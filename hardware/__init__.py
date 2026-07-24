@@ -1,0 +1,2 @@
+"""Smart chessboard hardware sources."""
+

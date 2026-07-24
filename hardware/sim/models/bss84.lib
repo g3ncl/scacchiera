@@ -1,0 +1,20 @@
+* BSS84 P-channel MOSFET, high-side bias-steering switch for the PIN cell.
+*
+* This is the per-cell switch that steers the forward bias current to the one
+* selected antenna. Its source sits on the 3V3 bias rail and its gate is the
+* active-low selection line SEL_N directly: SEL_N = 0 V (selected) gives
+* Vgs = -3.3 V and turns it on; SEL_N = 3.3 V (deselected) gives Vgs = 0 V and
+* turns it off. So no gate boost rail and no logic inversion are needed, and the
+* 12 V GATE_12V rail the MOSFET cell used is removed. It carries only the ~10 mA
+* forward bias, so its on-resistance is not critical.
+*
+* Datasheet-anchored ngspice VDMOS (pchan), not a vendor macromodel, matching the
+* BSS123/IRLML2030 models. BSS84, VDS = -50 V, VGS(th) about -1.4 V typ,
+* RDS(on) about 10 ohm at VGS = -2.7 V. Capacitances are datasheet-class and
+* PROVISIONAL until confirmed against the vendor datasheet; this device is out of
+* the RF path (behind the bias choke), so its capacitances barely affect the tank.
+.SUBCKT BSS84 D G S
+M1 D G S S BSS84_VDMOS
+.MODEL BSS84_VDMOS VDMOS(pchan Vds=50 Vto=-1.4 Kp=2 Rd=8 Rs=1 Rg=3
++ Cgs=25p Cgdmax=8p Cgdmin=2p a=0.4 Cjo=6p Vj=0.6 m=0.5)
+.ENDS

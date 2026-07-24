@@ -1,0 +1,42 @@
+# Numeric limits the SPICE validations assert against (docs/planning.md, M3).
+# One block per board; hardware/tests/ reads this file, so changing a limit
+# here changes what the test suite enforces.
+lightbar:
+  # Worst supply-loop drop (5 V feed IR drop plus ground rise) at any LED with
+  # all 17 pixels lit white. WS2812 logic thresholds track VDD, so bounding the
+  # rail droop keeps the data margin intact with wide headroom.
+  supply_loop_droop_v_max: 0.10
+
+matrix:
+  # Selected line resonance, alone and on the loaded 16-line bus. The DNP
+  # trims only add capacitance, so the untrimmed board must sit inside the
+  # band from above, never below 13.56 MHz's reachable range.
+  resonance_mhz:
+    min: 12.5
+    max: 15.0
+  bus_resonance_mhz:
+    min: 12.5
+    max: 15.0
+  # Field ratio between a selected and a deselected line at the tuned
+  # frequency; the shunt MOSFET is what buys this.
+  off_on_suppression_db:
+    min: 40.0
+  # Forward current the 3V3 steering must push through the PIN loop: enough
+  # for the diode's 3 ohm operating point, bounded so one selected line stays
+  # a trivial rail load.
+  bias_current_ma:
+    min: 7.0
+    max: 14.0
+  # A deselected cell must draw essentially nothing.
+  bias_off_current_ua_max: 10.0
+
+hub:
+  # Where the selected loop's field peaks when the PN5180 TX path (EMC filter
+  # plus series match) drives the loaded 16-line bus. The DNP match trim can
+  # pull it down toward the carrier on the assembled board.
+  system_resonance_mhz:
+    min: 12.5
+    max: 15.0
+  # Field the selected loop carries per volt of TX drive; guards against a
+  # match that is in band but too weakly coupled to read anything.
+  coil_ma_per_volt_min: 20.0

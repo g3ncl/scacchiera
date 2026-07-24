@@ -1,0 +1,20 @@
+* BSS123 RF switch model for the antenna switch cell.
+*
+* The BSS123 replaces the DMN10H700S as the series and shunt switch FET. The
+* switch cell shares one gate between the two series FETs, so under differential
+* drive that gate sits at common-mode virtual ground and each FET's input
+* capacitance loads the tank directly. The DMN10H700S (Ciss 235 pF) pulled the
+* resonance to ~6.7 MHz; the BSS123 (Ciss 22 pF) keeps the load small enough that
+* the matching network sets the tuning, so the cell resonates near 13.56 MHz.
+*
+* Datasheet-anchored ngspice VDMOS (not a vendor macromodel, which is not RF-valid).
+* Diodes BSS123, VDS = 100 V, VGS = +/-20 V, VGS(th) 1.4 V typ.
+* Capacitances at VDS = 25 V, VGS = 0, f = 1 MHz: Ciss 22 pF, Coss 3.5 pF, Crss 2 pF.
+*   Cgs = Ciss - Crss ~ 20 pF (the term the shared gate presents to the tank).
+*   Cgdmin 2 pF = Crss at 25 V; Cgdmax and Cjo carry the zero-bias rise and are
+*   PROVISIONAL until the datasheet junction-capacitance curve or a VNA sets them.
+.SUBCKT BSS123 D G S
+M1 D G S S BSS123_VDMOS
+.MODEL BSS123_VDMOS VDMOS(Vds=100 Vto=1.4 Kp=6 Rd=0.6 Rs=0.15 Rg=2
++ Cgs=20p Cgdmax=6p Cgdmin=2p a=0.4 Cjo=5p Vj=0.6 m=0.5)
+.ENDS

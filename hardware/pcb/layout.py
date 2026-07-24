@@ -1,0 +1,144 @@
+"""Small KiCad board-building helpers shared by the PCB layouts."""
+
+from collections.abc import Iterable
+import os
+from pathlib import Path
+
+import pcbnew
+
+from hardware.pcb.geometry import Placement, Position
+from hardware.pcb.netlist import ComponentRecord, Netlist
+
+
+__all__ = ["BoardBuilder", "Placement", "Position"]
+
+
+class BoardBuilder:
+    """Build a deterministic board from a checked SKiDL netlist."""
+
+    def __init__(self, netlist: Netlist, *, copper_layers: int = 2, board_thickness_mm: float = 1.6) -> None:
+        self.board = pcbnew.BOARD()
+        self.board.SetCopperLayerCount(copper_layers)
+        self.board.GetDesignSettings().SetBoardThickness(pcbnew.FromMM(board_thickness_mm))
+        self.netlist = netlist
+        self.nets = {
+            net.name: pcbnew.NETINFO_ITEM(self.board, net.name)
+            for net in netlist.nets
+        }
+        for net in self.nets.values():
+            self.board.Add(net)
+        self.footprints: dict[str, pcbnew.FOOTPRINT] = {}
+
+    def add_outline(self, width: float, height: float) -> None:
+        points = (
+            Position(0.0, 0.0),
+            Position(width, 0.0),
+            Position(width, height),
+            Position(0.0, height),
+            Position(0.0, 0.0),
+        )
+        for start, end in zip(points[:-1], points[1:], strict=True):
+            segment = pcbnew.PCB_SHAPE(self.board)
+            segment.SetShape(pcbnew.SHAPE_T_SEGMENT)
+            segment.SetLayer(pcbnew.Edge_Cuts)
+            segment.SetWidth(pcbnew.FromMM(0.05))
+            segment.SetStart(_vector(start))
+            segment.SetEnd(_vector(end))
+            self.board.Add(segment)
+
+    def add_component(self, component: ComponentRecord, placement: Placement) -> None:
+        library, name = component.footprint.split(":", maxsplit=1)
+        footprint = pcbnew.FootprintLoad(str(_library_path(library)), name)
+        if footprint is None:
+            raise ValueError(f"footprint not found: {component.footprint}")
+        footprint.SetReference(component.reference)
+        footprint.SetValue(component.value)
+        footprint.SetPosition(_vector(placement.position))
+        footprint.Reference().SetVisible(False)
+        footprint.Value().SetVisible(False)
+        pad_nets = self.netlist.pad_nets()
+        for pad in footprint.Pads():
+            net_name = pad_nets.get((component.reference, pad.GetNumber()))
+            if net_name is not None:
+                pad.SetNet(self.nets[net_name])
+        self.board.Add(footprint)
+        if placement.back:
+            footprint.Flip(_vector(placement.position), False)
+        footprint.SetOrientationDegrees(placement.rotation)
+        self.footprints[component.reference] = footprint
+
+    def pad_position(self, reference: str, number: str) -> Position:
+        positions = self.pad_positions(reference, number)
+        if positions:
+            return positions[0]
+        raise ValueError(f"pad {reference}.{number} not found")
+
+    def pad_positions(self, reference: str, number: str) -> tuple[Position, ...]:
+        footprint = self.footprints[reference]
+        return tuple(
+            Position(pcbnew.ToMM(pad.GetPosition().x), pcbnew.ToMM(pad.GetPosition().y))
+            for pad in footprint.Pads()
+            if pad.GetNumber() == number
+        )
+
+    def add_track(
+        self,
+        net_name: str,
+        points: Iterable[Position],
+        width: float,
+        layer: int = pcbnew.F_Cu,
+    ) -> None:
+        point_list = tuple(points)
+        for start, end in zip(point_list[:-1], point_list[1:], strict=True):
+            segment = pcbnew.PCB_TRACK(self.board)
+            segment.SetLayer(layer)
+            segment.SetWidth(pcbnew.FromMM(width))
+            segment.SetNet(self.nets[net_name])
+            segment.SetStart(_vector(start))
+            segment.SetEnd(_vector(end))
+            self.board.Add(segment)
+
+    def add_via(
+        self,
+        net_name: str,
+        position: Position,
+        diameter: float = 0.6,
+        drill: float = 0.3,
+    ) -> None:
+        via = pcbnew.PCB_VIA(self.board)
+        via.SetPosition(_vector(position))
+        via.SetWidth(pcbnew.FromMM(diameter))
+        via.SetDrill(pcbnew.FromMM(drill))
+        via.SetNet(self.nets[net_name])
+        self.board.Add(via)
+
+    def add_zone(self, net_name: str, layer: int, corners: Iterable[Position]) -> None:
+        zone = pcbnew.ZONE(self.board)
+        zone.SetLayer(layer)
+        zone.SetNet(self.nets[net_name])
+        zone.SetLocalClearance(pcbnew.FromMM(0.2))
+        zone.SetIslandRemovalMode(pcbnew.ISLAND_REMOVAL_MODE_ALWAYS)
+        outline = zone.Outline()
+        outline.NewOutline()
+        for corner in corners:
+            point = _vector(corner)
+            outline.Append(point.x, point.y)
+        self.board.Add(zone)
+
+    def save(self, path: Path) -> None:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        if not pcbnew.SaveBoard(str(path), self.board):
+            raise OSError(f"could not save {path}")
+
+
+def _vector(position: Position) -> pcbnew.VECTOR2I:
+    return pcbnew.VECTOR2I_MM(position.x, position.y)
+
+
+def _library_path(library: str) -> Path:
+    if library == "Chessboard":
+        return Path(__file__).parent / "generated" / "footprints" / "Chessboard.pretty"
+    root = os.environ.get("KICAD_FOOTPRINT_DIR")
+    if root is None:
+        raise RuntimeError("KICAD_FOOTPRINT_DIR is not set")
+    return Path(root) / f"{library}.pretty"
