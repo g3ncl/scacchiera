@@ -1,7 +1,7 @@
 ---
 type: entity
-date_updated: 2026-07-24
-source_count: 2
+date_updated: 2026-07-25
+source_count: 3
 tags:
   - wiki/entity
 ---
@@ -19,3 +19,4 @@ a BOM containing LCSC part numbers, and a CPL with `Designator`, `Mid X`, `Mid Y
 
 - [[jlcpcb-economic-parts-2026-07-24]]
 - [[jlcpcb-matrix-live-stock-2026-07-25]]
+- [[schemalyzer-jlcpcb-design-rules-2025]]

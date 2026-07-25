@@ -126,3 +126,11 @@ is driven by 68.21 EUR in combined large-size charges, not its 7.56 EUR componen
 Extended fee. Updated [[jlcpcb-basic-part-sourcing]] and the sourcing register: selective hand
 fitting cannot remove the assembly large-size charge, so the useful decision is full PCBA versus
 complete manual population.
+
+## [2026-07-25] ingest | JLCPCB design-rule and pre-order reference
+
+Captured Schemalyzer's 2025 JLCPCB design-rule guide under `Clippings/schemalyzer.com/` and
+ingested it as [[schemalyzer-jlcpcb-design-rules-2025]]. Updated [[jlcpcb]],
+[[jlcpcb-basic-part-sourcing]], [[overview]], and [[index]]. Its practical DFM and order-release
+tasks remain in the source summary, not project documentation. The source itself says that
+capabilities can change, so live JLCPCB settings and quote validation remain authoritative.

@@ -1,7 +1,7 @@
 ---
 type: concept
 date_updated: 2026-07-25
-source_count: 2
+source_count: 3
 confidence: medium
 tags:
   - wiki/concept
@@ -48,11 +48,19 @@ for large-size assembly while its components cost only 7.56 EUR. Once any PCBA p
 surcharge active, moving a few additional parts to hand assembly has little economic effect. The
 relevant comparison becomes full factory placement versus completely manual population.
 
+Release an order only after a final DFM review against the chosen JLCPCB options. Check the board
+outline and assembly-size limit, selected layer stack-up and copper, trace and clearance margins,
+via annular rings and drill sizes, copper-to-edge clearance, solder-mask dams, and legible
+silkscreen. Then run the project DRC and inspect JLCPCB's Gerber preview. The numerical guide is
+[[schemalyzer-jlcpcb-design-rules-2025]]; final capability confirmation belongs to JLCPCB because
+the limits and pricing are time-sensitive.
+
 ## Sources
 
 - [[jlcpcb-economic-parts-2026-07-24]]
 - [[jlcpcb-matrix-live-stock-2026-07-25]]
 - [[jlcpcb-matrix-bom-review]]
+- [[schemalyzer-jlcpcb-design-rules-2025]]
 
 ## Related
 

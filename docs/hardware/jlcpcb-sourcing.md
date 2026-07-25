@@ -1,10 +1,9 @@
 # JLCPCB assembly sourcing
 
-This register records the JLCPCB part selections for the three boards, and the parts that need a
-deliberate follow-up. The catalog snapshot is
-[economic-parts-2026-07-24.csv](../../Vault/Scacchiera/Clippings/jlcpcb/economic-parts-2026-07-24.csv),
-captured on 2026-07-24. The complete bound BOM was checked live again on 2026-07-25. Stock and
-prices remain time-sensitive.
+This register records the project's JLCPCB part selections for the three boards and the parts that
+need a deliberate follow-up. The supporting catalog capture and live-stock evidence live in the
+vault. The complete bound BOM was checked live again on 2026-07-25. Stock and prices remain
+time-sensitive.
 
 `make pcb-fab` emits the upload pair `<board>_jlcpcb_bom.csv` and
 `<board>_jlcpcb_cpl.csv`, and rejects the export if their designators differ. The internal costed file is named

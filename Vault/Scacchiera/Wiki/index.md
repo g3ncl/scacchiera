@@ -43,6 +43,7 @@ One [[wiki/source]] summary per ingested raw source. Factual, no interpretation.
 | [[bitwiseid-whitepaper]] | white paper (PDF, transcribed) | 2026-07-24 |
 | [[jlcpcb-economic-parts-2026-07-24]] | economic-parts catalog snapshot | 2026-07-24 |
 | [[jlcpcb-matrix-live-stock-2026-07-25]] | matrix live JLCPCB inventory | 2026-07-25 |
+| [[schemalyzer-jlcpcb-design-rules-2025]] | third-party JLCPCB DFM guide | 2026-07-25 |
 
 ## Entities
 
@@ -53,7 +54,7 @@ People, tools, orgs, repos. See [[wiki/entity]] pages.
 | [[ben-bulsink]] | 5 | 2026-07-24 |
 | [[nfc-game-board-project]] | 4 | 2026-07-24 |
 | [[clrc632]] | 2 | 2026-07-24 |
-| [[jlcpcb]] | 2 | 2026-07-25 |
+| [[jlcpcb]] | 3 | 2026-07-25 |
 
 ## Concepts
 
@@ -66,7 +67,7 @@ Ideas, patterns, techniques. See [[wiki/concept]] pages.
 | [[set-management-and-setid]]            | high       | 1            | 2026-07-24 |
 | [[row-column-antenna-matrix-technique]] | high       | 4            | 2026-07-24 |
 | [[pin-diode-antenna-switching]]         | high       | 1            | 2026-07-24 |
-| [[jlcpcb-basic-part-sourcing]]          | medium     | 2            | 2026-07-25 |
+| [[jlcpcb-basic-part-sourcing]]          | medium     | 3            | 2026-07-25 |
 |                                         |            |              |            |
 
 ## Synthesis

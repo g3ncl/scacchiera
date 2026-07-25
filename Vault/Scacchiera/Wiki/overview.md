@@ -64,3 +64,7 @@ CPL.
 The follow-up [[jlcpcb-matrix-live-stock-2026-07-25|live inventory capture]] confirms that every
 matrix line is available from JLCPCB's public Basic or Extended library above the five-board order
 requirement. Pre-Order and Global Sourcing remain fallback paths, not current requirements.
+
+[[schemalyzer-jlcpcb-design-rules-2025|Schemalyzer's captured JLCPCB DFM guide]] adds a general
+fabrication and release checklist. It is deliberately treated as secondary guidance: the project
+checks the chosen stack-up and PCBA limits in JLCPCB's live order flow before payment.
