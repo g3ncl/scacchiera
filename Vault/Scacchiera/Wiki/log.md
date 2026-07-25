@@ -98,3 +98,10 @@ Global Sourcing remain explicit fallbacks when no safe stocked equivalent exists
 Updated [[jlcpcb-basic-part-sourcing]] to treat the JLCPCB Extended fee per unique component, not
 per PCB design. The production rule is now Basic-first, with an Extended line retained only when no
 safe Basic part preserves the required function, package, and electrical limits.
+
+## [2026-07-25] query | Separate factory and hand assembly candidates
+
+Extended [[jlcpcb]] parts were classified by package access, quantity, and rework risk. The
+engineering BOM now distinguishes factory placement from practical hand-solder candidates without
+altering the upload BOM automatically. Connectors and low-count accessible packages are candidates
+for external purchase; hidden-pad, fine-pitch, tiny, and repetitive parts remain factory work.

@@ -64,6 +64,14 @@ JLC_PART_BY_MPN = {
     "0603WAF150KT5E": "C22769",
 }
 
+JLC_BASIC_CODES = frozenset(
+    {
+        "C1046", "C1525", "C1546", "C15849", "C15850", "C1779", "C21190",
+        "C22775", "C22935", "C22975", "C23137", "C23162", "C23186", "C23254",
+        "C23630", "C25803", "C25804", "C32949", "C45783", "C52923", "C5947",
+    }
+)
+
 
 @dataclass(frozen=True)
 class PinDefinition:
@@ -98,6 +106,12 @@ def component(
     part.footprint = footprint
     part.manf_num = mpn
     part.lcsc_part = JLC_PART_BY_MPN.get(mpn, "")
+    if not part.lcsc_part:
+        part.jlc_library = "Unbound"
+    elif part.lcsc_part in JLC_BASIC_CODES:
+        part.jlc_library = "Basic"
+    else:
+        part.jlc_library = "Extended"
     part.description = description
     part.unit_cost_eur = unit_cost_eur
     part.fitted = "yes" if fitted else "DNP"

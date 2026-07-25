@@ -32,6 +32,13 @@ required function, package, and electrical limits. Use Pre-Order or Global Sourc
 public-stock choices are exhausted, and submit the PCBA order only after those parts appear in My
 Parts Lib.
 
+Assembly routing is separate from electrical sourcing. Keep Basic parts with JLCPCB because their
+placement avoids the Extended fee. For an Extended part, prefer hand fitting only when its pads are
+accessible, the quantity is low, and inspection or rework is realistic. Fine-pitch packages,
+underside thermal pads, 0402 RF networks, and repeated arrays stay with factory reflow. The project
+records this decision per BOM line in the engineering BOM rather than silently dropping parts from
+the JLCPCB upload.
+
 ## Sources
 
 - [[jlcpcb-economic-parts-2026-07-24]]

@@ -11,6 +11,18 @@ prices remain time-sensitive.
 `<board>_engineering_bom.csv`; do not upload it. Blank `LCSC Part #` cells in the upload BOM are
 intentional unresolved items, not permission to select a substitute during ordering.
 
+The engineering BOM also records `JLC Library`, `Assembly Route`, `Hand Method`, and
+`Assembly Reason`. These columns are planning guidance. They do not silently remove parts from the
+JLCPCB upload. `Hand` identifies a practical candidate to buy elsewhere and omit deliberately when
+reviewing the JLCPCB match; `JLCPCB` means the part is Basic, too small or hidden for reliable iron
+soldering, or too repetitive to place economically by hand.
+
+Each fabrication run emits two upload choices. `<board>_jlcpcb_bom.csv` and
+`<board>_jlcpcb_cpl.csv` ask JLCPCB to place every fitted part. The matched
+`<board>_jlcpcb_hybrid_bom.csv` and `<board>_jlcpcb_hybrid_cpl.csv` omit every `Hand` row. Upload
+the hybrid pair together when using manual completion, then purchase exactly the rows in
+`<board>_hand_bom.csv` elsewhere. Never mix the full BOM with the hybrid CPL or the reverse.
+
 The upload BOM uses the selected manufacturer's exact MPN in `Comment`, not the schematic value.
 This makes the MPN agree with `LCSC Part #` and prevents JLCPCB's misleading comment mismatch
 warning. The value and tolerance remain visible in the engineering BOM.
@@ -21,6 +33,35 @@ Extended BOM lines. Keep one only when no Basic part preserves the required func
 electrical limits. If no safe public-stock part exists, use Pre-Order or Global Sourcing and wait
 until the inventory appears in My Parts Lib before submitting the assembly order. Re-match the BOM
 immediately before payment because inventory can change.
+
+## Factory versus hand assembly
+
+The default route assumes an iron plus ordinary hot air. Stencil and hot-plate reflow can move some
+factory-only parts into the manual column, but it also needs controlled paste deposition and close
+inspection. Do not count a part as hand-solderable merely because one prototype can be made to
+work.
+
+| Board | Prefer JLCPCB | Practical hand-solder candidates |
+| --- | --- | --- |
+| Lightbar | seventeen bottom-pad WS2812C-2020 LEDs and seventeen 0402 capacitors | J1 and the single 1210 bulk capacitor C18 |
+| Matrix | repeated groups of 16 to 32 small passives, SOD-523 diodes, MOSFETs, and the Basic shift registers | the single seven-pin connector J1 |
+| Hub | QFN, DFN, SON, fine-pitch TSSOP, USB-C, 0402 RF parts, the crystal, and the ESP32 module | JST connectors, switch, low-count 0603/0805/1206 parts, SOT-23 devices, and the two-terminal boost inductor |
+
+For the current bound BOM, following the `Hand` recommendations removes 22 board-specific
+Extended lines: two from the lightbar, one from the matrix, and nineteen from the hub. It leaves
+fourteen bound Extended lines for factory placement: six on the matrix and eight on the hub. At a
+25 EUR fee per Extended line, that changes the setup estimate from about 900 EUR to 350 EUR before
+the four unresolved lines are sourced. This saving assumes the hand-fitted parts are explicitly
+removed from the assembly order after reviewing the generated engineering BOM.
+
+The ESP32-C3-MINI-1U is not an iron-solder part. Its 0.8 mm perimeter pitch is manageable, but the
+large ground pad is split into nine paste areas under the module. It is feasible with a stencil and
+hot plate or reflow oven, then electrical inspection, but JLCPCB or another reflow assembler is the
+lower-risk route for the first hub.
+
+The current 27.12 MHz crystal is only 2.0 by 1.6 mm with four underside pads. It is a hot-air or
+reflow job, not a good manual iron candidate. A 3.2 by 2.5 mm crystal could be easier to rework, but
+changing it also changes the footprint and RF layout and needs a reviewed board revision.
 
 ## Selected Basic parts
 

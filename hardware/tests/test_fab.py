@@ -2,10 +2,13 @@ import csv
 from pathlib import Path
 
 from hardware.pcb.fab import (
+    HAND_ASSEMBLY_ROUTES,
+    HAND_BOM_COLUMNS,
     JLC_BOM_COLUMNS,
     JLC_CPL_COLUMNS,
     assembly_references,
     validate_assembly_designators,
+    write_hand_bom,
     write_jlc_bom,
     write_jlc_cpl,
 )
@@ -70,6 +73,32 @@ def test_write_jlc_bom_filters_dnp_parts(tmp_path: Path) -> None:
             "LCSC Part #": "C1525",
         }
     ]
+
+
+def test_hybrid_exports_split_hand_assembly_without_mismatching_cpl(tmp_path: Path) -> None:
+    engineering = tmp_path / "engineering.csv"
+    hybrid_bom = tmp_path / "hybrid_bom.csv"
+    hand_bom = tmp_path / "hand_bom.csv"
+    engineering.write_text(
+        "Comment,Designator,Footprint,MPN,LCSC Part #,JLC Library,Fitted,Quantity,"
+        "Assembly Route,Hand Method,Assembly Reason,Unit EUR,Line EUR\n"
+        "100n,C1,C_0402,CL05B104KO5NNNC,C1525,Basic,yes,1,JLCPCB,Factory reflow,"
+        "Basic placement,0.003,0.003\n"
+        "connector,J1,JST_GH,A1257WR-S-4P,C225127,Extended,yes,1,Hand,Iron or hot air,"
+        "Accessible pads,0.130,0.130\n",
+        encoding="utf-8",
+    )
+
+    write_jlc_bom(engineering, hybrid_bom, HAND_ASSEMBLY_ROUTES)
+    write_hand_bom(engineering, hand_bom)
+
+    with hybrid_bom.open(encoding="utf-8", newline="") as bom_file:
+        hybrid_rows = list(csv.DictReader(bom_file))
+    with hand_bom.open(encoding="utf-8", newline="") as bom_file:
+        hand_rows = list(csv.DictReader(bom_file))
+    assert [row["Designator"] for row in hybrid_rows] == ["C1"]
+    assert tuple(hand_rows[0]) == HAND_BOM_COLUMNS
+    assert [row["Designator"] for row in hand_rows] == ["J1"]
 
 
 def test_validate_assembly_designators_rejects_a_mismatch(tmp_path: Path) -> None:

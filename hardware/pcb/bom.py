@@ -14,8 +14,30 @@ class BomKey:
     footprint: str
     mpn: str
     lcsc_part: str
+    jlc_library: str
     fitted: str
     unit_cost_eur: float
+
+
+@dataclass(frozen=True)
+class AssemblyPlan:
+    route: str
+    hand_method: str
+    reason: str
+
+
+REFLOW_ONLY_FOOTPRINT_MARKERS = (
+    "0402_1005Metric",
+    "D_SOD-523",
+    "DFN_QFN",
+    "LED_WS2812B-2020",
+    "R-PDSO-N6_DRL-6",
+    "Texas_S-PVSON",
+    "TSSOP-24",
+    "USB_C_Receptacle",
+    "ESP32-C3-MINI-1U",
+    "Crystal_SMD_2016",
+)
 
 
 def _key(part: object) -> BomKey:
@@ -24,8 +46,34 @@ def _key(part: object) -> BomKey:
         str(getattr(part, "footprint", "")),
         str(getattr(part, "manf_num", "")),
         str(getattr(part, "lcsc_part", "")),
+        str(getattr(part, "jlc_library", "Unbound")),
         str(getattr(part, "fitted", "yes")),
         float(getattr(part, "unit_cost_eur", 0.0)),
+    )
+
+
+def assembly_plan(key: BomKey, quantity: int) -> AssemblyPlan:
+    """Choose a practical assembly route without changing what is fitted."""
+    if key.fitted != "yes" or key.mpn == "PCB_COPPER":
+        return AssemblyPlan("Omit", "None", "Not a fitted purchased component")
+    if key.jlc_library == "Basic":
+        return AssemblyPlan("JLCPCB", "Factory reflow", "Basic placement avoids an Extended fee")
+    if any(marker in key.footprint for marker in REFLOW_ONLY_FOOTPRINT_MARKERS):
+        return AssemblyPlan(
+            "JLCPCB",
+            "Stencil reflow only",
+            "Hidden, fine-pitch, or very small pads make iron soldering risky",
+        )
+    if quantity >= 10:
+        return AssemblyPlan(
+            "JLCPCB",
+            "Factory reflow",
+            "Individually solderable, but the repeated quantity makes manual work error-prone",
+        )
+    return AssemblyPlan(
+        "Hand",
+        "Iron or hot air",
+        "Low quantity and accessible pads make external purchase and manual fitting practical",
     )
 
 
@@ -46,12 +94,14 @@ def write_bom(circuit: Circuit, destination: Path) -> None:
         writer = csv.writer(bom_file)
         writer.writerow(
             (
-                "Comment", "Designator", "Footprint", "MPN", "LCSC Part #", "Fitted",
-                "Quantity", "Unit EUR", "Line EUR",
+                "Comment", "Designator", "Footprint", "MPN", "LCSC Part #", "JLC Library",
+                "Fitted", "Quantity", "Assembly Route", "Hand Method", "Assembly Reason",
+                "Unit EUR", "Line EUR",
             )
         )
         for key, references in sorted(grouped.items(), key=lambda item: item[1][0]):
             line_cost = key.unit_cost_eur * len(references) if key.fitted == "yes" else 0.0
+            plan = assembly_plan(key, len(references))
             writer.writerow(
                 (
                     key.value,
@@ -59,13 +109,19 @@ def write_bom(circuit: Circuit, destination: Path) -> None:
                     key.footprint,
                     key.mpn,
                     key.lcsc_part,
+                    key.jlc_library,
                     key.fitted,
                     len(references),
+                    plan.route,
+                    plan.hand_method,
+                    plan.reason,
                     f"{key.unit_cost_eur:.3f}",
                     f"{line_cost:.3f}",
                 )
             )
-        writer.writerow(("TOTAL", "", "", "", "", "", "", "", f"{fitted_cost_eur(circuit):.3f}"))
+        writer.writerow(
+            ("TOTAL", "", "", "", "", "", "", "", "", "", "", "", f"{fitted_cost_eur(circuit):.3f}")
+        )
 
 
 def missing_manufacturer_parts(circuit: Circuit) -> tuple[str, ...]:
