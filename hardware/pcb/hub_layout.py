@@ -22,10 +22,19 @@ from hardware.pcb.ses_import import apply_session
 
 OUTPUT = Path(__file__).parent / "generated" / "hub"
 FREEROUTING_JAR = os.environ.get("FREEROUTING_JAR", "/tmp/freerouting-2.2.4.jar")
-FREEROUTING_PASSES = int(os.environ.get("FREEROUTING_PASSES", "20"))
+FREEROUTING_PASSES = int(os.environ.get("FREEROUTING_PASSES", "40"))
+# Longest straight bridge the post-route closer may lay. See _close_pad.
+MAX_BRIDGE_MM = 2.5
 
 BOARD_WIDTH = 110.0
 BOARD_HEIGHT = 46.0
+
+# M2.5 plated mounting holes bonded to ground, so the enclosure screws tie the
+# shell to the pours rather than leaving it floating. 4.0 mm in from each corner
+# keeps the 5.4 mm pad clear of the board edge and of J10, J4 and the reader
+# supply row, the nearest parts to the corners.
+MOUNTING_HOLE_SIZE = "2.7mm_M2.5"
+MOUNTING_HOLE_INSET = 4.0
 
 
 def _grid(
@@ -67,12 +76,22 @@ def _placements() -> dict[str, Placement]:
         "L2": Placement(Position(46.0, 28.5)),
         "U7": Placement(Position(52.5, 23.0)),
         "U8": Placement(Position(52.5, 28.5)),
-        # MCU and expander.
+        # MCU and expander. C28 and C27 decouple the module locally, tucked into
+        # the 3.3 mm gap between U8 and U4's left edge so they sit within 4 mm of
+        # U4 pin 3 at (58.1, 28.3). WiFi TX peaks at 382 mA and the regulator's
+        # bulk capacitors are 17 mm away.
         "U4": Placement(Position(64.0, 30.0)),
+        # The gap between U8's courtyard (right edge 54.55) and U4's (left edge
+        # 57.3) is 2.75 mm, narrower than an 0805's 3.4 mm courtyard, so C27 is
+        # rotated to present its 1.96 mm side.
+        "C28": Placement(Position(55.925, 25.5)),
+        "C27": Placement(Position(55.925, 32.3), rotation=90.0),
         "U6": Placement(Position(63.0, 12.0), rotation=90.0),
         # Reader.
         "U3": Placement(Position(84.0, 28.0)),
-        "Y1": Placement(Position(77.5, 37.5)),
+        # 38.3, not 37.5: the 3225 crystal's courtyard is 4.20 x 3.50 mm against
+        # the 2016 part's 3.00 x 2.60, which reached into R28 above it.
+        "Y1": Placement(Position(77.5, 38.3)),
         "L3": Placement(Position(92.0, 24.0), rotation=90.0),
         "L4": Placement(Position(92.0, 30.0), rotation=90.0),
         # Edge connectors.
@@ -126,6 +145,17 @@ def generate_board(output: Path = OUTPUT / "hub.kicad_pcb") -> None:
         placement = placements.get(component.reference)
         if placement is not None:
             builder.add_component(component, placement)
+    inset = MOUNTING_HOLE_INSET
+    corners = (
+        (inset, inset),
+        (BOARD_WIDTH - inset, inset),
+        (inset, BOARD_HEIGHT - inset),
+        (BOARD_WIDTH - inset, BOARD_HEIGHT - inset),
+    )
+    for index, (x, y) in enumerate(corners, start=1):
+        builder.add_mounting_hole(
+            "GND", Position(x, y), f"H{index}", size=MOUNTING_HOLE_SIZE
+        )
     builder.save(output)
 
 
@@ -173,10 +203,19 @@ def _close_pad(board: pcbnew.BOARD, pad: pcbnew.PAD) -> None:
     pin = (pcbnew.ToMM(pad.GetPosition().x), pcbnew.ToMM(pad.GetPosition().y))
     target = _nearest_net_copper(board, net_name, pin, exclude_pad=pad)
     if target is None:
+        # The router sometimes skips a short two-pin net outright, leaving no
+        # copper at all to bridge to. Fall back to the net's nearest other pad.
+        target = _nearest_net_pad(board, net_name, pin, exclude_pad=pad)
+    if target is None:
         return
     distance_sq = (target[0] - pin[0]) ** 2 + (target[1] - pin[1]) ** 2
-    # Already joined (router copper sits on the pad) or nothing reachable.
-    if distance_sq < 0.35**2 or distance_sq > 14.0**2:
+    # Already joined (router copper sits on the pad), or too far to bridge.
+    # The ceiling is deliberately short: this lays a straight track with no
+    # obstacle avoidance, so a long one crosses whatever lies between. A 9 mm
+    # bridge across the MCU module once produced ten DRC violations on its own.
+    # Anything longer is left for the router, and shows up as an unconnected
+    # pad rather than a short.
+    if distance_sq < 0.35**2 or distance_sq > MAX_BRIDGE_MM**2:
         return
     # A direct bridge on the pad's own face: shortest, so it stays clear of the
     # neighbouring pads a routed detour would run past.
@@ -208,6 +247,30 @@ def _nearest_net_copper(
         )
         for end in ends:
             candidate = (pcbnew.ToMM(end.x), pcbnew.ToMM(end.y))
+            distance = (candidate[0] - point[0]) ** 2 + (candidate[1] - point[1]) ** 2
+            if distance < best_d:
+                best_d = distance
+                best = candidate
+    return best
+
+
+def _nearest_net_pad(
+    board: pcbnew.BOARD,
+    net_name: str,
+    point: tuple[float, float],
+    exclude_pad: pcbnew.PAD | None = None,
+) -> tuple[float, float] | None:
+    """Nearest other pad on the net, for nets the router left bare."""
+    best: tuple[float, float] | None = None
+    best_d = float("inf")
+    for footprint in board.GetFootprints():
+        for candidate_pad in footprint.Pads():
+            if candidate_pad.GetNetname() != net_name:
+                continue
+            if exclude_pad is not None and candidate_pad.GetPosition() == exclude_pad.GetPosition():
+                continue
+            position = candidate_pad.GetPosition()
+            candidate = (pcbnew.ToMM(position.x), pcbnew.ToMM(position.y))
             distance = (candidate[0] - point[0]) ** 2 + (candidate[1] - point[1]) ** 2
             if distance < best_d:
                 best_d = distance

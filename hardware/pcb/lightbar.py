@@ -1,12 +1,19 @@
-"""Player light bar: 17 addressable pixels behind the rail diffuser.
+"""Player light bar: 14 addressable pixels behind the rail diffuser.
 
-docs/functional/interface.md fixes the envelope: 120 x 8.5 mm, 17 low-current
+docs/functional/interface.md fixes the envelope: 120 x 8.5 mm, low-current
 LEDs, every component on the front face behind a replaceable diffuser. One
-WS2812C-2020 per position is the cheapest circuit that still covers the
+addressable pixel per position is the cheapest circuit that still covers the
 feedback semantics (the red illegal-position flash plus move, result, WiFi,
 and countdown cues need more than one color), because the controller is inside
 the LED: the whole bar is LEDs, decoupling, and a connector, and the hub drives
 it over a single data line.
+
+The pixel is an SK6805MINI-E rather than the WS2812C-2020 this replaced.
+JLCPCB cannot assemble a 120 x 8.5 mm outline, so the bar is populated by hand,
+and the WS2812C's pads sit under its body where an iron cannot reach them. The
+SK6805's legs extend past the body instead. It keeps the same 5 mA per channel
+class, so the 5 V rail budget is unchanged, but it is far wider, which is what
+sets the pixel count at 14 (see lightbar_geometry).
 """
 
 from skidl import Circuit, Net, Part
@@ -54,22 +61,22 @@ def build_lightbar() -> Circuit:
         led = component(
             circuit,
             f"D{index + 1}",
-            "WS2812C-2020",
-            "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm",
+            "SK6805MINI-E",
+            "Chessboard:SK6805MINI-E",
             (
-                PinDefinition("1", "DOUT"),
-                PinDefinition("2", "GND"),
-                PinDefinition("3", "DIN"),
-                PinDefinition("4", "VDD"),
+                PinDefinition("1", "VDD"),
+                PinDefinition("2", "DOUT"),
+                PinDefinition("3", "GND"),
+                PinDefinition("4", "DIN"),
             ),
-            mpn="WS2812C-2020",
-            description="5 V low-current addressable RGB LED",
-            unit_cost_eur=0.06,
+            mpn="SK6805MINI-E",
+            description="5 mA per channel addressable RGB LED, iron solderable",
+            unit_cost_eur=0.10,
         )
-        _connect(output, led, "1")
-        _connect(ground, led, "2")
-        _connect(data, led, "3")
-        _connect(power, led, "4")
+        _connect(power, led, "1")
+        _connect(output, led, "2")
+        _connect(ground, led, "3")
+        _connect(data, led, "4")
         data = output
         capacitor = two_pin(
             circuit,

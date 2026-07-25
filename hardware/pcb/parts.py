@@ -8,6 +8,7 @@ from skidl import Circuit, Part
 
 JLC_PART_BY_MPN = {
     "0402CG101J500NT": "C1546",
+    "0402CG150J500NT": "C1548",
     "0603WAF1000T5E": "C22775",
     "0603WAF1001T5E": "C21190",
     "0603WAF1002T5E": "C25804",
@@ -16,6 +17,7 @@ JLC_PART_BY_MPN = {
     "0603WAF2001T5E": "C22975",
     "0603WAF2492T5E": "C25962",
     "0603WAF3303T5E": "C23137",
+    "0603WAF3902T5E": "C23153",
     "0603WAF4701T5E": "C23162",
     "0603WAF5101T5E": "C23186",
     "0603WAF8202T5E": "C23254",
@@ -62,13 +64,17 @@ JLC_PART_BY_MPN = {
     "SDFL2012S100KTF": "C1046",
     "SM07B-GHS-TB(LF)(SN)": "C495552",
     "0603WAF150KT5E": "C22769",
+    "ESP32-C6-MINI-1U-N4": "C7558096",
+    "7M27100009": "C90919",
+    "SK6805MINI-E": "C5200774",
 }
 
 JLC_BASIC_CODES = frozenset(
     {
-        "C1046", "C1525", "C1546", "C15849", "C15850", "C1779", "C21190",
-        "C22775", "C22935", "C22975", "C23137", "C23162", "C23186", "C23254",
-        "C23630", "C25803", "C25804", "C32949", "C45783", "C52923", "C5947",
+        "C1046", "C1525", "C1546", "C1548", "C15849", "C15850", "C1779",
+        "C21190", "C22775", "C22935", "C22975", "C23137", "C23153", "C23162",
+        "C23186", "C23254", "C23630", "C25803", "C25804", "C32949", "C45783",
+        "C52923", "C5947",
     }
 )
 
@@ -149,11 +155,20 @@ def diode(circuit: Circuit, ref: str, mpn: str, *, unit_cost_eur: float) -> Part
     )
 
 
-def esp32_c3_mini_1u(circuit: Circuit, ref: str) -> Part:
+def esp32_c6_mini_1u(circuit: Circuit, ref: str) -> Part:
+    """ESP32-C6-MINI-1U, pin names straight from datasheet v1.5 Table 3-1.
+
+    The C6 is only pin compatible with the C3-MINI series on power, ground, EN
+    and UART0. The GPIO assignments differ, and critically the native USB moves
+    from IO18/IO19 (C3 pins 26/27) to IO12/IO13 on pins 17/18, while pin 21
+    becomes NC. Anything reusing a C3 pin map here silently mis-wires USB.
+    """
     signal_pins = {
-        3: "3V3", 5: "IO2", 6: "IO3", 8: "EN", 12: "IO0", 13: "IO1",
-        16: "IO10", 18: "IO4", 19: "IO5", 20: "IO6", 21: "IO7", 22: "IO8",
-        23: "IO9", 26: "IO18_USB_D-", 27: "IO19_USB_D+", 30: "RXD0", 31: "TXD0",
+        3: "3V3", 5: "IO2", 6: "IO3", 8: "EN", 9: "IO4", 10: "IO5",
+        12: "IO0", 13: "IO1", 15: "IO6", 16: "IO7", 17: "IO12_USB_D-",
+        18: "IO13_USB_D+", 19: "IO14", 20: "IO15", 22: "IO8", 23: "IO9",
+        24: "IO18", 25: "IO19", 26: "IO20", 27: "IO21", 28: "IO22",
+        29: "IO23", 30: "RXD0", 31: "TXD0",
     }
     ground_pins = {1, 2, 11, 14, *range(36, 54)}
     pins: list[PinDefinition] = []
@@ -168,12 +183,12 @@ def esp32_c3_mini_1u(circuit: Circuit, ref: str) -> Part:
     return component(
         circuit,
         ref,
-        "ESP32-C3-MINI-1U-N4X",
-        "Chessboard:ESP32-C3-MINI-1U",
+        "ESP32-C6-MINI-1U-N4",
+        "Chessboard:ESP32-C6-MINI-1U",
         pins,
-        mpn="ESP32-C3-MINI-1U-N4X",
-        description="WiFi and BLE module with external antenna connector",
-        unit_cost_eur=2.20,
+        mpn="ESP32-C6-MINI-1U-N4",
+        description="WiFi 6 and BLE module with external antenna connector",
+        unit_cost_eur=2.60,
     )
 
 

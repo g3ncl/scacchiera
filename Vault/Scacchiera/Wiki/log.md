@@ -134,3 +134,119 @@ ingested it as [[schemalyzer-jlcpcb-design-rules-2025]]. Updated [[jlcpcb]],
 [[jlcpcb-basic-part-sourcing]], [[overview]], and [[index]]. Its practical DFM and order-release
 tasks remain in the source summary, not project documentation. The source itself says that
 capabilities can change, so live JLCPCB settings and quote validation remain authoritative.
+
+## 2026-07-25 — datasheet layer added, three parts rebound
+
+Operation: schema change plus a four-datasheet ingest, driven by a hub assembly order that JLCPCB
+could not fill.
+
+Schema: `CLAUDE.md` and `AGENTS.md` gained a Datasheets section. `Vault/Scacchiera/Datasheets/`
+now holds raw component datasheets, immutable like `Clippings/`, named `<MPN>_<LCSC>.pdf`. The rule
+is read-before-choosing (never take an electrical limit from a catalog listing when a datasheet
+exists) and file-after-binding (source summary, entity page, index, log).
+
+Ingested: [[esp32-c6-mini-1u-datasheet]], [[pn5180-crystal-and-clock-requirements]],
+[[txc-7m27100009-datasheet]], [[sk68xx-mini-e-led-datasheets]].
+New entities: [[esp32-c6-mini-1u]], [[pn5180]], [[txc-7m27100009]], [[sk6805mini-e]].
+
+What the datasheets changed, that a catalog listing would not have:
+
+- **U4** ESP32-C3-MINI-1U-N4X (no stock) to ESP32-C6-MINI-1U-N4. Vendors call the C6 "pin-to-pin
+  compatible" with the C3-MINI series; Table 3-1 shows that holds only for power, ground, EN and
+  UART0. Native USB moves to pins 17/18 and pin 21 becomes NC, so the old map would have put SCLK
+  on USB_D+ and the reader's chip select on a no-connect.
+- **Y1** EXS00A-CS01188 (no stock) to TXC 7M27100009 in 3225. PN5180 Table 142 wants CL 10 pF and
+  ESR under 100 ohm; the new part is 10 pF and 60 ohm. The load capacitors went 10 pF to 15 pF,
+  because two equal caps present C/2 plus stray and the old pair presented 8 pF, spending about
+  41 ppm of a +/-100 ppm budget on load error alone.
+- **D1-D14** WS2812C-2020 to SK6805MINI-E, because the light bar is hand-populated and the
+  WS2812C's pads sit under its body. Its legs are wider, so 14 pixels fit a 120 mm bar where 17
+  did not, changing `docs/functional/interface.md`.
+
+Contradiction recorded, not resolved: the two OPSCO LED documents give different pinouts and
+package outlines, and LCSC publishes nothing for C5200774. See [[sk6805mini-e]] for the open risk.
+
+## 2026-07-25 (later) — twelve datasheets filed, one fatal value found
+
+Operation: ingest of the remaining bound-part datasheets, plus grounded mounting holes and a
+defect pass, ahead of starting `docs/simulation-workflow.md`.
+
+Filed 12 more datasheets, taking `Datasheets/` to 17: the hub power tree and logic
+([[hub-power-tree-datasheets]]) and the matrix switch-cell discretes
+([[matrix-discrete-datasheets]]).
+
+**The ingest caught a fatal error.** R17 set the TPS2553 light-bar current limit to 287/323/365 mA
+where the load is 448 mA, so the bars would have latched dark on every board built. The 82 kohm value
+came from a recalled formula, not the datasheet. Changed to 39 kohm (609/667/734 mA), which is
+JLCPCB Basic so it cost nothing. Written up as [[tps2553-current-limit-error]] because ERC, DRC and a
+passing 28-test suite were all blind to it.
+
+Two sibling dividers checked out against the same ingest: TPS63802 511k/91k gives 3.31 V against
+VFB 500 mV, TPS61023 732k/100k gives 4.95 V against VREF 595 mV and is TI's own worked example. The
+BAR64-02V model's "2.5 ohm at 10 mA, 100 MHz" is now datasheet-backed too.
+
+New open questions the datasheets raised rather than settled:
+
+- The 10 uH choke publishes one current number, 15 mA, and does not say whether it is a heating or a
+  saturation limit. The design biases it at 10.29 mA, 69% of that. Needs a V3 sweep.
+- MCP73871's THERM pin wants a 10 kohm NTC, which is on no BOM.
+- `USBLC6-2SC6_C2687116.pdf` is a UMW document, not ST: LCSC lists UMW for that order code.
+- LCSC's brand tags disagree with the documents it serves for BSS123 and BSS84. Recorded, not
+  resolved; V1 treats a documentation conflict as a release blocker.
+
+Also removed `models/bap64_02.lib` and its registry entry: the BAP64-02 it modelled was replaced by
+the BAR64-02V and nothing referenced it. Corrected `matrix.py` and `matrix.md`, which still described
+the cell as using a BAP64-02 at 3 ohm.
+
+## 2026-07-25 (later still) — mounting holes, and both matrix defects traced to one bug
+
+Operation: hardware change plus a defect pass, ending with all three boards DRC clean from a
+scratch rebuild.
+
+**Grounded mounting holes.** A new `BoardBuilder.add_mounting_hole` places M2.5 plated holes bonded
+to a net, so the enclosure screws tie the shell to the pours rather than floating. KiCad's
+MountingHole footprints carry `exclude_from_bom` and `exclude_from_pos_files`, which is what keeps
+them out of the JLCPCB upload files: a hole is not a part to place. Four at the hub's corners, two
+on the matrix past each end of the switch-cell array. None on the light bar, and that is a finding
+rather than an omission: J1, the pixels and the bulk capacitor occupy x 0.77 to 117.85 of a 120 mm
+board, against the 5.40 mm an M2 pad plus clearance needs, and a 4.4 mm pad on an 8.5 mm board would
+leave 2.05 mm of material either side of the screw.
+
+**The matrix's two reported defects were one bug.** U1's placement was a bare 3.5 mm, which put its
+pads 8 and 9 at x = -1.245: entirely off the board. Pad 9 is SEL_CHAIN, and a pad outside the outline
+is a pad Freerouting cannot reach, which is why routing failed on exactly that net. The 0.025 mm
+edge clearance reported on pads 7 and 10 was the same bug one pin further in. U1 is now seated by
+measuring its own courtyard, not its pads (a SOIC's outline is drawn wider than its pad field), so
+neither fault can recur if the footprint or rotation changes, and C65 follows it.
+
+**The four shared serial nets were taken away from the router.** Freerouting reached U1's and U2's
+0.65 mm serial pins unreliably, leaving a different one bare each run, and `_postroute_fixups` then
+patched whatever it left relative to where it stopped. Three skip heuristics were measured (a
+distance proxy, any-peer connectivity, all-peer connectivity) and all left the board sometimes clean
+and sometimes not, which is the evidence that no skip rule fixes it: the patch was downstream of a
+nondeterministic input. Their copper is now ripped up after import and all four paths drawn from
+measured pad positions.
+
+Three orderings make those paths provably non-crossing, and they are not the same ordering:
+
+- lanes keep the U1 pad order, so the left-margin verticals are parallel;
+- crossing y rises with lane x, so each horizontal clears the lanes to its right;
+- turn-up x falls as U2 pad y rises, and the net reaching U2's highest pad rounds the far side of U2
+  because its vertical would otherwise be tall enough to cut every other final leg;
+- J1 taps get rows of their own, ordered by how far right each hop reaches, because SEL_SRCLK runs
+  rightward from a lane left of its pin while SEL_RCLK runs leftward from a lane right of its pin.
+
+Lanes also moved off the U1 pad x onto their own 1.3 mm pitch: U1's pins are on 1.27 mm and J1's on
+1.25 mm, so lanes at the pads interleaved with J1's pads about 0.44 mm away, against the 0.525 mm a
+0.4 mm via needs from a 0.25 mm lane.
+
+Two approaches were tried and reverted, both recorded in the code so they are not repeated: running
+the crossing band above U2 instead of below (19 violations against 1), and freeing U1's pad row to
+let 3V3 through (fixes the rail, splits the ground pour into islands).
+
+**Final state**, rebuilt from an empty `generated/`: light bar, matrix and hub all at 0 DRC
+violations and 0 unconnected, 28 tests passing, mypy clean across 27 files.
+
+Open, and stated plainly: the serial nets are deterministic but Freerouting's own completeness is
+not. The hub needed three route attempts to reach 0 unconnected and the matrix one. `make
+pcb-*-route` is therefore not yet clean by construction; re-run it, or raise `FREEROUTING_PASSES`.

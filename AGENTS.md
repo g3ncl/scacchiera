@@ -45,6 +45,12 @@ Docs live in `docs/`, split by topic, mirroring the hardware and software split.
 
 `docs/planning.md` is the milestone plan for hardware development (see Hardware below). Keep it current as boards move through the process; Claude follows it rather than inventing its own sequencing.
 
+`docs/simulation-workflow.md` is the mandatory verification and ordering gate. Read it before
+designing or changing hardware. Its applicable milestones are hard requirements: no board may be
+called done or final, and no PCB fabrication or assembly order may be released, until the required
+test-article or final-board gate passes with recorded evidence. A missing, provisional, assumed, or
+manually waived critical check is a failure.
+
 Example layout:
 
 ```
@@ -71,6 +77,8 @@ Standard shape per file: short title, one paragraph on what it covers, then the 
   adds a 2.70 EUR feeder-change labor fee. Use a safe Basic match whenever possible. Keep an
   Extended part only when no Basic part preserves the required function, package, and electrical
   limits.
+- Every bound component's datasheet lives in the vault. Read it before choosing a part or writing
+  a number, file it after. See [LLM Wiki > Datasheets](#datasheets).
 - `hardware/cad`: build123d code generating the enclosure and internal parts. Parametric where it matters (fit, clearance, tolerance). Comment why a dimension is what it is, not what the line of code does.
 - `hardware/pcb`: SKiDL code generating the schematic and netlist. Group parts by function (power, sensing, MCU) rather than one flat file.
 
@@ -81,9 +89,13 @@ Hardware development proceeds board by board, grounded in `docs/functional/` rat
 1. **Board definition.** Decide which physical boards exist and what each is responsible for, derived from `docs/functional/`.
 2. **Schematic.** Design each board's electrical schematic in SKiDL (`hardware/pcb/`) to meet its slice of the functional spec. Keep bill-of-materials cost low: prefer fewer parts and simpler switching over a more elegant but pricier circuit.
 3. **PCB layout, as code.** Lay out the board in SKiDL/KiCad-generation code, not by hand in a GUI, so the layout stays reproducible and versioned like the schematic. If a board's SPICE validation needs layout-derived values (real trace or antenna inductance, resistance, coupling, parasitics) rather than an analytical estimate, do this step before SPICE validation for that board; otherwise validate the schematic first.
-4. **SPICE validation.** Validate the schematic automatically in ngspice (`hardware/sim/`, invoked from the test suite) against the numeric limits in `docs/hardware/criteria.yaml`. A board is not done while its only evidence is a formula; it needs a passing simulation.
+4. **SPICE validation.** Validate the schematic automatically in ngspice (`hardware/sim/`, invoked from the test suite) against the numeric limits in `docs/hardware/criteria.yaml`. Device parameters come from the filed datasheet, not from an estimate or from memory; see [LLM Wiki > Datasheets](#datasheets). A board is not done while its only evidence is a formula; it needs a passing simulation.
 
-A board is done only when its schematic, SPICE validation, and PCB layout all exist and pass. See `docs/planning.md` for the current milestone status.
+A board is done only when its schematic, PCB layout, and every applicable milestone in
+`docs/simulation-workflow.md` exist and pass. The workflow takes precedence over a narrower
+milestone or a passing nominal simulation. See `docs/planning.md` for the current milestone status,
+but do not mark a board complete or prepare order artifacts unless the verification evidence and
+release gate are recorded there.
 
 ## Software
 
@@ -106,6 +118,7 @@ The active Obsidian vault is `Vault/Scacchiera/`. Everything below is relative t
 ```
 Vault/Scacchiera/
   Clippings/         raw sources, immutable, drop zone for captures
+  Datasheets/        component datasheets, immutable, one file per bound part
   assets/            downloaded images so the vault stays self-contained
   Wiki/
     index.md         content catalog, read this first
@@ -151,6 +164,37 @@ Query, answer a question against the wiki:
 
 Filing query answers back is the point. Explorations compound in the knowledge base the same way ingested sources do.
 
+### Datasheets
+
+Every component the hardware binds gets its datasheet filed in the vault, so any number in a
+schematic, BOM, or SPICE deck can be traced back to the page it came from.
+
+`Vault/Scacchiera/Datasheets/` holds the raw files. It is immutable exactly as `Clippings/` is:
+download, never edit. Name each one `<MPN>_<LCSC>.pdf`, for example
+`ESP32-C6-MINI-1U-N4_C7558096.pdf`, so both the part number and the order code are greppable. When
+only an HTML datasheet exists, save the extracted text as `.md` under the same name.
+
+**Read before choosing.** Before binding a part, changing a component value, or putting a number
+into a SPICE deck or `criteria.yaml`, check `Datasheets/` for that part. If it is not there, fetch
+and file it first. Never take an electrical limit from a catalog listing, a search result, or
+memory when a datasheet exists. Catalog pages are for stock, price, and library class only.
+
+**Write after binding.** Filing a datasheet is a wiki ingest:
+
+1. Save the file to `Datasheets/`.
+2. Create `Wiki/sources/<mpn>-datasheet.md`, a `source-summary` recording the values the design
+   actually depends on (pinout, absolute maximums, operating and quiescent currents, load
+   capacitance, ESR, package and pad geometry), each with the datasheet section it came from.
+3. Create or update `Wiki/entities/<mpn>.md`, an `entity` page for the component: what it does,
+   which board and designator use it, which JLC/LCSC code is bound, and what a substitution would
+   cost. Components are entities the same way tools and repos are.
+4. Link it from the board's `docs/hardware/<board>.md` and from any concept page whose claim rests
+   on it.
+5. Update `Wiki/index.md` and append to `Wiki/log.md`, as with any other ingest.
+
+A design value with no datasheet page behind it is a guess. Mark it as one rather than letting it
+read as validated.
+
 Lint, health-check the wiki:
 
 - Orphan pages (no inbound links).
@@ -162,7 +206,7 @@ Lint, health-check the wiki:
 
 ### Rules
 
-- Raw sources (`Clippings/`) are immutable. Never modify them, even when their metadata is wrong. Add clarity in the wiki layer instead.
+- Raw sources (`Clippings/` and `Datasheets/`) are immutable. Never modify them, even when their metadata is wrong. Add clarity in the wiki layer instead.
 - You own `Wiki/` entirely. Update `index.md` and `log.md` on every wiki change.
 - Keep source summaries factual. Interpretation belongs in concept and synthesis pages.
 - When a new source contradicts existing wiki content, note the contradiction explicitly. Do not silently overwrite.

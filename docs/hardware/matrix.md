@@ -22,10 +22,11 @@ through-hole pads in the component margin.
 One cell per line, the single-ended half of the hybrid PIN switch the previous 64-antenna design
 validated in SPICE:
 
-- series BAP64-02 PIN diode: 3 ohm at 10 mA forward, sub-picofarad reverse, so fifteen deselected
+- series BAR64-02V PIN diode: 2.5 ohm at 10 mA forward (datasheet max, 100 MHz), sub-picofarad
+  reverse, so fifteen deselected
   cells load the bus with about 6 pF total where analog switches would collapse the tank;
 - shunt BSS123 grounding the tank when deselected (the off/on suppression);
-- bias steering from the 3V3 rail: high-side BSS84, 180 ohm set resistor, isolation BAP64-02,
+- bias steering from the 3V3 rail: high-side BSS84, 180 ohm set resistor, isolation BAR64-02V,
   10 uH choke, with the forward current returning through the loop's own grounded end;
 - 100 nF DC block toward the shared bus and a 100 kilohm bleed.
 
@@ -49,6 +50,16 @@ DSN (`make pcb-matrix-route`) and verified by KiCad DRC (`make pcb-matrix-drc`),
 lines route automatically; the shared serial lines they exchange with the corner connector escape
 U1 down front-copper lanes (0.4 mm vias thread the register's 0.65 mm pitch) that connect to the
 router's copper, and the ground pours are added and filled after routing.
+
+## Mounting
+
+Two M2.5 plated holes bonded to ground, past each end of the switch-cell array. Only two, and that is
+a constraint rather than a choice: the 15 mm left and bottom margins are already fully committed to
+hand-routed register lanes, the reserved front-copper band for the U1 serial verticals, the cell part
+rows at 4.4 and 10.6 mm, and the vertical corridors the router needs for all 16 selection lines.
+Putting a 5.4 mm pad mid-margin made Freerouting fail outright on SEL_CHAIN. The far two edges are
+only 5 mm wide with the outer antenna loop 1.6 mm away, where a grounded screw would load it.
+Screwing all four edges needs a wider outline, which belongs with the enclosure design.
 
 ## Validation
 

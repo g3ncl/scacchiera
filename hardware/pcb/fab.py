@@ -11,6 +11,8 @@ import sys
 import zipfile
 from pathlib import Path
 
+from hardware.pcb.bom import HAND_POPULATED_BOARDS
+
 KICAD_CLI = "/usr/bin/kicad-cli"
 GENERATED = Path(__file__).parent / "generated"
 BOARDS = ("lightbar", "matrix", "hub")
@@ -200,7 +202,9 @@ def export_fab(name: str) -> tuple[Path, Path, Path, Path, Path, Path]:
     hand_bom_path = board_dir / f"{name}_hand_bom.csv"
     for suffix in LEGACY_ASSEMBLY_SUFFIXES:
         (board_dir / f"{name}{suffix}").unlink(missing_ok=True)
-    standard_excluded_routes = HAND_ASSEMBLY_ROUTES if name == "lightbar" else frozenset()
+    standard_excluded_routes = (
+        HAND_ASSEMBLY_ROUTES if name in HAND_POPULATED_BOARDS else frozenset()
+    )
     write_jlc_bom(engineering_bom_path, bom_path, standard_excluded_routes)
     write_jlc_bom(engineering_bom_path, hybrid_bom_path, HAND_ASSEMBLY_ROUTES)
     write_hand_bom(engineering_bom_path, hand_bom_path)

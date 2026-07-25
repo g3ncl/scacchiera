@@ -60,11 +60,29 @@ here only as interfaces, not as boards.
 ### 3. Light bar board (x2, one design)
 
 - **Responsibility:** the diffused feedback bar fixed by
-  [interface.md](../functional/interface.md): 120 x 8.5 mm, 17 low-current LEDs, all components
-  on the front side behind a replaceable diffuser. Both rails use the identical design.
+  [interface.md](../functional/interface.md): 120 x 8.5 mm, 14 low-current LEDs, all components
+  on the front side behind a replaceable diffuser. Both rails use the identical design. The count
+  dropped from 17 because a hand-solderable LED package is wider; see
+  [lightbar.md](lightbar.md).
 - **Interfaces:** 4-wire JST GH from the hub: 5 V, ground, WS2812 data in, chain out (see
   [lightbar.md](lightbar.md)).
 - **Cost target:** 5 EUR per bar including fab.
+
+### Purchased accessories (not boards)
+
+Bought parts that appear on no board BOM but without which the product does not work. Recorded here
+for the same reason the display modules are: an order that forgets them is incomplete.
+
+- **Two ER-OLEDM3.12-1W display modules**, fixed by [interface.md](../functional/interface.md).
+- **One 2.4 GHz antenna with pigtail** for the hub's ESP32-C6-MINI-1U. The module has an external
+  antenna connector rather than a PCB antenna, which makes the antenna replaceable for about a euro
+  instead of a hub respin. The connector is **MHF3 / W.FL / IPEX3**, not U.FL: a U.FL pigtail is
+  larger and will not mate. Prefer an adhesive FPC antenna, pre-tuned to 50 ohm, stuck to the inside
+  of a plastic rail wall and kept roughly 15 mm clear of the battery, shields and copper. A custom
+  antenna PCB was considered and rejected: its radiation pattern is the one thing in this project
+  that no ngspice test can validate, and per-attempt iteration costs a fabrication run rather than
+  a euro.
+- **Battery**, one protected Li-ion cell with a JST PH lead.
 
 ## Why this split
 

@@ -8,6 +8,8 @@ from pathlib import Path
 import pytest
 import yaml
 
+from hardware.pcb.lightbar_geometry import LED_COUNT
+
 from hardware.sim.lightbar_supply import validate_supply
 
 
@@ -40,7 +42,7 @@ def routed_board() -> Path:
 def test_supply_loop_droop_within_criteria(routed_board: Path) -> None:
     limits = yaml.safe_load(CRITERIA.read_text(encoding="utf-8"))["lightbar"]
     result = validate_supply(routed_board, WORK_DIR)
-    assert len(result.droops_v) == 17
+    assert len(result.droops_v) == LED_COUNT
     # A solved network with zero droop would mean the extraction found no
     # copper resistance, so guard against a vacuous pass too.
     assert result.worst_droop_v > 0.0

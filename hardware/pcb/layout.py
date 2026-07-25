@@ -112,6 +112,36 @@ class BoardBuilder:
         via.SetNet(self.nets[net_name])
         self.board.Add(via)
 
+    def add_mounting_hole(
+        self,
+        net_name: str,
+        position: Position,
+        reference: str,
+        size: str = "2.7mm_M2.5",
+    ) -> None:
+        """A plated mounting hole bonded to a net, for screwing the board down.
+
+        Bonding it to ground rather than leaving it isolated ties the enclosure
+        screw to the ground pour, so the shell cannot float. KiCad's
+        MountingHole footprints carry exclude_from_bom and
+        exclude_from_pos_files, which is what keeps a hole out of the JLCPCB
+        upload files: it is a hole, not a part to place.
+        """
+        name = f"MountingHole_{size}_Pad"
+        footprint = pcbnew.FootprintLoad(
+            str(_library_path("MountingHole")), name
+        )
+        if footprint is None:
+            raise ValueError(f"mounting hole footprint not found: {name}")
+        footprint.SetReference(reference)
+        footprint.SetPosition(_vector(position))
+        footprint.Reference().SetVisible(False)
+        footprint.Value().SetVisible(False)
+        for pad in footprint.Pads():
+            pad.SetNet(self.nets[net_name])
+        self.board.Add(footprint)
+        self.footprints[reference] = footprint
+
     def add_zone(self, net_name: str, layer: int, corners: Iterable[Position]) -> None:
         zone = pcbnew.ZONE(self.board)
         zone.SetLayer(layer)

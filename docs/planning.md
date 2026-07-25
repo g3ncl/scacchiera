@@ -18,6 +18,27 @@ sequencing; update it as work proceeds so it stays the current source of truth f
   trace or antenna inductance, resistance, coupling, parasitics) rather than an analytical estimate,
   that board's PCB layout (Milestone 4) comes before its SPICE validation (Milestone 3) instead,
   because the honest numbers come from the copper geometry, not a formula.
+- Milestones M1 through M4 now describe design-generation progress only. They do not authorize a
+  PCB order. The hard release gates are V0 through V9 in
+  [simulation-workflow.md](simulation-workflow.md), which take precedence over the older completion
+  language below.
+
+## Verification release gates
+
+No gate is complete until its definition of done in
+[simulation-workflow.md](simulation-workflow.md) has recorded evidence. V0 through V7 permit only a
+scoped test-article order. V0 through V9 permit a final-board order.
+
+- [ ] V0 requirement traceability
+- [ ] V1 component and library proof
+- [ ] V2 connectivity and static electrical checks
+- [ ] V3 power, analog, timing, and fault simulation
+- [ ] V4 layout-derived electromagnetic validation
+- [ ] V5 firmware host verification
+- [ ] V6 firmware-in-simulation system verification
+- [ ] V7 mechanical and fabrication preflight
+- [ ] V8 test-article measurement and model calibration
+- [ ] V9 independent review and final release
 
 ## Milestones
 
@@ -45,12 +66,16 @@ DoD: `hardware/pcb/<board>.py` exists and generates a schematic, ERC is clean, a
 with a running per-board cost total, and a `docs/hardware/<board>.md` spec describes the board
 against the functional requirement it serves.
 
-- [x] Light bar schematic: `hardware/pcb/lightbar.py`, ERC clean, BOM totals 1.46 EUR in parts,
-  spec in [hardware/lightbar.md](hardware/lightbar.md).
+- [x] Light bar schematic: `hardware/pcb/lightbar.py`, ERC clean, BOM totals 1.83 EUR in parts,
+  spec in [hardware/lightbar.md](hardware/lightbar.md). Revised 2026-07-25: the pixel is now an
+  SK6805MINI-E, because a hand-populated board needs a package an iron can reach, and the count
+  dropped 17 to 14 because that package is wider.
 - [x] Matrix board schematic: `hardware/pcb/matrix.py`, ERC clean, BOM 6.02 EUR in parts, spec
   in [hardware/matrix.md](hardware/matrix.md).
-- [x] Hub board schematic: `hardware/pcb/hub.py`, ERC clean, BOM 14.94 EUR in parts, spec in
-  [hardware/hub.md](hardware/hub.md).
+- [x] Hub board schematic: `hardware/pcb/hub.py`, ERC clean, BOM 14.92 EUR in parts, spec in
+  [hardware/hub.md](hardware/hub.md). Revised 2026-07-25: U4 to ESP32-C6-MINI-1U-N4 with the C6
+  pin map from datasheet Table 3-1 (native USB moves to pins 17/18), Y1 to a stocked 3225
+  27.12 MHz crystal with 15 pF loads, plus local module decoupling and IO9/EN recovery pads.
 
 ### M3: SPICE validation (per board)
 
@@ -62,9 +87,10 @@ against its `criteria.yaml` limits, in the ordinary test suite. A board is not d
 evidence is an analytical formula; it needs a passing simulation.
 
 - [x] Light bar SPICE validation: `hardware/tests/test_sim_lightbar.py` solves the resistor
-  network extracted from the routed board in ngspice; worst supply-loop droop 24.6 mV against the
+  network extracted from the routed board in ngspice; worst supply-loop droop 13.1 mV against the
   100 mV limit in [hardware/criteria.yaml](hardware/criteria.yaml). Ran after layout because the
-  copper supplies the resistances.
+  copper supplies the resistances. Ground is now a pour rather than routed track, modelled as a
+  ladder between its real stitching-via positions so the plane stays layout-derived.
 - [x] Matrix board SPICE validation: `hardware/tests/test_sim_matrix.py`, antenna inductance and
   AC resistance derived from the routed loop geometry (`hardware/sim/loop.py`). Selected cell
   resonates at 14.18 MHz, loaded 16-line bus at 13.70 MHz, off/on suppression 90 dB, steering
@@ -82,7 +108,9 @@ DoD: the layout is generated from code, DRC is clean, and it fits the board's en
 [functional/physical.md](functional/physical.md).
 
 - [x] Light bar layout: `hardware/pcb/lightbar_layout.py` generates the routed 120 x 8.5 mm
-  board, DRC clean (`make pcb-lightbar-drc`).
+  board, DRC clean at 0 violations and 0 unconnected (`make pcb-lightbar-drc`). Rerouted
+  2026-07-25 around the wider LED: back-copper ground pour instead of a routed bus, and the 5 V
+  bus below the connector's mounting pads, the only pad-free full-length band left.
 - [x] Matrix board layout: `hardware/pcb/matrix_layout.py` generates placement, antenna copper,
   and both-face ground pours; Freerouting autoroute (`make pcb-matrix-route`) plus a
   deterministic U1-serial escape (front-copper lanes with 0.4 mm vias threading the register's
@@ -93,19 +121,68 @@ DoD: the layout is generated from code, DRC is clean, and it fits the board's en
   bridges any pad the router leaves open to its net's nearest copper (surviving the router's
   run-to-run variation). `make pcb-hub-drc` is clean: 0 violations, 0 unconnected.
 
-## Definition of done for the rebuild
+## Legacy definition of done for design generation
 
-Every board from Milestone 1 has cleared Milestones 2 through 4. No board counts as done while its
-schematic is unwritten, its SPICE validation is missing or failing, or its only PCB evidence is a
-description rather than a laid-out, DRC-clean board. `docs/hardware/` and `docs/software/` return,
-one file per board or subsystem, as each clears its milestones, mirroring `docs/functional/`'s
-one-topic-per-file scoping.
+Every board from Milestone 1 must clear Milestones 2 through 4. These milestones establish that the
+schematic, initial SPICE validation, and PCB layout exist. They are necessary inputs to the current
+verification workflow, not evidence that a board is final or safe to order. Final completion is V9
+in [simulation-workflow.md](simulation-workflow.md).
 
 ## Status
 
-All three boards are done. The light bar, matrix, and hub have each cleared Milestones 2 through
-4: schematic (ERC clean, costed BOM), SPICE validation (passing ngspice test against
-[hardware/criteria.yaml](hardware/criteria.yaml) in the ordinary suite), and PCB layout
-(generated from code, `make pcb-<board>-drc` clean at 0 violations and 0 unconnected). Per the
-rebuild's definition of done, every board from Milestone 1 has cleared Milestones 2 through 4,
-so the hardware rebuild is complete. Firmware and the companion app have not started.
+Revised 2026-07-25. Three parts were rebound after JLCPCB could not fill the hub order (U4 and Y1
+were short) and after the decision to hand-populate the lightbar and matrix rather than pay the
+large-size assembly charge. `Vault/Scacchiera/Datasheets/` and the Datasheets rule in `CLAUDE.md`
+came out of the same work: the C6 pin map, the crystal's load capacitance and the LED's drive
+current all came from datasheets that contradicted the catalog listings. Full suite passes at 28
+tests; lightbar, matrix and hub DRC are all clean.
+
+Known defects as of 2026-07-25, before the workflow starts:
+
+- **The matrix layout builds every time now, but is not reproducibly DRC clean.** Three consecutive
+  `make pcb-matrix-route && make pcb-matrix-drc` runs gave 0 violations / 0 unconnected, then 1 / 1,
+  then 2 / 3. It no longer crashes (see below), so V2's "netlist and routed board agree" is
+  reachable by re-running, but the board is not yet deterministic.
+
+  Root cause is understood and is architectural, not a tuning problem. The four shared serial nets
+  (SEL_SER, SEL_SRCLK, SEL_RCLK, SEL_CHAIN) are routed by Freerouting, which reaches their 0.65 mm
+  register pads unreliably, and `_postroute_fixups` then patches whatever it left by drawing a lane
+  *relative to where the router happened to stop*. Two better skip rules were measured (any-peer and
+  all-peer connectivity tests) and both came out worse, which is the evidence that no skip rule fixes
+  it: the patch is downstream of a nondeterministic input.
+
+  **The fix is to take those four nets away from the router entirely**: after importing the session,
+  rip up their copper and draw all four deterministically through reserved front-copper bands, the
+  way the left-hand U1 lane band is already reserved. That needs a bottom-margin band worked out
+  against the column antennas' through-hole terminals, which sit in the same margin. Scoped, not done.
+- **The hub layout is not reproducibly clean.** Freerouting leaves 1 to 2 pads open, varying run to
+  run. The post-route closer's bridge ceiling was cut from 14 mm to 2.5 mm because a 9.26 mm bridge
+  across the MCU module was producing ten DRC violations on its own, so open pads are now reported
+  rather than shorted over.
+- ~~Matrix U1 sits 0.025 mm from the board edge~~ **fixed**. It was worse than the DRC report
+  suggested: U1's pads 8 and 9 sat at x = -1.245, entirely *off* the board, and its silkscreen
+  overhung the edge. Pad 9 is SEL_CHAIN, which is why routing failed on that net specifically, so
+  this one placement bug produced both reported defects. U1 is now seated by measuring its own
+  courtyard (`_seat_inside_left_edge`) rather than against a hardcoded 3.5 mm, so it cannot recur if
+  the footprint or rotation changes, and C65 follows it. Four dead constants that described an
+  unimplemented deterministic route (`_LEFT_X`, `_BOTTOM_Y`, `_U1_FAN_Y`, `_U2_TURN_X`) were removed,
+  and the reserved lane band now derives from the real serial-pad positions.
+
+- ~~`make pcb-matrix-route` aborts~~ **fixed**. `_nearest_net_point` raised
+  `no router copper for net <X>` whenever Freerouting left one of the four serial nets bare, and
+  which net that was varied run to run, so the matrix could not be regenerated from code at all. It
+  now falls back to the net's own pads. A lane drawn to the counterpart pad is a worse route than one
+  drawn to router copper, but it is a route, and DRC judges it instead of the build dying.
+- **The 10 uH matrix choke has no margin evidence.** Its datasheet gives one current number, 15 mA,
+  without saying whether that is a heating or a saturation limit, and the design biases it at
+  10.29 mA.
+
+Two open sourcing risks are recorded in
+[hardware/jlcpcb-sourcing.md](hardware/jlcpcb-sourcing.md): U4's ordering code publishes no stock
+quantity, and the lightbar LED's ordering code has no authoritative datasheet and two conflicting
+vendor pinouts.
+
+The light bar, matrix, and hub have each cleared the legacy M2 through M4 design-generation gates:
+schematic, nominal SPICE checks, and PCB layout. They have not been assessed against V0 through V9,
+so none is final or authorized for a test-article or final-board order. Firmware and the companion
+app have not started, which also blocks V5 and V6.

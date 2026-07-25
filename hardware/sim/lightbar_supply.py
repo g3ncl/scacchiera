@@ -1,7 +1,7 @@
 """Validate the light bar's supply loop against the routed copper in ngspice.
 
 Builds a resistor network from every LED_5V and GND track segment in the
-generated board file, loads it with all 17 pixels lit white, and reports the
+generated board file, loads it with all 14 pixels lit white, and reports the
 worst supply-loop droop (feed drop plus ground rise) seen by any LED. The
 network is solved by ngspice, not analytically, per the Milestone 3 rule.
 """
@@ -12,16 +12,31 @@ from dataclasses import dataclass
 from math import hypot
 from pathlib import Path
 
-from hardware.pcb.lightbar_geometry import CONNECTOR_X, CONNECTOR_Y, LED_COUNT, LED_Y, led_x
-from hardware.sim.copper import Copper, read_copper, split_at_junctions
+from hardware.pcb.lightbar_geometry import (
+    BOARD_HEIGHT,
+    CONNECTOR_X,
+    CONNECTOR_Y,
+    LED_COUNT,
+    LED_Y,
+    POUR_INSET,
+    led_x,
+)
+from hardware.sim.copper import (
+    COPPER_RESISTIVITY_OHM_M,
+    COPPER_THICKNESS_M,
+    Copper,
+    read_copper,
+    split_at_junctions,
+)
 
 
 SUPPLY_NET = "LED_5V"
 GROUND_NET = "GND"
 SUPPLY_VOLTAGE_V = 5.0
-# WS2812C-2020 datasheet: about 5 mA per color channel, so a white pixel
-# draws all three at once. This is the worst legitimate load.
-LED_WHITE_CURRENT_A = 0.015
+# SK68XX MINI family datasheet rev 08: 5 mA per colour channel for the SK6805
+# variant (section 9) plus 1 mA of control-IC quiescent draw (section 10, IDD),
+# so a white pixel is 3 x 5 + 1. This is the worst legitimate load.
+LED_WHITE_CURRENT_A = 0.016
 # Floor for zero-length stubs so ngspice never sees a 0 ohm resistor.
 MINIMUM_RESISTANCE_OHM = 1e-6
 
@@ -73,6 +88,46 @@ def _network(copper: Copper, net: str) -> tuple[list[Resistor], dict[NodeKey, tu
     return resistors, positions
 
 
+def _ground_plane_network(
+    copper: Copper,
+) -> tuple[list[Resistor], dict[NodeKey, tuple[float, float]]]:
+    """Model the back-copper ground pour as a ladder between its stitching vias.
+
+    Ground stopped being routed track when the SK6805MINI-E's pad span left no
+    room for a front-copper bus, so there is no track geometry to extract. The
+    pour is still layout-derived though: its resistance comes from the real via
+    positions in the board file and the real pour width, one square of copper at
+    a time, rather than from an assumption that a plane is an ideal node.
+    """
+    sheet_ohm_per_square = COPPER_RESISTIVITY_OHM_M / COPPER_THICKNESS_M
+    pour_width_mm = BOARD_HEIGHT - 2.0 * POUR_INSET
+    vias = sorted(
+        (via for via in copper.vias if via.net == GROUND_NET),
+        key=lambda via: via.position[0],
+    )
+    if not vias:
+        raise ValueError("no ground stitching vias found on the board")
+    positions: dict[NodeKey, tuple[float, float]] = {}
+    for via in vias:
+        positions[_key(GROUND_NET, via.position)] = via.position
+    resistors: list[Resistor] = []
+    for near, far in zip(vias[:-1], vias[1:]):
+        span_mm = abs(far.position[0] - near.position[0])
+        ohm = sheet_ohm_per_square * span_mm / pour_width_mm
+        resistors.append(
+            (
+                _key(GROUND_NET, near.position),
+                _key(GROUND_NET, far.position),
+                max(ohm, MINIMUM_RESISTANCE_OHM),
+            )
+        )
+    return resistors, positions
+
+
+def _key(layer: str, point: tuple[float, float]) -> NodeKey:
+    return (layer, round(point[0] * 1000.0), round(point[1] * 1000.0))
+
+
 def _nearest(positions: dict[NodeKey, tuple[float, float]], point: tuple[float, float]) -> NodeKey:
     return min(
         positions,
@@ -98,7 +153,7 @@ def _run_ngspice(deck: str, work_dir: Path) -> dict[str, float]:
 def validate_supply(board: Path, work_dir: Path) -> SupplyResult:
     copper = read_copper(board)
     supply_resistors, supply_positions = _network(copper, SUPPLY_NET)
-    ground_resistors, ground_positions = _network(copper, GROUND_NET)
+    ground_resistors, ground_positions = _ground_plane_network(copper)
 
     names: dict[NodeKey, str] = {}
     connector = (CONNECTOR_X, CONNECTOR_Y)

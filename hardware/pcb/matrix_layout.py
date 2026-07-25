@@ -12,6 +12,7 @@ generation already proved out, and verified afterward by the real KiCad DRC.
 import os
 import subprocess
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 
 import pcbnew
@@ -20,9 +21,11 @@ from hardware.pcb.layout import BoardBuilder, Placement, Position
 from hardware.pcb.matrix_geometry import (
     BOARD_SIZE,
     LINE_COUNT,
+    MOUNTING_HOLE_SIZE,
     PLAY_ORIGIN,
     PLAY_SPAN,
     line_center,
+    mounting_hole_positions,
 )
 from hardware.pcb.netlist import read_netlist
 from hardware.pcb.ses_import import apply_session
@@ -30,7 +33,10 @@ from hardware.pcb.ses_import import apply_session
 
 OUTPUT = Path(__file__).parent / "generated" / "matrix"
 FREEROUTING_JAR = os.environ.get("FREEROUTING_JAR", "/tmp/freerouting-2.2.4.jar")
-FREEROUTING_PASSES = int(os.environ.get("FREEROUTING_PASSES", "12"))
+# 25, not 12: the selection lines into U2's left column are the last the router
+# finishes and it plateaus on them below this. 40 quadrupled the runtime for no
+# further gain.
+FREEROUTING_PASSES = int(os.environ.get("FREEROUTING_PASSES", "25"))
 
 # The ground pour covers the two component margins up to this line; the play
 # area beyond it carries only antenna copper, per the read budget.
@@ -91,6 +97,42 @@ def _corner_placements() -> dict[str, Placement]:
         "C65": Placement(Position(10.6, 158.5), rotation=90.0, back=True),
         "C66": Placement(Position(160.5, 5.5), rotation=90.0, back=True),
     }
+
+
+def _shift_footprint(builder: BoardBuilder, reference: str, dx: float) -> None:
+    footprint = builder.footprints[reference]
+    position = footprint.GetPosition()
+    footprint.SetPosition(pcbnew.VECTOR2I(position.x + pcbnew.FromMM(dx), position.y))
+
+
+def _seat_inside_left_edge(builder: BoardBuilder, reference: str, margin: float) -> float:
+    """Shift a footprint right until all of it clears the board edge.
+
+    U1's placement used to be a bare 3.5 mm, which put its pads 8 and 9 at
+    x = -1.245: entirely off the board. Pad 9 is SEL_CHAIN, and a pad outside the
+    outline is a pad Freerouting cannot reach, which is why `make
+    pcb-matrix-route` failed on exactly that net while the other three serial
+    nets routed. Pads 7 and 10 landed 0.025 mm from the edge against a 0.2 mm
+    rule, the same bug one pin further in.
+
+    Measured on the courtyard, not the pads: seating pad 8 at the margin still
+    left the body and its silkscreen hanging over the edge, because a SOIC's
+    outline is drawn wider than its pad field.
+
+    Deriving the offset from the footprint rather than naming a number means
+    neither fault can come back if the footprint or rotation changes. Same
+    verify-and-correct approach as _check_column_antennas below.
+    """
+    footprint = builder.footprints[reference]
+    courtyard = footprint.GetCourtyard(pcbnew.B_CrtYd)
+    if courtyard.IsEmpty():
+        courtyard = footprint.GetCourtyard(pcbnew.F_CrtYd)
+    leftmost = float(pcbnew.ToMM(courtyard.BBox().GetLeft()))
+    shift = margin - leftmost
+    if shift <= 0.0:
+        return 0.0
+    _shift_footprint(builder, reference, shift)
+    return shift
 
 
 def _check_column_antennas(builder: BoardBuilder) -> None:
@@ -159,6 +201,13 @@ def generate_board(output: Path = OUTPUT / "matrix.kicad_pcb") -> None:
         if placement is not None:
             builder.add_component(component, placement)
     _check_column_antennas(builder)
+    # C65 is U1's decoupling capacitor, so it follows U1 rather than being
+    # placed against a separate number that would drift out of step.
+    _shift_footprint(builder, "C65", _seat_inside_left_edge(builder, "U1", U1_EDGE_MARGIN))
+    for index, (x, y) in enumerate(mounting_hole_positions(), start=1):
+        builder.add_mounting_hole(
+            "GND", Position(x, y), f"H{index}", size=MOUNTING_HOLE_SIZE
+        )
     _preroute_connector_escapes(builder)
     _add_corridor_keepouts(builder)
     builder.save(output)
@@ -186,7 +235,19 @@ def _preroute_connector_escapes(builder: BoardBuilder) -> None:
 # back-copper fanout is needed and nothing collides with the router's own
 # back-copper tracks). Reserve that front-copper lane band so the router keeps
 # its routing out from under the verticals.
-_U1_LANE_KEEPOUT = (0.8, 8.5, 4.9, 151.2, ("F.Cu",))
+# Clearance from the board edge to U1's leftmost pad. 0.35 mm sits comfortably
+# over the board's 0.2 mm copper-to-edge rule.
+U1_EDGE_MARGIN = 0.35
+# The reserved lane band starts above J1's 3V3 escape via (which sits at y 8.5)
+# and extends just past U1's serial pad row: a negative gap. Without that the
+# router runs 3V3 across the pad row on front copper, through where the lanes
+# leave their pads. Stopping short of the row was tried and is worse: it frees
+# 3V3 but splits the ground pour into islands.
+_LANE_BAND_BOTTOM = 9.5
+_LANE_BAND_GAP_TO_U1 = -0.6
+# Slack either side of the outermost serial pad, so a 0.25 mm lane plus its
+# clearance fits inside the band.
+_LANE_BAND_SLACK = 0.6
 
 
 # The registers sit apart, each central to its bank, so all 16 selection lines
@@ -201,21 +262,88 @@ _U1_LANE_KEEPOUT = (0.8, 8.5, 4.9, 151.2, ("F.Cu",))
 # are back-copper SMD, so a front-copper trace passes over their pads and vias
 # straight down onto the target pad, threading the 0.65 mm serial-pin pitch
 # that the autorouter cannot.
-_KEEPOUTS: tuple[tuple[float, float, float, float, tuple[str, ...]], ...] = (_U1_LANE_KEEPOUT,)
+# The serial pins whose verticals the band has to protect: QH' out, SHCP, STCP,
+# and DS in.
+U1_SERIAL_PADS = ("9", "11", "12", "14")
+# The nets those pins carry, which _postroute_fixups owns end to end.
+SHARED_SERIAL_NETS = ("SEL_CHAIN", "SEL_SRCLK", "SEL_RCLK", "SEL_SER")
+# Lane geometry for the deterministic fan-out. See _serial_plan.
+_LANE_WIDTH = 0.25
+_LANE_VIA = 0.4
+_LANE_DRILL = 0.2
+# Lanes get their own pitch rather than sitting on their U1 pad x. U1's pins are
+# on 1.27 mm and J1's on 1.25 mm, so lanes placed at the pads interleave with
+# J1's pads about 0.44 mm away, against the 0.525 mm a 0.4 mm tap via needs from
+# a 0.25 mm lane. This pitch keeps every lane at least 0.55 mm from every J1 pad
+# (which sit at x 3.25, 4.50 and 5.75).
+_LANE_X0 = 1.2
+_LANE_PITCH = 1.3
+_JOG_DROP = 3.0
+# Crossing band below U2, one lane per net.
+_CROSS_Y0 = 1.2
+_CROSS_PITCH = 1.0
+# Turn-up x, assigned by U2 pad y ascending so each final leg into U2 passes
+# below the turn-ups of the nets stopping short of it. The net reaching U2's
+# highest pad would need a vertical tall enough to cross every other final leg,
+# so it goes around the far side of U2 and comes back in from the right.
+_TURN_X0 = 156.5
+_TURN_PITCH = 1.0
+_TURN_X_FAR = 159.5
+# Tap rows: lowest y clear of J1's pad band, then 0.6 mm apart so two
+# adjacent back-copper taps keep their 0.2 mm clearance.
+_TAP_MIN_Y = 3.0
+_TAP_PITCH = 0.7
+_CROSS_BAND = (0.6, 0.9, 151.5, 5.0)
+# J1's serial pins come off the connector in a different order than U1's, so a
+# single-layer fan-out cannot satisfy both: whichever way the crossing band is
+# ordered, one tap has to cut another net's lane. The taps therefore drop onto
+# J1 on back copper, and this window reserves that. It spans only J1's three
+# serial pads: its GND, RF_BUS and 3V3 pins sit at x 7.0 and beyond, so they
+# keep their back-copper escape.
+_J1_TAP_BAND = (2.0, 1.3, 6.6, 5.0)
+# Turn-up column: covers turn_x 155.5 to 159.5 and every U2 serial pad y.
+_TURN_BAND = (154.9, 0.9, 156.9, 8.0)
+# The far turn rounds U2 on its right, so it needs its own strip beyond the
+# pad column rather than a band swallowing it.
+_TURN_BAND_FAR = (159.0, 0.9, 160.1, 8.0)
 
-# Only three nets are hand-routed: the register-to-register links U1 -> U2.
-# SER stays a short local J1 <-> U1 hop the router handles. Left B.Cu lane x and
-# bottom F.Cu lane y are 0.5 mm apart (0.25 mm track keeps 0.25 mm clearance),
-# and both are ordered to match the U1 pin x order so the fanout never crosses.
-_LEFT_X = {"SEL_CHAIN": 0.9, "SEL_SRCLK": 1.4, "SEL_RCLK": 1.9}
-_BOTTOM_Y = {"SEL_SRCLK": 0.9, "SEL_RCLK": 1.4, "SEL_CHAIN": 1.9}
-_U1_FAN_Y = {"SEL_CHAIN": 150.1, "SEL_SRCLK": 150.6, "SEL_RCLK": 151.1}
-# Staggered front-copper turn-up x just left of U2, lower pin nearer the chip.
-_U2_TURN_X = {"SEL_SRCLK": 157.9, "SEL_RCLK": 157.3, "SEL_CHAIN": 156.7}
+
+@dataclass(frozen=True)
+class SerialLane:
+    net: str
+    pad: tuple[float, float]
+    lane_x: float
+    cross_y: float
+    turn_x: float
+
+
+def _u1_lane_band(builder: BoardBuilder) -> tuple[float, float, float, float]:
+    """The front-copper band reserved for U1's serial verticals.
+
+    Derived from where U1's serial pads actually ended up rather than hardcoded,
+    so it keeps covering them after _seat_inside_left_edge moves the part.
+    """
+    footprint = builder.footprints["U1"]
+    pads = [pad for pad in footprint.Pads() if pad.GetNumber() in U1_SERIAL_PADS]
+    xs = [pcbnew.ToMM(pad.GetPosition().x) for pad in pads]
+    row_y = min(pcbnew.ToMM(pad.GetPosition().y) for pad in pads)
+    return (
+        min(xs) - _LANE_BAND_SLACK,
+        _LANE_BAND_BOTTOM,
+        max(xs) + _LANE_BAND_SLACK,
+        row_y - _LANE_BAND_GAP_TO_U1,
+    )
 
 
 def _add_corridor_keepouts(builder: BoardBuilder) -> None:
-    for x1, y1, x2, y2, layers in _KEEPOUTS:
+    bands = (
+        (*_u1_lane_band(builder), ("F.Cu",)),
+        (*_CROSS_BAND, ("F.Cu",)),
+        (*_TURN_BAND, ("F.Cu",)),
+        (*_TURN_BAND_FAR, ("F.Cu",)),
+        (*_J1_TAP_BAND, ("B.Cu",)),
+    )
+    for x1, y1, x2, y2, layers in bands:
         for layer_name in layers:
             zone = pcbnew.ZONE(builder.board)
             zone.SetIsRuleArea(True)
@@ -243,6 +371,8 @@ def _route_waypoints(
     changes between consecutive nodes."""
     net = board.FindNet(net_name)
     for (ax, ay, alayer), (bx, by, blayer) in zip(nodes[:-1], nodes[1:]):
+        if (ax, ay) == (bx, by) and alayer == blayer:
+            continue
         segment = pcbnew.PCB_TRACK(board)
         segment.SetLayer(board.GetLayerID(alayer))
         segment.SetWidth(pcbnew.FromMM(width))
@@ -270,48 +400,170 @@ def _remove_rule_areas(board: pcbnew.BOARD) -> None:
             board.Remove(zone)
 
 
-def _postroute_fixups(board: pcbnew.BOARD) -> None:
-    """Drop each U1 serial pin down its reserved front-copper lane onto the
-    back-copper pickup stub the router connected to J1/U2."""
-    for pad in ("9", "11", "12", "14"):
-        net_name = board.FindFootprintByReference("U1").FindPadByNumber(pad).GetNetname()
-        pin = _pad_mm(board, "U1", pad)
-        lane_x = pin[0]
-        # If the router already ran this net's copper up to the U1 pad, adding a
-        # lane would duplicate it (co-located via, crossing). Skip those.
-        nearest_to_pad = _nearest_net_point(board, net_name, pin)
-        if (nearest_to_pad[0] - pin[0]) ** 2 + (nearest_to_pad[1] - pin[1]) ** 2 < 1.0:
-            continue
-        # Where the router left this net nearest the lane foot, before adding
-        # any of my own copper.
-        target = _nearest_net_point(board, net_name, (lane_x, 10.0))
-        # 0.4 mm via on the pad (fits the 0.65 mm pitch), front-copper straight
-        # down the reserved lane.
-        pad_via = pcbnew.PCB_VIA(board)
-        pad_via.SetPosition(pcbnew.VECTOR2I_MM(lane_x, pin[1]))
-        pad_via.SetWidth(pcbnew.FromMM(0.4))
-        pad_via.SetDrill(pcbnew.FromMM(0.2))
-        pad_via.SetNet(board.FindNet(net_name))
-        board.Add(pad_via)
-        _route_waypoints(
-            board,
-            net_name,
-            (
-                (lane_x, pin[1], "F.Cu"),
-                (lane_x, target[1], "F.Cu"),
-                (lane_x, target[1], "B.Cu"),
-                (target[0], target[1], "B.Cu"),
-            ),
-            width=0.25,
-            via_diameter=0.4,
-            via_drill=0.2,
+def _rip_up(board: pcbnew.BOARD, net_names: tuple[str, ...]) -> None:
+    """Delete every routed track and via on these nets."""
+    for track in list(board.Tracks()):
+        if track.GetNetname() in net_names:
+            board.Remove(track)
+
+
+def _serial_plan(board: pcbnew.BOARD) -> tuple[SerialLane, ...]:
+    """Assign each shared serial net a lane x, a crossing y, and a turn-up x.
+
+    Three orderings, each earning its place:
+
+    * lanes keep the U1 pad order, so the verticals down the left margin are
+      parallel and cannot cross;
+    * crossing y rises with lane x, so each horizontal passes below the lane
+      verticals of every net to its right;
+    * turn-up x falls as the U2 pad y rises, so each final leg into U2 passes
+      below the turn-ups of the nets stopping short of it. The net reaching U2's
+      highest pad cannot satisfy that against the others, since its vertical
+      would be tall enough to cut them, so it rounds the far side of U2 instead.
+
+    Taps get their own rows on top of this; see _tap_rows.
+    """
+    pads = {
+        board.FindFootprintByReference("U1").FindPadByNumber(number).GetNetname(): _pad_mm(
+            board, "U1", number
         )
+        for number in U1_SERIAL_PADS
+    }
+    far_pads = {
+        net: _pad_mm(board, "U2", number)
+        for net in pads
+        for number in (_pad_of(board, net, "U2"),)
+        if number is not None
+    }
+    by_pad_y = sorted(far_pads, key=lambda net: far_pads[net][1])
+    turn_x = {net: _TURN_X0 - i * _TURN_PITCH for i, net in enumerate(by_pad_y[:-1])}
+    turn_x[by_pad_y[-1]] = _TURN_X_FAR
+    return tuple(
+        SerialLane(
+            net=net,
+            pad=pads[net],
+            lane_x=_LANE_X0 + index * _LANE_PITCH,
+            cross_y=_CROSS_Y0 + index * _CROSS_PITCH,
+            turn_x=turn_x.get(net, 0.0),
+        )
+        for index, net in enumerate(sorted(pads, key=lambda net: pads[net][0]))
+    )
+
+
+def _tap_rows(board: pcbnew.BOARD, plan: tuple[SerialLane, ...]) -> dict[str, float]:
+    """The y at which each J1 tap leaves its lane for back copper.
+
+    Ordered by how far right the hop reaches, which is deliberately not the lane
+    ordering. SEL_SRCLK runs rightward from a lane left of its pin, SEL_RCLK
+    leftward from a lane right of its pin, so the two hops overlap and the one
+    reaching further has to sit below the other. Sharing the lanes' crossing rows
+    put them in exactly the wrong order and crossed them.
+
+    Rows are floored clear of J1's own pad band (y 0.8 to 2.5) so a tap via never
+    lands on a neighbouring pin, and spaced so two adjacent hops keep clearance.
+    """
+    taps = {
+        lane.net: lane for lane in plan if _pad_of(board, lane.net, "J1") is not None
+    }
+    reach = {
+        net: max(lane.lane_x, _pad_mm(board, "J1", str(_pad_of(board, net, "J1")))[0])
+        for net, lane in taps.items()
+    }
+    rows: dict[str, float] = {}
+    floor = _TAP_MIN_Y
+    for net in sorted(reach, key=lambda name: reach[name]):
+        rows[net] = max(taps[net].cross_y, floor)
+        floor = rows[net] + _TAP_PITCH
+    return rows
+
+
+def _postroute_fixups(board: pcbnew.BOARD) -> None:
+    """Draw the four shared serial nets deterministically.
+
+    Freerouting reaches U1's and U2's 0.65 mm serial pins unreliably, leaving a
+    different one of these four bare on each run, so anything derived from where
+    it stopped varied run to run. Three skip heuristics were measured and all
+    left the board sometimes clean and sometimes not, because the problem sits
+    upstream of the heuristic. These nets are therefore taken away from the
+    router: its copper is ripped up and the paths drawn from measured pad
+    positions, which is what makes the layout reproducible.
+    """
+    _rip_up(board, SHARED_SERIAL_NETS)
+    plan = _serial_plan(board)
+    tap_rows = _tap_rows(board, plan)
+    for lane in plan:
+        _via(board, lane.net, *lane.pad)
+        nodes: list[tuple[float, float, str]] = [(*lane.pad, "F.Cu")]
+        if abs(lane.lane_x - lane.pad[0]) > 1e-6:
+            nodes.append((lane.lane_x, lane.pad[1] - _JOG_DROP, "F.Cu"))
+        nodes.append((lane.lane_x, lane.cross_y, "F.Cu"))
+        far = _pad_of(board, lane.net, "U2")
+        if far is not None:
+            far_x, far_y = _pad_mm(board, "U2", far)
+            _route_waypoints(
+                board, lane.net,
+                tuple(nodes) + (
+                    (lane.turn_x, lane.cross_y, "F.Cu"),
+                    (lane.turn_x, far_y, "F.Cu"),
+                    (far_x, far_y, "F.Cu"),
+                ),
+                width=_LANE_WIDTH,
+            )
+            _via(board, lane.net, far_x, far_y)
+        tap = _pad_of(board, lane.net, "J1")
+        if tap is None:
+            continue
+        if far is None:
+            _route_waypoints(board, lane.net, tuple(nodes), width=_LANE_WIDTH)
+        j1_x, j1_y = _pad_mm(board, "J1", tap)
+        # Drop further down the lane's own x first, then hop on back copper. The
+        # drop is on the net's own lane so it can never conflict, and it buys the
+        # tap a row of its own: hopping at the lane's foot forced every tap to
+        # share the lane ordering, which is the wrong one for them (see
+        # _tap_rows). The hop itself has to be back copper, because on front
+        # copper it would run the length of every lane between it and its pin.
+        _route_waypoints(
+            board, lane.net,
+            (
+                (lane.lane_x, lane.cross_y, "F.Cu"),
+                (lane.lane_x, tap_rows[lane.net], "F.Cu"),
+                (lane.lane_x, tap_rows[lane.net], "B.Cu"),
+                (j1_x, tap_rows[lane.net], "B.Cu"),
+                (j1_x, j1_y, "B.Cu"),
+            ),
+            width=_LANE_WIDTH, via_diameter=_LANE_VIA, via_drill=_LANE_DRILL,
+        )
+
+
+def _pad_of(board: pcbnew.BOARD, net_name: str, reference: str = "U1") -> str | None:
+    footprint = board.FindFootprintByReference(reference)
+    for pad in footprint.Pads():
+        if pad.GetNetname() == net_name:
+            return str(pad.GetNumber())
+    return None
+
+
+def _via(board: pcbnew.BOARD, net_name: str, x: float, y: float) -> None:
+    via = pcbnew.PCB_VIA(board)
+    via.SetPosition(pcbnew.VECTOR2I_MM(x, y))
+    via.SetWidth(pcbnew.FromMM(_LANE_VIA))
+    via.SetDrill(pcbnew.FromMM(_LANE_DRILL))
+    via.SetNet(board.FindNet(net_name))
+    board.Add(via)
 
 
 def _nearest_net_point(
     board: pcbnew.BOARD, net_name: str, point: tuple[float, float]
 ) -> tuple[float, float]:
-    """Nearest endpoint of the net's existing (router-placed) copper to point."""
+    """Nearest endpoint of the net's routed copper to point.
+
+    Falls back to the net's own pads when the router left it bare. Freerouting
+    skips one of the four serial nets fairly often, and which one varies run to
+    run, so raising here turned an imperfect board into a failed build: the
+    matrix could not be regenerated from code at all. A lane drawn to the
+    counterpart pad is a worse route than one drawn to router copper, but it is
+    a route, and DRC then gets to judge it instead of the script aborting.
+    """
     best: tuple[float, float] | None = None
     best_d = float("inf")
     for track in board.Tracks():
@@ -329,7 +581,18 @@ def _nearest_net_point(
                 best_d = distance
                 best = candidate
     if best is None:
-        raise ValueError(f"no router copper for net {net_name}")
+        for footprint in board.GetFootprints():
+            for pad in footprint.Pads():
+                if pad.GetNetname() != net_name:
+                    continue
+                position = pad.GetPosition()
+                candidate = (pcbnew.ToMM(position.x), pcbnew.ToMM(position.y))
+                distance = (candidate[0] - point[0]) ** 2 + (candidate[1] - point[1]) ** 2
+                if distance < best_d:
+                    best_d = distance
+                    best = candidate
+    if best is None:
+        raise ValueError(f"net {net_name} has neither routed copper nor pads")
     return best
 
 

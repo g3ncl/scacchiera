@@ -30,3 +30,52 @@ TERMINAL_GAP = 3.0
 def line_center(index: int) -> float:
     """Lane center for row or column `index` along its cross axis."""
     return PLAY_ORIGIN + SQUARE_PITCH / 2.0 + SQUARE_PITCH * index
+
+
+# Mounting holes. M2.5 plated and bonded to ground, so the enclosure screws tie
+# the shell to the pour instead of floating.
+#
+# They sit at MOUNTING_HOLE_OFFSET from the board edge, inside the 15 mm left and
+# bottom margins only. Two reasons they are not on all four edges: the play area
+# is offset 15 mm so the far margins are just 5 mm, too narrow for a 5.4 mm pad;
+# and functional/physical.md wants nothing conductive near the sensing plane, so
+# a grounded screw 0.8 mm from the outer antenna loop would load it. The far two
+# edges want an enclosure ledge, or a wider outline, which is a CAD decision.
+MOUNTING_HOLE_SIZE = "2.7mm_M2.5"
+# 8.0 from the edge, not 4.0: the left margin reserves x 0.8 to 4.9 on front
+# copper for the U1 serial verticals, and both margins carry hand-routed
+# register lanes at 0.9 to 1.9. A plated hole is on every layer, so it clears
+# those, and 8.0 still sits inside the 15 mm margin with the pour.
+MOUNTING_HOLE_OFFSET = 8.0
+MOUNTING_HOLE_PAD = 5.4
+# Half-width of a switch cell's span along its margin. _cell_placements puts
+# slot centers from center - 9.5 to center + 10.5, and the parts themselves reach
+# about 2 mm further: a rotated 0603 is 3.4 mm tall, a SOT-23 3.5 mm. Add the
+# hole pad's own radius so a band that survives this filter really does fit one.
+_CELL_SPAN_LOW = 9.5 + 2.5
+_CELL_SPAN_HIGH = 10.5 + 2.5
+
+
+def mounting_hole_positions() -> tuple[tuple[float, float], ...]:
+    """Hole centers: one past each end of the cell array.
+
+    Only two, and this is a constraint rather than a choice. The left and bottom
+    margins are 15 mm wide and already fully committed: hand-routed register
+    lanes at 0.9 to 1.9, a reserved front-copper lane band out to 4.9 for the U1
+    serial verticals, cell part rows at 4.4 and 10.6, and the vertical corridors
+    the router needs to reach all 16 selection lines. A 5.4 mm pad dropped in
+    the middle of that blocks a corridor: placing these at 8.0 mm mid-margin
+    made Freerouting fail outright on SEL_CHAIN.
+
+    So they go past the end of the cell array, where the margin carries only
+    pour. The far two edges are just 5 mm wide (the play area is offset 15 mm)
+    and their outer antenna loop runs 1.6 mm away, so a grounded screw there
+    would load it. Supporting all four edges with screws needs a wider outline,
+    which belongs with the enclosure design.
+    """
+    beyond_cells = line_center(ROW_COUNT - 1) + _CELL_SPAN_HIGH
+    along = (beyond_cells + BOARD_SIZE) / 2.0
+    return (
+        (MOUNTING_HOLE_OFFSET, along),
+        (along, MOUNTING_HOLE_OFFSET),
+    )

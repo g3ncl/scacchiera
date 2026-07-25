@@ -73,6 +73,13 @@ def antenna_line_footprint() -> str:
 
 
 def esp32_footprint() -> str:
+    """ESP32-C6-MINI-1U land pattern.
+
+    Geometry is shared with the C3-MINI-1U this replaced: datasheet v1.5
+    section 10.1 gives the same 13.20 x 12.50 mm body and the same 53-pad
+    layout, and the 1U has no antenna keepout zone. Only the pin functions
+    differ, and those live in parts.esp32_c6_mini_1u.
+    """
     pads: list[str] = []
     for number in range(1, 12):
         y = -3.3 + (number - 1) * 0.8
@@ -93,24 +100,71 @@ def esp32_footprint() -> str:
     (primitives (gr_poly (pts (xy 0.725 0.725) (xy -0.725 0.725) (xy -0.725 -0.125) (xy -0.125 -0.725) (xy 0.725 -0.725)) (width 0) (fill yes))))''')
     for number, x, y in ((50, 5.95, -4.25), (51, 5.95, 5.65), (52, -5.95, 5.65), (53, -5.95, -4.25)):
         pads.append(f'  (pad "{number}" smd rect (at {x:.2f} {y:.2f}) (size 0.7 0.7) (layers "F.Cu" "F.Paste" "F.Mask"))')
-    return '''(footprint "ESP32-C3-MINI-1U"
+    return '''(footprint "ESP32-C6-MINI-1U"
   (version 20240108)
   (generator pcbnew)
   (layer "F.Cu")
-  (descr "Espressif ESP32-C3-MINI-1U recommended land pattern")
-  (tags "ESP32-C3")
+  (descr "Espressif ESP32-C6-MINI-1U recommended land pattern")
+  (tags "ESP32-C6")
   (property "Reference" "REF**" (at 0 -7.05 0) (layer "F.SilkS"))
-  (property "Value" "ESP32-C3-MINI-1U" (at 0 7.85 0) (layer "F.Fab"))
+  (property "Value" "ESP32-C6-MINI-1U" (at 0 7.85 0) (layer "F.Fab"))
   (attr smd)
   (fp_rect (start -6.6 -6.2) (end 6.6 6.3) (stroke (width 0.1) (type default)) (fill none) (layer "F.Fab"))
   (fp_rect (start -6.7 -6.3) (end 6.7 6.4) (stroke (width 0.05) (type default)) (fill none) (layer "F.CrtYd"))
 ''' + "\n".join(pads) + "\n)\n"
 
 
+def sk6805_mini_e_footprint() -> str:
+    """SK6805MINI-E / SK6812MINI-E land pattern, top mounted.
+
+    The -E suffix is the whole reason this part is here: its four legs extend
+    outside the 3.2 x 2.8 mm body, so every joint is reachable with an iron tip
+    where the WS2812C-2020's pads sat underneath it.
+
+    Pad geometry (1.35 x 0.82 mm at +/-2.725, +/-0.75) is taken from KiCad's
+    own LED_SK6812MINI-E land pattern, whose description cites the datasheet for
+    LCSC C5149201, the SK6812MINI-E in this same package. Pin numbering is the
+    rev 02 datasheet's section 5 table: 1 VDD, 2 DOUT, 3 GND, 4 DIN, arranged
+    as its top view shows (VDD top left, DIN top right).
+
+    Two caveats worth knowing before this board is ordered. KiCad ships only a
+    ReverseMount variant, so the corner arrangement here is the top-mount
+    mirror of it and should be checked against a physical part. And the rev 08
+    family datasheet gives a different pinout (1 DIN, 2 VDD, 3 DOUT, 4 VSS) for
+    a 3.5 x 3.7 mm package, so confirm which document the delivered reel
+    matches. See docs/hardware/jlcpcb-sourcing.md.
+    """
+    pad_w, pad_h = 1.35, 0.82
+    dx, dy = 2.725, 0.75
+    # (pad number, x sign, y sign) following the datasheet top view.
+    corners = (("1", -1, -1), ("2", -1, 1), ("3", 1, 1), ("4", 1, -1))
+    pads = [
+        f'  (pad "{number}" smd roundrect (at {dx * sx:.3f} {dy * sy:.3f}) '
+        f'(size {pad_w} {pad_h}) (layers "F.Cu" "F.Paste" "F.Mask") '
+        f'(roundrect_rratio 0.25))'
+        for number, sx, sy in corners
+    ]
+    return '''(footprint "SK6805MINI-E"
+  (version 20240108)
+  (generator pcbnew)
+  (layer "F.Cu")
+  (descr "SK6805MINI-E addressable RGB LED, legs outside the body for iron soldering")
+  (tags "addressable LED RGB NeoPixel")
+  (property "Reference" "REF**" (at 0 -2.6 0) (layer "F.SilkS"))
+  (property "Value" "SK6805MINI-E" (at 0 2.6 0) (layer "F.Fab"))
+  (attr smd)
+  (fp_rect (start -1.6 -1.4) (end 1.6 1.4) (stroke (width 0.1) (type default)) (fill none) (layer "F.Fab"))
+  (fp_rect (start -3.65 -1.87) (end 3.65 1.87) (stroke (width 0.05) (type default)) (fill none) (layer "F.CrtYd"))
+  (fp_line (start -1.7 -1.5) (end 1.7 -1.5) (stroke (width 0.12) (type default)) (layer "F.SilkS"))
+  (fp_circle (center -3.4 -1.6) (end -3.3 -1.6) (stroke (width 0.2) (type default)) (fill none) (layer "F.SilkS"))
+''' + "\n".join(pads) + "\n)\n"
+
+
 def write_footprints(output: Path = OUTPUT) -> None:
     output.mkdir(parents=True, exist_ok=True)
     (output / "Antenna_Line.kicad_mod").write_text(antenna_line_footprint(), encoding="utf-8")
-    (output / "ESP32-C3-MINI-1U.kicad_mod").write_text(esp32_footprint(), encoding="utf-8")
+    (output / "ESP32-C6-MINI-1U.kicad_mod").write_text(esp32_footprint(), encoding="utf-8")
+    (output / "SK6805MINI-E.kicad_mod").write_text(sk6805_mini_e_footprint(), encoding="utf-8")
 
 
 if __name__ == "__main__":

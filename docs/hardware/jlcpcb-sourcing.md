@@ -43,18 +43,34 @@ factory-only parts into the manual column, but it also needs controlled paste de
 inspection. Do not count a part as hand-solderable merely because one prototype can be made to
 work.
 
-| Board | Prefer JLCPCB | Practical hand-solder candidates |
-| --- | --- | --- |
-| Lightbar | none, because the board is below JLCPCB's supported assembly size | all components; use stencil reflow for the LEDs and 0402 capacitors, then iron or hot air for J1 and C18 |
-| Matrix | repeated groups of 16 to 32 small passives, SOD-523 diodes, MOSFETs, and the Basic shift registers | the single seven-pin connector J1 |
-| Hub | QFN, DFN, SON, fine-pitch TSSOP, USB-C, 0402 RF parts, the crystal, and the ESP32 module | JST connectors, switch, low-count 0603/0805/1206 parts, SOT-23 devices, and the two-terminal boost inductor |
+The build plan assumes **an iron only**: no hot air, no stencil, no hot plate. That is what decides
+each route, so "hand" here always means a joint an iron tip can reach.
 
-For the current bound BOM, following the `Hand` recommendations removes 22 board-specific
-Extended lines: two from the lightbar, one from the matrix, and nineteen from the hub. At 2.70 EUR
-per line, that avoids up to 59.40 EUR in feeder-change fees across the three separate designs. It
-leaves fourteen bound Extended lines for factory placement: six on the matrix and eight on the hub.
-This saving assumes the hand-fitted parts are explicitly removed from the assembly order after
-reviewing the generated engineering BOM.
+| Board | Prefer JLCPCB | Hand fitted |
+| --- | --- | --- |
+| Lightbar | none, the board is below JLCPCB's supported assembly size | everything; the LED was changed to a legs-outside-body package so an iron reaches all four joints |
+| Matrix | none, see below | all 165 references |
+| Hub | QFN, SON, SOT563, USB-C, the crystal, and the ESP32 module | JST connectors, switch, SOT-23 devices, inductors, 0402 C0G RF and timing capacitors, and the 0.65 mm TSSOP expander |
+
+Packages classified reflow-only are those with pads under the body or a pitch no tip can reach:
+QFN, SON, SOT563, USB-C, the 3225 crystal, and the ESP32 module. **0402, SOD-523, SOT-23, SOIC and
+0.65 mm TSSOP are deliberately not on that list.** They are tedious but every joint is reachable,
+and the plan hand-fits them, which is what removes their feeder fees.
+
+The lightbar and the matrix are now both fully hand populated, so only the hub goes to assembly.
+Order bare Gerbers for the other two. The hub leaves **seven** Extended lines for factory placement,
+all genuinely reflow-only: J1 (USB-C), U1 (MCP73871 QFN-20), U2 (TPS63802 SON-10), U3 (PN5180
+QFN-40), U4 (ESP32-C6-MINI-1U), U5 (TPS61023 SOT563) and Y1 (the 3225 crystal). Everything else
+Extended on the hub is hand fitted from `hub_hand_bom.csv`.
+
+Moving the 0402 C0G RF capacitors (C33/C36, C34) and the TSSOP expander (U6) to hand removes three
+feeder changes, about 8.10 EUR. That is offset by U4 and Y1 becoming real charged lines now that
+they are bound to stocked parts, where previously they were shortages the factory simply would not
+place. Net feeder count is about the same, but the board comes back complete instead of missing its
+MCU and its reader clock, which was the point.
+
+The quote below predates the U4, Y1, C31/C32, U6 and C33/C34 changes, so re-quote before ordering.
+It is kept as the cost structure, not as a current price.
 
 The 2026-07-25 hub hybrid quote is the current cost baseline. It reports 31 detected BOM rows, 29
 confirmed rows, and shortages on U4 and Y1. Economic PCBA is 53.13 EUR: 7.19 setup, 1.34 stencil,
@@ -62,14 +78,13 @@ confirmed rows, and shortages on U4 and Y1. Economic PCBA is 53.13 EUR: 7.19 set
 18.88 EUR is seven nominal 2.70 EUR feeder changes after quote rounding. J1 was detected with zero
 quantity and no component price, so budget another 2.70 EUR if it becomes a charged placement.
 
-The ESP32-C3-MINI-1U is not an iron-solder part. Its 0.8 mm perimeter pitch is manageable, but the
-large ground pad is split into nine paste areas under the module. It is feasible with a stencil and
-hot plate or reflow oven, then electrical inspection, but JLCPCB or another reflow assembler is the
-lower-risk route for the first hub.
+The ESP32-C6-MINI-1U is not an iron-solder part. Its 0.8 mm perimeter pitch is manageable, but the
+ground pad is an array of 1.45 mm pads under the module that no tip and no syringe can reach.
+JLCPCB places it.
 
-The current 27.12 MHz crystal is only 2.0 by 1.6 mm with four underside pads. It is a hot-air or
-reflow job, not a good manual iron candidate. A 3.2 by 2.5 mm crystal could be easier to rework, but
-changing it also changes the footprint and RF layout and needs a reviewed board revision.
+The crystal is now 3.2 by 2.5 mm (3225) rather than 2.0 by 1.6 mm. Its four pads are still on the
+underside, so it stays a factory placement, but the larger pads are reworkable with hot air if one
+ever has to come off.
 
 ## Selected Basic parts
 
@@ -103,13 +118,27 @@ Every bound code below was checked against live JLCPCB stock above the five-boar
 
 ### Lightbar
 
-- **Assembly route:** bare PCB fabrication only. Populate every component manually. A stencil and
-  hot plate or reflow oven are strongly preferred for the seventeen LEDs and 0402 capacitors.
-- **C18:** C49066, Samsung CL32A107MQVNNNE, is the exact 100 uF, 6.3 V, X5R, 1210 requirement.
+- **Assembly route:** bare PCB fabrication only, populated by hand with an iron. Both JLCPCB BOM
+  and CPL pairs are intentionally empty and `lightbar_hand_bom.csv` holds every fitted part.
+- **C15:** C49066, Samsung CL32A107MQVNNNE, is the exact 100 uF, 6.3 V, X5R, 1210 requirement.
 - **J1:** C225127, CJT A1257WR-S-4P, preserves the 1.25 mm GH-compatible right-angle interface.
-- **D1-D17, WS2812C-2020:** no Basic 2020-package, pin-compatible LED candidate. A different
-  stocked addressable LED changes both optics and the power assumptions. Keep this line unbound
-  and use Pre-Order or Global Sourcing for the exact low-current device.
+- **D1-D14, SK6805MINI-E (C5200774):** replaced the WS2812C-2020, which had no JLCPCB stock and
+  whose pads sit under its body. The `-E` legs extend outside the body so an iron reaches them, and
+  the 5 mA variant keeps the same rail budget as the part it replaced (16 mA per pixel white,
+  224 mA per bar) so no hub change and no firmware brightness cap are needed.
+
+  **Three risks on this line, accepted deliberately.** LCSC returns 404 for C5200774, so there is no
+  authoritative datasheet for the exact ordering code. JLCPCB lists the manufacturer as Normand and
+  the package as SMD3528, matching neither vendor document. And the two OPSCO documents disagree on
+  pinout: rev 02 gives 1 VDD, 2 DOUT, 3 GND, 4 DIN for a 3.2 x 2.8 mm body, rev 08 gives 1 DIN,
+  2 VDD, 3 DOUT, 4 VSS for a 3.5 x 3.7 mm body. The design follows rev 02, because LCSC C5149201's
+  manufacturer and MPN match that document exactly, and the footprint's pad geometry comes from
+  KiCad's `LED_SK6812MINI-E` land pattern which cites the C5149201 datasheet.
+
+  **Confirm the delivered part's pinout and mount side against a physical sample before ordering
+  these boards.** Swapping VDD and GND destroys 14 pixels per bar. The lower-risk alternative is
+  SK6812MINI-E (C5149201), which has a real LCSC listing and a matching datasheet, at the cost of
+  12 mA per channel and therefore a firmware brightness cap.
 
 ### Matrix
 
@@ -121,6 +150,7 @@ DNP tuning capacitors, and power flags are absent from both upload files.
 | --- | --- | --- | --- | ---: | --- |
 | C2/C6 through C62 | CC0603FRNPO9BN221 | C519500 | Extended | 157,735 | 220 pF, 50 V, C0G, 0603, 1%; tighter than the required 2% |
 | C65/C66 and C1/C5 through C61 | CL05B104KO5NNNC | C1525 | Basic | 47,288,853 | exact 100 nF, 16 V, X7R, 0402 part |
+| (all rows above are now hand fitted, not factory placed) | | | | | |
 | D1-D32 | BAR64-02V | C5295579 | Extended | 25,001 | JSCJ PIN diode, SOD-523, validated as described below |
 | J1 | SM07B-GHS-TB(LF)(SN) | C495552 | Extended | 52,619 | exact JST 7-pin right-angle connector |
 | L1/L3 through L31 | SDFL2012S100KTF | C1046 | Basic | 167,255 | 10 uH, 0805, 15 mA rating exceeds the 10.29 mA simulated bias |
@@ -141,11 +171,16 @@ The upload contains six rows labelled Extended, while 13.48 EUR corresponds to f
 2.70 EUR feeder changes after quote rounding. The quote does not identify which row has its feeder
 fee waived, so use the displayed total rather than estimating this order from labels alone.
 
-Selective hand fitting does not remove the 50.47 EUR assembly large-size charge. The meaningful
-choice is therefore binary: pay JLCPCB 82.02 EUR to place the 164 hybrid references, or order the
-bare matrix PCB and populate all 165 purchased references manually, including 32 SOD-523 diodes
-and the repeated 0603/SOT-23 arrays. Splitting the matrix into smaller PCBs could reduce future
-large-size charges, but that is an RF and interconnect redesign rather than a sourcing substitution.
+Selective hand fitting does not remove the 50.47 EUR assembly large-size charge, so the choice was
+binary: pay 82.02 EUR to place the 164 hybrid references, or order the bare PCB and populate all 165
+by hand. **The decision is to hand populate.** Every package on this board is iron-reachable
+(0402, 0603, 0805, SOT-23, SOD-523, SOIC-16, one JST), there is no fine pitch and nothing hidden, so
+the only cost is time, against roughly 82 EUR of PCBA of which 50.47 EUR was pure size penalty.
+
+Splitting the matrix into a dumb antenna board plus a small switch daughterboard would also avoid
+the charge, but it puts connector inductance into all 16 resonant tanks, changes the ground return,
+and forces the antenna board through Milestones 1 to 4 again. Hand populating gets the same saving
+with no RF risk, so the split was rejected.
 
 The stocked JSCJ BAR64-02V replaces the unavailable NXP BAP64-02. Its conservative ngspice model
 uses the JSCJ limits of 2.5 ohm maximum at 10 mA and 0.55 pF maximum at 1 V, 0.35 pF maximum at
@@ -168,16 +203,42 @@ PN5180 C3E package suffix, verified connector families, RF chokes, protection pa
 values, and passives that meet the original dielectric, voltage, and footprint requirements. The
 24.9 kohm R6 replacement differs by only 0.4%, inside the original 25 kohm 1% tolerance.
 
-Three lines remain deliberately unbound:
+U4 and Y1 were the two shortfalls blocking the order, and both are now bound. One line remains
+unbound:
 
 - **L2, 74438357010:** stocked 1 uH candidates reduce saturation-current and DCR margin. Use
-  Pre-Order or Global Sourcing rather than weakening the TPS61023 power stage.
-- **U4, ESP32-C3-MINI-1U-N4X:** the stocked N4 module uses the older chip revision. Do not trade
-  away the N4X revision and its lifecycle advantage merely to obtain public stock. JLCPCB matched
-  exact C49230958 in the hybrid quote, but reported a two-piece shortfall.
-- **Y1, EXS00A-CS01188:** stocked 27.12 MHz candidates found so far use a different footprint.
-  Changing it requires a reviewed layout change, not a purchasing substitution. JLCPCB matched
-  exact C3032297 in the hybrid quote, but reported a six-piece shortfall.
+  Pre-Order or Global Sourcing rather than weakening the TPS61023 power stage. It is hand fitted,
+  so it does not block the assembly order.
+
+Resolved:
+
+- **U4, now ESP32-C6-MINI-1U-N4 (C7558096).** The C3-MINI-1U-N4X was two pieces short. The C6 is
+  newer silicon (2023 against 2021) with 512 KB SRAM against 400 KB, in the identical 13.2 x 12.5 mm
+  footprint, so it cost no layout work beyond the pin map. **Its pin map is not the C3's**: the C6
+  is pin compatible only on power, ground, EN and UART0, and native USB moves to pins 17/18 while
+  pin 21 becomes NC. Caveat: C7558096 is a JLCPCB "New Arrivals" line publishing no stock quantity,
+  and LCSC 404s on the code, so verify stock before payment. Fallback is C5736265
+  (ESP32-C6-MINI-1, PCB antenna, 517 in stock at capture), which costs a copper keepout, 4.1 mm of
+  extra length and a fixed antenna.
+- **Y1, now TXC 7M27100009 (C90919), 27.12 MHz in 3225.** 1,905 in stock at capture. It clears every
+  line of PN5180 Table 142: 10 pF load against 10 pF typ, 60 ohm ESR against 100 ohm max, ± 10 ppm
+  and ± 15 ppm over temperature against ± 100 ppm. Drive level sits at the 100 uW ceiling rather
+  than below it, the one value without margin; R27/R28 are the knob if the assembled board needs it
+  reduced.
+- **C31/C32, now 15 pF (C1548, Basic).** Two equal caps present C/2 plus stray, so 15 pF presents
+  about 10.5 pF against the required 10 pF. The previous 10 pF presented about 8 pF, about 41 ppm of
+  pull, spending most of the ± 100 ppm budget on load error before the crystal's own tolerance.
+  Basic, so the correction was free.
+
+## Antenna, a purchased accessory
+
+The ESP32-C6-MINI-1U has an external antenna connector rather than a PCB antenna, which makes the
+antenna a plug-in part: a bad one costs a euro, not a hub board. It is on no BOM. Buy an adhesive
+FPC 2.4 GHz antenna with a pigtail and record it with the display modules in
+[boards.md](boards.md).
+
+**The connector is MHF3 / W.FL / IPEX3, not U.FL.** A U.FL (MHF1) pigtail is physically larger and
+will not mate. This is the easiest way to waste money on this build.
 
 ## IC upgrade and cost review
 

@@ -22,7 +22,7 @@ from skidl.pin import pin_types
 from hardware.pcb.parts import (
     PinDefinition,
     component,
-    esp32_c3_mini_1u,
+    esp32_c6_mini_1u,
     tps63802,
     two_pin,
     usb_c_receptacle,
@@ -376,7 +376,14 @@ def _build_led_rail(circuit: Circuit, nets: dict[str, Net]) -> Net:
     led_fault = nets["LED_FAULT_N"]
     _connect(led_fault, led_limiter, "4")
     _connect(nets["LED_5V"], led_limiter, "6")
-    led_limit_resistor = _rc(circuit, "R17", "82k 1%", "0603WAF8202T5E")
+    # 39k, not 82k. TPS2553 datasheet section 9.5.1 gives the trip current as
+    #   IOSmin = 25230 / R^1.016, IOSnom = 23950 / R^0.977, IOSmax = 22980 / R^0.94
+    # with R in kohm, valid from 15k to 232k. 82k trips at 287/323/365 mA, below
+    # the 448 mA the two light bars draw (14 pixels x 16 mA x 2 bars), so the
+    # rail would have latched off on any bright cue. 39k gives 609/667/734 mA,
+    # 1.36x the load at the minimum trip. The worst-case 734 mA fault current
+    # reflects to about 1.24 A on 3V3, inside the TPS63802's 2 A.
+    led_limit_resistor = _rc(circuit, "R17", "39k 1%", "0603WAF3902T5E")
     _connect(_pin_net(circuit, "LED_ILIM", led_limiter, "5"), led_limit_resistor, "1")
     _connect(nets["GND"], led_limit_resistor, "2")
     led_fault_pullup = _rc(circuit, "R18", "100k", "0603WAF1003T5E")
@@ -409,23 +416,46 @@ def _build_led_rail(circuit: Circuit, nets: dict[str, Net]) -> Net:
 
 
 def _build_mcu(circuit: Circuit, nets: dict[str, Net]) -> None:
-    mcu = esp32_c3_mini_1u(circuit, "U4")
+    mcu = esp32_c6_mini_1u(circuit, "U4")
     _connect(nets["3V3"], mcu, "3")
     for pin in ("1", "2", "11", "14", *tuple(str(number) for number in range(36, 54))):
         _connect(nets["GND"], mcu, pin)
-    # IO2 (pin 5) is a boot strapping pin that must read high at reset, so it
-    # carries the pulled-up chip select rather than the pulled-down LED data
-    # line, which lives on IO0 (pin 12). Same reviewed map as the previous hub,
-    # with the freed I2C-expander lines picking up the new slow signals.
+    # Datasheet v1.5 Table 3-1 pin numbers, not the C3 map: native USB is
+    # IO12/IO13 on pins 17/18, so reusing the C3 map would put SCLK on USB_D+
+    # and the reader's chip select on a no-connect.
+    #
+    # SPI and both chip selects sit on pins 24 to 29, the module's bottom-right
+    # and right edges, because the reader is placed to the right of the module.
+    # The FSPI-native pins (IO2, IO6, IO7) are all on the left and bottom-left,
+    # so aligning to them put MISO the long way round the module and the router
+    # could not close it. At a display's and a reader's few MHz the GPIO matrix
+    # costs nothing, so proximity wins.
+    #
+    # I2C keeps pins 22/23 because IO8 and IO9 are the C6 boot strapping pins
+    # and the 4.7k bus pullups are what hold them high for SPI boot (Table 4-3),
+    # which also makes IO9 the download-mode recovery pin.
     mcu_connections = {
-        "5": "OLED2_CS_N", "6": "NFC_BUSY", "12": "LED_DATA", "13": "NFC_IRQ",
-        "16": "OLED1_CS_N", "18": "SCLK", "19": "MOSI", "20": "MISO", "21": "NFC_CS_N",
-        "22": "I2C_SCL", "23": "I2C_SDA", "26": "USB_D-", "27": "USB_D+",
-        "30": "UART_RX", "31": "UART_TX",
+        "6": "NFC_BUSY", "12": "LED_DATA", "13": "NFC_IRQ",
+        "17": "USB_D-", "18": "USB_D+", "22": "I2C_SCL", "23": "I2C_SDA",
+        "24": "OLED2_CS_N", "25": "SCLK", "26": "MOSI", "27": "MISO",
+        "28": "NFC_CS_N", "29": "OLED1_CS_N", "30": "UART_RX", "31": "UART_TX",
     }
     for pin, name in mcu_connections.items():
         _connect(nets[name], mcu, pin)
-    _no_connect(circuit, mcu, ("4", "7", "9", "10", "15", "17", "24", "25", "28", "29", "32", "33", "34", "35"))
+    # Pins 4, 7, 21 and 32 to 35 are datasheet NC; 5, 9, 10, 15, 16, 19 and 20
+    # are real GPIOs this design does not use. IO15 (pin 20) stays unused on
+    # purpose because it is the JTAG-source strapping pin.
+    _no_connect(circuit, mcu, ("4", "5", "7", "9", "10", "15", "16", "19", "20", "21", "32", "33", "34", "35"))
+    # Espressif requires bulk plus high-frequency decoupling at the module's
+    # 3V3 pin. The regulator's own output caps are centimetres away, and WiFi
+    # TX bursts brown the module out without local charge.
+    for ref, value, mpn, footprint in (
+        ("C27", "10u 10V", "CL21A106KAYNNNE", "Capacitor_SMD:C_0805_2012Metric"),
+        ("C28", "100n", "CL05B104KO5NNNC", "Capacitor_SMD:C_0402_1005Metric"),
+    ):
+        local_cap = two_pin(circuit, ref, value, footprint, mpn=mpn, unit_cost_eur=0.05)
+        _connect(nets["3V3"], local_cap, "1")
+        _connect(nets["GND"], local_cap, "2")
     en_pull = _rc(circuit, "R20", "10k", "0603WAF1002T5E")
     mcu_en = _pin_net(circuit, "MCU_EN", mcu, "8")
     _connect(nets["3V3"], en_pull, "1")
@@ -440,11 +470,30 @@ def _build_mcu(circuit: Circuit, nets: dict[str, Net]) -> None:
         pullup = _rc(circuit, ref, "4.7k", "0603WAF4701T5E")
         _connect(nets["3V3"], pullup, "1")
         _connect(nets[name], pullup, "2")
-    # Holds the strapping pin high at reset and the OLED deselected until
-    # firmware drives it.
+    # IO18 is not a C6 strapping pin, so this is no longer a boot requirement.
+    # It stays because the OLED must read deselected until firmware drives it.
     strap_pullup = _rc(circuit, "R23", "10k", "0603WAF1002T5E")
     _connect(nets["3V3"], strap_pullup, "1")
     _connect(nets["OLED2_CS_N"], strap_pullup, "2")
+
+    # Recovery pads. Flashing is normally USB-Serial-JTAG over USB-C, but the
+    # only button sits behind the polled expander and cannot hold IO9 low at
+    # reset. Shorting TP1 to TP3 and pulsing TP2 forces joint download boot
+    # (datasheet Table 4-3) if firmware ever breaks the USB peripheral.
+    for ref, net_name in (("TP1", "I2C_SDA"), ("TP2", "MCU_EN"), ("TP3", "GND")):
+        pad = Part(
+            "Connector_Generic", "Conn_01x01", tool="kicad9", circuit=circuit,
+            ref=ref, tag=ref,
+        )
+        pad.value = "RECOVERY"
+        pad.footprint = "TestPoint:TestPoint_Pad_D1.0mm"
+        pad.fitted = "DNP"
+        pad.jlc_library = "Unbound"
+        pad.manf_num = ""
+        pad.lcsc_part = ""
+        pad.description = "Bare copper recovery pad, not a purchased part"
+        pad.unit_cost_eur = 0.0
+        _connect(mcu_en if net_name == "MCU_EN" else nets[net_name], pad, "1")
 
     expander = _io_expander(circuit)
     _no_connect(circuit, expander, ("1", "18", "19", "20"))
@@ -522,15 +571,21 @@ def _build_reader(circuit: Circuit, nets: dict[str, Net]) -> None:
     _connect(nets["3V3"], reader_bulk, "1")
     _connect(nets["GND"], reader_bulk, "2")
 
+    # TXC 7M27100009 against PN5180 Table 142 (crystal requirements for
+    # ISO/IEC14443 compliant operation): 10 pF load against the required 10 pF
+    # typ, 60 ohm ESR against 100 ohm max, +/-10 ppm tolerance and +/-15 ppm
+    # stability against +/-100 ppm, 100 uW typical drive against the 100 uW
+    # ceiling. The 3225 package replaced a 2016 part that JLCPCB could not
+    # stock, and its larger pads are also reworkable by hand.
     crystal = component(
         circuit,
         "Y1",
-        "27.12MHz EXS00A-CS01188",
-        "Crystal:Crystal_SMD_2016-4Pin_2.0x1.6mm",
+        "27.12MHz 7M27100009",
+        "Crystal:Crystal_SMD_3225-4Pin_3.2x2.5mm",
         tuple(PinDefinition(str(index), name) for index, name in enumerate(("XTI", "GND", "XTO", "GND"), start=1)),
-        mpn="EXS00A-CS01188",
+        mpn="7M27100009",
         description="PN5180 27.12 MHz reference crystal",
-        unit_cost_eur=0.35,
+        unit_cost_eur=0.17,
     )
     clk1 = _pin_net(circuit, "NFC_CLK1", reader, "36")
     clk2 = _pin_net(circuit, "NFC_CLK2", reader, "37")
@@ -544,8 +599,13 @@ def _build_reader(circuit: Circuit, nets: dict[str, Net]) -> None:
     _connect(xto, crystal, "3")
     for pin in ("2", "4"):
         _connect(nets["GND"], crystal, pin)
+    # Two equal caps present CL = C/2 + Cstray to the crystal. The part wants
+    # 10 pF, and with 2 to 4 pF of trace and CLK pin stray, 15 pF lands at
+    # about 10.5 pF, roughly 10 ppm of pull. The previous 10 pF pair presented
+    # only 8 pF, which pulled about 41 ppm and spent most of the PN5180's
+    # +/-100 ppm budget before the crystal's own tolerance was counted.
     for ref, crystal_net in (("C31", xti), ("C32", xto)):
-        load_capacitor = _rc(circuit, ref, "10p C0G", "CL05C100JB5NNNC")
+        load_capacitor = _rc(circuit, ref, "15p C0G", "0402CG150J500NT")
         _connect(crystal_net, load_capacitor, "1")
         _connect(nets["GND"], load_capacitor, "2")
 

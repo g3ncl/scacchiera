@@ -15,9 +15,16 @@ sits outside the display cradle so it can be reached with a finger.
 
 ## Light bars
 
-Two diffused rail bars, one per player, each a 120 x 8.5 mm custom PCB with 17 low-current LEDs behind
+Two diffused rail bars, one per player, each a 120 x 8.5 mm custom PCB with 14 low-current LEDs behind
 a replaceable diffuser. They show brief feedback: move accepted, error, result, WiFi state, and
 countdowns. All components are on the front side, behind the diffuser.
+
+The count was 17 until 2026-07-25. It is 14 because the bars are populated by hand (JLCPCB will not
+assemble a 120 x 8.5 mm outline), which requires an LED whose pads are reachable with an iron rather
+than hidden under its body. Such a package is wider: the chosen part's courtyard is 7.30 mm and the
+4-pin JST GH takes 9.46 mm of exclusive length, leaving room for 14. The diffuser standoff should be
+around half the 7.30 mm pitch so the bar still reads as a bar rather than as discrete dots. See
+[hardware/lightbar.md](../hardware/lightbar.md).
 
 ## Button
 

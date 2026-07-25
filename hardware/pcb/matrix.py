@@ -11,14 +11,14 @@ previous 64-antenna design (its differential twin needed two of everything
 because the reader drove both antenna ends; a line loop returns to ground, so
 one side suffices):
 
-- a series BAP64-02 between bus and tank. Forward biased (about 10 mA) it is a
-  3 ohm switch; reverse it is sub-pF, so 15 deselected cells leave the bus tank
+- a series BAR64-02V between bus and tank. Forward biased (about 10 mA) it is a
+  2.5 ohm switch (datasheet rD max at 10 mA, 100 MHz); reverse it is sub-pF, so 15 deselected cells leave the bus tank
   in band where an analog switch's parallel off-capacitance would collapse it.
 - a shunt BSS123 grounding the tank when deselected, raising off/on suppression
   far past what series isolation alone gives. Gate on SEL_N directly: high
   (deselected) shunts, low (selected) releases. No static current.
 - bias steering: a high-side BSS84 from the 3V3 rail through R_set and an
-  isolation BAP64-02 into the bias choke. The forward current returns through
+  isolation BAR64-02V into the bias choke. The forward current returns through
   the loop antenna's own ground end, so a single leg biases the cell, and the
   isolation diode's off state keeps the steering parts off the bus when
   deselected.
