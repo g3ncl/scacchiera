@@ -21,6 +21,7 @@ from hardware.pcb.ses_import import apply_session
 
 
 OUTPUT = Path(__file__).parent / "generated" / "hub"
+REVIEWED_SESSION = Path(__file__).parent / "routes" / "hub.ses"
 FREEROUTING_JAR = os.environ.get("FREEROUTING_JAR", "/tmp/freerouting-2.2.4.jar")
 FREEROUTING_PASSES = int(os.environ.get("FREEROUTING_PASSES", "40"))
 # Longest straight bridge the post-route closer may lay. See _close_pad.
@@ -102,6 +103,11 @@ def _placements() -> dict[str, Placement]:
         "J8": Placement(Position(74.0, 3.5), rotation=180.0),
         "J9": Placement(Position(86.0, 3.5), rotation=180.0),
         "J10": Placement(Position(96.0, 3.5), rotation=180.0),
+        # TP1 and TP2 sit directly on reviewed route waypoints. This makes the
+        # recovery pads accessible without adding long, obstacle-blind stubs.
+        "TP1": Placement(Position(62.16138, 11.31167945), back=True),
+        "TP2": Placement(Position(55.9304, 10.1021), back=True),
+        "TP3": Placement(Position(45.0, 6.0), back=True),
     }
     # Grid pitches respect the courtyards: a rotated 0603 needs 3.4 mm between
     # rows, an 0805 3.8 mm.
@@ -141,10 +147,6 @@ def generate_board(output: Path = OUTPUT / "hub.kicad_pcb") -> None:
     builder.board.GetDesignSettings().m_HoleClearance = pcbnew.FromMM(0.15)
     builder.add_outline(BOARD_WIDTH, BOARD_HEIGHT)
     placements = _placements()
-    for component in netlist.components:
-        placement = placements.get(component.reference)
-        if placement is not None:
-            builder.add_component(component, placement)
     inset = MOUNTING_HOLE_INSET
     corners = (
         (inset, inset),
@@ -152,32 +154,99 @@ def generate_board(output: Path = OUTPUT / "hub.kicad_pcb") -> None:
         (inset, BOARD_HEIGHT - inset),
         (BOARD_WIDTH - inset, BOARD_HEIGHT - inset),
     )
-    for index, (x, y) in enumerate(corners, start=1):
-        builder.add_mounting_hole(
-            "GND", Position(x, y), f"H{index}", size=MOUNTING_HOLE_SIZE
-        )
+    placements.update(
+        {
+            f"H{index}": Placement(Position(x, y))
+            for index, (x, y) in enumerate(corners, start=1)
+        }
+    )
+    for component in netlist.components:
+        placement = placements.get(component.reference)
+        if placement is not None:
+            builder.add_component(component, placement)
+    shield_pads = sorted(builder.pad_positions("J1", "SH"), key=lambda point: (point.y, point.x))
+    top_left, top_right, bottom_left, bottom_right = shield_pads
+    builder.add_track(
+        "USB_SHIELD",
+        (top_left, Position(1.5, 17.3), Position(1.5, 28.7)),
+        0.4,
+        pcbnew.B_Cu,
+    )
+    builder.add_track(
+        "USB_SHIELD",
+        (top_right, Position(6.5, 17.3), Position(1.5, 17.3)),
+        0.4,
+        pcbnew.B_Cu,
+    )
+    builder.add_track(
+        "USB_SHIELD",
+        (bottom_left, Position(1.5, 28.7)),
+        0.4,
+        pcbnew.B_Cu,
+    )
+    builder.add_track(
+        "USB_SHIELD",
+        (bottom_right, Position(8.0, 28.7), Position(1.5, 28.7)),
+        0.4,
+        pcbnew.B_Cu,
+    )
+    builder.add_track(
+        "USB_SHIELD",
+        (Position(1.5, 17.3), Position(9.0, 15.0)),
+        0.4,
+        pcbnew.B_Cu,
+    )
+    builder.add_via("USB_SHIELD", Position(9.0, 15.0))
+    builder.add_track(
+        "USB_SHIELD",
+        (Position(9.0, 15.0), Position(10.5, 15.0)),
+        0.4,
+    )
+    builder.add_via("USB_SHIELD", Position(10.5, 15.0))
+    builder.add_track(
+        "USB_SHIELD",
+        (
+            Position(10.5, 15.0),
+            Position(15.5, 15.0),
+            Position(15.5, 18.0),
+            Position(17.2231, 18.0),
+        ),
+        0.4,
+        pcbnew.B_Cu,
+    )
+    builder.add_via("GND", Position(45.0, 6.0))
     builder.save(output)
 
 
-def route_board(board_path: Path = OUTPUT / "hub.kicad_pcb") -> None:
+def route_board(
+    board_path: Path = OUTPUT / "hub.kicad_pcb",
+    *,
+    reroute: bool = False,
+) -> None:
     dsn = board_path.with_suffix(".dsn")
-    ses = board_path.with_suffix(".ses")
-    board = pcbnew.LoadBoard(str(board_path))
-    if not pcbnew.ExportSpecctraDSN(board, str(dsn)):
-        raise OSError(f"Specctra DSN export failed for {board_path}")
-    if not Path(FREEROUTING_JAR).is_file():
-        raise FileNotFoundError(
-            f"Freerouting jar not found at {FREEROUTING_JAR}; set FREEROUTING_JAR"
+    session_path = REVIEWED_SESSION
+    if reroute:
+        session_path = board_path.with_suffix(".ses")
+        board = pcbnew.LoadBoard(str(board_path))
+        if not pcbnew.ExportSpecctraDSN(board, str(dsn)):
+            raise OSError(f"Specctra DSN export failed for {board_path}")
+        if not Path(FREEROUTING_JAR).is_file():
+            raise FileNotFoundError(
+                f"Freerouting jar not found at {FREEROUTING_JAR}; set FREEROUTING_JAR"
+            )
+        subprocess.run(
+            (
+                "java", "-Djava.awt.headless=true", "-jar", FREEROUTING_JAR,
+                "-de", str(dsn), "-do", str(session_path), "-mp", str(FREEROUTING_PASSES),
+            ),
+            check=True,
         )
-    subprocess.run(
-        (
-            "java", "-Djava.awt.headless=true", "-jar", FREEROUTING_JAR,
-            "-de", str(dsn), "-do", str(ses), "-mp", str(FREEROUTING_PASSES),
-        ),
-        check=True,
-    )
     board = pcbnew.LoadBoard(str(board_path))
-    apply_session(board, ses.read_text(encoding="utf-8"))
+    apply_session(
+        board,
+        session_path.read_text(encoding="utf-8"),
+        net_aliases={"NFC_VMID_TAP": "NFC_VMID"},
+    )
     _postroute_fixups(board)
     if not pcbnew.SaveBoard(str(board_path), board):
         raise OSError(f"could not save routed board {board_path}")
@@ -327,5 +396,5 @@ def _finalize_ground(board_path: Path) -> None:
 
 if __name__ == "__main__":
     generate_board()
-    if "--route" in sys.argv:
-        route_board()
+    if "--route" in sys.argv or "--reroute" in sys.argv:
+        route_board(reroute="--reroute" in sys.argv)

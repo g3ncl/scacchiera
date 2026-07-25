@@ -42,7 +42,14 @@ scoped test-article order. V0 through V9 permit a final-board order.
   library and rating audits, declared model treatment, and no open document conflict. The audit
   replaced the lightbar LED and both matrix MOSFET selections rather than waiving conflicts.
   Evidence: 6 component-proof tests and 4 matrix vendor-model tests passed on 2026-07-25.
-- [ ] V2 connectivity and static electrical checks
+- [x] V2 connectivity and static electrical checks: clean generation runs full SKiDL and KiCad ERC,
+  imports reviewed deterministic routing sessions, and runs PCB DRC with schematic parity on all
+  three boards. [verification/v2-static.yaml](verification/v2-static.yaml) records the four
+  reviewed generated-schematic warning classes, every datasheet-traced no-connect, and the zero
+  finding board results. Four focused tests cover both ends of every cable, exact USB-C pins,
+  startup pulls, recovery pads, enable/reset nets, and exposed pads. Evidence: `make check` passed
+  with 43 tests, mypy clean, and all boards at 0 violations, 0 unconnected, and 0 parity issues on
+  2026-07-26.
 - [ ] V3 power, analog, timing, and fault simulation
 - [ ] V4 layout-derived electromagnetic validation
 - [ ] V5 firmware host verification
@@ -124,14 +131,13 @@ DoD: the layout is generated from code, DRC is clean, and it fits the board's en
   2026-07-25 around the wider LED: back-copper ground pour instead of a routed bus, and the 5 V
   bus below the connector's mounting pads, the only pad-free full-length band left.
 - [x] Matrix board layout: `hardware/pcb/matrix_layout.py` generates placement, antenna copper,
-  and both-face ground pours; Freerouting autoroute (`make pcb-matrix-route`) plus a
-  deterministic U1-serial escape (front-copper lanes with 0.4 mm vias threading the register's
-  0.65 mm pitch, connected to the router's copper). `make pcb-matrix-drc` is clean: 0 violations,
-  0 unconnected.
+  and both-face ground pours. The reviewed route session excludes four deterministic serial nets,
+  and the Q24 rail escape is deterministic as well. `make pcb-matrix-drc` is reproducibly clean:
+  0 violations, 0 unconnected, and 0 schematic parity issues.
 - [x] Hub board layout: `hardware/pcb/hub_layout.py` generates placement and both-face ground
-  pours; Freerouting autoroute (`make pcb-hub-route`) plus an adaptive post-route closer that
-  bridges any pad the router leaves open to its net's nearest copper (surviving the router's
-  run-to-run variation). `make pcb-hub-drc` is clean: 0 violations, 0 unconnected.
+  pours. The reviewed route session is completed by deterministic USB shield, recovery-pad, and
+  ground stitching geometry. `make pcb-hub-drc` is reproducibly clean: 0 violations,
+  0 unconnected, and 0 schematic parity issues.
 
 ## Legacy definition of done for design generation
 
@@ -142,57 +148,12 @@ in [simulation-workflow.md](simulation-workflow.md).
 
 ## Status
 
-Revised 2026-07-25. Three parts were rebound after JLCPCB could not fill the hub order (U4 and Y1
-were short) and after the decision to hand-populate the lightbar and matrix rather than pay the
-large-size assembly charge. `Vault/Scacchiera/Datasheets/` and the Datasheets rule in `CLAUDE.md`
-came out of the same work: the C6 pin map, the crystal's load capacitance and the LED's drive
-current all came from datasheets that contradicted the catalog listings. Full suite passes at 28
-tests; lightbar, matrix and hub DRC are all clean.
+Revised 2026-07-26. V0, V1, and V2 pass. All three boards regenerate from reviewed route sessions
+and clear ERC, PCB DRC, unconnected-item, and schematic-parity checks. Fresh Freerouting output is
+kept behind the explicit `pcb-*-reroute` targets so an unreviewed route cannot silently replace the
+passing build. The 10 uH matrix choke's ambiguous 15 mA datasheet rating remains a V3 corner and
+fault-model concern, not a waived check. U4 still requires controlled Global Sourcing for factory
+placement because it is not hand solderable.
 
-Known defects as of 2026-07-25, before the workflow starts:
-
-- **The matrix layout builds every time now, but is not reproducibly DRC clean.** Three consecutive
-  `make pcb-matrix-route && make pcb-matrix-drc` runs gave 0 violations / 0 unconnected, then 1 / 1,
-  then 2 / 3. It no longer crashes (see below), so V2's "netlist and routed board agree" is
-  reachable by re-running, but the board is not yet deterministic.
-
-  Root cause is understood and is architectural, not a tuning problem. The four shared serial nets
-  (SEL_SER, SEL_SRCLK, SEL_RCLK, SEL_CHAIN) are routed by Freerouting, which reaches their 0.65 mm
-  register pads unreliably, and `_postroute_fixups` then patches whatever it left by drawing a lane
-  *relative to where the router happened to stop*. Two better skip rules were measured (any-peer and
-  all-peer connectivity tests) and both came out worse, which is the evidence that no skip rule fixes
-  it: the patch is downstream of a nondeterministic input.
-
-  **The fix is to take those four nets away from the router entirely**: after importing the session,
-  rip up their copper and draw all four deterministically through reserved front-copper bands, the
-  way the left-hand U1 lane band is already reserved. That needs a bottom-margin band worked out
-  against the column antennas' through-hole terminals, which sit in the same margin. Scoped, not done.
-- **The hub layout is not reproducibly clean.** Freerouting leaves 1 to 2 pads open, varying run to
-  run. The post-route closer's bridge ceiling was cut from 14 mm to 2.5 mm because a 9.26 mm bridge
-  across the MCU module was producing ten DRC violations on its own, so open pads are now reported
-  rather than shorted over.
-- ~~Matrix U1 sits 0.025 mm from the board edge~~ **fixed**. It was worse than the DRC report
-  suggested: U1's pads 8 and 9 sat at x = -1.245, entirely *off* the board, and its silkscreen
-  overhung the edge. Pad 9 is SEL_CHAIN, which is why routing failed on that net specifically, so
-  this one placement bug produced both reported defects. U1 is now seated by measuring its own
-  courtyard (`_seat_inside_left_edge`) rather than against a hardcoded 3.5 mm, so it cannot recur if
-  the footprint or rotation changes, and C65 follows it. Four dead constants that described an
-  unimplemented deterministic route (`_LEFT_X`, `_BOTTOM_Y`, `_U1_FAN_Y`, `_U2_TURN_X`) were removed,
-  and the reserved lane band now derives from the real serial-pad positions.
-
-- ~~`make pcb-matrix-route` aborts~~ **fixed**. `_nearest_net_point` raised
-  `no router copper for net <X>` whenever Freerouting left one of the four serial nets bare, and
-  which net that was varied run to run, so the matrix could not be regenerated from code at all. It
-  now falls back to the net's own pads. A lane drawn to the counterpart pad is a worse route than one
-  drawn to router copper, but it is a route, and DRC judges it instead of the build dying.
-- **The 10 uH matrix choke has no margin evidence.** Its datasheet gives one current number, 15 mA,
-  without saying whether that is a heating or a saturation limit, and the design biases it at
-  10.326 mA.
-
-The old U4 and lightbar sourcing risks are closed by exact stocked DigiKey order codes. U4 still
-requires controlled Global Sourcing for factory placement because it is not hand solderable.
-
-The light bar, matrix, and hub have each cleared the legacy M2 through M4 design-generation gates:
-schematic, nominal SPICE checks, and PCB layout. They have not been assessed against V0 through V9,
-so none is final or authorized for a test-article or final-board order. Firmware and the companion
-app have not started, which also blocks V5 and V6.
+No board is authorized for a test-article order until V3 through V7 pass. Firmware and the companion
+app have not started, so V5 and V6 remain open.

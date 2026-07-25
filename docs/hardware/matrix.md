@@ -44,12 +44,12 @@ The reader and its matching live on the hub; this board is copper and switching 
 300 x 300 mm, 2 layers, 1.0 mm thick. The play area sits 15 mm off the left and bottom edges;
 those margins carry every component (all on the back, keeping the front face flat for the
 controlled air gap), the connector, and both-face ground pours. Components are placed
-deterministically in code; track routing is autorouted by Freerouting from the exported Specctra
-DSN (`make pcb-matrix-route`) and verified by KiCad DRC (`make pcb-matrix-drc`), 0 violations and
-0 unconnected. The two 74HC595 registers sit apart, each central to its bank, so all 16 selection
-lines route automatically; the shared serial lines they exchange with the corner connector escape
-U1 down front-copper lanes (0.4 mm vias thread the register's 0.65 mm pitch) that connect to the
-router's copper, and the ground pours are added and filled after routing.
+deterministically in code. Normal builds import the reviewed route in
+`hardware/pcb/routes/matrix.ses`; `make pcb-matrix-reroute` explicitly produces a new Freerouting
+candidate. KiCad DRC with schematic parity (`make pcb-matrix-drc`) reports 0 violations,
+0 unconnected, and 0 parity issues. The four shared serial nets and Q24 power escape are routed
+deterministically before the reviewed session is imported, so their 0.65 mm register escapes do
+not depend on autorouter variation. Ground pours are added and filled after routing.
 
 ## Mounting
 

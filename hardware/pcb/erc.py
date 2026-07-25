@@ -10,6 +10,22 @@ _UNCONNECTED = re.compile(
     r"\[pin_not_connected\]:.*?@\(([-\d.]+) mm, ([-\d.]+) mm\): Symbol (\S+) Pin (\S+)",
     re.DOTALL,
 )
+_ISSUE = re.compile(r"^\[([^]]+)\]:", re.MULTILINE)
+_SEVERITY = re.compile(r"^    ; (error|warning)$", re.MULTILINE)
+
+# SKiDL embeds modified generic symbols, and KiCad's standalone CLI does not
+# load project library tables without a native project file. Its placement also
+# uses valid electrical endpoints between display-grid points. These warnings
+# remain visible in the report; V1 audits the libraries and PCB schematic
+# parity verifies the resulting links and connectivity.
+REVIEWED_WARNINGS = frozenset(
+    {
+        "endpoint_off_grid",
+        "footprint_link_issues",
+        "lib_symbol_issues",
+        "lib_symbol_mismatch",
+    }
+)
 
 
 def add_reviewed_no_connects(schematic: Path, report: Path, expected: frozenset[str]) -> None:
@@ -35,15 +51,13 @@ def add_reviewed_no_connects(schematic: Path, report: Path, expected: frozenset[
     schematic.write_text(updated, encoding="utf-8")
 
 
-def run_error_erc(schematic: Path, report: Path) -> None:
-    """Run KiCad ERC and fail generation if any error remains."""
+def run_reviewed_erc(schematic: Path, report: Path) -> None:
+    """Run full KiCad ERC and reject errors or unreviewed warning classes."""
     result = subprocess.run(
         (
             "kicad-cli",
             "sch",
             "erc",
-            "--severity-error",
-            "--exit-code-violations",
             "-o",
             str(report),
             str(schematic),
@@ -51,6 +65,16 @@ def run_error_erc(schematic: Path, report: Path) -> None:
         check=False,
         capture_output=True,
         text=True,
+        cwd=schematic.parent,
     )
-    if result.returncode != 0:
+    if result.returncode not in {0, 5}:
         raise RuntimeError(f"KiCad ERC failed for {schematic}:\n{result.stdout}\n{result.stderr}")
+    report_text = report.read_text(encoding="utf-8")
+    severities = frozenset(_SEVERITY.findall(report_text))
+    issue_types = frozenset(_ISSUE.findall(report_text))
+    unreviewed = issue_types - REVIEWED_WARNINGS
+    if "error" in severities or unreviewed:
+        raise RuntimeError(
+            f"KiCad ERC has errors or unreviewed warnings for {schematic}: "
+            f"{sorted(unreviewed)}"
+        )

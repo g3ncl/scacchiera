@@ -30,7 +30,12 @@ def _point(x_token: SExpr, y_token: SExpr) -> pcbnew.VECTOR2I:
     return pcbnew.VECTOR2I_MM(_mm(x_token), -_mm(y_token))
 
 
-def apply_session(board: pcbnew.BOARD, session_text: str) -> int:
+def apply_session(
+    board: pcbnew.BOARD,
+    session_text: str,
+    excluded_nets: frozenset[str] = frozenset(),
+    net_aliases: dict[str, str] | None = None,
+) -> int:
     """Add every routed wire segment and via from the session; returns the
     number of items added."""
     root = parse_sexpr(session_text)
@@ -58,6 +63,10 @@ def apply_session(board: pcbnew.BOARD, session_text: str) -> int:
         net_name = net_expr[1]
         if not isinstance(net_name, str):
             raise ValueError(f"unnamed net in session: {net_expr[:2]}")
+        if net_name in excluded_nets:
+            continue
+        if net_aliases is not None:
+            net_name = net_aliases.get(net_name, net_name)
         net = board.FindNet(net_name)
         if net is None:
             raise ValueError(f"session net not on board: {net_name}")

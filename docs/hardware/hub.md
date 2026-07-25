@@ -74,10 +74,12 @@ connectors chained through LED_RETURN, a 4-pin UART service connector, and the 2
 
 110 x 46 mm, 2 layers, in the service volume under one player rail. Components are placed
 deterministically by functional zone (USB and charging, rails, MCU and expander, reader and its
-front end, edge connectors); track routing is autorouted by Freerouting (`make pcb-hub-route`)
-with both-face ground pours added afterward. Freerouting leaves a few pads open in the dense
-PN5180 QFN and USB-C areas that vary run to run, so a post-route step bridges any still-open pad
-to its net's nearest routed copper. `make pcb-hub-drc` is clean: 0 violations, 0 unconnected.
+front end, edge connectors). Normal builds import the reviewed route in
+`hardware/pcb/routes/hub.ses`; `make pcb-hub-reroute` is the explicit command for producing a new
+Freerouting candidate. The USB shield tabs and recovery pads have deterministic routes, the
+TPS63802 and PN5180 exposed pads are grounded, and both-face ground pours are filled afterward.
+`make pcb-hub-drc` checks schematic parity and is clean: 0 violations, 0 unconnected, 0 parity
+issues.
 
 ## Mounting
 

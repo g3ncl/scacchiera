@@ -31,7 +31,7 @@ the cell ranges.
 from skidl import Circuit, Net, Part
 
 from hardware.pcb.matrix_geometry import LINE_COUNT
-from hardware.pcb.parts import PinDefinition, component, diode, mosfet, two_pin
+from hardware.pcb.parts import PinDefinition, component, diode, mosfet, mounting_hole, two_pin
 
 
 COIL_FOOTPRINT = "Chessboard:Antenna_Line"
@@ -277,4 +277,6 @@ def build_matrix() -> Circuit:
     # their orientation, the schematic only fixes the order.
     for index in range(LINE_COUNT):
         matrix_cell(circuit, index, rf_bus, gnd, v33, sel_lines[index])
+    for index in range(1, 3):
+        mounting_hole(circuit, f"H{index}", gnd)
     return circuit

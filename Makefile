@@ -3,6 +3,7 @@ XDG_DATA_HOME := $(CURDIR)/.cache/data
 XDG_CACHE_HOME := $(CURDIR)/.cache/cache
 XDG_CONFIG_HOME := $(CURDIR)/.cache/config
 MPLCONFIGDIR := $(CURDIR)/.cache/matplotlib
+PYTHONHASHSEED := 0
 KICAD9_SYMBOL_DIR := $(HOME)/.local/share/flatpak/runtime/org.kicad.KiCad.Library.Symbols/x86_64/stable/active/files/symbols
 KICAD_FOOTPRINT_DIR := $(HOME)/.local/share/flatpak/runtime/org.kicad.KiCad.Library.Footprints/x86_64/stable/active/files/footprints
 KICAD_CLI := /usr/bin/kicad-cli
@@ -11,20 +12,18 @@ export XDG_DATA_HOME
 export XDG_CACHE_HOME
 export XDG_CONFIG_HOME
 export MPLCONFIGDIR
+export PYTHONHASHSEED
 export KICAD9_SYMBOL_DIR
 export KICAD_FOOTPRINT_DIR
 
 .PHONY: check footprints schematic-lightbar schematic-matrix schematic-hub \
 	pcb-lightbar pcb-lightbar-drc pcb-lightbar-fab \
-	pcb-matrix pcb-matrix-route pcb-matrix-drc pcb-matrix-fab \
-	pcb-hub pcb-hub-route pcb-hub-drc pcb-hub-fab pcb-fab clean
+	pcb-matrix pcb-matrix-route pcb-matrix-reroute pcb-matrix-drc pcb-matrix-fab \
+	pcb-hub pcb-hub-route pcb-hub-reroute pcb-hub-drc pcb-hub-fab pcb-fab clean
 
-check: schematic-lightbar schematic-matrix schematic-hub pcb-lightbar-drc
+check: pcb-lightbar-drc pcb-matrix-drc pcb-hub-drc
 	$(PYTHON) -m mypy hardware
 	$(PYTHON) -m pytest
-
-# The matrix and hub DRC targets need their routed boards; routing is the
-# manual multi-minute pcb-*-route step, so they stay out of `check`.
 
 schematic-lightbar: footprints
 	$(PYTHON) -m hardware.pcb.generate lightbar
@@ -38,28 +37,32 @@ schematic-hub: footprints
 footprints:
 	$(PYTHON) -m hardware.pcb.footprints
 
-# Placement is deterministic; --route runs Freerouting (needs java and the
-# jar, several minutes) and imports the result back.
+# Normal builds import the reviewed route. A fresh autorouter run is an
+# explicit operation because its result must pass review before replacing it.
 pcb-matrix: schematic-matrix
-	/usr/bin/python3 -m hardware.pcb.matrix_layout
-
-pcb-matrix-route: schematic-matrix
 	/usr/bin/python3 -m hardware.pcb.matrix_layout --route
 
-pcb-matrix-drc:
-	$(KICAD_CLI) pcb drc --exit-code-violations --output hardware/pcb/generated/matrix/matrix-drc.rpt hardware/pcb/generated/matrix/matrix.kicad_pcb
+pcb-matrix-route: pcb-matrix
+
+pcb-matrix-reroute: schematic-matrix
+	/usr/bin/python3 -m hardware.pcb.matrix_layout --reroute
+
+pcb-matrix-drc: pcb-matrix
+	$(KICAD_CLI) pcb drc --exit-code-violations --schematic-parity --output hardware/pcb/generated/matrix/matrix-drc.rpt hardware/pcb/generated/matrix/matrix.kicad_pcb
 
 pcb-matrix-fab: schematic-matrix
 	$(PYTHON) -m hardware.pcb.fab matrix
 
 pcb-hub: schematic-hub
-	/usr/bin/python3 -m hardware.pcb.hub_layout
-
-pcb-hub-route: schematic-hub
 	/usr/bin/python3 -m hardware.pcb.hub_layout --route
 
-pcb-hub-drc:
-	$(KICAD_CLI) pcb drc --exit-code-violations --output hardware/pcb/generated/hub/hub-drc.rpt hardware/pcb/generated/hub/hub.kicad_pcb
+pcb-hub-route: pcb-hub
+
+pcb-hub-reroute: schematic-hub
+	/usr/bin/python3 -m hardware.pcb.hub_layout --reroute
+
+pcb-hub-drc: pcb-hub
+	$(KICAD_CLI) pcb drc --exit-code-violations --schematic-parity --output hardware/pcb/generated/hub/hub-drc.rpt hardware/pcb/generated/hub/hub.kicad_pcb
 
 pcb-hub-fab: schematic-hub
 	$(PYTHON) -m hardware.pcb.fab hub
@@ -70,7 +73,7 @@ pcb-lightbar: schematic-lightbar
 	/usr/bin/python3 -m hardware.pcb.lightbar_layout
 
 pcb-lightbar-drc: pcb-lightbar
-	$(KICAD_CLI) pcb drc --exit-code-violations --output hardware/pcb/generated/lightbar/lightbar-drc.rpt hardware/pcb/generated/lightbar/lightbar.kicad_pcb
+	$(KICAD_CLI) pcb drc --exit-code-violations --schematic-parity --output hardware/pcb/generated/lightbar/lightbar-drc.rpt hardware/pcb/generated/lightbar/lightbar.kicad_pcb
 
 pcb-lightbar-fab: schematic-lightbar
 	$(PYTHON) -m hardware.pcb.fab lightbar

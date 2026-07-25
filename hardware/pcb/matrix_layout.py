@@ -32,6 +32,7 @@ from hardware.pcb.ses_import import apply_session
 
 
 OUTPUT = Path(__file__).parent / "generated" / "matrix"
+REVIEWED_SESSION = Path(__file__).parent / "routes" / "matrix.ses"
 FREEROUTING_JAR = os.environ.get("FREEROUTING_JAR", "/tmp/freerouting-2.2.4.jar")
 # 25, not 12: the selection lines into U2's left column are the last the router
 # finishes and it plateaus on them below this. 40 quadrupled the runtime for no
@@ -196,6 +197,12 @@ def generate_board(output: Path = OUTPUT / "matrix.kicad_pcb") -> None:
     for line in range(LINE_COUNT):
         placements.update(_cell_placements(line))
     placements.update(_corner_placements())
+    placements.update(
+        {
+            f"H{index}": Placement(Position(x, y))
+            for index, (x, y) in enumerate(mounting_hole_positions(), start=1)
+        }
+    )
     for component in netlist.components:
         placement = placements.get(component.reference)
         if placement is not None:
@@ -204,12 +211,10 @@ def generate_board(output: Path = OUTPUT / "matrix.kicad_pcb") -> None:
     # C65 is U1's decoupling capacitor, so it follows U1 rather than being
     # placed against a separate number that would drift out of step.
     _shift_footprint(builder, "C65", _seat_inside_left_edge(builder, "U1", U1_EDGE_MARGIN))
-    for index, (x, y) in enumerate(mounting_hole_positions(), start=1):
-        builder.add_mounting_hole(
-            "GND", Position(x, y), f"H{index}", size=MOUNTING_HOLE_SIZE
-        )
     _preroute_connector_escapes(builder)
     _add_corridor_keepouts(builder)
+    _postroute_fixups(builder.board)
+    _close_q24_power(builder.board)
     builder.save(output)
 
 
@@ -390,8 +395,15 @@ def _route_waypoints(
 
 
 def _pad_mm(board: pcbnew.BOARD, reference: str, number: str) -> tuple[float, float]:
-    position = board.FindFootprintByReference(reference).FindPadByNumber(number).GetPosition()
+    position = _footprint(board, reference).FindPadByNumber(number).GetPosition()
     return (pcbnew.ToMM(position.x), pcbnew.ToMM(position.y))
+
+
+def _footprint(board: pcbnew.BOARD, reference: str) -> pcbnew.FOOTPRINT:
+    for footprint in board.GetFootprints():
+        if footprint.GetReference() == reference:
+            return footprint
+    raise ValueError(f"footprint {reference} not found")
 
 
 def _remove_rule_areas(board: pcbnew.BOARD) -> None:
@@ -423,10 +435,9 @@ def _serial_plan(board: pcbnew.BOARD) -> tuple[SerialLane, ...]:
 
     Taps get their own rows on top of this; see _tap_rows.
     """
+    u1 = _footprint(board, "U1")
     pads = {
-        board.FindFootprintByReference("U1").FindPadByNumber(number).GetNetname(): _pad_mm(
-            board, "U1", number
-        )
+        u1.FindPadByNumber(number).GetNetname(): _pad_mm(board, "U1", number)
         for number in U1_SERIAL_PADS
     }
     far_pads = {
@@ -535,8 +546,30 @@ def _postroute_fixups(board: pcbnew.BOARD) -> None:
         )
 
 
+def _close_q24_power(board: pcbnew.BOARD) -> None:
+    """Escape Q24's back-side supply around its two neighbouring pads."""
+    start = _pad_mm(board, "Q24", "2")
+    _route_waypoints(
+        board,
+        "3V3",
+        (
+            (*start, "B.Cu"),
+            (145.9, start[1], "B.Cu"),
+            (145.9, 5.95, "B.Cu"),
+            (145.9, 5.95, "F.Cu"),
+            (150.4, 5.95, "F.Cu"),
+            (150.4, 5.95, "B.Cu"),
+            (150.4, 3.0, "B.Cu"),
+            (150.981, 2.4194, "B.Cu"),
+        ),
+        width=0.2,
+        via_diameter=0.4,
+        via_drill=0.2,
+    )
+
+
 def _pad_of(board: pcbnew.BOARD, net_name: str, reference: str = "U1") -> str | None:
-    footprint = board.FindFootprintByReference(reference)
+    footprint = _footprint(board, reference)
     for pad in footprint.Pads():
         if pad.GetNetname() == net_name:
             return str(pad.GetNumber())
@@ -606,29 +639,37 @@ def _finalize_ground(board_path: Path) -> None:
         raise OSError(f"could not save {board_path}")
 
 
-def route_board(board_path: Path = OUTPUT / "matrix.kicad_pcb") -> None:
-    """Export Specctra DSN, run Freerouting headless, import the session, fill
-    the ground pour. Idempotent from the placement."""
+def route_board(
+    board_path: Path = OUTPUT / "matrix.kicad_pcb",
+    *,
+    reroute: bool = False,
+) -> None:
+    """Import the reviewed route, or explicitly replace it with Freerouting."""
     dsn = board_path.with_suffix(".dsn")
-    ses = board_path.with_suffix(".ses")
-    board = pcbnew.LoadBoard(str(board_path))
-    if not pcbnew.ExportSpecctraDSN(board, str(dsn)):
-        raise OSError(f"Specctra DSN export failed for {board_path}")
-    if not Path(FREEROUTING_JAR).is_file():
-        raise FileNotFoundError(
-            f"Freerouting jar not found at {FREEROUTING_JAR}; set FREEROUTING_JAR"
+    session_path = REVIEWED_SESSION
+    if reroute:
+        session_path = board_path.with_suffix(".ses")
+        board = pcbnew.LoadBoard(str(board_path))
+        if not pcbnew.ExportSpecctraDSN(board, str(dsn)):
+            raise OSError(f"Specctra DSN export failed for {board_path}")
+        if not Path(FREEROUTING_JAR).is_file():
+            raise FileNotFoundError(
+                f"Freerouting jar not found at {FREEROUTING_JAR}; set FREEROUTING_JAR"
+            )
+        subprocess.run(
+            (
+                "java", "-Djava.awt.headless=true", "-jar", FREEROUTING_JAR,
+                "-de", str(dsn), "-do", str(session_path), "-mp", str(FREEROUTING_PASSES),
+            ),
+            check=True,
         )
-    subprocess.run(
-        (
-            "java", "-Djava.awt.headless=true", "-jar", FREEROUTING_JAR,
-            "-de", str(dsn), "-do", str(ses), "-mp", str(FREEROUTING_PASSES),
-        ),
-        check=True,
-    )
     board = pcbnew.LoadBoard(str(board_path))
-    apply_session(board, ses.read_text(encoding="utf-8"))
+    apply_session(
+        board,
+        session_path.read_text(encoding="utf-8"),
+        frozenset(SHARED_SERIAL_NETS),
+    )
     _remove_rule_areas(board)
-    _postroute_fixups(board)
     if not pcbnew.SaveBoard(str(board_path), board):
         raise OSError(f"could not save routed board {board_path}")
     _finalize_ground(board_path)
@@ -636,5 +677,5 @@ def route_board(board_path: Path = OUTPUT / "matrix.kicad_pcb") -> None:
 
 if __name__ == "__main__":
     generate_board()
-    if "--route" in sys.argv:
-        route_board()
+    if "--route" in sys.argv or "--reroute" in sys.argv:
+        route_board(reroute="--reroute" in sys.argv)

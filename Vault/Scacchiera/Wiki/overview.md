@@ -1,6 +1,6 @@
 ---
 type: overview
-date_updated: 2026-07-25
+date_updated: 2026-07-26
 tags:
   - wiki/overview
 ---
@@ -20,8 +20,10 @@ functional requirements map to stable test IDs, 37 numeric criteria carry eviden
 source hashes force traceability review whenever the functional specification changes. V1 now
 binds all 59 purchased fitted MPNs to exact supplier codes, immutable manufacturer datasheets,
 library audits, rating fields and declared simulation treatment. It also replaced the conflicting
-matrix MOSFETs and lightbar LED with exact parts. V2 through V9 remain responsible for the later
-connectivity, simulation, firmware, physical, measured and independent-review evidence.
+matrix MOSFETs and lightbar LED with exact parts. [[v2-static-connectivity]] records the next gate:
+all three boards regenerate from reviewed route sessions, exact connectors and no-connects are
+tested, and KiCad reports zero DRC, unconnected, and schematic-parity findings. V3 through V9 remain
+responsible for simulation corners, firmware, physical, measured and independent-review evidence.
 
 ## NFC Game Board: the reference project
 

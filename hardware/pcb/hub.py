@@ -23,10 +23,21 @@ from hardware.pcb.parts import (
     PinDefinition,
     component,
     esp32_c6_mini_1u,
+    mounting_hole,
     tps63802,
     two_pin,
     usb_c_receptacle,
 )
+
+
+NO_CONNECTS: dict[str, tuple[str, ...]] = {
+    "J1": ("A8", "B8"),
+    "J8": ("4",),
+    "SW1": ("3",),
+    "U3": ("2", "11", "14", "20", "23", "24", "31", "32", "33", "34", "35", "40"),
+    "U4": ("4", "5", "7", "9", "10", "15", "16", "19", "20", "21", "32", "33", "34", "35"),
+    "U6": ("1", "18", "19", "20"),
+}
 
 
 def _connect(net: Net, part: Part, pin: str) -> None:
@@ -87,7 +98,7 @@ def _pn5180(circuit: Circuit) -> Part:
         "NSS", "AUX2", "MOSI", "PVSS", "MISO", "PVDD", "SCK", "BUSY", "VSS", "RESET_N",
         "NC11", "VBAT", "VBAT", "NC14", "RXN", "RXP", "VMID", "TX2", "TVSS", "NC20",
         "TX1", "TVDD", "ANT1", "ANT2", "VDHF", "VBAT", "VSS", "AVDD", "VDD", "DVDD",
-        "NC31", "NC32", "NC33", "NC34", "NC35", "CLK1", "CLK2", "GPO1", "IRQ", "AUX1",
+        "NC31", "NC32", "NC33", "NC34", "NC35", "CLK1", "CLK2", "GPO1", "IRQ", "AUX1", "EP_GND",
     )
     return component(
         circuit,
@@ -156,7 +167,7 @@ def _build_power(circuit: Circuit, nets: dict[str, Net]) -> None:
         _connect(nets["USB_D+"], usb, pin)
     for pin in ("A7", "B7"):
         _connect(nets["USB_D-"], usb, pin)
-    _no_connect(circuit, usb, ("A8", "B8"))
+    _no_connect(circuit, usb, NO_CONNECTS["J1"])
     for index, pin in (("1", "A5"), ("2", "B5")):
         rd = _rc(circuit, f"R{index}", "5.1k", "0603WAF5101T5E")
         _connect(_pin_net(circuit, f"USB_CC{index}", usb, pin), rd, "1")
@@ -189,7 +200,7 @@ def _build_power(circuit: Circuit, nets: dict[str, Net]) -> None:
         circuit, "C12", "4.7n 1kV", "Capacitor_SMD:C_1206_3216Metric",
         mpn="CC1206KKX7RCBB472", unit_cost_eur=0.04,
     )
-    shield = _pin_net(circuit, "USB_SHIELD", usb, "S1")
+    shield = _pin_net(circuit, "USB_SHIELD", usb, "SH")
     for part in (shield_resistor, shield_capacitor):
         _connect(shield, part, "1")
         _connect(nets["GND"], part, "2")
@@ -287,7 +298,7 @@ def _build_power(circuit: Circuit, nets: dict[str, Net]) -> None:
     )
     _connect(nets["POWER_EN"], power_switch, "1")
     _connect(nets["SYS"], power_switch, "2")
-    _no_connect(circuit, power_switch, ("3",))
+    _no_connect(circuit, power_switch, NO_CONNECTS["SW1"])
     power_enable_pull = _rc(circuit, "R11", "1M", "0603WAF1004T5E")
     _connect(nets["POWER_EN"], power_enable_pull, "1")
     _connect(nets["GND"], power_enable_pull, "2")
@@ -305,7 +316,7 @@ def _build_power(circuit: Circuit, nets: dict[str, Net]) -> None:
     _connect(nets["USB_VBUS"], usb_override, "2")
 
     regulator = tps63802(circuit, "U2")
-    for pin in ("2", "3", "8"):
+    for pin in ("2", "3", "8", "11"):
         _connect(nets["GND"], regulator, pin)
     _connect(nets["SYS"], regulator, "10")
     _connect(nets["POWER_EN"], regulator, "1")
@@ -446,7 +457,7 @@ def _build_mcu(circuit: Circuit, nets: dict[str, Net]) -> None:
     # Pins 4, 7, 21 and 32 to 35 are datasheet NC; 5, 9, 10, 15, 16, 19 and 20
     # are real GPIOs this design does not use. IO15 (pin 20) stays unused on
     # purpose because it is the JTAG-source strapping pin.
-    _no_connect(circuit, mcu, ("4", "5", "7", "9", "10", "15", "16", "19", "20", "21", "32", "33", "34", "35"))
+    _no_connect(circuit, mcu, NO_CONNECTS["U4"])
     # Espressif requires bulk plus high-frequency decoupling at the module's
     # 3V3 pin. The regulator's own output caps are centimetres away, and WiFi
     # TX bursts brown the module out without local charge.
@@ -497,7 +508,7 @@ def _build_mcu(circuit: Circuit, nets: dict[str, Net]) -> None:
         _connect(mcu_en if net_name == "MCU_EN" else nets[net_name], pad, "1")
 
     expander = _io_expander(circuit)
-    _no_connect(circuit, expander, ("1", "18", "19", "20"))
+    _no_connect(circuit, expander, NO_CONNECTS["U6"])
     for pin in ("2", "3", "12", "21"):
         _connect(nets["GND"], expander, pin)
     _connect(nets["3V3"], expander, "24")
@@ -526,8 +537,8 @@ def _build_mcu(circuit: Circuit, nets: dict[str, Net]) -> None:
 
 def _build_reader(circuit: Circuit, nets: dict[str, Net]) -> None:
     reader = _pn5180(circuit)
-    _no_connect(circuit, reader, ("2", "11", "14", "20", "23", "24", "31", "32", "33", "34", "35", "40"))
-    for pin in ("4", "9", "19", "27"):
+    _no_connect(circuit, reader, NO_CONNECTS["U3"])
+    for pin in ("4", "9", "19", "27", "41"):
         _connect(nets["GND"], reader, pin)
     for pin in ("6", "12", "13", "26"):
         _connect(nets["3V3"], reader, pin)
@@ -722,7 +733,7 @@ def build_hub() -> Circuit:
         else:
             _connect(nets["LED_RETURN"], connector, "3")
             # The second bar ends the chain; its data output stays open.
-            _no_connect(circuit, connector, ("4",))
+            _no_connect(circuit, connector, NO_CONNECTS["J8"])
 
     uart = _connector(circuit, "J9", ("3V3", "GND", "UART_TX", "UART_RX"), "A1257WR-S-4P", 0.14)
     for connector_pin, name in enumerate(("3V3", "GND", "UART_TX", "UART_RX"), start=1):
@@ -737,4 +748,6 @@ def build_hub() -> Circuit:
     srclr_pull = _rc(circuit, "R31", "10k", "0603WAF1002T5E")
     _connect(nets["3V3"], srclr_pull, "1")
     _connect(nets["SEL_SRCLR_N"], srclr_pull, "2")
+    for index in range(1, 5):
+        mounting_hole(circuit, f"H{index}", nets["GND"])
     return circuit

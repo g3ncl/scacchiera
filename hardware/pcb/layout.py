@@ -53,12 +53,34 @@ class BoardBuilder:
             raise ValueError(f"footprint not found: {component.footprint}")
         footprint.SetReference(component.reference)
         footprint.SetValue(component.value)
+        footprint.SetAttributes(footprint.GetAttributes() & ~pcbnew.FP_EXCLUDE_FROM_BOM)
+        footprint.SetFPIDAsString(component.footprint)
+        footprint.GetField("Description").SetText(component.description)
+        footprint.GetField("Datasheet").SetText(component.datasheet)
+        schematic_path = pcbnew.KIID_PATH()
+        schematic_path.push_back(pcbnew.KIID(component.schematic_id))
+        footprint.SetPath(schematic_path)
+        footprint.SetSheetname("/")
         footprint.SetPosition(_vector(placement.position))
         footprint.Reference().SetVisible(False)
         footprint.Value().SetVisible(False)
         pad_nets = self.netlist.pad_nets()
         for pad in footprint.Pads():
             net_name = pad_nets.get((component.reference, pad.GetNumber()))
+            if net_name is None:
+                number = pad.GetNumber()
+                if number.isdigit():
+                    pin_name = f"Pin_{number}"
+                    net_name = f"unconnected-({component.reference}-{pin_name}-Pad{number})"
+                    if net_name not in self.nets:
+                        self.nets[net_name] = pcbnew.NETINFO_ITEM(self.board, net_name)
+                        self.board.Add(self.nets[net_name])
+                elif number in {"A8", "B8"}:
+                    pin_name = "SBU1" if number == "A8" else "SBU2"
+                    net_name = f"unconnected-({component.reference}-{pin_name}-Pad{number})"
+                    if net_name not in self.nets:
+                        self.nets[net_name] = pcbnew.NETINFO_ITEM(self.board, net_name)
+                        self.board.Add(self.nets[net_name])
             if net_name is not None:
                 pad.SetNet(self.nets[net_name])
         self.board.Add(footprint)

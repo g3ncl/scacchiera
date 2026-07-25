@@ -276,3 +276,17 @@ Harvatek T37K3RGB-05C000112U1930 and DigiKey cut-tape code. The matrix now uses 
 BSS123-7-F and BSS84-7-F, with their exact JLC codes and Diodes vendor SPICE models. The ESP32-C6
 module and Würth boost inductor gained stocked DigiKey cut-tape sources. Historical conflicting raw
 files and summaries remain immutable and are explicitly marked superseded.
+
+## [2026-07-26] verification | V2 static connectivity and deterministic routing
+
+Closed the V2 connectivity gate and filed the rationale as [[v2-static-connectivity]]. Replaced the
+hub's generic USB connector model with the native alphanumeric USB-C symbol, grounded the TPS63802
+and PN5180 exposed pads, moved plated mounting holes into the schematics, and enumerated every
+reviewed no-connect against its filed datasheet. Connector tests now cover both cable ends, service
+headers, boot and power-off defaults, recovery pads, and exact USB identities.
+
+Versioned the reviewed matrix and hub route sessions. Normal builds import them, while new
+Freerouting candidates require explicit reroute targets. Matrix serial and power escapes plus hub
+USB shield and recovery geometry remain deterministic code-owned routes. A clean full gate reports
+zero DRC violations, zero unconnected items, zero schematic-parity issues, mypy clean, and 43 tests
+passing.

@@ -17,6 +17,9 @@ class ComponentRecord:
     reference: str
     value: str
     footprint: str
+    description: str
+    datasheet: str
+    schematic_id: str
 
 
 @dataclass(frozen=True)
@@ -111,6 +114,16 @@ def sexpr_value(expression: list[SExpr], name: str) -> str:
     return matches[0][1]
 
 
+def sexpr_field(expression: list[SExpr], name: str) -> str:
+    fields = sexpr_children(expression, "fields")
+    if not fields:
+        return ""
+    for field in sexpr_children(fields[0], "field"):
+        if len(field) >= 3 and field[1] == ["name", name] and isinstance(field[2], str):
+            return field[2]
+    return ""
+
+
 def read_netlist(path: Path) -> Netlist:
     root = parse_sexpr(path.read_text(encoding="utf-8"))
     if not isinstance(root, list) or not root or root[0] != "export":
@@ -121,6 +134,9 @@ def read_netlist(path: Path) -> Netlist:
             reference=sexpr_value(component, "ref"),
             value=sexpr_value(component, "value"),
             footprint=sexpr_value(component, "footprint"),
+            description=sexpr_value(component, "description"),
+            datasheet=sexpr_field(component, "Datasheet"),
+            schematic_id=sexpr_value(component, "tstamps"),
         )
         for component in sexpr_children(components_section, "comp")
     )

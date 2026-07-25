@@ -3,7 +3,7 @@
 from collections.abc import Iterable
 from dataclasses import dataclass
 
-from skidl import Circuit, Part
+from skidl import Circuit, Net, Part
 
 
 JLC_PART_BY_MPN = {
@@ -131,6 +131,23 @@ def component(
     return part
 
 
+def mounting_hole(circuit: Circuit, ref: str, ground: Net) -> Part:
+    """Put a plated mechanical hole in both schematic and PCB netlists."""
+    hole = component(
+        circuit,
+        ref,
+        "M2.5 plated mounting hole",
+        "MountingHole:MountingHole_2.7mm_M2.5_Pad",
+        (PinDefinition("1", "GND"),),
+        mpn="",
+        description="Plated mounting hole, not a purchased component",
+        unit_cost_eur=0.0,
+        fitted=False,
+    )
+    ground += hole["1"]
+    return hole
+
+
 def mosfet(circuit: Circuit, ref: str, mpn: str, *, unit_cost_eur: float) -> Part:
     return component(
         circuit,
@@ -198,7 +215,7 @@ def esp32_c6_mini_1u(circuit: Circuit, ref: str) -> Part:
 
 
 def tps63802(circuit: Circuit, ref: str) -> Part:
-    names = ("EN", "MODE", "AGND", "FB", "PG", "VOUT", "L2", "GND", "L1", "VIN")
+    names = ("EN", "MODE", "AGND", "FB", "PG", "VOUT", "L2", "GND", "L1", "VIN", "EP_GND")
     return component(
         circuit,
         ref,
@@ -212,25 +229,25 @@ def tps63802(circuit: Circuit, ref: str) -> Part:
 
 
 def usb_c_receptacle(circuit: Circuit, ref: str) -> Part:
-    pins = (
-        PinDefinition("A1", "GND"), PinDefinition("A4", "VBUS"), PinDefinition("A5", "CC1"),
-        PinDefinition("A6", "D+"), PinDefinition("A7", "D-"), PinDefinition("A8", "SBU1"),
-        PinDefinition("A9", "VBUS"), PinDefinition("A12", "GND"),
-        PinDefinition("B1", "GND"), PinDefinition("B4", "VBUS"), PinDefinition("B5", "CC2"),
-        PinDefinition("B6", "D+"), PinDefinition("B7", "D-"), PinDefinition("B8", "SBU2"),
-        PinDefinition("B9", "VBUS"), PinDefinition("B12", "GND"),
-        PinDefinition("S1", "SHIELD"),
+    part = Part(
+        "Connector",
+        "USB_C_Receptacle_USB2.0_16P",
+        tool="kicad9",
+        circuit=circuit,
+        ref=ref,
+        tag=ref,
     )
-    return component(
-        circuit,
-        ref,
-        "USB4105-GF-A",
-        "Connector_USB:USB_C_Receptacle_GCT_USB4105-xx-A_16P_TopMnt_Horizontal",
-        pins,
-        mpn="USB4105-GF-A",
-        description="USB-C USB 2.0 receptacle",
-        unit_cost_eur=0.55,
-    )
+    part.value = "USB4105-GF-A"
+    part.footprint = "Connector_USB:USB_C_Receptacle_GCT_USB4105-xx-A_16P_TopMnt_Horizontal"
+    part.manf_num = "USB4105-GF-A"
+    part.lcsc_part = JLC_PART_BY_MPN["USB4105-GF-A"]
+    part.supplier = "JLCPCB"
+    part.order_code = part.lcsc_part
+    part.jlc_library = "Extended"
+    part.description = "USB-C USB 2.0 receptacle"
+    part.unit_cost_eur = 0.55
+    part.fitted = "yes"
+    return part
 
 
 def two_pin(

@@ -1,6 +1,6 @@
 ---
 type: index
-date_updated: 2026-07-25
+date_updated: 2026-07-26
 tags:
   - wiki/index
 ---
@@ -227,3 +227,4 @@ Query answers filed back into the wiki. See [[wiki/synthesis]] pages.
 | [[jlcpcb-matrix-bom-review]] | How can the matrix BOM be made unambiguous, stocked, and safe? | 2026-07-24 |
 | [[verification-evidence-model]] | How are requirements, criteria, and tests kept synchronized? | 2026-07-25 |
 | [[v1-component-proof]] | How is every fitted component tied to exact V1 evidence? | 2026-07-25 |
+| [[v2-static-connectivity]] | How are schematic connectivity and routed boards proven equivalent? | 2026-07-26 |
