@@ -250,3 +250,13 @@ violations and 0 unconnected, 28 tests passing, mypy clean across 27 files.
 Open, and stated plainly: the serial nets are deterministic but Freerouting's own completeness is
 not. The hub needed three route attempts to reach 0 unconnected and the matrix one. `make
 pcb-*-route` is therefore not yet clean by construction; re-run it, or raise `FREEROUTING_PASSES`.
+## [2026-07-25] verification | V0 executable traceability
+
+Operation: built the V0 requirement and numeric-criteria evidence structure.
+
+Mapped all current functional documents into 71 atomic requirement IDs with named tests and pinned
+the reviewed inputs by SHA-256. Replaced the flat nominal SPICE thresholds with 37 structured
+criteria carrying units, evidence source, operating conditions, and margin, then added automated
+checks for freshness, completeness, uniqueness, and bidirectional links. Filed the design rationale
+as [[verification-evidence-model]]. The pass also removed the stale 17-pixel WS2812 wording from the
+criteria after the light bar changed to fourteen SK6805MINI-E pixels.

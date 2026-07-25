@@ -29,7 +29,13 @@ No gate is complete until its definition of done in
 [simulation-workflow.md](simulation-workflow.md) has recorded evidence. V0 through V7 permit only a
 scoped test-article order. V0 through V9 permit a final-board order.
 
-- [ ] V0 requirement traceability
+- [x] V0 requirement traceability: 71 atomic requirements in
+  [verification/traceability.yaml](verification/traceability.yaml) map the complete functional
+  specification and fitted-part absolute-maximum audit to stable test IDs. The manifest pins the
+  reviewed functional sources by SHA-256. Thirty-seven numeric criteria in
+  [hardware/criteria.yaml](hardware/criteria.yaml) record units, evidence, conditions, and margin.
+  `hardware/tests/test_traceability.py` enforces source freshness, schema completeness, unique IDs,
+  and bidirectional requirement/criterion links. Evidence: 5 tests passed on 2026-07-25.
 - [ ] V1 component and library proof
 - [ ] V2 connectivity and static electrical checks
 - [ ] V3 power, analog, timing, and fault simulation

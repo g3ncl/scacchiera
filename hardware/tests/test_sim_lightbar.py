@@ -6,16 +6,14 @@ import sys
 from pathlib import Path
 
 import pytest
-import yaml
 
 from hardware.pcb.lightbar_geometry import LED_COUNT
-
 from hardware.sim.lightbar_supply import validate_supply
+from hardware.verification.criteria import load_criterion
 
 
 ROOT = Path(__file__).parent.parent.parent
 BOARD = ROOT / "hardware" / "pcb" / "generated" / "lightbar" / "lightbar.kicad_pcb"
-CRITERIA = ROOT / "docs" / "hardware" / "criteria.yaml"
 WORK_DIR = ROOT / "hardware" / "sim" / "generated" / "lightbar"
 
 
@@ -40,10 +38,10 @@ def routed_board() -> Path:
 
 
 def test_supply_loop_droop_within_criteria(routed_board: Path) -> None:
-    limits = yaml.safe_load(CRITERIA.read_text(encoding="utf-8"))["lightbar"]
+    limits = load_criterion("LB-SUPPLY-DROOP").limits
     result = validate_supply(routed_board, WORK_DIR)
     assert len(result.droops_v) == LED_COUNT
     # A solved network with zero droop would mean the extraction found no
     # copper resistance, so guard against a vacuous pass too.
     assert result.worst_droop_v > 0.0
-    assert result.worst_droop_v <= limits["supply_loop_droop_v_max"]
+    assert result.worst_droop_v <= limits["maximum"]

@@ -12,6 +12,14 @@ the big picture changes during ingestion. Start here for the shape of the
 knowledge base, then follow [[wikilinks]] into [[index|the index]] and the
 individual pages.
 
+## Verification state
+
+The legacy schematic, nominal simulation, and generated-layout milestones are inputs rather than
+release authority. [[verification-evidence-model]] records the executable V0 structure: 71 atomic
+functional requirements map to stable test IDs, 37 numeric criteria carry evidence and margin, and
+source hashes force traceability review whenever the functional specification changes. V1 through
+V9 remain responsible for proving those mapped requirements.
+
 ## NFC Game Board: the reference project
 
 The wiki's first ingest covers [[nfc-game-board-project|NFC Game Board]], [[ben-bulsink|Ben

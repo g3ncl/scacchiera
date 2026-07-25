@@ -1,42 +1,375 @@
-# Numeric limits the SPICE validations assert against (docs/planning.md, M3).
-# One block per board; hardware/tests/ reads this file, so changing a limit
-# here changes what the test suite enforces.
-lightbar:
-  # Worst supply-loop drop (5 V feed IR drop plus ground rise) at any LED with
-  # all 17 pixels lit white. WS2812 logic thresholds track VDD, so bounding the
-  # rail droop keeps the data margin intact with wide headroom.
-  supply_loop_droop_v_max: 0.10
+# Numeric acceptance criteria used by automated verification. Every entry records
+# units, conditions, evidence, and deliberate margin. Requirement coverage lives
+# in docs/verification/traceability.yaml.
+version: 1
 
-matrix:
-  # Selected line resonance, alone and on the loaded 16-line bus. The DNP
-  # trims only add capacitance, so the untrimmed board must sit inside the
-  # band from above, never below 13.56 MHz's reachable range.
-  resonance_mhz:
-    min: 12.5
-    max: 15.0
-  bus_resonance_mhz:
-    min: 12.5
-    max: 15.0
-  # Field ratio between a selected and a deselected line at the tuned
-  # frequency; the shunt MOSFET is what buys this.
-  off_on_suppression_db:
-    min: 40.0
-  # Forward current the 3V3 steering must push through the PIN loop: enough
-  # for the diode's 3 ohm operating point, bounded so one selected line stays
-  # a trivial rail load.
-  bias_current_ma:
-    min: 7.0
-    max: 14.0
-  # A deselected cell must draw essentially nothing.
-  bias_off_current_ua_max: 10.0
+criteria:
+  GAME-BOARD-FILES:
+    description: Number of files and ranks in the chessboard grid.
+    requirement_ids: [PRINCIPLE-003]
+    unit: count
+    limits: {exact: 8}
+    evidence: {class: Derived, source: docs/functional/overview.md, locator: Principles}
+    operating_conditions: Game model, sensing map, UI, and generated board geometry.
+    margin: Exact discrete count; no tolerance applies.
+    test_ids: [TEST-GAME-RULES-001, TEST-PHY-GRID-001]
 
-hub:
-  # Where the selected loop's field peaks when the PN5180 TX path (EMC filter
-  # plus series match) drives the loaded 16-line bus. The DNP match trim can
-  # pull it down toward the carrier on the assembled board.
-  system_resonance_mhz:
-    min: 12.5
-    max: 15.0
-  # Field the selected loop carries per volt of TX drive; guards against a
-  # match that is in band but too weakly coupled to read anything.
-  coil_ma_per_volt_min: 20.0
+  GAME-BOARD-SQUARES:
+    description: Total number of typed physical squares.
+    requirement_ids: [PRINCIPLE-003]
+    unit: count
+    limits: {exact: 64}
+    evidence: {class: Derived, source: docs/functional/overview.md, locator: Principles}
+    operating_conditions: Game model, sensing map, UI, and generated board geometry.
+    margin: Eight files multiplied by eight ranks gives exactly 64 squares.
+    test_ids: [TEST-GAME-RULES-001, TEST-PHY-GRID-001]
+
+  GAME-STANDARD-PIECES:
+    description: Number of standard pieces provisioned from their starting squares.
+    requirement_ids: [GAME-PROVISION-002]
+    unit: count
+    limits: {exact: 32}
+    evidence: {class: Derived, source: docs/functional/gameplay.md, locator: Piece provisioning}
+    operating_conditions: New-set provisioning before spare promotion pieces.
+    margin: Exact standard chess-set count; no tolerance applies.
+    test_ids: [TEST-GAME-PROVISION-002]
+
+  PHY-SQUARE-PITCH:
+    description: Nominal center-to-center pitch of adjacent squares.
+    requirement_ids: [PHY-GEO-001]
+    unit: mm
+    limits: {nominal: 35.0, tolerance: 0.10}
+    evidence: {class: Derived, source: docs/functional/physical.md, locator: "Fixed geometry: Square pitch"}
+    operating_conditions: Generated nominal CAD geometry before manufacturing variation.
+    margin: The 0.10 mm generation tolerance detects parameter drift; fabrication tolerance is checked at V7.
+    test_ids: [TEST-PHY-GEO-001]
+
+  PHY-PLAY-WIDTH:
+    description: Nominal width and depth of the square playing area.
+    requirement_ids: [PHY-GEO-002]
+    unit: mm
+    limits: {nominal: 280.0, tolerance: 0.10}
+    evidence: {class: Derived, source: docs/functional/physical.md, locator: "Fixed geometry: Play area"}
+    operating_conditions: Generated nominal CAD geometry before manufacturing variation.
+    margin: Eight 35.0 mm pitches total 280.0 mm; 0.10 mm detects generator drift.
+    test_ids: [TEST-PHY-GEO-002]
+
+  PHY-SIDE-RAIL-WIDTH:
+    description: Nominal width of each side rail.
+    requirement_ids: [PHY-GEO-003]
+    unit: mm
+    limits: {nominal: 15.0, tolerance: 0.10}
+    evidence: {class: Derived, source: docs/functional/physical.md, locator: "Fixed geometry: Side rails"}
+    operating_conditions: Generated nominal CAD geometry before manufacturing variation.
+    margin: The 0.10 mm generation tolerance detects a wrong parameter while preserving the nominal dimension.
+    test_ids: [TEST-PHY-GEO-003]
+
+  PHY-PLAYER-RAIL-WIDTH:
+    description: Nominal width of each player rail.
+    requirement_ids: [PHY-GEO-004]
+    unit: mm
+    limits: {nominal: 50.0, tolerance: 0.10}
+    evidence: {class: Derived, source: docs/functional/physical.md, locator: "Fixed geometry: Player rails"}
+    operating_conditions: Generated nominal CAD geometry before manufacturing variation.
+    margin: The 0.10 mm generation tolerance detects a wrong parameter while preserving the nominal dimension.
+    test_ids: [TEST-PHY-GEO-004]
+
+  PHY-OVERALL-WIDTH:
+    description: Nominal overall board width.
+    requirement_ids: [PHY-GEO-005]
+    unit: mm
+    limits: {nominal: 310.0, tolerance: 0.10}
+    evidence: {class: Derived, source: docs/functional/physical.md, locator: "Fixed geometry: Overall board"}
+    operating_conditions: Generated nominal CAD geometry before manufacturing variation.
+    margin: The play area plus both side rails derives 310 mm; 0.10 mm detects parameter drift.
+    test_ids: [TEST-PHY-GEO-005]
+
+  PHY-OVERALL-DEPTH:
+    description: Nominal overall board depth.
+    requirement_ids: [PHY-GEO-005]
+    unit: mm
+    limits: {nominal: 380.0, tolerance: 0.10}
+    evidence: {class: Derived, source: docs/functional/physical.md, locator: "Fixed geometry: Overall board"}
+    operating_conditions: Generated nominal CAD geometry before manufacturing variation.
+    margin: The play area plus both player rails derives 380 mm; 0.10 mm detects parameter drift.
+    test_ids: [TEST-PHY-GEO-005]
+
+  PHY-BODY-HEIGHT:
+    description: Target body height before feet.
+    requirement_ids: [PHY-GEO-006]
+    unit: mm
+    limits: {target: 32.0, maximum: 32.0}
+    evidence: {class: Derived, source: docs/functional/physical.md, locator: "Fixed geometry: Body height before feet"}
+    operating_conditions: Closed generated enclosure excluding removable feet.
+    margin: The target is a hard maximum; component and manufacturing margins must fit below it at V7.
+    test_ids: [TEST-PHY-GEO-006]
+
+  PHY-TOP-STACK:
+    description: Maximum carrier, adhesive, and veneer stack thickness.
+    requirement_ids: [PHY-TOP-002]
+    unit: mm
+    limits: {maximum: 1.75}
+    evidence: {class: Derived, source: docs/functional/physical.md, locator: "Continuous top surface: thickness budget"}
+    operating_conditions: Finished top stack at its thickest measured point.
+    margin: The V7 nominal and tolerance stack must remain below the product maximum.
+    test_ids: [TEST-PHY-TOP-002]
+
+  PHY-CARRIER-THICKNESS:
+    description: Nominal structural carrier thickness.
+    requirement_ids: [PHY-TOP-004]
+    unit: mm
+    limits: {nominal: 1.0, tolerance: 0.10}
+    evidence: {class: Derived, source: docs/functional/physical.md, locator: "Continuous top surface: carrier"}
+    operating_conditions: Purchased G10 or FR4 carrier before adhesive and veneer are applied.
+    margin: The 0.10 mm incoming tolerance leaves at least 0.65 mm of the total stack budget for adhesive and veneer.
+    test_ids: [TEST-MECH-TOP-004, TEST-V8-TOP-STACK-001]
+
+  PHY-TAG-DISTANCE:
+    description: Maximum distance from a resting tag to the sensing plane.
+    requirement_ids: [PHY-RF-001]
+    unit: mm
+    limits: {maximum: 3.0}
+    evidence: {class: Derived, source: docs/functional/physical.md, locator: "Read budget: complete distance"}
+    operating_conditions: Worst-case piece, felt, veneer, adhesive, carrier, air gap, and PCB stack.
+    margin: The mechanical nominal must remain below 3.0 mm by its complete worst-case tolerance stack.
+    test_ids: [TEST-PHY-RF-001]
+
+  PHY-CONDUCTOR-CLEARANCE:
+    description: Minimum conductor distance behind the sensing plane before RF measurement.
+    requirement_ids: [PHY-RF-002]
+    unit: mm
+    limits: {minimum: 10.0}
+    evidence: {class: Derived, source: docs/functional/physical.md, locator: "Read budget: conductor keepout"}
+    operating_conditions: Uncalibrated design before an assembled V8 RF check proves a smaller distance.
+    margin: No reduction is allowed without measured V8 evidence.
+    test_ids: [TEST-PHY-RF-002]
+
+  PHY-TAG-RECESS-DIAMETER:
+    description: Nominal centered NFC tag recess diameter in each piece.
+    requirement_ids: [PHY-PIECE-001]
+    unit: mm
+    limits: {nominal: 22.0, tolerance: 0.10}
+    evidence: {class: Derived, source: docs/functional/physical.md, locator: Pieces}
+    operating_conditions: Generated nominal piece geometry before manufacturing variation.
+    margin: The generation tolerance detects a wrong recess while V7 adds clearance from the selected tag drawing.
+    test_ids: [TEST-MECH-PIECE-001]
+
+  IF-DISPLAY-COUNT:
+    description: Number of player display modules.
+    requirement_ids: [IF-DISPLAY-001]
+    unit: count
+    limits: {exact: 2}
+    evidence: {class: Derived, source: docs/functional/interface.md, locator: Displays}
+    operating_conditions: Complete assembled product.
+    margin: Exact one-per-player count; no tolerance applies.
+    test_ids: [TEST-IF-DISPLAY-001]
+
+  IF-DISPLAY-WIDTH:
+    description: Nominal display module width.
+    requirement_ids: [IF-DISPLAY-001]
+    unit: mm
+    limits: {nominal: 100.0, tolerance: 0.10}
+    evidence: {class: Derived, source: docs/functional/interface.md, locator: "Displays: specified module envelope"}
+    operating_conditions: Maximum display envelope used by CAD.
+    margin: CAD must reserve the datasheet maximum envelope plus V7 assembly clearance.
+    test_ids: [TEST-IF-DISPLAY-001]
+
+  IF-DISPLAY-HEIGHT:
+    description: Nominal display module height.
+    requirement_ids: [IF-DISPLAY-001]
+    unit: mm
+    limits: {nominal: 33.0, tolerance: 0.10}
+    evidence: {class: Derived, source: docs/functional/interface.md, locator: "Displays: specified module envelope"}
+    operating_conditions: Maximum display envelope used by CAD.
+    margin: CAD must reserve the datasheet maximum envelope plus V7 assembly clearance.
+    test_ids: [TEST-IF-DISPLAY-001]
+
+  IF-LIGHTBAR-WIDTH:
+    description: Nominal light-bar PCB length.
+    requirement_ids: [IF-LIGHTBAR-001]
+    unit: mm
+    limits: {nominal: 120.0, tolerance: 0.01}
+    evidence: {class: Derived, source: docs/functional/interface.md, locator: Light bars}
+    operating_conditions: Generated routed PCB outline.
+    margin: The tolerance admits serialization precision but detects a wrong outline.
+    test_ids: [TEST-IF-LIGHTBAR-001]
+
+  IF-LIGHTBAR-ASSEMBLY-COUNT:
+    description: Number of complete light-bar assemblies in the product.
+    requirement_ids: [IF-LIGHTBAR-001]
+    unit: count
+    limits: {exact: 2}
+    evidence: {class: Derived, source: docs/functional/interface.md, locator: Light bars}
+    operating_conditions: Complete assembled product.
+    margin: Exact one-per-player count; no tolerance applies.
+    test_ids: [TEST-IF-LIGHTBAR-001]
+
+  IF-LIGHTBAR-HEIGHT:
+    description: Nominal light-bar PCB height.
+    requirement_ids: [IF-LIGHTBAR-001]
+    unit: mm
+    limits: {nominal: 8.5, tolerance: 0.01}
+    evidence: {class: Derived, source: docs/functional/interface.md, locator: Light bars}
+    operating_conditions: Generated routed PCB outline.
+    margin: The tolerance admits serialization precision but detects a wrong outline.
+    test_ids: [TEST-IF-LIGHTBAR-001]
+
+  IF-LIGHTBAR-COUNT:
+    description: Fitted addressable LEDs per player light bar.
+    requirement_ids: [IF-LIGHTBAR-002]
+    unit: count
+    limits: {exact: 14}
+    evidence: {class: Derived, source: docs/functional/interface.md, locator: Light bars}
+    operating_conditions: Functional spec, schematic, layout, simulation, BOM, firmware, and criteria.
+    margin: Exact discrete count; no tolerance applies.
+    test_ids: [TEST-IF-LIGHTBAR-002]
+
+  IF-DIFFUSER-STANDOFF:
+    description: Nominal diffuser standoff derived from half the LED pitch.
+    requirement_ids: [IF-LIGHTBAR-003]
+    unit: mm
+    limits: {nominal: 3.65, tolerance: 0.10}
+    evidence: {class: Derived, source: docs/functional/interface.md, locator: "Light bars: diffuser standoff"}
+    operating_conditions: Generated nominal diffuser geometry; V8 verifies perceived continuity.
+    margin: Half of 7.30 mm is 3.65 mm; 0.10 mm detects a wrong CAD parameter without claiming optical tolerance.
+    test_ids: [TEST-MECH-DIFFUSER-001, TEST-V8-DIFFUSER-001]
+
+  GAME-TIME-SELECT-WINDOW:
+    description: Time-control selection window after accepting the start position.
+    requirement_ids: [GAME-CLOCK-001]
+    unit: s
+    limits: {nominal: 10.0, tolerance: 0.10}
+    evidence: {class: Derived, source: docs/functional/gameplay.md, locator: "Clock and results: selection window"}
+    operating_conditions: Monotonic firmware clock under every supported power state.
+    margin: One percent is wider than the crystal error and preserves the specified interaction.
+    test_ids: [TEST-GAME-CLOCK-001]
+
+  GAME-TIME-SELECT-HOLD:
+    description: King hold duration used to choose a time-control preset.
+    requirement_ids: [GAME-CLOCK-002]
+    unit: s
+    limits: {nominal: 3.0, tolerance: 0.20}
+    evidence: {class: Derived, source: docs/functional/gameplay.md, locator: "Clock and results: king hold"}
+    operating_conditions: Stable typed king position with sensing debounce applied.
+    margin: The 200 ms window accommodates one sensing cycle while remaining perceptibly three seconds.
+    test_ids: [TEST-GAME-CLOCK-002]
+
+  GAME-RESIGN-HOLD:
+    description: King-absence duration that starts resignation or draw confirmation.
+    requirement_ids: [GAME-RESULT-003]
+    unit: s
+    limits: {nominal: 5.0, tolerance: 0.10}
+    evidence: {class: Derived, source: docs/functional/gameplay.md, locator: "Clock and results: resignation"}
+    operating_conditions: Stable complete-board scans while one or both kings are absent.
+    margin: Two percent admits scheduler granularity while preventing an early gesture.
+    test_ids: [TEST-GAME-RESULT-003]
+
+  GAME-RESULT-COUNTDOWN:
+    description: Confirmation countdown after a resignation or draw gesture.
+    requirement_ids: [GAME-RESULT-004]
+    unit: s
+    limits: {nominal: 15.0, tolerance: 0.10}
+    evidence: {class: Derived, source: docs/functional/gameplay.md, locator: "Clock and results: countdown"}
+    operating_conditions: Monotonic firmware clock after accepting the king-absence gesture.
+    margin: The tolerance admits scheduler granularity without materially shortening confirmation.
+    test_ids: [TEST-GAME-RESULT-004]
+
+  GAME-IDLE-SLEEP:
+    description: Idle duration before automatic sleep when sleep is permitted.
+    requirement_ids: [GAME-POWER-001]
+    unit: min
+    limits: {nominal: 20.0, tolerance: 0.25}
+    evidence: {class: Derived, source: docs/functional/gameplay.md, locator: Sleep and battery}
+    operating_conditions: No game, clients, button activity, or position changes.
+    margin: Fifteen seconds accommodates housekeeping while preserving about twenty minutes.
+    test_ids: [TEST-GAME-POWER-001]
+
+  GAME-LOW-BATTERY-SHUTDOWN:
+    description: Grace period between a critical battery indication and shutdown.
+    requirement_ids: [GAME-POWER-003]
+    unit: min
+    limits: {nominal: 5.0, tolerance: 0.10}
+    evidence: {class: Derived, source: docs/functional/gameplay.md, locator: Sleep and battery}
+    operating_conditions: Critical battery remains asserted and USB remains absent.
+    margin: Six seconds accommodates orderly persistence without materially shortening warning.
+    test_ids: [TEST-GAME-POWER-003]
+
+  LB-SUPPLY-DROOP:
+    description: Worst 5 V feed drop plus ground rise at any light-bar LED.
+    requirement_ids: [IF-LIGHTBAR-002]
+    unit: V
+    limits: {maximum: 0.10}
+    evidence: {class: Derived, source: Vault/Scacchiera/Wiki/sources/sk68xx-mini-e-led-datasheets.md, locator: Electrical limits and layout-derived resistance}
+    operating_conditions: All 14 pixels white at 16 mA each, minimum copper thickness, and maximum resistivity.
+    margin: Nominal routed droop is 13.1 mV, leaving 86.9 mV.
+    test_ids: [TEST-LB-PWR-001]
+
+  MATRIX-CELL-RESONANCE:
+    description: Untrimmed selected-cell resonance before loaded-bus interaction.
+    requirement_ids: [PHY-RF-001]
+    unit: MHz
+    limits: {minimum: 12.5, maximum: 15.0}
+    evidence: {class: Derived, source: hardware/sim/loop.py, locator: Routed loop geometry and filed component models}
+    operating_conditions: Nominal routed loop with one selected switch cell and no tag.
+    margin: The DNP trim only adds capacitance; the window reserves adjustment around 13.56 MHz.
+    test_ids: [TEST-MATRIX-RF-001]
+
+  MATRIX-BUS-RESONANCE:
+    description: Untrimmed selected-cell resonance on the complete 16-cell bus.
+    requirement_ids: [PHY-RF-001]
+    unit: MHz
+    limits: {minimum: 12.5, maximum: 15.0}
+    evidence: {class: Derived, source: hardware/sim/matrix_rf.py, locator: Production switch connectivity and routed geometry}
+    operating_conditions: One selected and fifteen deselected nominal cells, no tag.
+    margin: The DNP trim only adds capacitance; the window reserves adjustment around 13.56 MHz.
+    test_ids: [TEST-MATRIX-RF-002]
+
+  MATRIX-OFF-ON-SUPPRESSION:
+    description: Current ratio between selected and deselected antenna lines.
+    requirement_ids: [PRINCIPLE-001, GAME-FAULT-003]
+    unit: dB
+    limits: {minimum: 40.0}
+    evidence: {class: Derived, source: Vault/Scacchiera/Wiki/sources/matrix-discrete-datasheets.md, locator: PIN diode and MOSFET switching parameters}
+    operating_conditions: Carrier frequency with one selected and one nominal deselected cell.
+    margin: Nominal simulation is 90 dB, leaving 50 dB for corners and extracted geometry.
+    test_ids: [TEST-MATRIX-RF-003]
+
+  MATRIX-BIAS-CURRENT:
+    description: Forward steering current through a selected PIN-diode cell.
+    requirement_ids: [PHY-RF-001]
+    unit: mA
+    limits: {minimum: 7.0, maximum: 14.0}
+    evidence: {class: Derived, source: Vault/Scacchiera/Wiki/sources/matrix-discrete-datasheets.md, locator: BAR64-02V and SDFL2012S100KTF limits}
+    operating_conditions: 3.3 V rail across bounded resistor, MOSFET, diode, and choke corners.
+    margin: Nominal 9.7 mA is 2.7 mA above the switching floor and 1 mA below the published choke rating.
+    test_ids: [TEST-MATRIX-BIAS-001]
+
+  MATRIX-OFF-BIAS-CURRENT:
+    description: Leakage current in a deselected antenna cell.
+    requirement_ids: [PHY-RF-001]
+    unit: uA
+    limits: {maximum: 10.0}
+    evidence: {class: Derived, source: Vault/Scacchiera/Wiki/sources/matrix-discrete-datasheets.md, locator: MOSFET and PIN-diode leakage limits}
+    operating_conditions: Deselected cell over V3 supply and temperature corners.
+    margin: Ten microamps is three orders below the selected-cell bias floor.
+    test_ids: [TEST-MATRIX-BIAS-002]
+
+  HUB-SYSTEM-RESONANCE:
+    description: Resonance of the PN5180 transmit path and complete selected matrix bus.
+    requirement_ids: [PHY-RF-001]
+    unit: MHz
+    limits: {minimum: 12.5, maximum: 15.0}
+    evidence: {class: Derived, source: hardware/sim/hub_front_end.py, locator: Production connectivity and routed-loop model}
+    operating_conditions: Nominal front end with one selected and fifteen deselected cells, no tag.
+    margin: The window reserves trim range around 13.56 MHz; V4 replaces the analytical model.
+    test_ids: [TEST-HUB-RF-001]
+
+  HUB-COIL-CURRENT-PER-VOLT:
+    description: Selected-loop current per volt of PN5180 transmit drive.
+    requirement_ids: [PHY-RF-001]
+    unit: mA/V
+    limits: {minimum: 20.0}
+    evidence: {class: Derived, source: hardware/sim/hub_front_end.py, locator: Production connectivity and routed-loop model}
+    operating_conditions: Simulated system resonance with one selected line.
+    margin: Nominal 60 mA/V is three times the minimum; V4 replaces it with field and receive limits.
+    test_ids: [TEST-HUB-RF-002]

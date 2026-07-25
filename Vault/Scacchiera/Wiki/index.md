@@ -95,5 +95,6 @@ Query answers filed back into the wiki. See [[wiki/synthesis]] pages.
 
 | Page | Question | Updated |
 | --- | --- | --- |
-| [[tps2553-current-limit-error]] | 2 | high | 2026-07-25 |
-| [[jlcpcb-matrix-bom-review]] | Make the matrix BOM stocked, exact, and assembly-safe | 2026-07-24 |
+| [[tps2553-current-limit-error]] | Why did the original current-limit calculation fail? | 2026-07-25 |
+| [[jlcpcb-matrix-bom-review]] | How can the matrix BOM be made unambiguous, stocked, and safe? | 2026-07-24 |
+| [[verification-evidence-model]] | How are requirements, criteria, and tests kept synchronized? | 2026-07-25 |

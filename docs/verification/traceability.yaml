@@ -1,0 +1,333 @@
+# Atomic product requirements and their verification identifiers. Source hashes
+# force an explicit review whenever the functional specification changes.
+version: 1
+
+sources:
+  docs/functional/overview.md: 657ab698c588dbcc606459dee62486cb9f61e0e5bfeb5f2481f21c8525c0131d
+  docs/functional/gameplay.md: 461a3ce900ad7e2bfe67bc4f424bfa5b899486ad70e7820304bceae711a65097
+  docs/functional/interface.md: 9d5aa00b924f575a50c5e1f5020e19c7470c0e618da78e05f585d669c9d59b71
+  docs/functional/physical.md: 5f7888874f7e5a848dffe02f8d00c3a26ac5ebeb4aeb0ae89a0bc7ecee5779b3
+
+requirements:
+  - id: PRINCIPLE-001
+    source: {path: docs/functional/overview.md, locator: Principles}
+    statement: The complete typed physical position is authoritative and sensing faults never become inferred moves.
+    criterion_ids: [MATRIX-OFF-ON-SUPPRESSION]
+    test_ids: [TEST-GAME-AUTHORITY-001, TEST-SENSE-FAULT-001, TEST-MATRIX-RF-003]
+  - id: PRINCIPLE-002
+    source: {path: docs/functional/overview.md, locator: Principles}
+    statement: Every board function remains usable without a browser client.
+    test_ids: [TEST-SYSTEM-OFFLINE-001]
+  - id: PRINCIPLE-003
+    source: {path: docs/functional/overview.md, locator: Principles}
+    statement: The product implements an 8 by 8 standard chessboard with standard rules and results.
+    criterion_ids: [GAME-BOARD-FILES, GAME-BOARD-SQUARES]
+    test_ids: [TEST-GAME-RULES-001, TEST-PHY-GRID-001]
+
+  - id: GAME-START-001
+    source: {path: docs/functional/gameplay.md, locator: Starting and recording}
+    statement: A press of the single button requests a new game.
+    test_ids: [TEST-GAME-START-001]
+  - id: GAME-START-002
+    source: {path: docs/functional/gameplay.md, locator: Starting and recording}
+    statement: A new game is accepted only from the exact standard typed starting position.
+    test_ids: [TEST-GAME-START-002]
+  - id: GAME-START-003
+    source: {path: docs/functional/gameplay.md, locator: Starting and recording}
+    statement: Start-position failures identify the exact mismatched square or tag fault.
+    test_ids: [TEST-GAME-START-003]
+  - id: GAME-MOVE-001
+    source: {path: docs/functional/gameplay.md, locator: Starting and recording}
+    statement: A stable legal physical move becomes provisional.
+    test_ids: [TEST-GAME-MOVE-001]
+  - id: GAME-MOVE-002
+    source: {path: docs/functional/gameplay.md, locator: Starting and recording}
+    statement: A provisional move commits when the opponent first lifts one of their pieces.
+    test_ids: [TEST-GAME-MOVE-002]
+  - id: GAME-MOVE-003
+    source: {path: docs/functional/gameplay.md, locator: Starting and recording}
+    statement: Restoring the previous position before commitment cancels the provisional move.
+    test_ids: [TEST-GAME-MOVE-003]
+  - id: GAME-MOVE-004
+    source: {path: docs/functional/gameplay.md, locator: Starting and recording}
+    statement: A different legal move before commitment replaces the provisional move.
+    test_ids: [TEST-GAME-MOVE-004]
+  - id: GAME-MOVE-005
+    source: {path: docs/functional/gameplay.md, locator: Starting and recording}
+    statement: The owner can explicitly undo a committed move.
+    test_ids: [TEST-GAME-MOVE-005]
+  - id: GAME-MOVE-006
+    source: {path: docs/functional/gameplay.md, locator: Starting and recording}
+    statement: Captures, castling, and en passant are determined from typed position changes.
+    test_ids: [TEST-GAME-CAPTURE-001, TEST-GAME-CASTLE-001, TEST-GAME-EN-PASSANT-001]
+  - id: GAME-PROMOTION-001
+    source: {path: docs/functional/gameplay.md, locator: Starting and recording}
+    statement: Promotion requires a pawn on the final rank followed by a same-color queen, rook, bishop, or knight tag.
+    test_ids: [TEST-GAME-PROMOTION-001]
+  - id: GAME-PROMOTION-002
+    source: {path: docs/functional/gameplay.md, locator: Starting and recording}
+    statement: A pawn left on its final rank is not a completed move.
+    test_ids: [TEST-GAME-PROMOTION-002]
+  - id: GAME-ILLEGAL-001
+    source: {path: docs/functional/gameplay.md, locator: Starting and recording}
+    statement: An illegal stable position flashes the offending side red and is not recorded.
+    test_ids: [TEST-GAME-ILLEGAL-001]
+  - id: GAME-END-001
+    source: {path: docs/functional/gameplay.md, locator: Starting and recording}
+    statement: Checkmate, stalemate, dead positions, fivefold repetition, and the 75-move rule finish automatically.
+    test_ids: [TEST-GAME-END-001]
+  - id: GAME-END-002
+    source: {path: docs/functional/gameplay.md, locator: Starting and recording}
+    statement: Claimable threefold repetition and 50-move draws are displayed as hints rather than automatic results.
+    test_ids: [TEST-GAME-END-002]
+
+  - id: GAME-CLOCK-001
+    source: {path: docs/functional/gameplay.md, locator: Clock and results}
+    statement: A ten-second time-control selection window opens immediately after accepting the start position.
+    criterion_ids: [GAME-TIME-SELECT-WINDOW]
+    test_ids: [TEST-GAME-CLOCK-001]
+  - id: GAME-CLOCK-002
+    source: {path: docs/functional/gameplay.md, locator: Clock and results}
+    statement: Holding the white king on d4, d5, e4, or e5 for roughly three seconds selects the associated preset.
+    criterion_ids: [GAME-TIME-SELECT-HOLD]
+    test_ids: [TEST-GAME-CLOCK-002]
+  - id: GAME-CLOCK-003
+    source: {path: docs/functional/gameplay.md, locator: Clock and results}
+    statement: Returning the white king to e1 arms a selected time preset; otherwise the game is untimed.
+    test_ids: [TEST-GAME-CLOCK-003]
+  - id: GAME-CLOCK-004
+    source: {path: docs/functional/gameplay.md, locator: Clock and results}
+    statement: Placing a move switches the running clock and a provisional take-back switches it back.
+    test_ids: [TEST-GAME-CLOCK-004]
+  - id: GAME-CLOCK-005
+    source: {path: docs/functional/gameplay.md, locator: Clock and results}
+    statement: A short button press pauses or resumes the game clock.
+    test_ids: [TEST-GAME-CLOCK-005]
+  - id: GAME-RESULT-001
+    source: {path: docs/functional/gameplay.md, locator: Clock and results}
+    statement: Flag fall ends the game unless the opponent has insufficient mating material, which produces a draw.
+    test_ids: [TEST-GAME-RESULT-001]
+  - id: GAME-RESULT-002
+    source: {path: docs/functional/gameplay.md, locator: Clock and results}
+    statement: Removing one king requests resignation and removing both requests an agreed draw.
+    test_ids: [TEST-GAME-RESULT-002]
+  - id: GAME-RESULT-003
+    source: {path: docs/functional/gameplay.md, locator: Clock and results}
+    statement: A resignation or draw gesture starts after five seconds of stable king absence.
+    criterion_ids: [GAME-RESIGN-HOLD]
+    test_ids: [TEST-GAME-RESULT-003]
+  - id: GAME-RESULT-004
+    source: {path: docs/functional/gameplay.md, locator: Clock and results}
+    statement: The requested result completes after a displayed 15-second confirmation countdown.
+    criterion_ids: [GAME-RESULT-COUNTDOWN]
+    test_ids: [TEST-GAME-RESULT-004]
+  - id: GAME-RESULT-005
+    source: {path: docs/functional/gameplay.md, locator: Clock and results}
+    statement: Returning a removed king cancels the resignation or draw gesture.
+    test_ids: [TEST-GAME-RESULT-005]
+
+  - id: GAME-POWER-001
+    source: {path: docs/functional/gameplay.md, locator: Sleep and battery}
+    statement: The board sleeps after about 20 idle minutes when no game or clients are active.
+    criterion_ids: [GAME-IDLE-SLEEP]
+    test_ids: [TEST-GAME-POWER-001]
+  - id: GAME-POWER-002
+    source: {path: docs/functional/gameplay.md, locator: Sleep and battery}
+    statement: A game in progress prevents automatic sleep.
+    test_ids: [TEST-GAME-POWER-002]
+  - id: GAME-POWER-003
+    source: {path: docs/functional/gameplay.md, locator: Sleep and battery}
+    statement: Critical battery state saves the game and shuts down after five minutes unless USB is connected.
+    criterion_ids: [GAME-LOW-BATTERY-SHUTDOWN]
+    test_ids: [TEST-GAME-POWER-003]
+
+  - id: GAME-FAULT-001
+    source: {path: docs/functional/gameplay.md, locator: Faults}
+    statement: Faults do not change the stored chess position.
+    test_ids: [TEST-GAME-FAULT-001]
+  - id: GAME-FAULT-002
+    source: {path: docs/functional/gameplay.md, locator: Faults, TAG_FAULT}
+    statement: Unknown tag versions, codes, CRCs, or unreadable changed pieces report TAG_FAULT and identify recovery.
+    test_ids: [TEST-GAME-FAULT-002]
+  - id: GAME-FAULT-003
+    source: {path: docs/functional/gameplay.md, locator: Faults, UID_DUPLICATE and RF_CROSSTALK}
+    statement: Duplicate logical UIDs and one tag read at multiple positions are distinguished and reported.
+    criterion_ids: [MATRIX-OFF-ON-SUPPRESSION]
+    test_ids: [TEST-GAME-FAULT-003, TEST-SENSE-CROSSTALK-001, TEST-MATRIX-RF-003]
+  - id: GAME-FAULT-004
+    source: {path: docs/functional/gameplay.md, locator: Faults, SQUARE_UNSTABLE}
+    statement: Repeated present, absent, or unreadable changes report SQUARE_UNSTABLE for the affected square.
+    test_ids: [TEST-GAME-FAULT-004]
+  - id: GAME-FAULT-005
+    source: {path: docs/functional/gameplay.md, locator: Faults, BOARD_MISMATCH}
+    statement: A complete restart snapshot that differs from persisted state reports BOARD_MISMATCH and requires resynchronization or a new game.
+    test_ids: [TEST-GAME-FAULT-005]
+
+  - id: GAME-PROVISION-001
+    source: {path: docs/functional/gameplay.md, locator: Piece provisioning}
+    statement: Provisioning requires a long button hold and owner confirmation.
+    test_ids: [TEST-GAME-PROVISION-001]
+  - id: GAME-PROVISION-002
+    source: {path: docs/functional/gameplay.md, locator: Piece provisioning}
+    statement: New-set provisioning writes and verifies the 32 standard pieces from their starting squares and records each UID.
+    criterion_ids: [GAME-STANDARD-PIECES]
+    test_ids: [TEST-GAME-PROVISION-002]
+  - id: GAME-PROVISION-003
+    source: {path: docs/functional/gameplay.md, locator: Piece provisioning}
+    statement: New-set provisioning prompts for every spare promotion piece.
+    test_ids: [TEST-GAME-PROVISION-003]
+  - id: GAME-PROVISION-004
+    source: {path: docs/functional/gameplay.md, locator: Piece provisioning}
+    statement: A replacement tag can be written for one selected piece class.
+    test_ids: [TEST-GAME-PROVISION-004]
+  - id: GAME-PROVISION-005
+    source: {path: docs/functional/gameplay.md, locator: Piece provisioning}
+    statement: Provisioning refuses to overwrite a tag detected elsewhere on the board.
+    test_ids: [TEST-GAME-PROVISION-005]
+
+  - id: GAME-WEB-001
+    source: {path: docs/functional/gameplay.md, locator: Browser client}
+    statement: Every browser client mirrors board state, with the first client as owner and later clients as spectators.
+    test_ids: [TEST-WEB-ROLE-001, TEST-WEB-MIRROR-001]
+  - id: GAME-WEB-002
+    source: {path: docs/functional/gameplay.md, locator: Browser client}
+    statement: The owner can edit metadata, time presets, brightness, diagnostics, provisioning, resynchronization, games, and WiFi settings.
+    test_ids: [TEST-WEB-OWNER-001]
+  - id: GAME-WEB-003
+    source: {path: docs/functional/gameplay.md, locator: Browser client}
+    statement: Optional Stockfish analysis runs in a browser Web Worker and is not required for board operation.
+    test_ids: [TEST-WEB-ANALYSIS-001]
+  - id: GAME-PERSIST-001
+    source: {path: docs/functional/gameplay.md, locator: Browser client}
+    statement: Completed games are stored as PGN with standard tags and SAN.
+    test_ids: [TEST-GAME-PERSIST-001]
+  - id: GAME-PERSIST-002
+    source: {path: docs/functional/gameplay.md, locator: Browser client}
+    statement: The in-progress snapshot persists after every committed move.
+    test_ids: [TEST-GAME-PERSIST-002]
+
+  - id: IF-DISPLAY-001
+    source: {path: docs/functional/interface.md, locator: Displays}
+    statement: Two 100 by 33 mm ER-OLEDM3.12-1W displays fit one per player rail.
+    criterion_ids: [IF-DISPLAY-COUNT, IF-DISPLAY-WIDTH, IF-DISPLAY-HEIGHT]
+    test_ids: [TEST-IF-DISPLAY-001]
+  - id: IF-DISPLAY-002
+    source: {path: docs/functional/interface.md, locator: Displays}
+    statement: Displays show clocks, setup, countdowns, faults, and battery state.
+    test_ids: [TEST-IF-DISPLAY-002]
+  - id: IF-DISPLAY-003
+    source: {path: docs/functional/interface.md, locator: Displays}
+    statement: Displays stay dark during an unclocked game unless information must be communicated.
+    test_ids: [TEST-IF-DISPLAY-003]
+  - id: IF-DISPLAY-004
+    source: {path: docs/functional/interface.md, locator: Displays}
+    statement: Display glass is clamped against hard stops without preload and the button remains finger-accessible outside the cradle.
+    test_ids: [TEST-MECH-DISPLAY-001, TEST-MECH-BUTTON-001]
+  - id: IF-LIGHTBAR-001
+    source: {path: docs/functional/interface.md, locator: Light bars}
+    statement: Two 120 by 8.5 mm light-bar PCBs fit one per player rail behind replaceable diffusers.
+    criterion_ids: [IF-LIGHTBAR-ASSEMBLY-COUNT, IF-LIGHTBAR-WIDTH, IF-LIGHTBAR-HEIGHT]
+    test_ids: [TEST-IF-LIGHTBAR-001]
+  - id: IF-LIGHTBAR-002
+    source: {path: docs/functional/interface.md, locator: Light bars}
+    statement: Each light bar has exactly 14 low-current LEDs with every component on the front side.
+    criterion_ids: [IF-LIGHTBAR-COUNT, LB-SUPPLY-DROOP]
+    test_ids: [TEST-IF-LIGHTBAR-002, TEST-LB-PWR-001]
+  - id: IF-LIGHTBAR-003
+    source: {path: docs/functional/interface.md, locator: Light bars}
+    statement: Diffuser standoff is designed around half the 7.30 mm LED pitch so the output reads as a continuous bar.
+    criterion_ids: [IF-DIFFUSER-STANDOFF]
+    test_ids: [TEST-MECH-DIFFUSER-001, TEST-V8-DIFFUSER-001]
+  - id: IF-BUTTON-001
+    source: {path: docs/functional/interface.md, locator: Button}
+    statement: The single button supports new-game press, in-game short press, and gated maintenance long hold.
+    test_ids: [TEST-IF-BUTTON-001]
+  - id: IF-FEEDBACK-001
+    source: {path: docs/functional/interface.md, locator: Feedback semantics}
+    statement: Displays carry textual state and light bars carry brief glanceable feedback for the specified events.
+    test_ids: [TEST-IF-FEEDBACK-001]
+  - id: IF-FEEDBACK-002
+    source: {path: docs/functional/interface.md, locator: Feedback semantics}
+    statement: Both feedback surfaces stay dark when an unclocked game has nothing to communicate.
+    test_ids: [TEST-IF-FEEDBACK-002]
+  - id: IF-FEEDBACK-003
+    source: {path: docs/functional/interface.md, locator: Feedback semantics}
+    statement: The owner can configure feedback brightness from the browser.
+    test_ids: [TEST-IF-FEEDBACK-003]
+
+  - id: PHY-GEO-001
+    source: {path: docs/functional/physical.md, locator: Fixed geometry}
+    statement: Square centers use a 35.0 mm pitch.
+    criterion_ids: [PHY-SQUARE-PITCH]
+    test_ids: [TEST-PHY-GEO-001]
+  - id: PHY-GEO-002
+    source: {path: docs/functional/physical.md, locator: Fixed geometry}
+    statement: The 8 by 8 play area is 280 by 280 mm.
+    criterion_ids: [PHY-PLAY-WIDTH]
+    test_ids: [TEST-PHY-GEO-002]
+  - id: PHY-GEO-003
+    source: {path: docs/functional/physical.md, locator: Fixed geometry}
+    statement: Each side rail is 15 mm wide.
+    criterion_ids: [PHY-SIDE-RAIL-WIDTH]
+    test_ids: [TEST-PHY-GEO-003]
+  - id: PHY-GEO-004
+    source: {path: docs/functional/physical.md, locator: Fixed geometry}
+    statement: Each player rail is 50 mm wide.
+    criterion_ids: [PHY-PLAYER-RAIL-WIDTH]
+    test_ids: [TEST-PHY-GEO-004]
+  - id: PHY-GEO-005
+    source: {path: docs/functional/physical.md, locator: Fixed geometry}
+    statement: Overall board dimensions are 310 by 380 mm.
+    criterion_ids: [PHY-OVERALL-WIDTH, PHY-OVERALL-DEPTH]
+    test_ids: [TEST-PHY-GEO-005]
+  - id: PHY-GEO-006
+    source: {path: docs/functional/physical.md, locator: Fixed geometry}
+    statement: Body height before feet targets no more than 32 mm.
+    criterion_ids: [PHY-BODY-HEIGHT]
+    test_ids: [TEST-PHY-GEO-006]
+  - id: PHY-TOP-001
+    source: {path: docs/functional/physical.md, locator: Continuous top surface}
+    statement: The play area has one continuous structural face with no visible contact, sensor, pad, or hole inside a square.
+    test_ids: [TEST-MECH-TOP-001]
+  - id: PHY-TOP-002
+    source: {path: docs/functional/physical.md, locator: Continuous top surface}
+    statement: Carrier, adhesive, and veneer total no more than 1.75 mm and remain uniform.
+    criterion_ids: [PHY-TOP-STACK]
+    test_ids: [TEST-PHY-TOP-002]
+  - id: PHY-TOP-003
+    source: {path: docs/functional/physical.md, locator: Continuous top surface}
+    statement: The top is supported on grid lines and perimeter while the sensing PCB carries no surface load.
+    test_ids: [TEST-MECH-TOP-003]
+  - id: PHY-TOP-004
+    source: {path: docs/functional/physical.md, locator: Continuous top surface}
+    statement: The playing face uses a 1.0 mm G10 or FR4 carrier with bonded light and dark real-wood veneer squares and a controlled adhesive layer.
+    criterion_ids: [PHY-CARRIER-THICKNESS]
+    test_ids: [TEST-MECH-TOP-004, TEST-V8-TOP-STACK-001]
+  - id: PHY-RF-001
+    source: {path: docs/functional/physical.md, locator: Read budget}
+    statement: Worst-case distance from a resting piece tag to the sensing plane is no more than 3.0 mm.
+    criterion_ids: [PHY-TAG-DISTANCE, MATRIX-CELL-RESONANCE, MATRIX-BUS-RESONANCE, MATRIX-BIAS-CURRENT, MATRIX-OFF-BIAS-CURRENT, HUB-SYSTEM-RESONANCE, HUB-COIL-CURRENT-PER-VOLT]
+    test_ids: [TEST-PHY-RF-001, TEST-V8-RF-001, TEST-MATRIX-RF-001, TEST-MATRIX-RF-002, TEST-MATRIX-BIAS-001, TEST-MATRIX-BIAS-002, TEST-HUB-RF-001, TEST-HUB-RF-002]
+  - id: PHY-RF-002
+    source: {path: docs/functional/physical.md, locator: Read budget}
+    statement: Conductive objects remain at least 10 mm behind the sensing plane until measured RF evidence permits less.
+    criterion_ids: [PHY-CONDUCTOR-CLEARANCE]
+    test_ids: [TEST-PHY-RF-002, TEST-V8-RF-002]
+  - id: PHY-PIECE-001
+    source: {path: docs/functional/physical.md, locator: Pieces}
+    statement: Each piece hides a centered NFC tag in a 22 mm recess beneath thin felt.
+    criterion_ids: [PHY-TAG-RECESS-DIAMETER]
+    test_ids: [TEST-MECH-PIECE-001]
+  - id: PHY-PIECE-002
+    source: {path: docs/functional/physical.md, locator: Pieces}
+    statement: Pieces use nonconductive ballast and contain no steel washer or metal immediately above the tag.
+    test_ids: [TEST-MECH-PIECE-002, TEST-V8-RF-003]
+  - id: PHY-PIECE-003
+    source: {path: docs/functional/physical.md, locator: Pieces}
+    statement: Tag provisioning identifies piece color and type independently of sensing architecture.
+    test_ids: [TEST-SENSE-TAG-001, TEST-GAME-PROVISION-002]
+
+component_absolute_maximums:
+  source: Generated fitted BOMs and V1 component evidence records
+  test_ids: [TEST-V1-ABSOLUTE-MAXIMUM-COVERAGE]
+  rule: Every fitted semiconductor, IC, capacitor, inductor, resistor, fuse, switch, connector, display, tag, and battery has its applicable absolute limits mapped to V2, V3, V4, or V7 tests before V0 may pass.
