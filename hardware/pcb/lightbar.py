@@ -33,7 +33,7 @@ def build_lightbar() -> Circuit:
     connector = component(
         circuit,
         "J1",
-        "SM04B-GHS-TB",
+        "A1257WR-S-4P",
         "Connector_JST:JST_GH_SM04B-GHS-TB_1x04-1MP_P1.25mm_Horizontal",
         (
             PinDefinition("1", "LED_5V"),
@@ -41,7 +41,7 @@ def build_lightbar() -> Circuit:
             PinDefinition("3", "DATA_IN"),
             PinDefinition("4", "DATA_OUT"),
         ),
-        mpn="SM04B-GHS-TB",
+        mpn="A1257WR-S-4P",
         description="Light bar input and daisy-chain output",
         unit_cost_eur=0.30,
     )
@@ -87,7 +87,7 @@ def build_lightbar() -> Circuit:
         f"C{LED_COUNT + 1}",
         "100u 6.3V",
         "Capacitor_SMD:C_1210_3225Metric",
-        mpn="GRM32ER60J107ME20",
+        mpn="CL32A107MQVNNNE",
         unit_cost_eur=0.09,
     )
     _connect(power, bulk, "1")

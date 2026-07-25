@@ -36,5 +36,5 @@ any LED to 100 mV; the routed board measures 24.6 mV at the far end of the bar.
 
 ## Cost
 
-Generated BOM (`hardware/pcb/generated/lightbar/lightbar_bom.csv`) totals 1.46 EUR in parts per
+Generated engineering BOM (`hardware/pcb/generated/lightbar/lightbar_engineering_bom.csv`) totals 1.46 EUR in parts per
 bar, against the 5 EUR per-bar target in [boards.md](boards.md) including fabrication.

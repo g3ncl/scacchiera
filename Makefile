@@ -14,7 +14,10 @@ export MPLCONFIGDIR
 export KICAD9_SYMBOL_DIR
 export KICAD_FOOTPRINT_DIR
 
-.PHONY: check schematic-lightbar pcb-lightbar pcb-lightbar-drc pcb-fab clean
+.PHONY: check footprints schematic-lightbar schematic-matrix schematic-hub \
+	pcb-lightbar pcb-lightbar-drc pcb-lightbar-fab \
+	pcb-matrix pcb-matrix-route pcb-matrix-drc pcb-matrix-fab \
+	pcb-hub pcb-hub-route pcb-hub-drc pcb-hub-fab pcb-fab clean
 
 check: schematic-lightbar schematic-matrix schematic-hub pcb-lightbar-drc
 	$(PYTHON) -m mypy hardware

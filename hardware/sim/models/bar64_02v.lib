@@ -1,0 +1,12 @@
+* JSCJ BAR64-02V PIN diode model for the matrix switch cell.
+*
+* This is a conservative datasheet-anchored small-signal RF model, not a
+* vendor macromodel. The junction capacitance curve passes through the stated
+* maxima of 0.55 pF at 1 V and 0.35 pF at 5 V reverse bias. This deliberately
+* exceeds the 0.4 pF typical value at 0 V. The forward model reaches the stated
+* 2.5 ohm maximum at 10 mA and 100 MHz.
+*
+* TT=0 keeps the AC linearization from treating PIN carrier lifetime as an
+* ordinary diode diffusion capacitance. The model is valid for the switch
+* bias points and small-signal AC analysis, not reverse-recovery transients.
+.model BAR64_02V D(IS=1e-14 N=0.93 RS=0.1 CJO=0.783p VJ=0.6 M=0.36 TT=0)

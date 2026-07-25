@@ -55,6 +55,7 @@ MODELS: dict[str, SpiceModel] = {
 # switch models these need no .SUBCKT wrapper. Pins are ordered (anode, cathode).
 DIODE_MODELS: dict[str, SpiceModel] = {
     "BAP64-02": SpiceModel(name="BAP64_02", pins=("A", "K"), include="bap64_02.lib"),
+    "BAR64-02V": SpiceModel(name="BAR64_02V", pins=("A", "K"), include="bar64_02v.lib"),
 }
 
 

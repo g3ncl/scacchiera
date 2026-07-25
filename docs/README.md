@@ -19,4 +19,7 @@ three PCB layouts are generated from code and DRC-clean (0 violations, 0 unconne
 board has cleared its milestones, so the hardware rebuild is complete. Firmware and the companion
 app have not started.
 
+[JLCPCB assembly sourcing](hardware/jlcpcb-sourcing.md) records the Basic-part selections,
+unresolved assembly items, and the cost-review rule for any replacement IC.
+
 Both the functional spec and the future implementation draw on the [Obsidian vault](../Vault/Scacchiera/) at the repository root, which holds the external research feeding the chessboard (reference projects, papers, datasheets) as an LLM-maintained wiki over immutable raw captures. Start at [Vault/Scacchiera/Wiki/index.md](../Vault/Scacchiera/Wiki/index.md); see `CLAUDE.md` for how it is maintained.

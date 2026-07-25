@@ -1,6 +1,6 @@
 ---
 type: overview
-date_updated: 2026-07-24
+date_updated: 2026-07-25
 tags:
   - wiki/overview
 ---
@@ -46,3 +46,21 @@ decision again in the from-scratch rebuild).
 
 See [[nfc-game-board-project]] for the full architecture and [[bitwiseid-whitepaper]] for the
 detection method in detail.
+
+## Assembly sourcing
+
+[[jlcpcb]] is the intended assembly service. The captured
+[[jlcpcb-economic-parts-2026-07-24|economic-parts catalog]] supplies a dated Basic-part inventory
+for the production pass. Only substitutions that preserve value, package, dielectric, and electrical
+limits are assigned to the JLC BOM; RF, power, IC, and mechanical items without a verified match
+are kept explicit in [[jlcpcb-basic-part-sourcing]] and
+[[../../../docs/hardware/jlcpcb-sourcing.md|the project sourcing register]].
+
+The matrix production BOM is now fully bound. [[jlcpcb-matrix-bom-review]] records how exact MPN
+comments, live inventory checks, assembly-only reference filtering, and conservative RF simulation
+turned JLCPCB's ambiguous first match into an 11-line BOM whose 165 references exactly match its
+CPL.
+
+The follow-up [[jlcpcb-matrix-live-stock-2026-07-25|live inventory capture]] confirms that every
+matrix line is available from JLCPCB's public Basic or Extended library above the five-board order
+requirement. Pre-Order and Global Sourcing remain fallback paths, not current requirements.

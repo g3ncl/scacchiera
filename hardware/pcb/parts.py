@@ -6,6 +6,65 @@ from dataclasses import dataclass
 from skidl import Circuit, Part
 
 
+JLC_PART_BY_MPN = {
+    "0402CG101J500NT": "C1546",
+    "0603WAF1000T5E": "C22775",
+    "0603WAF1001T5E": "C21190",
+    "0603WAF1002T5E": "C25804",
+    "0603WAF1003T5E": "C25803",
+    "0603WAF1004T5E": "C22935",
+    "0603WAF2001T5E": "C22975",
+    "0603WAF2492T5E": "C25962",
+    "0603WAF3303T5E": "C23137",
+    "0603WAF4701T5E": "C23162",
+    "0603WAF5101T5E": "C23186",
+    "0603WAF8202T5E": "C23254",
+    "0603WAF9102T5E": "C23265",
+    "74HC595D,118": "C5947",
+    "A1257WR-S-4P": "C225127",
+    "B2B-PH-K-S(LF)(SN)": "C131337",
+    "BAT54H": "C475620",
+    "CC1206KKX7RCBB472": "C107198",
+    "CL32A107MQVNNNE": "C49066",
+    "DFE201610E-R47M=P2": "C269773",
+    "DMP2035U-7": "C110499",
+    "GRM1555C1H221JA01D": "C71693",
+    "GRM1555C1H680JA01D": "C76977",
+    "JS102011SAQN": "C221660",
+    "LQW2BASR47J00L": "C337959",
+    "MCP73871T-2CCI/ML": "C511310",
+    "MF-MSMF050-2": "C17313",
+    "PN5180A0HN/C3E": "C1526287",
+    "RC0603FR-07110KL": "C137807",
+    "RC0603FR-07511KL": "C188257",
+    "RC0603FR-07732KL": "C246003",
+    "SN74AHCT1G125DBVR": "C7484",
+    "SM02B-GHS-TB(LF)(SN)": "C189893",
+    "TCA9535PWR": "C130204",
+    "TPS2553DBVR-1": "C111738",
+    "TPS61023DRLR": "C919459",
+    "TPS63802DLAR": "C2845237",
+    "USB4105-GF-A": "C3020560",
+    "USBLC6-2SC6": "C2687116",
+    "BAR64-02V": "C5295579",
+    "BSS123": "C7420338",
+    "BSS84": "C114481",
+    "CC0603FRNPO9BN221": "C519500",
+    "CL05B104KO5NNNC": "C1525",
+    "CL05A105KA5NQNC": "C52923",
+    "CL05C100JB5NNNC": "C32949",
+    "CL10A105KB8NNNC": "C15849",
+    "CL21A106KAYNNNE": "C15850",
+    "CL21A226MAQNNNE": "C45783",
+    "CL21A475KAQNNNE": "C1779",
+    "CL10A225KO8NNNC": "C23630",
+    "RS-03K1800FT": "C286574",
+    "SDFL2012S100KTF": "C1046",
+    "SM07B-GHS-TB(LF)(SN)": "C495552",
+    "0603WAF150KT5E": "C22769",
+}
+
+
 @dataclass(frozen=True)
 class PinDefinition:
     number: str
@@ -38,6 +97,7 @@ def component(
     part.value = value
     part.footprint = footprint
     part.manf_num = mpn
+    part.lcsc_part = JLC_PART_BY_MPN.get(mpn, "")
     part.description = description
     part.unit_cost_eur = unit_cost_eur
     part.fitted = "yes" if fitted else "DNP"

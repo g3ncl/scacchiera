@@ -68,3 +68,33 @@ is where [[bitwiseid-method|BitwiseID]] is proven. Updated [[pin-diode-antenna-s
 rebuilt matrix board re-adopted the technique as a single-ended half of the old hybrid cell,
 re-validated in ngspice. Design detail lives in `docs/hardware/`, not here; these edits only
 un-stale the wiki's "open decision" language. `Clippings/` untouched.
+
+## [2026-07-24] ingest | JLCPCB economic-parts catalog snapshot
+
+Captured the 2,004-row JLCPCB economic-parts CSV under `Clippings/jlcpcb/`, then ingested it as
+[[jlcpcb-economic-parts-2026-07-24]]. Created [[jlcpcb]] and
+[[jlcpcb-basic-part-sourcing]], updated [[index]] and [[overview]], and recorded the project-level
+Basic selections plus intentionally unresolved parts in
+`docs/hardware/jlcpcb-sourcing.md`. The catalog is a dated availability snapshot, so it informs
+but does not replace a live JLCPCB quote.
+
+## [2026-07-24] query | Validate the matrix JLCPCB assembly BOM
+
+Filed [[jlcpcb-matrix-bom-review]] after resolving JLCPCB comment mismatches, unavailable matches,
+and a PCB-copper pseudo-part. Updated [[jlcpcb-basic-part-sourcing]], [[index]], and [[overview]].
+The final matrix upload has 11 exact JLC-bound rows and matching 165-reference BOM/CPL sets. The
+stocked BAR64-02V PIN-diode substitution passed the matrix RF limits under a conservative model.
+
+## [2026-07-25] ingest | Matrix live JLCPCB inventory
+
+Captured the 11 selected matrix parts and their live public stock as
+[[jlcpcb-matrix-live-stock-2026-07-25]]. Updated [[jlcpcb]],
+[[jlcpcb-basic-part-sourcing]], [[index]], and [[overview]]. Every matrix selection exceeded its
+five-board order quantity. Public Basic and Extended stock is the first choice; Pre-Order and
+Global Sourcing remain explicit fallbacks when no safe stocked equivalent exists.
+
+## [2026-07-25] lint | Correct Extended-component fee policy
+
+Updated [[jlcpcb-basic-part-sourcing]] to treat the JLCPCB Extended fee per unique component, not
+per PCB design. The production rule is now Basic-first, with an Extended line retained only when no
+safe Basic part preserves the required function, package, and electrical limits.

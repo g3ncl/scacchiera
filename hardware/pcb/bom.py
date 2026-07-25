@@ -13,6 +13,7 @@ class BomKey:
     value: str
     footprint: str
     mpn: str
+    lcsc_part: str
     fitted: str
     unit_cost_eur: float
 
@@ -22,6 +23,7 @@ def _key(part: object) -> BomKey:
         str(getattr(part, "value", "")),
         str(getattr(part, "footprint", "")),
         str(getattr(part, "manf_num", "")),
+        str(getattr(part, "lcsc_part", "")),
         str(getattr(part, "fitted", "yes")),
         float(getattr(part, "unit_cost_eur", 0.0)),
     )
@@ -43,7 +45,10 @@ def write_bom(circuit: Circuit, destination: Path) -> None:
     with destination.open("w", encoding="utf-8", newline="") as bom_file:
         writer = csv.writer(bom_file)
         writer.writerow(
-            ("Comment", "Designator", "Footprint", "MPN", "Fitted", "Quantity", "Unit EUR", "Line EUR")
+            (
+                "Comment", "Designator", "Footprint", "MPN", "LCSC Part #", "Fitted",
+                "Quantity", "Unit EUR", "Line EUR",
+            )
         )
         for key, references in sorted(grouped.items(), key=lambda item: item[1][0]):
             line_cost = key.unit_cost_eur * len(references) if key.fitted == "yes" else 0.0
@@ -53,13 +58,14 @@ def write_bom(circuit: Circuit, destination: Path) -> None:
                     ",".join(references),
                     key.footprint,
                     key.mpn,
+                    key.lcsc_part,
                     key.fitted,
                     len(references),
                     f"{key.unit_cost_eur:.3f}",
                     f"{line_cost:.3f}",
                 )
             )
-        writer.writerow(("TOTAL", "", "", "", "", "", "", f"{fitted_cost_eur(circuit):.3f}"))
+        writer.writerow(("TOTAL", "", "", "", "", "", "", "", f"{fitted_cost_eur(circuit):.3f}"))
 
 
 def missing_manufacturer_parts(circuit: Circuit) -> tuple[str, ...]:

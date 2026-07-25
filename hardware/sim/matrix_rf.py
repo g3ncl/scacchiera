@@ -60,7 +60,7 @@ def _build_bus() -> tuple[Circuit, tuple[Net, ...]]:
 
 
 def _includes() -> str:
-    return model_includes(MODELS["BSS123"], MODELS["BSS84"], DIODE_MODELS["BAP64-02"])
+    return model_includes(MODELS["BSS123"], MODELS["BSS84"], DIODE_MODELS["BAR64-02V"])
 
 
 def _testbench_tail(output: Path) -> list[str]:

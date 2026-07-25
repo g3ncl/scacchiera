@@ -14,26 +14,61 @@ from pathlib import Path
 KICAD_CLI = "/usr/bin/kicad-cli"
 GENERATED = Path(__file__).parent / "generated"
 BOARDS = ("lightbar", "matrix", "hub")
+LEGACY_ASSEMBLY_SUFFIXES = (
+    "_bom.csv",
+    "_cpl.csv",
+    "_jlc_bom.csv",
+    "_jlc_cpl.csv",
+)
 
 GERBER_LAYERS = (
     "F.Cu,B.Cu,F.Paste,B.Paste,F.Silkscreen,B.Silkscreen,F.Mask,B.Mask,Edge.Cuts"
 )
 
 JLC_CPL_COLUMNS = ("Designator", "Mid X", "Mid Y", "Rotation", "Layer")
+JLC_BOM_COLUMNS = ("Comment", "Designator", "Footprint", "LCSC Part #")
+NON_ASSEMBLED_MPNS = frozenset({"PCB_COPPER"})
 
 
-def fitted_references(bom_path: Path) -> frozenset[str]:
-    """Read the fitted designators from the project's engineering BOM."""
+def _is_assembled(row: dict[str, str]) -> bool:
+    return row["Fitted"] == "yes" and row["MPN"] not in NON_ASSEMBLED_MPNS
+
+
+def assembly_references(bom_path: Path) -> frozenset[str]:
+    """Read the purchased assembly designators from the engineering BOM."""
     with bom_path.open(encoding="utf-8", newline="") as bom_file:
         reader = csv.DictReader(bom_file)
-        required_columns = {"Designator", "Fitted"}
+        required_columns = {"Designator", "MPN", "Fitted"}
         if reader.fieldnames is None or not required_columns.issubset(reader.fieldnames):
             raise ValueError(f"{bom_path} is not a project BOM export")
         return frozenset(
             reference
             for row in reader
-            if row["Fitted"] == "yes"
+            if _is_assembled(row)
             for reference in row["Designator"].split(",")
+        )
+
+
+def write_jlc_bom(source: Path, destination: Path) -> None:
+    """Convert the engineering BOM into JLCPCB's assembly BOM layout."""
+    with source.open(encoding="utf-8", newline="") as source_file:
+        reader = csv.DictReader(source_file)
+        required_columns = {*JLC_BOM_COLUMNS, "MPN", "Fitted"}
+        if reader.fieldnames is None or not required_columns.issubset(reader.fieldnames):
+            raise ValueError(f"{source} is not a project BOM export")
+        rows = tuple(row for row in reader if _is_assembled(row))
+
+    with destination.open("w", encoding="utf-8", newline="") as destination_file:
+        writer = csv.DictWriter(destination_file, fieldnames=JLC_BOM_COLUMNS)
+        writer.writeheader()
+        writer.writerows(
+            {
+                "Comment": row["MPN"],
+                "Designator": row["Designator"],
+                "Footprint": row["Footprint"],
+                "LCSC Part #": row["LCSC Part #"],
+            }
+            for row in rows
         )
 
 
@@ -65,7 +100,26 @@ def write_jlc_cpl(
             )
 
 
-def export_fab(name: str) -> Path:
+def validate_assembly_designators(bom_path: Path, cpl_path: Path) -> None:
+    """Require the upload BOM and CPL to describe the same fitted parts."""
+    with bom_path.open(encoding="utf-8", newline="") as bom_file:
+        bom_references = {
+            reference
+            for row in csv.DictReader(bom_file)
+            for reference in row["Designator"].split(",")
+        }
+    with cpl_path.open(encoding="utf-8", newline="") as cpl_file:
+        cpl_references = {row["Designator"] for row in csv.DictReader(cpl_file)}
+    if bom_references != cpl_references:
+        missing_from_cpl = sorted(bom_references - cpl_references)
+        missing_from_bom = sorted(cpl_references - bom_references)
+        raise ValueError(
+            "JLCPCB BOM/CPL designator mismatch: "
+            f"BOM only={missing_from_cpl}, CPL only={missing_from_bom}"
+        )
+
+
+def export_fab(name: str) -> tuple[Path, Path, Path]:
     board_dir = GENERATED / name
     pcb_file = board_dir / f"{name}.kicad_pcb"
     if not pcb_file.exists():
@@ -106,7 +160,12 @@ def export_fab(name: str) -> Path:
             archive.write(gerber_file, arcname=gerber_file.name)
 
     raw_cpl_path = fab_dir / f"{name}.pos.csv"
-    cpl_path = board_dir / f"{name}_cpl.csv"
+    cpl_path = board_dir / f"{name}_jlcpcb_cpl.csv"
+    engineering_bom_path = board_dir / f"{name}_engineering_bom.csv"
+    bom_path = board_dir / f"{name}_jlcpcb_bom.csv"
+    for suffix in LEGACY_ASSEMBLY_SUFFIXES:
+        (board_dir / f"{name}{suffix}").unlink(missing_ok=True)
+    write_jlc_bom(engineering_bom_path, bom_path)
     subprocess.run(
         [
             KICAD_CLI, "pcb", "export", "pos",
@@ -119,17 +178,20 @@ def export_fab(name: str) -> Path:
         ],
         check=True,
     )
-    write_jlc_cpl(raw_cpl_path, cpl_path, fitted_references(board_dir / f"{name}_bom.csv"))
+    write_jlc_cpl(raw_cpl_path, cpl_path, assembly_references(engineering_bom_path))
+    validate_assembly_designators(bom_path, cpl_path)
 
     shutil.rmtree(fab_dir)
-    return zip_path
+    return zip_path, bom_path, cpl_path
 
 
 def main() -> None:
     if len(sys.argv) != 2 or sys.argv[1] not in BOARDS:
         raise SystemExit(f"Usage: python -m hardware.pcb.fab {{{'|'.join(BOARDS)}}}")
-    zip_path = export_fab(sys.argv[1])
+    zip_path, bom_path, cpl_path = export_fab(sys.argv[1])
     print(f"gerbers: {zip_path}")
+    print(f"JLCPCB BOM: {bom_path}")
+    print(f"JLCPCB CPL: {cpl_path}")
 
 
 if __name__ == "__main__":

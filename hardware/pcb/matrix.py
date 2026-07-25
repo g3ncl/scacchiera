@@ -70,7 +70,7 @@ def matrix_cell(
     _connect(rf_bus, c_block, "1")
     _connect(bus, c_block, "2")
 
-    d_series = diode(circuit, f"D{index * 2 + 1}", "BAP64-02", unit_cost_eur=0.10)
+    d_series = diode(circuit, f"D{index * 2 + 1}", "BAR64-02V", unit_cost_eur=0.036)
     _connect(bus, d_series, "A")
     _connect(match, d_series, "K")
 
@@ -87,8 +87,8 @@ def matrix_cell(
         f"C{index * 4 + 2}",
         "220p C0G 2%",
         "Capacitor_SMD:C_0603_1608Metric",
-        mpn="GRM1885C1H221JA01D",
-        unit_cost_eur=0.02,
+        mpn="CC0603FRNPO9BN221",
+        unit_cost_eur=0.034,
     )
     fine = two_pin(
         circuit,
@@ -119,8 +119,8 @@ def matrix_cell(
         f"R{index * 3 + 1}",
         "1.5R 1%",
         "Resistor_SMD:R_0603_1608Metric",
-        mpn="RC0603FR-071R5L",
-        unit_cost_eur=0.002,
+        mpn="0603WAF150KT5E",
+        unit_cost_eur=0.005,
     )
     _connect(match, damping, "1")
     _connect(coil, damping, "2")
@@ -148,13 +148,13 @@ def matrix_cell(
         f"R{index * 3 + 2}",
         R_SET,
         "Resistor_SMD:R_0603_1608Metric",
-        mpn="RC0603FR-07180RL",
-        unit_cost_eur=0.002,
+        mpn="RS-03K1800FT",
+        unit_cost_eur=0.004,
     )
     _connect(steer, r_set, "1")
     _connect(mid, r_set, "2")
 
-    d_iso = diode(circuit, f"D{index * 2 + 2}", "BAP64-02", unit_cost_eur=0.10)
+    d_iso = diode(circuit, f"D{index * 2 + 2}", "BAR64-02V", unit_cost_eur=0.036)
     _connect(mid, d_iso, "A")
     _connect(inject, d_iso, "K")
 
@@ -163,8 +163,8 @@ def matrix_cell(
         f"L{index * 2 + 1}",
         "10uH",
         "Inductor_SMD:L_0805_2012Metric",
-        mpn="LQM21FN100M70L",
-        unit_cost_eur=0.03,
+        mpn="SDFL2012S100KTF",
+        unit_cost_eur=0.056,
     )
     _connect(inject, l_choke, "1")
     _connect(bus, l_choke, "2")
@@ -174,7 +174,7 @@ def matrix_cell(
         f"R{index * 3 + 3}",
         R_BLEED,
         "Resistor_SMD:R_0603_1608Metric",
-        mpn="RC0603FR-07100KL",
+        mpn="0603WAF1003T5E",
         unit_cost_eur=0.002,
     )
     _connect(inject, r_bleed, "1")
@@ -189,12 +189,12 @@ def _shift_register(circuit: Circuit, ref: str) -> Part:
     return component(
         circuit,
         ref,
-        "SN74HC595PW",
-        "Package_SO:TSSOP-16_4.4x5mm_P0.65mm",
+        "74HC595D,118",
+        "Package_SO:SOIC-16_3.9x9.9mm_P1.27mm",
         tuple(PinDefinition(str(number), name) for number, name in enumerate(names, start=1)),
-        mpn="SN74HC595PWR",
+        mpn="74HC595D,118",
         description="8-bit shift register holding the one-hot line selection",
-        unit_cost_eur=0.12,
+        unit_cost_eur=0.20,
     )
 
 
@@ -235,9 +235,9 @@ def build_matrix() -> Circuit:
             PinDefinition("6", "SEL_SRCLK"),
             PinDefinition("7", "SEL_RCLK"),
         ),
-        mpn="SM07B-GHS-TB",
+        mpn="SM07B-GHS-TB(LF)(SN)",
         description="Hub link: RF bus between grounds, rail, and selection serial",
-        unit_cost_eur=0.35,
+        unit_cost_eur=0.296,
     )
     _connect(gnd, connector, "1")
     _connect(rf_bus, connector, "2")

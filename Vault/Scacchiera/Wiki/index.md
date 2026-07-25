@@ -1,6 +1,6 @@
 ---
 type: index
-date_updated: 2026-07-24
+date_updated: 2026-07-25
 tags:
   - wiki/index
 ---
@@ -41,6 +41,8 @@ One [[wiki/source]] summary per ingested raw source. Factual, no interpretation.
 | [[nfcgameboard-pcb]] | nfcgameboard.com page | 2026-07-24 |
 | [[nfcgameboard-software]] | nfcgameboard.com page | 2026-07-24 |
 | [[bitwiseid-whitepaper]] | white paper (PDF, transcribed) | 2026-07-24 |
+| [[jlcpcb-economic-parts-2026-07-24]] | economic-parts catalog snapshot | 2026-07-24 |
+| [[jlcpcb-matrix-live-stock-2026-07-25]] | matrix live JLCPCB inventory | 2026-07-25 |
 
 ## Entities
 
@@ -51,18 +53,21 @@ People, tools, orgs, repos. See [[wiki/entity]] pages.
 | [[ben-bulsink]] | 5 | 2026-07-24 |
 | [[nfc-game-board-project]] | 4 | 2026-07-24 |
 | [[clrc632]] | 2 | 2026-07-24 |
+| [[jlcpcb]] | 2 | 2026-07-25 |
 
 ## Concepts
 
 Ideas, patterns, techniques. See [[wiki/concept]] pages.
 
-| Page | Confidence | source_count | Updated |
-| --- | --- | --- | --- |
-| [[bitwiseid-method]] | high | 1 | 2026-07-24 |
-| [[bitwisexy-method]] | high | 1 | 2026-07-24 |
-| [[set-management-and-setid]] | high | 1 | 2026-07-24 |
-| [[row-column-antenna-matrix-technique]] | high | 4 | 2026-07-24 |
-| [[pin-diode-antenna-switching]] | high | 1 | 2026-07-24 |
+| Page                                    | Confidence | source_count | Updated    |
+| --------------------------------------- | ---------- | ------------ | ---------- |
+| [[bitwiseid-method]]                    | high       | 1            | 2026-07-24 |
+| [[bitwisexy-method]]                    | high       | 1            | 2026-07-24 |
+| [[set-management-and-setid]]            | high       | 1            | 2026-07-24 |
+| [[row-column-antenna-matrix-technique]] | high       | 4            | 2026-07-24 |
+| [[pin-diode-antenna-switching]]         | high       | 1            | 2026-07-24 |
+| [[jlcpcb-basic-part-sourcing]]          | medium     | 2            | 2026-07-25 |
+|                                         |            |              |            |
 
 ## Synthesis
 
@@ -70,4 +75,4 @@ Query answers filed back into the wiki. See [[wiki/synthesis]] pages.
 
 | Page | Question | Updated |
 | --- | --- | --- |
-| _(none yet)_ | | |
+| [[jlcpcb-matrix-bom-review]] | Make the matrix BOM stocked, exact, and assembly-safe | 2026-07-24 |

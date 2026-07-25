@@ -33,6 +33,10 @@ def square_index(file_letter: str, rank: int) -> int:
     return (rank - 1) * 8 + (ord(file_letter) - ord("a"))
 ```
 
+## Git
+
+- Use short Conventional Commit messages, for example `fix: align JLCPCB exports`.
+
 ## Documentation
 
 Docs live in `docs/`, split by topic, mirroring the hardware and software split. No single document tries to explain everything, each file stays scoped and concise.
@@ -63,6 +67,9 @@ Standard shape per file: short title, one paragraph on what it covers, then the 
 
 ## Hardware
 
+- Minimize JLCPCB Extended-library selections because its fee applies to each unique Extended
+  component. Use a safe Basic match whenever possible. Keep an Extended part only when no Basic
+  part preserves the required function, package, and electrical limits.
 - `hardware/cad`: build123d code generating the enclosure and internal parts. Parametric where it matters (fit, clearance, tolerance). Comment why a dimension is what it is, not what the line of code does.
 - `hardware/pcb`: SKiDL code generating the schematic and netlist. Group parts by function (power, sensing, MCU) rather than one flat file.
 

@@ -63,5 +63,5 @@ The 68 pF match value came from this bench; 220 pF would drag the system to 9 MH
 
 ## Cost
 
-Generated BOM (`hardware/pcb/generated/hub/hub_bom.csv`) totals 14.94 EUR in parts against the
+Generated engineering BOM (`hardware/pcb/generated/hub/hub_engineering_bom.csv`) totals 14.94 EUR in parts against the
 30 EUR board target in [boards.md](boards.md).
