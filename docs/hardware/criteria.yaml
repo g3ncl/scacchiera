@@ -299,9 +299,9 @@ criteria:
     requirement_ids: [IF-LIGHTBAR-002]
     unit: V
     limits: {maximum: 0.10}
-    evidence: {class: Derived, source: Vault/Scacchiera/Wiki/sources/sk68xx-mini-e-led-datasheets.md, locator: Electrical limits and layout-derived resistance}
+    evidence: {class: Derived, source: Vault/Scacchiera/Wiki/sources/t37k3rgb-05c000112u1930-datasheet.md, locator: Datasheet page 6 and layout-derived resistance}
     operating_conditions: All 14 pixels white at 16 mA each, minimum copper thickness, and maximum resistivity.
-    margin: Nominal routed droop is 13.1 mV, leaving 86.9 mV.
+    margin: Nominal routed droop is 12.46 mV, leaving 87.54 mV.
     test_ids: [TEST-LB-PWR-001]
 
   MATRIX-CELL-RESONANCE:
@@ -331,7 +331,7 @@ criteria:
     limits: {minimum: 40.0}
     evidence: {class: Derived, source: Vault/Scacchiera/Wiki/sources/matrix-discrete-datasheets.md, locator: PIN diode and MOSFET switching parameters}
     operating_conditions: Carrier frequency with one selected and one nominal deselected cell.
-    margin: Nominal simulation is 90 dB, leaving 50 dB for corners and extracted geometry.
+    margin: Exact vendor-model simulation is 65.6 dB, leaving 25.6 dB for corners and extracted geometry.
     test_ids: [TEST-MATRIX-RF-003]
 
   MATRIX-BIAS-CURRENT:
@@ -341,7 +341,7 @@ criteria:
     limits: {minimum: 7.0, maximum: 14.0}
     evidence: {class: Derived, source: Vault/Scacchiera/Wiki/sources/matrix-discrete-datasheets.md, locator: BAR64-02V and SDFL2012S100KTF limits}
     operating_conditions: 3.3 V rail across bounded resistor, MOSFET, diode, and choke corners.
-    margin: Nominal 9.7 mA is 2.7 mA above the switching floor and 1 mA below the published choke rating.
+    margin: Nominal 10.326 mA is 3.326 mA above the switching floor and 4.674 mA below the published choke rating.
     test_ids: [TEST-MATRIX-BIAS-001]
 
   MATRIX-OFF-BIAS-CURRENT:

@@ -1,16 +1,4 @@
-"""Generate the routed 120 mm player light-bar PCB.
-
-The SK6805MINI-E's four corner legs put its pads at the outside of a 6.80 mm
-span, which left the previous bespoke ground bus with nowhere to run: any
-front-copper track above the LED row came within 0.1 mm of a DOUT pad. So
-ground is a back-copper pour with a via at every ground pad instead, which is
-both simpler than routing a bus and a better return path for a 14-pixel chain.
-Front copper carries only the 5 V bus, the pixel-to-pixel data hops, and the
-chain's return leg.
-
-Pad geometry is read back with pad_position after placement rather than
-assumed, so the routing follows whatever the footprint rotation produces.
-"""
+"""Generate the routed 120 mm player light-bar PCB."""
 
 from pathlib import Path
 
@@ -38,8 +26,8 @@ from hardware.pcb.netlist import read_netlist
 
 OUTPUT = Path(__file__).parent / "generated" / "lightbar"
 
-# Pin numbers on the SK6805MINI-E: 1 VDD, 2 DOUT, 3 GND, 4 DIN.
-LED_VDD, LED_DOUT, LED_GND, LED_DIN = "1", "2", "3", "4"
+# Harvatek datasheet page 5: 1 DOUT, 2 GND, 3 DIN, 4 VDD.
+LED_DOUT, LED_GND, LED_DIN, LED_VDD = "1", "2", "3", "4"
 
 
 def _placements() -> dict[str, Placement]:
@@ -132,13 +120,16 @@ def _route_external_data(builder: BoardBuilder) -> None:
     # on back copper, above the ground vias and inside the pour's clearance.
     connector_output = builder.pad_position("J1", "4")
     last_output = builder.pad_position(f"D{LED_COUNT}", LED_DOUT)
-    far_via = Position(last_output.x, DATA_RETURN_Y)
-    near_via = Position(connector_output.x, DATA_RETURN_Y)
-    builder.add_track("DATA_OUT", (last_output, far_via), width=0.2)
+    far_via = Position(last_output.x + 1.5, DATA_RETURN_Y)
+    near_via = connector_output
+    builder.add_track(
+        "DATA_OUT",
+        (last_output, Position(far_via.x, last_output.y), far_via),
+        width=0.2,
+    )
     builder.add_via("DATA_OUT", far_via)
     builder.add_track("DATA_OUT", (far_via, near_via), width=0.2, layer=pcbnew.B_Cu)
     builder.add_via("DATA_OUT", near_via)
-    builder.add_track("DATA_OUT", (near_via, connector_output), width=0.2)
 
 
 def generate_board(output: Path = OUTPUT / "lightbar.kicad_pcb") -> None:

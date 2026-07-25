@@ -27,11 +27,11 @@ review and immutable release hashes. See
 
 The first V0 inventory contains 71 atomic functional requirements and 37 numeric criteria. It also
 removed a stale 17-pixel WS2812 criterion left behind when the design changed to fourteen
-SK6805MINI-E pixels, illustrating why cross-document checks are release evidence rather than
+low-current pixels, illustrating why cross-document checks are release evidence rather than
 housekeeping.
 
 ## Related
 
 - [[overview]]
-- [[sk6805mini-e]]
+- [[v1-component-proof]]
 - [[tps2553-current-limit-error]]

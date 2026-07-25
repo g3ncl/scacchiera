@@ -49,8 +49,8 @@ JLC_PART_BY_MPN = {
     "USB4105-GF-A": "C3020560",
     "USBLC6-2SC6": "C2687116",
     "BAR64-02V": "C5295579",
-    "BSS123": "C7420338",
-    "BSS84": "C114481",
+    "BSS123-7-F": "C85107",
+    "BSS84-7-F": "C85202",
     "CC0603FRNPO9BN221": "C519500",
     "CL05B104KO5NNNC": "C1525",
     "CL05A105KA5NQNC": "C52923",
@@ -66,7 +66,6 @@ JLC_PART_BY_MPN = {
     "0603WAF150KT5E": "C22769",
     "ESP32-C6-MINI-1U-N4": "C7558096",
     "7M27100009": "C90919",
-    "SK6805MINI-E": "C5200774",
 }
 
 JLC_BASIC_CODES = frozenset(
@@ -96,6 +95,8 @@ def component(
     description: str,
     unit_cost_eur: float,
     fitted: bool = True,
+    supplier: str = "",
+    order_code: str = "",
 ) -> Part:
     # Generic connector symbols renamed pin by pin keep the schematic free of
     # per-device symbol libraries while still producing a correct netlist.
@@ -112,6 +113,8 @@ def component(
     part.footprint = footprint
     part.manf_num = mpn
     part.lcsc_part = JLC_PART_BY_MPN.get(mpn, "")
+    part.supplier = supplier or ("JLCPCB" if part.lcsc_part else "")
+    part.order_code = order_code or part.lcsc_part
     if not part.lcsc_part:
         part.jlc_library = "Unbound"
     elif part.lcsc_part in JLC_BASIC_CODES:
@@ -188,7 +191,9 @@ def esp32_c6_mini_1u(circuit: Circuit, ref: str) -> Part:
         pins,
         mpn="ESP32-C6-MINI-1U-N4",
         description="WiFi 6 and BLE module with external antenna connector",
-        unit_cost_eur=2.60,
+        unit_cost_eur=3.89,
+        supplier="DigiKey",
+        order_code="1965-ESP32-C6-MINI-1U-N4CT-ND",
     )
 
 
@@ -237,6 +242,8 @@ def two_pin(
     mpn: str,
     unit_cost_eur: float,
     fitted: bool = True,
+    supplier: str = "",
+    order_code: str = "",
 ) -> Part:
     return component(
         circuit,
@@ -248,4 +255,6 @@ def two_pin(
         description=value,
         unit_cost_eur=unit_cost_eur,
         fitted=fitted,
+        supplier=supplier,
+        order_code=order_code,
     )

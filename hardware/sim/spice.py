@@ -47,8 +47,12 @@ class SpiceModel:
 
 
 MODELS: dict[str, SpiceModel] = {
-    "BSS123": SpiceModel(name="BSS123", pins=("D", "G", "S"), include="bss123.lib"),
-    "BSS84": SpiceModel(name="BSS84", pins=("D", "G", "S"), include="bss84.lib"),
+    "BSS123-7-F": SpiceModel(
+        name="BSS123/ZTX", pins=("D", "G", "S"), include="vendor/BSS123.spice.txt"
+    ),
+    "BSS84-7-F": SpiceModel(
+        name="BSS84", pins=("D", "G", "S"), include="vendor/BSS84.spice.txt"
+    ),
 }
 
 # Diodes reference their .model name directly from a D card, so unlike the VDMOS

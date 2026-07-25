@@ -17,8 +17,11 @@ individual pages.
 The legacy schematic, nominal simulation, and generated-layout milestones are inputs rather than
 release authority. [[verification-evidence-model]] records the executable V0 structure: 71 atomic
 functional requirements map to stable test IDs, 37 numeric criteria carry evidence and margin, and
-source hashes force traceability review whenever the functional specification changes. V1 through
-V9 remain responsible for proving those mapped requirements.
+source hashes force traceability review whenever the functional specification changes. V1 now
+binds all 59 purchased fitted MPNs to exact supplier codes, immutable manufacturer datasheets,
+library audits, rating fields and declared simulation treatment. It also replaced the conflicting
+matrix MOSFETs and lightbar LED with exact parts. V2 through V9 remain responsible for the later
+connectivity, simulation, firmware, physical, measured and independent-review evidence.
 
 ## NFC Game Board: the reference project
 

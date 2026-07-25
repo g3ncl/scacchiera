@@ -14,10 +14,10 @@ one side suffices):
 - a series BAR64-02V between bus and tank. Forward biased (about 10 mA) it is a
   2.5 ohm switch (datasheet rD max at 10 mA, 100 MHz); reverse it is sub-pF, so 15 deselected cells leave the bus tank
   in band where an analog switch's parallel off-capacitance would collapse it.
-- a shunt BSS123 grounding the tank when deselected, raising off/on suppression
+- a shunt BSS123-7-F grounding the tank when deselected, raising off/on suppression
   far past what series isolation alone gives. Gate on SEL_N directly: high
   (deselected) shunts, low (selected) releases. No static current.
-- bias steering: a high-side BSS84 from the 3V3 rail through R_set and an
+- bias steering: a high-side BSS84-7-F from the 3V3 rail through R_set and an
   isolation BAR64-02V into the bias choke. The forward current returns through
   the loop antenna's own ground end, so a single leg biases the cell, and the
   isolation diode's off state keeps the steering parts off the bus when
@@ -74,7 +74,7 @@ def matrix_cell(
     _connect(bus, d_series, "A")
     _connect(match, d_series, "K")
 
-    q_shunt = mosfet(circuit, f"Q{index * 2 + 1}", "BSS123", unit_cost_eur=0.03)
+    q_shunt = mosfet(circuit, f"Q{index * 2 + 1}", "BSS123-7-F", unit_cost_eur=0.04)
     _connect(sel_n, q_shunt, "G")
     _connect(match, q_shunt, "D")
     _connect(gnd, q_shunt, "S")
@@ -138,7 +138,7 @@ def matrix_cell(
 
     # Bias steering: 3V3 -> Q_steer -> R_set -> D_iso -> choke -> bus node,
     # returning to ground through the loop itself.
-    q_steer = mosfet(circuit, f"Q{index * 2 + 2}", "BSS84", unit_cost_eur=0.05)
+    q_steer = mosfet(circuit, f"Q{index * 2 + 2}", "BSS84-7-F", unit_cost_eur=0.04)
     _connect(v33, q_steer, "S")
     _connect(sel_n, q_steer, "G")
     _connect(steer, q_steer, "D")

@@ -8,12 +8,11 @@ and countdown cues need more than one color), because the controller is inside
 the LED: the whole bar is LEDs, decoupling, and a connector, and the hub drives
 it over a single data line.
 
-The pixel is an SK6805MINI-E rather than the WS2812C-2020 this replaced.
-JLCPCB cannot assemble a 120 x 8.5 mm outline, so the bar is populated by hand,
-and the WS2812C's pads sit under its body where an iron cannot reach them. The
-SK6805's legs extend past the body instead. It keeps the same 5 mA per channel
-class, so the 5 V rail budget is unchanged, but it is far wider, which is what
-sets the pixel count at 14 (see lightbar_geometry).
+The pixel is Harvatek's T37K3RGB-05C000112U1930. JLCPCB cannot assemble a
+120 x 8.5 mm outline, so the bar is populated by hand. Its four legs extend
+past the body where an iron can reach them, and its 5 mA channel current keeps
+the rail budget low. Its 3.5 mm body and pad span set the count at 14 (see
+lightbar_geometry).
 """
 
 from skidl import Circuit, Net, Part
@@ -61,22 +60,24 @@ def build_lightbar() -> Circuit:
         led = component(
             circuit,
             f"D{index + 1}",
-            "SK6805MINI-E",
-            "Chessboard:SK6805MINI-E",
+            "T37K3RGB-05C000112U1930",
+            "Chessboard:T37K3RGB-05C000112U1930",
             (
-                PinDefinition("1", "VDD"),
-                PinDefinition("2", "DOUT"),
-                PinDefinition("3", "GND"),
-                PinDefinition("4", "DIN"),
+                PinDefinition("1", "DOUT"),
+                PinDefinition("2", "GND"),
+                PinDefinition("3", "DIN"),
+                PinDefinition("4", "VDD"),
             ),
-            mpn="SK6805MINI-E",
-            description="5 mA per channel addressable RGB LED, iron solderable",
-            unit_cost_eur=0.10,
+            mpn="T37K3RGB-05C000112U1930",
+            description="Harvatek 5 mA per channel addressable RGB LED",
+            unit_cost_eur=0.421,
+            supplier="DigiKey",
+            order_code="3147-T37K3RGB-05C000112U1930CT-ND",
         )
-        _connect(power, led, "1")
-        _connect(output, led, "2")
-        _connect(ground, led, "3")
-        _connect(data, led, "4")
+        _connect(output, led, "1")
+        _connect(ground, led, "2")
+        _connect(data, led, "3")
+        _connect(power, led, "4")
         data = output
         capacitor = two_pin(
             circuit,

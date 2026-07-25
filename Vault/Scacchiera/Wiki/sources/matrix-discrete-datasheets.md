@@ -83,3 +83,11 @@ Datasheets rule, conflicting documentation is recorded, and under
 resolved.
 
 Related: [[pin-diode-antenna-switching]], [[row-column-antenna-matrix-technique]], [[jlcpcb]]
+
+## V1 resolution
+
+The generic BSS123 and BSS84 catalog selections above are historical and are no longer fitted.
+V1 rebound the matrix to Diodes Incorporated **BSS123-7-F (C85107)** and **BSS84-7-F (C85202)**.
+Their exact manufacturer datasheets and vendor SPICE models are filed and indexed separately as
+[[bss123-7-f-datasheet]] and [[bss84-7-f-datasheet]]. This records the contradiction and its
+resolution instead of rewriting the earlier capture.

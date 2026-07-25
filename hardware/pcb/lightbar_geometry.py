@@ -4,21 +4,10 @@ Stdlib only: the layout generator imports this under the system interpreter
 (which has pcbnew) while the simulation imports it from the venv (which does
 not), so nothing here may depend on either environment.
 
-Why 14 pixels and not the 17 the functional spec originally asked for. The
-SK6805MINI-E's legs stick out past its body, which is what makes it iron
-solderable, and that puts its courtyard at 7.30 mm against the WS2812C-2020's
-2.0 mm. The 4-pin JST GH is 9.46 mm wide and 6.40 mm deep, too deep to tuck
-under the LED row in an 8.5 mm tall board, so it costs length exclusively:
-
-    120.0 board
-    - 0.77 left edge margin
-    - 9.46 connector
-    - 0.50 gap
-    = 109.27 mm for the LEDs, and 109.27 / 7.30 = 14.9
-
-So 14 fits with clean courtyards and 6.85 mm spare. 15 is reachable only by
-dropping the pitch to 7.10 mm, which leaves the pads 0.30 mm apart but lets the
-courtyards overlap. 16 does not fit at any pitch that keeps the pads apart.
+The functional specification fixes fourteen pixels. The 7.30 mm pitch is an
+optical spacing parameter, retained when the unavailable SK6805MINI-E was
+replaced by the smaller Harvatek T37K3RGB part. It gives the diffuser a 3.65 mm
+nominal standoff and leaves service copper at both ends of the 120 mm strip.
 """
 
 BOARD_WIDTH = 120.0
@@ -38,17 +27,16 @@ BOARD_HEIGHT = 8.5
 # channel or by adhesive, which is how LED strips of this shape are normally
 # held. See docs/hardware/lightbar.md.
 LED_COUNT = 14
-# 7.30 mm is the SK6805MINI-E courtyard, so adjacent parts just touch and their
-# 6.80 mm pad spans stay 0.50 mm apart.
+# The diffuser standoff is half this pitch; see IF-DIFFUSER-STANDOFF.
 LED_PITCH = 7.30
 LED_START_X = 14.6
-LED_Y = 2.3
+LED_Y = 3.1
 # The 5 V bus runs below the connector's two mounting pads, which occupy y 4.25
 # to 6.95 and block the otherwise-obvious band under the LED row. Every other
 # full-length band is only ~0.7 mm tall between pad rows, too tight for a bus
 # plus clearance, so 7.5 is the one place a 0.8 mm bus fits: it spans 7.1 to
 # 7.9 and keeps 0.6 mm to the board edge.
-CAPACITOR_Y = 5.6
+CAPACITOR_Y = 6.5
 POWER_BUS_Y = 7.5
 CONNECTOR_X = 5.5
 CONNECTOR_Y = 4.25
@@ -60,9 +48,9 @@ BULK_Y = 6.3  # sits beside the bus in the spare right-hand copper
 # board-edge clearance. The SPICE deck also reads this to size the plane.
 POUR_INSET = 0.6
 # The chain's return leg crosses on back copper above the ground vias.
-DATA_RETURN_Y = 0.9
+DATA_RETURN_Y = 4.0
 # DATA_IN ducks under the connector's signal pads to reach the first pixel.
-DATA_IN_Y = 3.7
+DATA_IN_Y = 1.1
 
 
 def led_x(index: int) -> float:

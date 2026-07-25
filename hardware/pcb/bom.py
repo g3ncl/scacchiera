@@ -14,6 +14,8 @@ class BomKey:
     footprint: str
     mpn: str
     lcsc_part: str
+    supplier: str
+    order_code: str
     jlc_library: str
     fitted: str
     unit_cost_eur: float
@@ -54,6 +56,8 @@ def _key(part: object) -> BomKey:
         str(getattr(part, "footprint", "")),
         str(getattr(part, "manf_num", "")),
         str(getattr(part, "lcsc_part", "")),
+        str(getattr(part, "supplier", "")),
+        str(getattr(part, "order_code", "")),
         str(getattr(part, "jlc_library", "Unbound")),
         str(getattr(part, "fitted", "yes")),
         float(getattr(part, "unit_cost_eur", 0.0)),
@@ -111,7 +115,8 @@ def write_bom(circuit: Circuit, destination: Path) -> None:
         writer = csv.writer(bom_file)
         writer.writerow(
             (
-                "Comment", "Designator", "Footprint", "MPN", "LCSC Part #", "JLC Library",
+                "Comment", "Designator", "Footprint", "MPN", "Supplier", "Order Code",
+                "LCSC Part #", "JLC Library",
                 "Fitted", "Quantity", "Assembly Route", "Hand Method", "Assembly Reason",
                 "Unit EUR", "Line EUR",
             )
@@ -125,6 +130,8 @@ def write_bom(circuit: Circuit, destination: Path) -> None:
                     ",".join(references),
                     key.footprint,
                     key.mpn,
+                    key.supplier,
+                    key.order_code,
                     key.lcsc_part,
                     key.jlc_library,
                     key.fitted,
@@ -137,7 +144,7 @@ def write_bom(circuit: Circuit, destination: Path) -> None:
                 )
             )
         writer.writerow(
-            ("TOTAL", "", "", "", "", "", "", "", "", "", "", "", f"{fitted_cost_eur(circuit):.3f}")
+            ("TOTAL", "", "", "", "", "", "", "", "", "", "", "", "", "", f"{fitted_cost_eur(circuit):.3f}")
         )
 
 

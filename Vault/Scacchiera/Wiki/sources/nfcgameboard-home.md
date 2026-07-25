@@ -5,7 +5,7 @@ tags:
   - wiki/source
 ---
 
-# Source: NFC Game Board — home page
+# Source: NFC Game Board home page
 
 Raw clipping: [Clippings/nfcgameboard.com/home.md](../../Clippings/nfcgameboard.com/home.md). [captured::2026-07-24] [author::[[ben-bulsink]]]
 

@@ -22,13 +22,9 @@ Raw sources that have been captured but not yet ingested into the wiki. Move a
 row into the Sources table below once its summary page exists.
 
 Component datasheets live in [Datasheets/](../Datasheets) and are immutable in the same way
-`Clippings/` is. Every part the hardware binds should have one filed, with a `source-summary` here
-and an `entity` page for the component; see the Datasheets section of `CLAUDE.md`. Filed so far:
-ESP32-C6-MINI-1U, PN5180, TXC 7M27100009, SK6812MINI-E (rev 02), the SK68XX MINI family (rev 08),
-the hub power tree and logic (MCP73871, TPS63802, TPS61023, TPS2553, TCA9535, SN74AHCT1G125,
-USBLC6-2SC6) and the matrix discretes (BAR64-02V, BSS123, BSS84, 74HC595, SDFL2012S100KTF).
-Still unfiled: the passives, the JST connectors, USB4105-GF-A, DMP2035U-7, BAT54H, MF-MSMF050-2,
-JS102011SAQN, and the two RF inductors (DFE201610E, LQW2BASR47J00L).
+`Clippings/` is. V1 filed and ingested all 59 purchased fitted MPNs. The generated catalogs below
+list one `source-summary` and one component `entity` per exact part. Historical family summaries
+remain because they explain rejected selections and contradictions that must not be forgotten.
 
 Five further nfcgameboard.com pages are linked from the captured pages but not yet clipped:
 `/why`, `/videos`, `/mechanics`, `/embedded`, `/presentation`. Not urgent: `/embedded` and
@@ -75,6 +71,138 @@ People, tools, orgs, repos. See [[wiki/entity]] pages.
 | [[txc-7m27100009]] | 2 | 2026-07-25 |
 | [[sk6805mini-e]] | 1 | 2026-07-25 |
 
+<!-- V1-COMPONENT-CATALOG:START -->
+## V1 component datasheet sources
+
+One exact source summary per purchased fitted MPN. The structured audit is
+`docs/verification/v1-components.yaml`.
+
+| Page | Manufacturer | Updated |
+| --- | --- | --- |
+| [[0402cg101j500nt-datasheet]] | Fenghua Advanced Technology | 2026-07-25 |
+| [[0402cg150j500nt-datasheet]] | Fenghua Advanced Technology | 2026-07-25 |
+| [[0603waf1000t5e-datasheet]] | UNI-ROYAL | 2026-07-25 |
+| [[0603waf1001t5e-datasheet]] | UNI-ROYAL | 2026-07-25 |
+| [[0603waf1002t5e-datasheet]] | UNI-ROYAL | 2026-07-25 |
+| [[0603waf1003t5e-datasheet]] | UNI-ROYAL | 2026-07-25 |
+| [[0603waf1004t5e-datasheet]] | UNI-ROYAL | 2026-07-25 |
+| [[0603waf150kt5e-datasheet]] | UNI-ROYAL | 2026-07-25 |
+| [[0603waf2001t5e-datasheet]] | UNI-ROYAL | 2026-07-25 |
+| [[0603waf2492t5e-datasheet]] | UNI-ROYAL | 2026-07-25 |
+| [[0603waf3303t5e-datasheet]] | UNI-ROYAL | 2026-07-25 |
+| [[0603waf3902t5e-datasheet]] | UNI-ROYAL | 2026-07-25 |
+| [[0603waf4701t5e-datasheet]] | UNI-ROYAL | 2026-07-25 |
+| [[0603waf5101t5e-datasheet]] | UNI-ROYAL | 2026-07-25 |
+| [[0603waf9102t5e-datasheet]] | UNI-ROYAL | 2026-07-25 |
+| [[74438357010-datasheet]] | Würth Elektronik | 2026-07-25 |
+| [[74hc595d-118-datasheet]] | Nexperia | 2026-07-25 |
+| [[7m27100009-datasheet]] | TXC | 2026-07-25 |
+| [[a1257wr-s-4p-datasheet]] | CJT | 2026-07-25 |
+| [[b2b-ph-k-s-lf-sn-datasheet]] | JST | 2026-07-25 |
+| [[bar64-02v-datasheet]] | Jiangsu Changjing Electronics Technology | 2026-07-25 |
+| [[bat54h-datasheet]] | Jiangsu Changjing Electronics Technology | 2026-07-25 |
+| [[bss123-7-f-datasheet]] | Diodes Incorporated | 2026-07-25 |
+| [[bss84-7-f-datasheet]] | Diodes Incorporated | 2026-07-25 |
+| [[cc0603frnpo9bn221-datasheet]] | Yageo | 2026-07-25 |
+| [[cc1206kkx7rcbb472-datasheet]] | Yageo | 2026-07-25 |
+| [[cl05a105ka5nqnc-datasheet]] | Samsung Electro-Mechanics | 2026-07-25 |
+| [[cl05b104ko5nnnc-datasheet]] | Samsung Electro-Mechanics | 2026-07-25 |
+| [[cl10a105kb8nnnc-datasheet]] | Samsung Electro-Mechanics | 2026-07-25 |
+| [[cl10a225ko8nnnc-datasheet]] | Samsung Electro-Mechanics | 2026-07-25 |
+| [[cl21a106kaynnne-datasheet]] | Samsung Electro-Mechanics | 2026-07-25 |
+| [[cl21a226maqnnne-datasheet]] | Samsung Electro-Mechanics | 2026-07-25 |
+| [[cl21a475kaqnnne-datasheet]] | Samsung Electro-Mechanics | 2026-07-25 |
+| [[cl32a107mqvnnne-datasheet]] | Samsung Electro-Mechanics | 2026-07-25 |
+| [[dfe201610e-r47m-p2-datasheet]] | Murata | 2026-07-25 |
+| [[dmp2035u-7-datasheet]] | Diodes Incorporated | 2026-07-25 |
+| [[esp32-c6-mini-1u-n4-datasheet]] | Espressif Systems | 2026-07-25 |
+| [[grm1555c1h221ja01d-datasheet]] | Murata | 2026-07-25 |
+| [[grm1555c1h680ja01d-datasheet]] | Murata | 2026-07-25 |
+| [[js102011saqn-datasheet]] | C&K | 2026-07-25 |
+| [[lqw2basr47j00l-datasheet]] | Murata | 2026-07-25 |
+| [[mcp73871t-2cci-ml-datasheet]] | Microchip Technology | 2026-07-25 |
+| [[mf-msmf050-2-datasheet]] | Bourns | 2026-07-25 |
+| [[pn5180a0hn-c3e-datasheet]] | NXP Semiconductors | 2026-07-25 |
+| [[rc0603fr-07110kl-datasheet]] | Yageo | 2026-07-25 |
+| [[rc0603fr-07511kl-datasheet]] | Yageo | 2026-07-25 |
+| [[rc0603fr-07732kl-datasheet]] | Yageo | 2026-07-25 |
+| [[rs-03k1800ft-datasheet]] | Fenghua Advanced Technology | 2026-07-25 |
+| [[sdfl2012s100ktf-datasheet]] | Sunlord | 2026-07-25 |
+| [[sm02b-ghs-tb-lf-sn-datasheet]] | JST | 2026-07-25 |
+| [[sm07b-ghs-tb-lf-sn-datasheet]] | JST | 2026-07-25 |
+| [[sn74ahct1g125dbvr-datasheet]] | Texas Instruments | 2026-07-25 |
+| [[t37k3rgb-05c000112u1930-datasheet]] | Harvatek | 2026-07-25 |
+| [[tca9535pwr-datasheet]] | Texas Instruments | 2026-07-25 |
+| [[tps2553dbvr-1-datasheet]] | Texas Instruments | 2026-07-25 |
+| [[tps61023drlr-datasheet]] | Texas Instruments | 2026-07-25 |
+| [[tps63802dlar-datasheet]] | Texas Instruments | 2026-07-25 |
+| [[usb4105-gf-a-datasheet]] | GCT | 2026-07-25 |
+| [[usblc6-2sc6-datasheet]] | UMW (UTD Semiconductor) | 2026-07-25 |
+
+## V1 component entities
+
+| Page | source_count | Updated |
+| --- | ---: | --- |
+| [[0402cg101j500nt]] | 1 | 2026-07-25 |
+| [[0402cg150j500nt]] | 1 | 2026-07-25 |
+| [[0603waf1000t5e]] | 1 | 2026-07-25 |
+| [[0603waf1001t5e]] | 1 | 2026-07-25 |
+| [[0603waf1002t5e]] | 1 | 2026-07-25 |
+| [[0603waf1003t5e]] | 1 | 2026-07-25 |
+| [[0603waf1004t5e]] | 1 | 2026-07-25 |
+| [[0603waf150kt5e]] | 1 | 2026-07-25 |
+| [[0603waf2001t5e]] | 1 | 2026-07-25 |
+| [[0603waf2492t5e]] | 1 | 2026-07-25 |
+| [[0603waf3303t5e]] | 1 | 2026-07-25 |
+| [[0603waf3902t5e]] | 1 | 2026-07-25 |
+| [[0603waf4701t5e]] | 1 | 2026-07-25 |
+| [[0603waf5101t5e]] | 1 | 2026-07-25 |
+| [[0603waf9102t5e]] | 1 | 2026-07-25 |
+| [[74438357010]] | 1 | 2026-07-25 |
+| [[74hc595d-118]] | 1 | 2026-07-25 |
+| [[7m27100009]] | 1 | 2026-07-25 |
+| [[a1257wr-s-4p]] | 1 | 2026-07-25 |
+| [[b2b-ph-k-s-lf-sn]] | 1 | 2026-07-25 |
+| [[bar64-02v]] | 1 | 2026-07-25 |
+| [[bat54h]] | 1 | 2026-07-25 |
+| [[bss123-7-f]] | 1 | 2026-07-25 |
+| [[bss84-7-f]] | 1 | 2026-07-25 |
+| [[cc0603frnpo9bn221]] | 1 | 2026-07-25 |
+| [[cc1206kkx7rcbb472]] | 1 | 2026-07-25 |
+| [[cl05a105ka5nqnc]] | 1 | 2026-07-25 |
+| [[cl05b104ko5nnnc]] | 1 | 2026-07-25 |
+| [[cl10a105kb8nnnc]] | 1 | 2026-07-25 |
+| [[cl10a225ko8nnnc]] | 1 | 2026-07-25 |
+| [[cl21a106kaynnne]] | 1 | 2026-07-25 |
+| [[cl21a226maqnnne]] | 1 | 2026-07-25 |
+| [[cl21a475kaqnnne]] | 1 | 2026-07-25 |
+| [[cl32a107mqvnnne]] | 1 | 2026-07-25 |
+| [[dfe201610e-r47m-p2]] | 1 | 2026-07-25 |
+| [[dmp2035u-7]] | 1 | 2026-07-25 |
+| [[esp32-c6-mini-1u-n4]] | 1 | 2026-07-25 |
+| [[grm1555c1h221ja01d]] | 1 | 2026-07-25 |
+| [[grm1555c1h680ja01d]] | 1 | 2026-07-25 |
+| [[js102011saqn]] | 1 | 2026-07-25 |
+| [[lqw2basr47j00l]] | 1 | 2026-07-25 |
+| [[mcp73871t-2cci-ml]] | 1 | 2026-07-25 |
+| [[mf-msmf050-2]] | 1 | 2026-07-25 |
+| [[pn5180a0hn-c3e]] | 1 | 2026-07-25 |
+| [[rc0603fr-07110kl]] | 1 | 2026-07-25 |
+| [[rc0603fr-07511kl]] | 1 | 2026-07-25 |
+| [[rc0603fr-07732kl]] | 1 | 2026-07-25 |
+| [[rs-03k1800ft]] | 1 | 2026-07-25 |
+| [[sdfl2012s100ktf]] | 1 | 2026-07-25 |
+| [[sm02b-ghs-tb-lf-sn]] | 1 | 2026-07-25 |
+| [[sm07b-ghs-tb-lf-sn]] | 1 | 2026-07-25 |
+| [[sn74ahct1g125dbvr]] | 1 | 2026-07-25 |
+| [[t37k3rgb-05c000112u1930]] | 1 | 2026-07-25 |
+| [[tca9535pwr]] | 1 | 2026-07-25 |
+| [[tps2553dbvr-1]] | 1 | 2026-07-25 |
+| [[tps61023drlr]] | 1 | 2026-07-25 |
+| [[tps63802dlar]] | 1 | 2026-07-25 |
+| [[usb4105-gf-a]] | 1 | 2026-07-25 |
+| [[usblc6-2sc6]] | 1 | 2026-07-25 |
+<!-- V1-COMPONENT-CATALOG:END -->
 ## Concepts
 
 Ideas, patterns, techniques. See [[wiki/concept]] pages.
@@ -98,3 +226,4 @@ Query answers filed back into the wiki. See [[wiki/synthesis]] pages.
 | [[tps2553-current-limit-error]] | Why did the original current-limit calculation fail? | 2026-07-25 |
 | [[jlcpcb-matrix-bom-review]] | How can the matrix BOM be made unambiguous, stocked, and safe? | 2026-07-24 |
 | [[verification-evidence-model]] | How are requirements, criteria, and tests kept synchronized? | 2026-07-25 |
+| [[v1-component-proof]] | How is every fitted component tied to exact V1 evidence? | 2026-07-25 |

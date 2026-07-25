@@ -5,7 +5,7 @@ tags:
   - wiki/source
 ---
 
-# Source: NFC Game Board — software page
+# Source: NFC Game Board software page
 
 Raw clipping: [Clippings/nfcgameboard.com/software.md](../../Clippings/nfcgameboard.com/software.md). [captured::2026-07-24] [author::[[ben-bulsink]]]
 

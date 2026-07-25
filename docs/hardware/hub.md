@@ -93,7 +93,7 @@ The 68 pF match value came from this bench; 220 pF would drag the system to 9 MH
 
 ## Cost
 
-Generated engineering BOM (`hardware/pcb/generated/hub/hub_engineering_bom.csv`) totals 14.92 EUR in parts against the
+Generated engineering BOM (`hardware/pcb/generated/hub/hub_engineering_bom.csv`) totals 16.21 EUR in parts against the
 30 EUR board target in [boards.md](boards.md).
 
 Seven Extended lines go to JLCPCB, all of them genuinely reflow-only: J1 (USB-C), U1, U2, U3, U5,

@@ -2,7 +2,7 @@ from hardware.pcb.bom import AssemblyPlan, BomKey, assembly_plan
 
 
 def _key(*, footprint: str, library: str, fitted: str = "yes") -> BomKey:
-    return BomKey("part", footprint, "MPN", "C1", library, fitted, 0.1)
+    return BomKey("part", footprint, "MPN", "C1", "JLCPCB", "C1", library, fitted, 0.1)
 
 
 def test_basic_part_stays_with_jlcpcb() -> None:
@@ -76,10 +76,8 @@ def test_lightbar_overrides_basic_and_reflow_parts_to_hand_assembly() -> None:
         1,
         "lightbar",
     )
-    # The SK6805MINI-E's legs sit outside its body, so unlike the WS2812C-2020
-    # it replaced, an iron reaches every joint.
     led = assembly_plan(
-        _key(footprint="Chessboard:SK6805MINI-E", library="Extended"),
+        _key(footprint="Chessboard:T37K3RGB-05C000112U1930", library="Unbound"),
         14,
         "lightbar",
     )

@@ -114,29 +114,10 @@ def esp32_footprint() -> str:
 ''' + "\n".join(pads) + "\n)\n"
 
 
-def sk6805_mini_e_footprint() -> str:
-    """SK6805MINI-E / SK6812MINI-E land pattern, top mounted.
-
-    The -E suffix is the whole reason this part is here: its four legs extend
-    outside the 3.2 x 2.8 mm body, so every joint is reachable with an iron tip
-    where the WS2812C-2020's pads sat underneath it.
-
-    Pad geometry (1.35 x 0.82 mm at +/-2.725, +/-0.75) is taken from KiCad's
-    own LED_SK6812MINI-E land pattern, whose description cites the datasheet for
-    LCSC C5149201, the SK6812MINI-E in this same package. Pin numbering is the
-    rev 02 datasheet's section 5 table: 1 VDD, 2 DOUT, 3 GND, 4 DIN, arranged
-    as its top view shows (VDD top left, DIN top right).
-
-    Two caveats worth knowing before this board is ordered. KiCad ships only a
-    ReverseMount variant, so the corner arrangement here is the top-mount
-    mirror of it and should be checked against a physical part. And the rev 08
-    family datasheet gives a different pinout (1 DIN, 2 VDD, 3 DOUT, 4 VSS) for
-    a 3.5 x 3.7 mm package, so confirm which document the delivered reel
-    matches. See docs/hardware/jlcpcb-sourcing.md.
-    """
-    pad_w, pad_h = 1.35, 0.82
-    dx, dy = 2.725, 0.75
-    # (pad number, x sign, y sign) following the datasheet top view.
+def t37k3rgb_footprint() -> str:
+    """Harvatek T37K3RGB land pattern from datasheet page 5."""
+    pad_w, pad_h = 0.72, 1.15
+    dx, dy = 0.74, 1.575
     corners = (("1", -1, -1), ("2", -1, 1), ("3", 1, 1), ("4", 1, -1))
     pads = [
         f'  (pad "{number}" smd roundrect (at {dx * sx:.3f} {dy * sy:.3f}) '
@@ -144,19 +125,18 @@ def sk6805_mini_e_footprint() -> str:
         f'(roundrect_rratio 0.25))'
         for number, sx, sy in corners
     ]
-    return '''(footprint "SK6805MINI-E"
+    return '''(footprint "T37K3RGB-05C000112U1930"
   (version 20240108)
   (generator pcbnew)
   (layer "F.Cu")
-  (descr "SK6805MINI-E addressable RGB LED, legs outside the body for iron soldering")
+  (descr "Harvatek T37K3RGB 5 mA addressable RGB LED")
   (tags "addressable LED RGB NeoPixel")
-  (property "Reference" "REF**" (at 0 -2.6 0) (layer "F.SilkS"))
-  (property "Value" "SK6805MINI-E" (at 0 2.6 0) (layer "F.Fab"))
+  (property "Reference" "REF**" (at 0 -2.8 0) (layer "F.SilkS"))
+  (property "Value" "T37K3RGB-05C000112U1930" (at 0 2.8 0) (layer "F.Fab"))
   (attr smd)
-  (fp_rect (start -1.6 -1.4) (end 1.6 1.4) (stroke (width 0.1) (type default)) (fill none) (layer "F.Fab"))
-  (fp_rect (start -3.65 -1.87) (end 3.65 1.87) (stroke (width 0.05) (type default)) (fill none) (layer "F.CrtYd"))
-  (fp_line (start -1.7 -1.5) (end 1.7 -1.5) (stroke (width 0.12) (type default)) (layer "F.SilkS"))
-  (fp_circle (center -3.4 -1.6) (end -3.3 -1.6) (stroke (width 0.2) (type default)) (fill none) (layer "F.SilkS"))
+  (fp_rect (start -1.4 -1.75) (end 1.4 1.75) (stroke (width 0.1) (type default)) (fill none) (layer "F.Fab"))
+  (fp_rect (start -1.65 -2.4) (end 1.65 2.4) (stroke (width 0.05) (type default)) (fill none) (layer "F.CrtYd"))
+  (fp_circle (center -1.5 -2.1) (end -1.4 -2.1) (stroke (width 0.2) (type default)) (fill none) (layer "F.SilkS"))
 ''' + "\n".join(pads) + "\n)\n"
 
 
@@ -164,7 +144,7 @@ def write_footprints(output: Path = OUTPUT) -> None:
     output.mkdir(parents=True, exist_ok=True)
     (output / "Antenna_Line.kicad_mod").write_text(antenna_line_footprint(), encoding="utf-8")
     (output / "ESP32-C6-MINI-1U.kicad_mod").write_text(esp32_footprint(), encoding="utf-8")
-    (output / "SK6805MINI-E.kicad_mod").write_text(sk6805_mini_e_footprint(), encoding="utf-8")
+    (output / "T37K3RGB-05C000112U1930.kicad_mod").write_text(t37k3rgb_footprint(), encoding="utf-8")
 
 
 if __name__ == "__main__":

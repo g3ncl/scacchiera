@@ -1,0 +1,19 @@
+---
+type: entity
+tags:
+  - wiki/entity
+  - wiki/component
+date_updated: 2026-07-25
+source_count: 1
+---
+
+# CL21A106KAYNNNE
+
+Exact fitted component from Samsung Electro-Mechanics, used by hub C14 (10u 10V), hub C7 (10u 10V), hub C27 (10u 10V).
+
+[mpn::CL21A106KAYNNNE] [supplier::JLCPCB]
+[order_code::C15850] [category::capacitor]
+
+The immutable source is summarized in [[cl21a106kaynnne-datasheet]]. The complete
+library, rating, availability, and model audit is machine checked from
+`docs/verification/v1-components.yaml`.

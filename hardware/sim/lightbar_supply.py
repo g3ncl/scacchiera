@@ -33,9 +33,9 @@ from hardware.sim.copper import (
 SUPPLY_NET = "LED_5V"
 GROUND_NET = "GND"
 SUPPLY_VOLTAGE_V = 5.0
-# SK68XX MINI family datasheet rev 08: 5 mA per colour channel for the SK6805
-# variant (section 9) plus 1 mA of control-IC quiescent draw (section 10, IDD),
-# so a white pixel is 3 x 5 + 1. This is the worst legitimate load.
+# Harvatek T37K3RGB datasheet page 6: 5 mA per colour channel and 17 mA total
+# absolute maximum. A 16 mA white-pixel load covers all channels plus more than
+# twice the published 0.45 mA typical control current.
 LED_WHITE_CURRENT_A = 0.016
 # Floor for zero-length stubs so ngspice never sees a 0 ohm resistor.
 MINIMUM_RESISTANCE_OHM = 1e-6
@@ -93,7 +93,7 @@ def _ground_plane_network(
 ) -> tuple[list[Resistor], dict[NodeKey, tuple[float, float]]]:
     """Model the back-copper ground pour as a ladder between its stitching vias.
 
-    Ground stopped being routed track when the SK6805MINI-E's pad span left no
+    Ground stopped being routed track when the addressable LED's pad span left no
     room for a front-copper bus, so there is no track geometry to extract. The
     pour is still layout-derived though: its resistance comes from the real via
     positions in the board file and the real pour width, one square of copper at

@@ -346,6 +346,7 @@ def _build_led_rail(circuit: Circuit, nets: dict[str, Net]) -> Net:
     led_inductor = two_pin(
         circuit, "L2", "1uH", "Inductor_SMD:L_Wuerth_MAPI-3015",
         mpn="74438357010", unit_cost_eur=0.15,
+        supplier="DigiKey", order_code="732-11197-1-ND",
     )
     _connect(nets["3V3"], led_inductor, "1")
     _connect(led_boost_sw, led_inductor, "2")

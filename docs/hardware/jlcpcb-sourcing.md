@@ -122,23 +122,11 @@ Every bound code below was checked against live JLCPCB stock above the five-boar
   and CPL pairs are intentionally empty and `lightbar_hand_bom.csv` holds every fitted part.
 - **C15:** C49066, Samsung CL32A107MQVNNNE, is the exact 100 uF, 6.3 V, X5R, 1210 requirement.
 - **J1:** C225127, CJT A1257WR-S-4P, preserves the 1.25 mm GH-compatible right-angle interface.
-- **D1-D14, SK6805MINI-E (C5200774):** replaced the WS2812C-2020, which had no JLCPCB stock and
-  whose pads sit under its body. The `-E` legs extend outside the body so an iron reaches them, and
-  the 5 mA variant keeps the same rail budget as the part it replaced (16 mA per pixel white,
-  224 mA per bar) so no hub change and no firmware brightness cap are needed.
-
-  **Three risks on this line, accepted deliberately.** LCSC returns 404 for C5200774, so there is no
-  authoritative datasheet for the exact ordering code. JLCPCB lists the manufacturer as Normand and
-  the package as SMD3528, matching neither vendor document. And the two OPSCO documents disagree on
-  pinout: rev 02 gives 1 VDD, 2 DOUT, 3 GND, 4 DIN for a 3.2 x 2.8 mm body, rev 08 gives 1 DIN,
-  2 VDD, 3 DOUT, 4 VSS for a 3.5 x 3.7 mm body. The design follows rev 02, because LCSC C5149201's
-  manufacturer and MPN match that document exactly, and the footprint's pad geometry comes from
-  KiCad's `LED_SK6812MINI-E` land pattern which cites the C5149201 datasheet.
-
-  **Confirm the delivered part's pinout and mount side against a physical sample before ordering
-  these boards.** Swapping VDD and GND destroys 14 pixels per bar. The lower-risk alternative is
-  SK6812MINI-E (C5149201), which has a real LCSC listing and a matching datasheet, at the cost of
-  12 mA per channel and therefore a firmware brightness cap.
+- **D1-D14, Harvatek T37K3RGB-05C000112U1930:** DigiKey cut-tape order
+  `3147-T37K3RGB-05C000112U1930CT-ND`. The exact manufacturer datasheet gives pin 1 DOUT, pin 2
+  GND, pin 3 DIN and pin 4 VDD, a 3.5 by 2.8 mm body, external iron-reachable leads, 5 mA per
+  channel and an 800 kHz protocol. The observed stock was 53, enough for two bars plus attrition.
+  This closes the unresolved C5200774 catalog and pinout conflict without changing the rail budget.
 
 ### Matrix
 
@@ -153,9 +141,9 @@ DNP tuning capacitors, and power flags are absent from both upload files.
 | (all rows above are now hand fitted, not factory placed) | | | | | |
 | D1-D32 | BAR64-02V | C5295579 | Extended | 25,001 | JSCJ PIN diode, SOD-523, validated as described below |
 | J1 | SM07B-GHS-TB(LF)(SN) | C495552 | Extended | 52,619 | exact JST 7-pin right-angle connector |
-| L1/L3 through L31 | SDFL2012S100KTF | C1046 | Basic | 167,255 | 10 uH, 0805, 15 mA rating exceeds the 10.29 mA simulated bias |
-| Q1/Q3 through Q31 | BSS123 | C7420338 | Extended | 33,935 | exact SOT-23 N-channel device and modeled RF capacitances |
-| Q2/Q4 through Q32 | BSS84 | C114481 | Extended | 225,237 | exact SOT-23 P-channel device, 50 V and 130 mA |
+| L1/L3 through L31 | SDFL2012S100KTF | C1046 | Basic | 167,255 | 10 uH, 0805, 15 mA rating exceeds the 10.326 mA simulated bias |
+| Q1/Q3 through Q31 | BSS123-7-F | C85107 | Extended | stocked | Diodes Incorporated SOT-23 part with exact datasheet and vendor SPICE model |
+| Q2/Q4 through Q32 | BSS84-7-F | C85202 | Extended | 173,300 | Diodes Incorporated SOT-23 part with exact datasheet and vendor SPICE model |
 | R1/R4 through R46 | 0603WAF150KT5E | C22769 | Extended | 44,567 | 1.5 ohm, 1%, 100 mW, 0603 |
 | R2/R5 through R47 | RS-03K1800FT | C286574 | Extended | 232,046 | 180 ohm, 1%, 100 mW, 0603 |
 | R3/R6 through R48 | 0603WAF1003T5E | C25803 | Basic | 7,405,766 | 100 kohm, 1%, 100 mW, 0603 |
@@ -184,16 +172,17 @@ with no RF risk, so the split was rejected.
 
 The stocked JSCJ BAR64-02V replaces the unavailable NXP BAP64-02. Its conservative ngspice model
 uses the JSCJ limits of 2.5 ohm maximum at 10 mA and 0.55 pF maximum at 1 V, 0.35 pF maximum at
-5 V. The complete matrix validation passes with 14.179 MHz selected-cell resonance, 13.385 MHz
-loaded-bus resonance, 84.6 dB off/on suppression, 10.29 mA on-state bias, and effectively zero
-off-state bias. The replacement keeps the SOD-523 package and pin polarity.
+5 V. With the exact Diodes MOSFET vendor models, the complete matrix validation passes with
+13.540 MHz selected-cell resonance, 12.930 MHz loaded-bus resonance, 65.6 dB off/on suppression,
+10.326 mA on-state bias, and 0.058 uA off-state bias. The replacement keeps the SOD-523 package
+and pin polarity.
 
 At the live first-unit prices, BAR64-02V is $0.0361 versus $0.4253 for the unavailable NXP match.
 For JLCPCB's quoted 160-diode quantity that is a component-price reduction of about $62.27. The
 1.5 ohm C22769 selection is $0.0047 versus $0.0232 for the initially matched RT0603 part, saving
 about $1.67 across 90 pieces. These figures exclude setup, attrition, tax, and shipping.
 
-The 10 uH choke remains Basic C1046. Its 15 mA rating exceeds the validated 10.29 mA bias, and using
+The 10 uH choke remains Basic C1046. Its 15 mA rating exceeds the validated 10.326 mA bias, and using
 an Extended alternative solely for extra margin would add another unique-component fee.
 
 ### Hub
@@ -203,23 +192,22 @@ PN5180 C3E package suffix, verified connector families, RF chokes, protection pa
 values, and passives that meet the original dielectric, voltage, and footprint requirements. The
 24.9 kohm R6 replacement differs by only 0.4%, inside the original 25 kohm 1% tolerance.
 
-U4 and Y1 were the two shortfalls blocking the order, and both are now bound. One line remains
-unbound:
+U4, Y1 and L2 are exact and externally available. U4 still needs JLCPCB Global Sourcing or another
+controlled placement route because its exposed ground pads make it reflow-only.
 
-- **L2, 74438357010:** stocked 1 uH candidates reduce saturation-current and DCR margin. Use
-  Pre-Order or Global Sourcing rather than weakening the TPS61023 power stage. It is hand fitted,
-  so it does not block the assembly order.
+- **L2, 74438357010:** DigiKey cut-tape order `732-11197-1-ND`, 16,892 observed in stock. It remains
+  hand fitted and preserves the required 9.6 A saturation current and 13.5 milliohm maximum DCR.
 
 Resolved:
 
-- **U4, now ESP32-C6-MINI-1U-N4 (C7558096).** The C3-MINI-1U-N4X was two pieces short. The C6 is
+- **U4, now ESP32-C6-MINI-1U-N4.** The C3-MINI-1U-N4X was two pieces short. The C6 is
   newer silicon (2023 against 2021) with 512 KB SRAM against 400 KB, in the identical 13.2 x 12.5 mm
   footprint, so it cost no layout work beyond the pin map. **Its pin map is not the C3's**: the C6
   is pin compatible only on power, ground, EN and UART0, and native USB moves to pins 17/18 while
-  pin 21 becomes NC. Caveat: C7558096 is a JLCPCB "New Arrivals" line publishing no stock quantity,
-  and LCSC 404s on the code, so verify stock before payment. Fallback is C5736265
-  (ESP32-C6-MINI-1, PCB antenna, 517 in stock at capture), which costs a copper keepout, 4.1 mm of
-  extra length and a fixed antenna.
+  pin 21 becomes NC. DigiKey cut-tape order `1965-ESP32-C6-MINI-1U-N4CT-ND` had 732 units in
+  observed European stock. C7558096 remains on the JLC upload BOM for matching, but its public
+  quantity is not release evidence. Source the exact DigiKey part through JLCPCB Global Sourcing
+  before assembly rather than accepting an automatic substitute.
 - **Y1, now TXC 7M27100009 (C90919), 27.12 MHz in 3225.** 1,905 in stock at capture. It clears every
   line of PN5180 Table 142: 10 pF load against 10 pF typ, 60 ohm ESR against 100 ohm max, ± 10 ppm
   and ± 15 ppm over temperature against ± 100 ppm. Drive level sits at the 100 uW ceiling rather

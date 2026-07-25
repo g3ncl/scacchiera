@@ -5,7 +5,7 @@ tags:
   - wiki/source
 ---
 
-# Source: NFC Game Board — schematics page
+# Source: NFC Game Board schematics page
 
 Raw clipping: [Clippings/nfcgameboard.com/schematics.md](../../Clippings/nfcgameboard.com/schematics.md). [captured::2026-07-24] [author::[[ben-bulsink]]]
 

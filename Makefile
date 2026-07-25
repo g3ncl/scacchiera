@@ -26,7 +26,7 @@ check: schematic-lightbar schematic-matrix schematic-hub pcb-lightbar-drc
 # The matrix and hub DRC targets need their routed boards; routing is the
 # manual multi-minute pcb-*-route step, so they stay out of `check`.
 
-schematic-lightbar:
+schematic-lightbar: footprints
 	$(PYTHON) -m hardware.pcb.generate lightbar
 
 schematic-matrix: footprints

@@ -25,8 +25,8 @@ validated in SPICE:
 - series BAR64-02V PIN diode: 2.5 ohm at 10 mA forward (datasheet max, 100 MHz), sub-picofarad
   reverse, so fifteen deselected
   cells load the bus with about 6 pF total where analog switches would collapse the tank;
-- shunt BSS123 grounding the tank when deselected (the off/on suppression);
-- bias steering from the 3V3 rail: high-side BSS84, 180 ohm set resistor, isolation BAR64-02V,
+- shunt BSS123-7-F grounding the tank when deselected (the off/on suppression);
+- bias steering from the 3V3 rail: high-side BSS84-7-F, 180 ohm set resistor, isolation BAR64-02V,
   10 uH choke, with the forward current returning through the loop's own grounded end;
 - 100 nF DC block toward the shared bus and a 100 kilohm bleed.
 
@@ -66,11 +66,11 @@ Screwing all four edges needs a wider outline, which belongs with the enclosure 
 `hardware/tests/test_sim_matrix.py` builds the cell and the full 16-cell bus from the same SKiDL
 objects as the netlist, expands the loop footprint to its geometry-derived inductance and AC
 resistance (`hardware/sim/loop.py`), and runs ngspice against
-[criteria.yaml](criteria.yaml). Measured: single selected cell resonates at 14.18 MHz (high side
-of the band by design, the trims only add capacitance), the loaded 16-line bus at 13.70 MHz,
-off/on suppression 90 dB, steering bias 9.7 mA on and about zero off.
+[criteria.yaml](criteria.yaml). With the exact Diodes vendor MOSFET models, the selected cell
+resonates at 13.54 MHz, the loaded 16-line bus at 12.93 MHz, off/on suppression is 65.6 dB, and
+steering bias is 10.326 mA on and 0.058 uA off.
 
 ## Cost
 
-Generated BOM totals 6.02 EUR in parts; with area-dominated fabrication the board lands around
+Generated BOM totals 4.80 EUR in parts; with area-dominated fabrication the board lands around
 the 25 EUR target in [boards.md](boards.md).

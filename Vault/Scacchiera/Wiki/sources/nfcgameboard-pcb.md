@@ -5,7 +5,7 @@ tags:
   - wiki/source
 ---
 
-# Source: NFC Game Board — PCB page
+# Source: NFC Game Board PCB page
 
 Raw clipping: [Clippings/nfcgameboard.com/pcb.md](../../Clippings/nfcgameboard.com/pcb.md). [captured::2026-07-24] [author::[[ben-bulsink]]]
 

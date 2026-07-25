@@ -54,7 +54,7 @@ See [[tps2553-current-limit-error]].
 - **TPS63802**: 2 A rated for VIN at or above 2.3 V at VOUT 3.3 V.
 - **SN74AHCT1G125** (section 5.3): **VIH 2 V min, VIL 0.8 V max at a 5 V supply**, fixed TTL levels.
   This is precisely why the part is in the design: a 3.3 V GPIO clears 2 V, so the buffer accepts
-  MCU logic and drives the LED chain at 5 V, which the SK6805's 0.7 x VDD = 3.5 V VIH demands.
+  MCU logic and drives the LED chain at 5 V, above the fitted Harvatek LED's 3.1 V minimum VIH.
 - **TCA9535**: INT is open-drain active-low on any port edge.
 
 ## Caveat on the ESD part

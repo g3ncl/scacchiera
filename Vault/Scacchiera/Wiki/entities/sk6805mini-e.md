@@ -9,6 +9,11 @@ source_count: 1
 
 # SK6805MINI-E
 
+> [!warning] Rejected selection
+> This part is not fitted. V1 replaced it with
+> [[t37k3rgb-05c000112u1930]] because the C5200774 catalog entry had no exact authoritative
+> datasheet and conflicting pinouts. The page remains as the decision record.
+
 The addressable RGB pixel on the [light bar](../../../../docs/hardware/lightbar.md),
 designators **D1 to D14**. Controller inside the LED, 800 kHz single-wire chain,
 5 mA per colour channel.

@@ -36,7 +36,12 @@ scoped test-article order. V0 through V9 permit a final-board order.
   [hardware/criteria.yaml](hardware/criteria.yaml) record units, evidence, conditions, and margin.
   `hardware/tests/test_traceability.py` enforces source freshness, schema completeness, unique IDs,
   and bidirectional requirement/criterion links. Evidence: 5 tests passed on 2026-07-25.
-- [ ] V1 component and library proof
+- [x] V1 component and library proof: all 59 purchased fitted MPNs in
+  [verification/v1-components.yaml](verification/v1-components.yaml) have exact supplier and order
+  codes, dated availability, immutable manufacturer datasheets, per-part wiki ingestion, complete
+  library and rating audits, declared model treatment, and no open document conflict. The audit
+  replaced the lightbar LED and both matrix MOSFET selections rather than waiving conflicts.
+  Evidence: 6 component-proof tests and 4 matrix vendor-model tests passed on 2026-07-25.
 - [ ] V2 connectivity and static electrical checks
 - [ ] V3 power, analog, timing, and fault simulation
 - [ ] V4 layout-derived electromagnetic validation
@@ -72,13 +77,13 @@ DoD: `hardware/pcb/<board>.py` exists and generates a schematic, ERC is clean, a
 with a running per-board cost total, and a `docs/hardware/<board>.md` spec describes the board
 against the functional requirement it serves.
 
-- [x] Light bar schematic: `hardware/pcb/lightbar.py`, ERC clean, BOM totals 1.83 EUR in parts,
+- [x] Light bar schematic: `hardware/pcb/lightbar.py`, ERC clean, BOM totals 6.33 EUR in parts,
   spec in [hardware/lightbar.md](hardware/lightbar.md). Revised 2026-07-25: the pixel is now an
-  SK6805MINI-E, because a hand-populated board needs a package an iron can reach, and the count
-  dropped 17 to 14 because that package is wider.
-- [x] Matrix board schematic: `hardware/pcb/matrix.py`, ERC clean, BOM 6.02 EUR in parts, spec
+  Harvatek T37K3RGB-05C000112U1930, because a hand-populated board needs an exact sourced package
+  an iron can reach, and the count dropped 17 to 14 because that package is wider.
+- [x] Matrix board schematic: `hardware/pcb/matrix.py`, ERC clean, BOM 4.80 EUR in parts, spec
   in [hardware/matrix.md](hardware/matrix.md).
-- [x] Hub board schematic: `hardware/pcb/hub.py`, ERC clean, BOM 14.92 EUR in parts, spec in
+- [x] Hub board schematic: `hardware/pcb/hub.py`, ERC clean, BOM 16.21 EUR in parts, spec in
   [hardware/hub.md](hardware/hub.md). Revised 2026-07-25: U4 to ESP32-C6-MINI-1U-N4 with the C6
   pin map from datasheet Table 3-1 (native USB moves to pins 17/18), Y1 to a stocked 3225
   27.12 MHz crystal with 15 pF loads, plus local module decoupling and IO9/EN recovery pads.
@@ -93,14 +98,15 @@ against its `criteria.yaml` limits, in the ordinary test suite. A board is not d
 evidence is an analytical formula; it needs a passing simulation.
 
 - [x] Light bar SPICE validation: `hardware/tests/test_sim_lightbar.py` solves the resistor
-  network extracted from the routed board in ngspice; worst supply-loop droop 13.1 mV against the
+  network extracted from the routed board in ngspice; worst supply-loop droop 12.46 mV against the
   100 mV limit in [hardware/criteria.yaml](hardware/criteria.yaml). Ran after layout because the
   copper supplies the resistances. Ground is now a pour rather than routed track, modelled as a
   ladder between its real stitching-via positions so the plane stays layout-derived.
 - [x] Matrix board SPICE validation: `hardware/tests/test_sim_matrix.py`, antenna inductance and
   AC resistance derived from the routed loop geometry (`hardware/sim/loop.py`). Selected cell
-  resonates at 14.18 MHz, loaded 16-line bus at 13.70 MHz, off/on suppression 90 dB, steering
-  bias 9.7 mA, all inside [hardware/criteria.yaml](hardware/criteria.yaml).
+  resonates at 13.54 MHz, loaded 16-line bus at 12.93 MHz, off/on suppression 65.6 dB, steering
+  bias 10.326 mA, all inside [hardware/criteria.yaml](hardware/criteria.yaml) with exact Diodes
+  vendor MOSFET models.
 - [x] Hub board SPICE validation: `hardware/tests/test_sim_hub.py` drives the 16-cell bus
   through the PN5180 TX path; the selected loop's field peaks at 13.86 MHz at 60 mA per volt of
   drive. The 68 pF series match value came from this bench.
@@ -181,12 +187,10 @@ Known defects as of 2026-07-25, before the workflow starts:
   drawn to router copper, but it is a route, and DRC judges it instead of the build dying.
 - **The 10 uH matrix choke has no margin evidence.** Its datasheet gives one current number, 15 mA,
   without saying whether that is a heating or a saturation limit, and the design biases it at
-  10.29 mA.
+  10.326 mA.
 
-Two open sourcing risks are recorded in
-[hardware/jlcpcb-sourcing.md](hardware/jlcpcb-sourcing.md): U4's ordering code publishes no stock
-quantity, and the lightbar LED's ordering code has no authoritative datasheet and two conflicting
-vendor pinouts.
+The old U4 and lightbar sourcing risks are closed by exact stocked DigiKey order codes. U4 still
+requires controlled Global Sourcing for factory placement because it is not hand solderable.
 
 The light bar, matrix, and hub have each cleared the legacy M2 through M4 design-generation gates:
 schematic, nominal SPICE checks, and PCB layout. They have not been assessed against V0 through V9,
