@@ -22,17 +22,20 @@ Each fabrication run emits two upload choices. `<board>_jlcpcb_bom.csv` and
 `<board>_jlcpcb_hybrid_bom.csv` and `<board>_jlcpcb_hybrid_cpl.csv` omit every `Hand` row. Upload
 the hybrid pair together when using manual completion, then purchase exactly the rows in
 `<board>_hand_bom.csv` elsewhere. Never mix the full BOM with the hybrid CPL or the reverse.
+The lightbar is the exception: JLCPCB cannot assemble its 120 by 8.5 mm outline, so both of its
+JLCPCB BOM/CPL pairs are intentionally empty and its hand BOM contains every fitted component.
+Order only its bare PCB Gerbers from JLCPCB.
 
 The upload BOM uses the selected manufacturer's exact MPN in `Comment`, not the schematic value.
 This makes the MPN agree with `LCSC Part #` and prevents JLCPCB's misleading comment mismatch
 warning. The value and tolerance remain visible in the engineering BOM.
 
 For Standard PCB Assembly, search JLCPCB's public Basic library first and require live stock above
-the order quantity including attrition. Each unique Extended component adds a fee, so minimize
-Extended BOM lines. Keep one only when no Basic part preserves the required function, package, and
-electrical limits. If no safe public-stock part exists, use Pre-Order or Global Sourcing and wait
-until the inventory appears in My Parts Lib before submitting the assembly order. Re-match the BOM
-immediately before payment because inventory can change.
+the order quantity including attrition. Each unique Extended component currently adds a 2.70 EUR
+feeder-change labor fee, so minimize Extended BOM lines. Keep one only when no Basic part preserves
+the required function, package, and electrical limits. If no safe public-stock part exists, use
+Pre-Order or Global Sourcing and wait until the inventory appears in My Parts Lib before submitting
+the assembly order. Re-match the BOM immediately before payment because inventory can change.
 
 ## Factory versus hand assembly
 
@@ -43,16 +46,22 @@ work.
 
 | Board | Prefer JLCPCB | Practical hand-solder candidates |
 | --- | --- | --- |
-| Lightbar | seventeen bottom-pad WS2812C-2020 LEDs and seventeen 0402 capacitors | J1 and the single 1210 bulk capacitor C18 |
+| Lightbar | none, because the board is below JLCPCB's supported assembly size | all components; use stencil reflow for the LEDs and 0402 capacitors, then iron or hot air for J1 and C18 |
 | Matrix | repeated groups of 16 to 32 small passives, SOD-523 diodes, MOSFETs, and the Basic shift registers | the single seven-pin connector J1 |
 | Hub | QFN, DFN, SON, fine-pitch TSSOP, USB-C, 0402 RF parts, the crystal, and the ESP32 module | JST connectors, switch, low-count 0603/0805/1206 parts, SOT-23 devices, and the two-terminal boost inductor |
 
 For the current bound BOM, following the `Hand` recommendations removes 22 board-specific
-Extended lines: two from the lightbar, one from the matrix, and nineteen from the hub. It leaves
-fourteen bound Extended lines for factory placement: six on the matrix and eight on the hub. At a
-25 EUR fee per Extended line, that changes the setup estimate from about 900 EUR to 350 EUR before
-the four unresolved lines are sourced. This saving assumes the hand-fitted parts are explicitly
-removed from the assembly order after reviewing the generated engineering BOM.
+Extended lines: two from the lightbar, one from the matrix, and nineteen from the hub. At 2.70 EUR
+per line, that avoids up to 59.40 EUR in feeder-change fees across the three separate designs. It
+leaves fourteen bound Extended lines for factory placement: six on the matrix and eight on the hub.
+This saving assumes the hand-fitted parts are explicitly removed from the assembly order after
+reviewing the generated engineering BOM.
+
+The 2026-07-25 hub hybrid quote is the current cost baseline. It reports 31 detected BOM rows, 29
+confirmed rows, and shortages on U4 and Y1. Economic PCBA is 53.13 EUR: 7.19 setup, 1.34 stencil,
+24.28 components, 18.88 Extended-component fees, 0.69 SMT assembly, and 0.75 nitrogen reflow. The
+18.88 EUR is seven nominal 2.70 EUR feeder changes after quote rounding. J1 was detected with zero
+quantity and no component price, so budget another 2.70 EUR if it becomes a charged placement.
 
 The ESP32-C3-MINI-1U is not an iron-solder part. Its 0.8 mm perimeter pitch is manageable, but the
 large ground pad is split into nine paste areas under the module. It is feasible with a stencil and
@@ -95,6 +104,8 @@ Every bound code below was checked against live JLCPCB stock above the five-boar
 
 ### Lightbar
 
+- **Assembly route:** bare PCB fabrication only. Populate every component manually. A stencil and
+  hot plate or reflow oven are strongly preferred for the seventeen LEDs and 0402 capacitors.
 - **C18:** C49066, Samsung CL32A107MQVNNNE, is the exact 100 uF, 6.3 V, X5R, 1210 requirement.
 - **J1:** C225127, CJT A1257WR-S-4P, preserves the 1.25 mm GH-compatible right-angle interface.
 - **D1-D17, WS2812C-2020:** no Basic 2020-package, pin-compatible LED candidate. A different
@@ -120,6 +131,22 @@ DNP tuning capacitors, and power flags are absent from both upload files.
 | R2/R5 through R47 | RS-03K1800FT | C286574 | Extended | 232,046 | 180 ohm, 1%, 100 mW, 0603 |
 | R3/R6 through R48 | 0603WAF1003T5E | C25803 | Basic | 7,405,766 | 100 kohm, 1%, 100 mW, 0603 |
 | U1/U2 | 74HC595D,118 | C5947 | Basic | 182,847 | Nexperia SOIC-16 device, same logic and pinout |
+
+The 2026-07-25 matrix hybrid quote confirms all ten uploaded rows with no shortages. PCB fabrication
+is 59.03 EUR and Economic PCBA is 82.02 EUR, for 141.05 EUR before shipping and tax. The dominant
+cost is board size: 17.74 EUR on fabrication plus 50.47 EUR on assembly, or 68.21 EUR total. The
+assembly large-size charge alone is 61.5% of the PCBA price. Components cost only 7.56 EUR and the
+Extended-component fee is 13.48 EUR.
+
+The upload contains six rows labelled Extended, while 13.48 EUR corresponds to five nominal
+2.70 EUR feeder changes after quote rounding. The quote does not identify which row has its feeder
+fee waived, so use the displayed total rather than estimating this order from labels alone.
+
+Selective hand fitting does not remove the 50.47 EUR assembly large-size charge. The meaningful
+choice is therefore binary: pay JLCPCB 82.02 EUR to place the 164 hybrid references, or order the
+bare matrix PCB and populate all 165 purchased references manually, including 32 SOD-523 diodes
+and the repeated 0603/SOT-23 arrays. Splitting the matrix into smaller PCBs could reduce future
+large-size charges, but that is an RF and interconnect redesign rather than a sourcing substitution.
 
 The stocked JSCJ BAR64-02V replaces the unavailable NXP BAP64-02. Its conservative ngspice model
 uses the JSCJ limits of 2.5 ohm maximum at 10 mA and 0.55 pF maximum at 1 V, 0.35 pF maximum at
@@ -147,9 +174,11 @@ Three lines remain deliberately unbound:
 - **L2, 74438357010:** stocked 1 uH candidates reduce saturation-current and DCR margin. Use
   Pre-Order or Global Sourcing rather than weakening the TPS61023 power stage.
 - **U4, ESP32-C3-MINI-1U-N4X:** the stocked N4 module uses the older chip revision. Do not trade
-  away the N4X revision and its lifecycle advantage merely to obtain public stock.
+  away the N4X revision and its lifecycle advantage merely to obtain public stock. JLCPCB matched
+  exact C49230958 in the hybrid quote, but reported a two-piece shortfall.
 - **Y1, EXS00A-CS01188:** stocked 27.12 MHz candidates found so far use a different footprint.
-  Changing it requires a reviewed layout change, not a purchasing substitution.
+  Changing it requires a reviewed layout change, not a purchasing substitution. JLCPCB matched
+  exact C3032297 in the hybrid quote, but reported a six-piece shortfall.
 
 ## IC upgrade and cost review
 

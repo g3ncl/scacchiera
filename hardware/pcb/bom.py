@@ -52,10 +52,17 @@ def _key(part: object) -> BomKey:
     )
 
 
-def assembly_plan(key: BomKey, quantity: int) -> AssemblyPlan:
+def assembly_plan(key: BomKey, quantity: int, board_name: str = "") -> AssemblyPlan:
     """Choose a practical assembly route without changing what is fitted."""
     if key.fitted != "yes" or key.mpn == "PCB_COPPER":
         return AssemblyPlan("Omit", "None", "Not a fitted purchased component")
+    if board_name == "lightbar":
+        reflow_only = any(marker in key.footprint for marker in REFLOW_ONLY_FOOTPRINT_MARKERS)
+        return AssemblyPlan(
+            "Hand",
+            "Stencil reflow" if reflow_only else "Iron or hot air",
+            "The lightbar is below JLCPCB's supported assembly size",
+        )
     if key.jlc_library == "Basic":
         return AssemblyPlan("JLCPCB", "Factory reflow", "Basic placement avoids an Extended fee")
     if any(marker in key.footprint for marker in REFLOW_ONLY_FOOTPRINT_MARKERS):
@@ -101,7 +108,7 @@ def write_bom(circuit: Circuit, destination: Path) -> None:
         )
         for key, references in sorted(grouped.items(), key=lambda item: item[1][0]):
             line_cost = key.unit_cost_eur * len(references) if key.fitted == "yes" else 0.0
-            plan = assembly_plan(key, len(references))
+            plan = assembly_plan(key, len(references), circuit.name)
             writer.writerow(
                 (
                     key.value,

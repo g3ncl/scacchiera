@@ -200,7 +200,8 @@ def export_fab(name: str) -> tuple[Path, Path, Path, Path, Path, Path]:
     hand_bom_path = board_dir / f"{name}_hand_bom.csv"
     for suffix in LEGACY_ASSEMBLY_SUFFIXES:
         (board_dir / f"{name}{suffix}").unlink(missing_ok=True)
-    write_jlc_bom(engineering_bom_path, bom_path)
+    standard_excluded_routes = HAND_ASSEMBLY_ROUTES if name == "lightbar" else frozenset()
+    write_jlc_bom(engineering_bom_path, bom_path, standard_excluded_routes)
     write_jlc_bom(engineering_bom_path, hybrid_bom_path, HAND_ASSEMBLY_ROUTES)
     write_hand_bom(engineering_bom_path, hand_bom_path)
     subprocess.run(
@@ -215,7 +216,11 @@ def export_fab(name: str) -> tuple[Path, Path, Path, Path, Path, Path]:
         ],
         check=True,
     )
-    write_jlc_cpl(raw_cpl_path, cpl_path, assembly_references(engineering_bom_path))
+    write_jlc_cpl(
+        raw_cpl_path,
+        cpl_path,
+        assembly_references(engineering_bom_path, standard_excluded_routes),
+    )
     write_jlc_cpl(
         raw_cpl_path,
         hybrid_cpl_path,

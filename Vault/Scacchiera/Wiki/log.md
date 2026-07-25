@@ -105,3 +105,24 @@ Extended [[jlcpcb]] parts were classified by package access, quantity, and rewor
 engineering BOM now distinguishes factory placement from practical hand-solder candidates without
 altering the upload BOM automatically. Connectors and low-count accessible packages are candidates
 for external purchase; hidden-pad, fine-pitch, tiny, and repetitive parts remain factory work.
+
+## [2026-07-25] correction | Route the complete lightbar to manual assembly
+
+The lightbar's 120 by 8.5 mm outline is below [[jlcpcb]] assembly support. Its board-level rule now
+overrides per-part classifications: the hand BOM contains every fitted component and both JLCPCB
+BOM/CPL pairs are intentionally empty. Bare-board fabrication remains supported.
+
+## [2026-07-25] query | Calibrate Extended fees from the hub quote
+
+The live hub hybrid quote established a 2.70 EUR labor fee per charged Extended component, replacing
+the earlier incorrect 25 EUR estimate. Seven charged feeder changes produced 18.88 EUR after quote
+rounding. The quote confirmed 29 of 31 detected rows and reported inventory shortages only for U4
+and Y1. Updated [[jlcpcb-basic-part-sourcing]] and the production sourcing register.
+
+## [2026-07-25] query | Review the matrix hybrid quote
+
+The matrix hybrid upload matched all ten rows with no shortages. Its 141.05 EUR PCB plus PCBA quote
+is driven by 68.21 EUR in combined large-size charges, not its 7.56 EUR component cost or 13.48 EUR
+Extended fee. Updated [[jlcpcb-basic-part-sourcing]] and the sourcing register: selective hand
+fitting cannot remove the assembly large-size charge, so the useful decision is full PCBA versus
+complete manual population.

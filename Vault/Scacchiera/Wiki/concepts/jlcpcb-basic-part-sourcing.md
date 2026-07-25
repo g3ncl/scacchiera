@@ -26,11 +26,11 @@ hides which device is being purchased. Keep the human-readable value in the engi
 bind the upload with the exact MPN plus JLC code. See [[jlcpcb-matrix-bom-review]] for the validated
 matrix application of this rule.
 
-For [[jlcpcb]] Standard PCB Assembly, each unique Extended component adds a fee. Search Basic first
-and minimize Extended BOM lines. Keep an Extended selection only when no Basic part preserves the
-required function, package, and electrical limits. Use Pre-Order or Global Sourcing only after safe
-public-stock choices are exhausted, and submit the PCBA order only after those parts appear in My
-Parts Lib.
+For [[jlcpcb]] Standard PCB Assembly, each unique Extended component currently adds a 2.70 EUR
+feeder-change labor fee. Search Basic first and minimize Extended BOM lines. Keep an Extended
+selection only when no Basic part preserves the required function, package, and electrical limits.
+Use Pre-Order or Global Sourcing only after safe public-stock choices are exhausted, and submit the
+PCBA order only after those parts appear in My Parts Lib.
 
 Assembly routing is separate from electrical sourcing. Keep Basic parts with JLCPCB because their
 placement avoids the Extended fee. For an Extended part, prefer hand fitting only when its pads are
@@ -38,6 +38,15 @@ accessible, the quantity is low, and inspection or rework is realistic. Fine-pit
 underside thermal pads, 0402 RF networks, and repeated arrays stay with factory reflow. The project
 records this decision per BOM line in the engineering BOM rather than silently dropping parts from
 the JLCPCB upload.
+
+Board-level manufacturing limits override part-level routing. The 120 by 8.5 mm lightbar is below
+JLCPCB's supported assembly size, so all of its components remain hand or local-reflow work even
+when an individual part is Basic.
+
+Board-level surcharges can outweigh component sourcing. The matrix hybrid quote charged 50.47 EUR
+for large-size assembly while its components cost only 7.56 EUR. Once any PCBA placement keeps that
+surcharge active, moving a few additional parts to hand assembly has little economic effect. The
+relevant comparison becomes full factory placement versus completely manual population.
 
 ## Sources
 

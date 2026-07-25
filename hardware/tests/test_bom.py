@@ -40,3 +40,22 @@ def test_repeated_solderable_parts_stay_with_jlcpcb() -> None:
         16,
     )
     assert plan.route == "JLCPCB"
+
+
+def test_lightbar_overrides_basic_and_reflow_parts_to_hand_assembly() -> None:
+    basic = assembly_plan(
+        _key(footprint="Capacitor_SMD:C_1210_3225Metric", library="Basic"),
+        1,
+        "lightbar",
+    )
+    reflow = assembly_plan(
+        _key(footprint="LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm", library="Unbound"),
+        17,
+        "lightbar",
+    )
+    assert basic.route == "Hand"
+    assert reflow == AssemblyPlan(
+        "Hand",
+        "Stencil reflow",
+        "The lightbar is below JLCPCB's supported assembly size",
+    )

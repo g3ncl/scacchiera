@@ -67,9 +67,10 @@ Standard shape per file: short title, one paragraph on what it covers, then the 
 
 ## Hardware
 
-- Minimize JLCPCB Extended-library selections because its fee applies to each unique Extended
-  component. Use a safe Basic match whenever possible. Keep an Extended part only when no Basic
-  part preserves the required function, package, and electrical limits.
+- Minimize JLCPCB Extended-library selections because each unique Extended component currently
+  adds a 2.70 EUR feeder-change labor fee. Use a safe Basic match whenever possible. Keep an
+  Extended part only when no Basic part preserves the required function, package, and electrical
+  limits.
 - `hardware/cad`: build123d code generating the enclosure and internal parts. Parametric where it matters (fit, clearance, tolerance). Comment why a dimension is what it is, not what the line of code does.
 - `hardware/pcb`: SKiDL code generating the schematic and netlist. Group parts by function (power, sensing, MCU) rather than one flat file.
 
