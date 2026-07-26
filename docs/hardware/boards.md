@@ -82,7 +82,9 @@ for the same reason the display modules are: an order that forgets them is incom
   antenna PCB was considered and rejected: its radiation pattern is the one thing in this project
   that no ngspice test can validate, and per-attempt iteration costs a fabrication run rather than
   a euro.
-- **Battery**, one protected Li-ion cell with a JST PH lead.
+- **Battery**, one protected 1S assembly based on a Molicel INR-21700-M65A cell, with a bonded
+  thermistor and a locking connector rated for the 4 A charge path. The exact assembly and
+  connector remain open V1 selections.
 
 ## Why this split
 

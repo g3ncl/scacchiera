@@ -59,6 +59,8 @@ One [[wiki/source]] summary per ingested raw source. Factual, no interpretation.
 | [[bq25638-datasheet]] | component datasheet | 2026-07-26 |
 | [[tps25730-datasheet]] | component datasheet | 2026-07-26 |
 | [[pmp23456-reference-design]] | TI reference-design test report | 2026-07-26 |
+| [[sw6106-datasheet]] | component datasheet | 2026-07-26 |
+| [[rbs18634-datasheet]] | module product sheet | 2026-07-26 |
 
 ## Entities
 
@@ -77,6 +79,8 @@ People, tools, orgs, repos. See [[wiki/entity]] pages.
 | [[inr-21700-m65a]] | 1 | 2026-07-26 |
 | [[bq25638]] | 2 | 2026-07-26 |
 | [[tps25730s]] | 2 | 2026-07-26 |
+| [[sw6106]] | 2 | 2026-07-26 |
+| [[rbs18634]] | 2 | 2026-07-26 |
 
 <!-- V1-COMPONENT-CATALOG:START -->
 ## V1 component datasheet sources
@@ -127,7 +131,7 @@ One exact source summary per purchased fitted MPN. The structured audit is
 | [[grm1555c1h680ja01d-datasheet]] | Murata | 2026-07-25 |
 | [[js102011saqn-datasheet]] | C&K | 2026-07-25 |
 | [[lqw2basr47j00l-datasheet]] | Murata | 2026-07-25 |
-| [[mcp73871t-2cci-ml-datasheet]] | Microchip Technology | 2026-07-25 |
+| [[mcp73871t-2cci-ml-datasheet]] | Microchip Technology | 2026-07-26 |
 | [[mf-msmf050-2-datasheet]] | Bourns | 2026-07-25 |
 | [[pn5180a0hn-c3e-datasheet]] | NXP Semiconductors | 2026-07-25 |
 | [[rc0603fr-07110kl-datasheet]] | Yageo | 2026-07-25 |
@@ -191,7 +195,7 @@ One exact source summary per purchased fitted MPN. The structured audit is
 | [[grm1555c1h680ja01d]] | 1 | 2026-07-25 |
 | [[js102011saqn]] | 1 | 2026-07-25 |
 | [[lqw2basr47j00l]] | 1 | 2026-07-25 |
-| [[mcp73871t-2cci-ml]] | 1 | 2026-07-25 |
+| [[mcp73871t-2cci-ml]] | 1 | 2026-07-26 |
 | [[mf-msmf050-2]] | 1 | 2026-07-25 |
 | [[pn5180a0hn-c3e]] | 1 | 2026-07-25 |
 | [[rc0603fr-07110kl]] | 1 | 2026-07-25 |
@@ -222,7 +226,7 @@ Ideas, patterns, techniques. See [[wiki/concept]] pages.
 | [[row-column-antenna-matrix-technique]] | high       | 4            | 2026-07-24 |
 | [[pin-diode-antenna-switching]]         | high       | 1            | 2026-07-24 |
 | [[jlcpcb-basic-part-sourcing]]          | medium     | 3            | 2026-07-25 |
-| [[usb-c-pd-fast-charging]]              | high       | 4            | 2026-07-26 |
+| [[usb-c-pd-fast-charging]]              | high       | 6            | 2026-07-26 |
 |                                         |            |              |            |
 
 ## Synthesis
@@ -237,3 +241,4 @@ Query answers filed back into the wiki. See [[wiki/synthesis]] pages.
 | [[v1-component-proof]] | How is every fitted component tied to exact V1 evidence? | 2026-07-25 |
 | [[v2-static-connectivity]] | How are schematic connectivity and routed boards proven equivalent? | 2026-07-26 |
 | [[chessboard-quick-charge-architecture]] | How can recharge time become much shorter than useful play time? | 2026-07-26 |
+| [[quick-charge-module-evaluation]] | Can a cheap purchased board de-risk quick charging? | 2026-07-26 |

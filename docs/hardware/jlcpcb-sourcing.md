@@ -5,6 +5,11 @@ need a deliberate follow-up. The supporting catalog capture and live-stock evide
 vault. The complete bound BOM was checked live again on 2026-07-25. Stock and prices remain
 time-sensitive.
 
+The hub selections and quotes in this register describe the last generated MCP73871 design. That
+hub is superseded by the USB-C PD redesign in [hub.md](hub.md), so none of its hub counts, costs,
+or order files are current release evidence. Update this register from the regenerated PD hub only
+after its V1 and V2 gates pass. Lightbar and matrix selections remain current.
+
 `make pcb-fab` emits the upload pair `<board>_jlcpcb_bom.csv` and
 `<board>_jlcpcb_cpl.csv`, and rejects the export if their designators differ. The internal costed file is named
 `<board>_engineering_bom.csv`; do not upload it. Blank `LCSC Part #` cells in the upload BOM are
@@ -50,7 +55,7 @@ each route, so "hand" here always means a joint an iron tip can reach.
 | --- | --- | --- |
 | Lightbar | none, the board is below JLCPCB's supported assembly size | everything; the LED was changed to a legs-outside-body package so an iron reaches all four joints |
 | Matrix | none, see below | all 165 references |
-| Hub | QFN, SON, SOT563, USB-C, the crystal, and the ESP32 module | JST connectors, switch, SOT-23 devices, inductors, 0402 C0G RF and timing capacitors, and the 0.65 mm TSSOP expander |
+| Hub, historical MCP73871 design | QFN, SON, SOT563, USB-C, the crystal, and the ESP32 module | JST connectors, switch, SOT-23 devices, inductors, 0402 C0G RF and timing capacitors, and the 0.65 mm TSSOP expander |
 
 Packages classified reflow-only are those with pads under the body or a pitch no tip can reach:
 QFN, SON, SOT563, USB-C, the 3225 crystal, and the ESP32 module. **0402, SOD-523, SOT-23, SOIC and

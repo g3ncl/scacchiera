@@ -9,14 +9,24 @@ layout in `hardware/pcb/hub_layout.py`.
 
 ## Power
 
-USB-C (5.1 k CC pulls, resettable fuse, ESD array) into an MCP73871 power-path charger for one
-protected Li-ion cell, with a thermistor connector and a slide switch enabling battery operation
-(USB power overrides it through a diode). A TPS63802 buck-boost makes 3V3 across the whole cell
-range. The light bars' 5 V comes from a TPS61023 boost that true-disconnects when disabled, feeds
-a TPS2553 latch-off current limiter, and drives the WS2812 data line through an AHCT buffer at
-5 V logic. The charger's STAT1/LBO output gives the low-battery signal behind the functional
-spec's save-and-shutdown behavior. This power tree is carried over from the previous hub
-generation, which cleared ERC and review.
+The former passive Type-C sink and MCP73871 500 mA linear charger are superseded. The final target
+uses a TPS25730S autonomous sink to negotiate 5 V/3 A or 9 V/3 A, followed by a BQ25638 switching
+charger with an NVDC system power path. The target battery is a protected 1S assembly based on one
+6.5 Ah Molicel INR-21700-M65A cell, with its thermistor bonded to the cell and brought to the
+charger. The charge setting is 4 A when the PD contract, system demand, and cell temperature allow
+it. A lower-power source remains safe but charges more slowly.
+
+The TPS63802 still makes 3V3 across the cell range. The light bars' 5 V still comes from a
+TPS61023 boost that true-disconnects when disabled, feeds a TPS2553 latch-off current limiter, and
+drives the pixel data line through an AHCT buffer at 5 V logic. Charger status and telemetry must
+support the low-battery save-and-shutdown behavior and report source-limited or
+temperature-limited charging.
+
+The 6.76 EUR SW6106 RBS18634 board in
+[quick-charge-test-article.md](quick-charge-test-article.md) is a battery and thermal test article,
+not the final power path. Its controller supports 4 A PD charging, but the module documentation
+does not prove NTC wiring, uninterrupted cable handover, or controlled revision. Those are measured
+unknowns rather than reasons to weaken the functional requirements.
 
 ## MCU and slow control
 
@@ -95,8 +105,9 @@ The 68 pF match value came from this bench; 220 pF would drag the system to 9 MH
 
 ## Cost
 
-Generated engineering BOM (`hardware/pcb/generated/hub/hub_engineering_bom.csv`) totals 16.21 EUR in parts against the
-30 EUR board target in [boards.md](boards.md).
+The 16.21 EUR historical generated BOM belongs to the superseded MCP73871 hub. Recalculate the hub
+cost after the PD charger schematic and route pass V1 and V2. The RBS18634 test article costs
+6.76 EUR before shipping and is lab evidence, not part of the production BOM.
 
 Seven Extended lines go to JLCPCB, all of them genuinely reflow-only: J1 (USB-C), U1, U2, U3, U5,
 U4 and Y1. Everything else Extended is hand-fitted from `hub_hand_bom.csv`, including the 0402 C0G

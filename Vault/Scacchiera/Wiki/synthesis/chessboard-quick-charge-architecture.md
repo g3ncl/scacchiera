@@ -18,6 +18,11 @@ The exact implementation is [[tps25730s]] plus [[bq25638]], based on
 setting while retaining system priority. Fast charge requires the negotiated contract, acceptable
 cell temperature, and the board's charge-priority load policy. Every other case folds back safely.
 
+The readily available [[rbs18634]] module is a bounded V8 charge test article, not a replacement
+for that final implementation. Its [[sw6106]] controller can charge at 4 A above 5 V input and can
+charge while supplying a load. The module sheet does not prove NTC wiring, sustained thermal
+performance, uninterrupted handover, or revision control. See [[quick-charge-module-evaluation]].
+
 The remaining critical uncertainty is the battery assembly rather than the cell chemistry. A bare
 21700 is not an acceptable product battery. V1 remains reopened until a protected assembly and
 qualified source are exact, and V7 must prove the thicker cylinder, insulation, connector, strain

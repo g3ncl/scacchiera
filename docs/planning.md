@@ -168,3 +168,9 @@ passing component, static, simulation, and layout evidence. The 10 uH matrix cho
 
 No board is authorized for a test-article order until V3 through V7 pass. Firmware and the companion
 app have not started, so V5 and V6 remain open.
+
+The named V8 charge article is the 6.76 EUR MakerMind RBS18634 SW6106 module described in
+[hardware/quick-charge-test-article.md](hardware/quick-charge-test-article.md). It can measure the
+M65A charge-rate, temperature, NTC, and cable-handover risks without fabricating the final hub. It
+does not close V1 or replace the final NVDC path because its module BOM, NTC wiring, protection
+thresholds, sustained rating, dimensions, and revision control are unpublished.

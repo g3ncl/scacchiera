@@ -24,6 +24,11 @@ safety requirements after the original 500 mA architecture proved unsuitable.
 reopened the hub portions of V1 and [[v2-static-connectivity|V2]]. The lightbar and matrix evidence
 remains valid. No later gate may treat the former MCP73871 schematic or route as current evidence.
 
+[[quick-charge-module-evaluation]] identifies the 6.76 EUR [[rbs18634]] as the smallest charge and
+thermal test article. Its [[sw6106]] controller supports 4 A PD charging, but unpublished
+module-level NTC wiring, handover, protection, and revision details keep it outside the final hub
+BOM unless measurement and later qualification close those gaps.
+
 ## NFC Game Board: the reference project
 
 The wiki's first ingest covers [[nfc-game-board-project|NFC Game Board]], [[ben-bulsink|Ben

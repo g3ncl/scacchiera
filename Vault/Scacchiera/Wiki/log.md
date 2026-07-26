@@ -1,6 +1,6 @@
 ---
 type: log
-date_updated: 2026-07-24
+date_updated: 2026-07-26
 tags:
   - wiki/log
 ---
@@ -303,3 +303,17 @@ The selected target is a protected 6.5 Ah cell assembly charged at 4 A from a ne
 source. Because this replaces the MCP73871 and passive Type-C sink, the hub portions of V1 and V2
 are reopened. The exact protected pack source, schematic, footprint, route, simulation, and measured
 charge cycle remain open and are not represented as passing evidence.
+
+## [2026-07-26] query | Evaluate purchased quick-charge boards
+
+Filed the immutable [[rbs18634-datasheet]] module sheet and [[sw6106-datasheet]] controller data
+sheet, created [[rbs18634]] and [[sw6106]], and answered the buy-versus-build question in
+[[quick-charge-module-evaluation]]. The named module was available for 6.76 EUR and advertises 1S,
+18 W PD, and 4 A charging.
+
+The cheap board is retained as a V8 battery, thermal, NTC, and cable-handover test article. It does
+not replace the final NVDC charger: its module sheet recommends external battery protection and
+does not publish its NTC wiring, schematic, complete BOM, dimensions, sustained thermal rating,
+handover time, or revision control. Updated [[chessboard-quick-charge-architecture]],
+[[usb-c-pd-fast-charging]], [[overview]], and [[index]] without treating unknown module behavior as
+validated evidence.

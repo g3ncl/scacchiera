@@ -1,7 +1,7 @@
 ---
 type: concept
 date_updated: 2026-07-26
-source_count: 4
+source_count: 6
 confidence: high
 tags:
   - wiki/concept
@@ -23,3 +23,9 @@ not a fast-charge source.
 [[pmp23456-reference-design]] proves the selected controller pair at 5 V/3 A and 9 V/3 A and around
 93 percent measured 3 A charge efficiency. The 4 A chessboard operating point remains a V3 and V8
 obligation rather than an inference from that measurement.
+
+Low-cost power-bank modules are useful measurement articles but have a different evidence boundary.
+The [[rbs18634]] and its [[sw6106]] controller advertise the required charge current, yet only the
+controller data sheet documents the NTC and simultaneous-output features. The module document does
+not establish their exact implementation or prove uninterrupted rail handover. A module may
+calibrate charge-current and thermal models without becoming the final qualified power path.
