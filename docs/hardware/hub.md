@@ -90,10 +90,15 @@ the 2-pin button. There is no battery connector on the hub.
 
 ## Board
 
-The target remains at most 110 x 46 mm, 2 layers, in the service volume under one player rail.
-The existing placement and reviewed route belong to the superseded charger design. They are
-historical evidence only until regenerated around the 5 V boundary and checked again at V2. The
-current SKiDL schematic implements the new boundary and its focused static connectivity tests pass.
+The board is 110 x 46 mm, 1.0 mm thick, with four copper layers. The inner routing capacity leaves
+substantially more ground return around the ESP32 and PN5180 than the attempted two-layer route,
+while the matrix remains the only board functionally constrained to two layers. Placement follows
+the signal path from USB input and temperature gate, through managed rails and control, to the NFC
+front end and edge connectors. The reviewed Specctra session is versioned, with the 2 A USB entry,
+safety-critical VBUS branches, USB shield, SCLK bridge, and ground stitching owned deterministically
+by code. `make pcb-hub-drc` reproduces 0 violations, 0 unconnected items, and 0 schematic-parity
+issues. The fabrication export reads the stack from the board, so the two inner layers reach the
+Gerber set instead of being dropped by a fixed outer-layer list.
 
 ## Mounting
 
@@ -111,5 +116,7 @@ The 68 pF match value came from this bench; 220 pF would drag the system to 9 MH
 
 The regenerated engineering BOM is 13.402 EUR in estimated custom-board parts. This is not a
 factory quote and excludes assembly fees, the PiSugar 3 Plus, its cell sensor and cable assemblies.
-The purchased subsystem must be included in complete-product cost, not the JLCPCB BOM. Re-quote the
-hub after its new route passes V2.
+The purchased subsystem must be included in complete-product cost, not the JLCPCB BOM. Four copper
+layers cost more per panel than two, so the 25 EUR board target in
+[boards.md](boards.md) needs a real quote rather than the previous two-layer assumption. Re-quote the
+four-layer hub with the complete product before ordering.

@@ -49,7 +49,24 @@ board_results:
   matrix: {drc_violations: 0, unconnected_items: 0, schematic_parity_issues: 0}
   hub: {drc_violations: 0, unconnected_items: 0, schematic_parity_issues: 0}
 
+hub_layout:
+  envelope_mm: [110, 46]
+  copper_layers: 4
+  board_thickness_mm: 1.0
+  reviewed_route: hardware/pcb/routes/hub.ses
+  rationale: Four copper layers preserve useful ground return around the dense MCU and NFC routing; only the matrix is functionally constrained to two layers.
+  deterministic_routes:
+  - USB shield tabs and bleed network
+  - 0.5 mm USB VBUS entry, safety-window distribution, and reference branch
+  - USB VBUS comparator and input-capacitor branch
+  - PN5180 to MCU SCLK branch
+  - ground stitching vias
+  fabrication_layers: Read from the board's own layer table by hardware/pcb/fab.py, so In1.Cu and In2.Cu reach the Gerber set rather than being dropped by a fixed outer-layer list.
+
 commands:
   static_gate: make check
   fresh_autoroute_matrix: make pcb-matrix-reroute
   fresh_autoroute_hub: make pcb-hub-reroute
+evidence:
+  hub_drc_command: make pcb-hub-drc
+  static_tests: 6 passed on 2026-07-26, including the recorded four-layer stackup

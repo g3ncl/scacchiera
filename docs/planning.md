@@ -48,21 +48,26 @@ scoped test-article order. V0 through V9 permit a final-board order.
   DGK0008A land pattern because the generic KiCad VSSOP footprint does not meet the board's 0.2 mm
   clearance. The rejected SWPA catalog binding remains as contradiction evidence rather than a
   waiver. Evidence: 7 component-proof tests and 4 matrix vendor-model tests passed on 2026-07-26.
-- [ ] V2 connectivity and static electrical checks: the lightbar and matrix remain valid. The hub
-  schematic and route are superseded by the commercial 5 V boundary and must be regenerated and
-  re-reviewed. Historical evidence follows: clean generation runs full SKiDL and KiCad ERC,
+- [x] V2 connectivity and static electrical checks: clean generation runs full SKiDL and KiCad ERC,
   imports reviewed deterministic routing sessions, and runs PCB DRC with schematic parity on all
   three boards. [verification/v2-static.yaml](verification/v2-static.yaml) records the four
   reviewed generated-schematic warning classes, every datasheet-traced no-connect, and the zero
-  finding board results. Four focused tests cover both ends of every cable, exact USB-C pins,
-  startup pulls, recovery pads, enable/reset nets, and exposed pads. Evidence: `make check` passed
-  with 43 tests, mypy clean, and all boards at 0 violations, 0 unconnected, and 0 parity issues on
-  2026-07-26.
+  finding board results. The rebuilt 110 x 46 mm hub uses four copper layers so the dense MCU and
+  NFC routes retain useful ground return. Its reviewed route includes code-owned USB shield, 0.5 mm
+  VBUS distribution, safety-window branches, reader SCLK, and ground stitching. Because two of those
+  fixed nets run on inner copper, the Gerber export now reads the stack from the board instead of a
+  fixed outer-layer list. Six focused tests cover both ends of every cable, exact USB-C pins, startup
+  pulls, recovery pads, enable/reset nets, exposed pads, the hardware temperature gate, and the
+  recorded stackup. Evidence: `make check` passed with 47 tests, mypy clean, and all boards at 0
+  violations, 0 unconnected, and 0 parity issues on 2026-07-26.
 - [ ] V3 power, analog, timing, and fault simulation
-- [ ] V4 layout-derived electromagnetic validation
+- [ ] V4 layout-derived electromagnetic validation: the hub extraction must use its four-layer stack,
+  because an inner ground plane roughly 0.2 mm below the RF front end changes coupling and the
+  hub-side RF feed's impedance against the two-layer geometry the earlier bench assumed.
 - [ ] V5 firmware host verification
 - [ ] V6 firmware-in-simulation system verification
-- [ ] V7 mechanical and fabrication preflight
+- [ ] V7 mechanical and fabrication preflight: the hub order specification must name four layers and
+  a chosen 1.0 mm stackup, and no hub board fab quote exists at that layer count yet.
 - [ ] V8 test-article measurement and model calibration
 - [ ] V9 independent review and final release
 
@@ -150,9 +155,10 @@ DoD: the layout is generated from code, DRC is clean, and it fits the board's en
   and both-face ground pours. The reviewed route session excludes four deterministic serial nets,
   and the Q24 rail escape is deterministic as well. `make pcb-matrix-drc` is reproducibly clean:
   0 violations, 0 unconnected, and 0 schematic parity issues.
-- [ ] Hub board layout: the existing `hardware/pcb/hub_layout.py` route belongs to the superseded
-  charger and must be replaced after the simplified 5 V-input schematic is complete. Its historical
-  placement, routing, and clean DRC are not current release evidence.
+- [x] Hub board layout: `hardware/pcb/hub_layout.py` generates the four-layer 110 x 46 mm placement,
+  fixed safety and bus escapes, ground pours, and reviewed route around the commercial 5 V power
+  boundary. `make pcb-hub-drc` is reproducibly clean: 0 violations, 0 unconnected, and 0 schematic
+  parity issues.
 
 ## Legacy definition of done for design generation
 

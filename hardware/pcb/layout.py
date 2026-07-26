@@ -75,8 +75,11 @@ class BoardBuilder:
                     if net_name not in self.nets:
                         self.nets[net_name] = pcbnew.NETINFO_ITEM(self.board, net_name)
                         self.board.Add(self.nets[net_name])
-                elif number in {"A8", "B8"}:
-                    pin_name = "SBU1" if number == "A8" else "SBU2"
+                elif number in {"A6", "A7", "A8", "B6", "B7", "B8"}:
+                    pin_name = {
+                        "A6": "D+", "B6": "D+", "A7": "D-", "B7": "D-",
+                        "A8": "SBU1", "B8": "SBU2",
+                    }[number]
                     net_name = f"unconnected-({component.reference}-{pin_name}-Pad{number})"
                     if net_name not in self.nets:
                         self.nets[net_name] = pcbnew.NETINFO_ITEM(self.board, net_name)

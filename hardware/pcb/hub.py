@@ -404,10 +404,10 @@ def _build_mcu(circuit: Circuit, nets: dict[str, Net]) -> None:
     _connect(nets["3V3"], strap_pullup, "1")
     _connect(nets["OLED2_CS_N"], strap_pullup, "2")
 
-    # Recovery pads. Flashing is normally USB-Serial-JTAG over USB-C, but the
-    # only button sits behind the polled expander and cannot hold IO9 low at
-    # reset. Shorting TP1 to TP3 and pulsing TP2 forces joint download boot
-    # (datasheet Table 4-3) if firmware ever breaks the USB peripheral.
+    # Recovery pads. Flashing is UART0 on J9, because the power-only inlet
+    # leaves native USB open, and the only button sits behind the polled
+    # expander and cannot hold IO9 low at reset. Shorting TP1 to TP3 and
+    # pulsing TP2 forces joint download boot (datasheet Table 4-3).
     for ref, net_name in (("TP1", "I2C_SDA"), ("TP2", "MCU_EN"), ("TP3", "GND")):
         pad = Part(
             "Connector_Generic", "Conn_01x01", tool="kicad9", circuit=circuit,

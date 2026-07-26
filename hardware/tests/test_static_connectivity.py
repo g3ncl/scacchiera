@@ -1,5 +1,9 @@
-"""V2 connector, no-connect, startup, and programming checks."""
+"""V2 connector, no-connect, startup, programming, and stackup checks."""
 
+import os
+import re
+import subprocess
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -7,6 +11,7 @@ import yaml
 from skidl import Circuit, Part
 
 from hardware.pcb.erc import REVIEWED_WARNINGS
+from hardware.pcb.fab import copper_layers, gerber_layers
 from hardware.pcb.generate import NO_CONNECTS as SCHEMATIC_NO_CONNECTS
 from hardware.pcb.hub import NO_CONNECTS, build_hub
 from hardware.pcb.lightbar import build_lightbar
@@ -15,6 +20,22 @@ from hardware.pcb.matrix import build_matrix
 
 ROOT = Path(__file__).parents[2]
 EVIDENCE = ROOT / "docs" / "verification" / "v2-static.yaml"
+HUB_BOARD = ROOT / "hardware" / "pcb" / "generated" / "hub" / "hub.kicad_pcb"
+
+
+def _hub_board() -> Path:
+    # A bare pytest run regenerates the board; `make check` has already built
+    # it through the schematic and layout targets.
+    if not HUB_BOARD.exists():
+        subprocess.run(
+            (sys.executable, "-m", "hardware.pcb.generate", "hub"),
+            check=True, cwd=ROOT, env=os.environ,
+        )
+        subprocess.run(
+            ("/usr/bin/python3", "-m", "hardware.pcb.hub_layout", "--route"),
+            check=True, cwd=ROOT, env=os.environ,
+        )
+    return HUB_BOARD
 
 
 def _part(circuit: Circuit, reference: str) -> Part:
@@ -157,3 +178,21 @@ def test_power_boundary_and_temperature_gate_are_hardware_defined() -> None:
     assert _net(hub, "U4", "5") == "TEMP_SENSE_ADC"
     assert _net(hub, "U4", "17") == "__NOCONNECT"
     assert _net(hub, "U4", "18") == "__NOCONNECT"
+
+
+def test_hub_board_matches_its_recorded_stackup() -> None:
+    """The four-layer decision has to reach the board and its Gerber export.
+
+    The fixed VBUS branch and the SCLK bridge both run on inner copper, so a
+    stackup the fabrication layer list does not cover would ship a board
+    missing routed connections."""
+    recorded = _evidence()["hub_layout"]
+    assert (ROOT / str(recorded["reviewed_route"])).is_file()
+    board = _hub_board()
+    layers = copper_layers(board)
+    assert layers == ("F.Cu", "In1.Cu", "In2.Cu", "B.Cu")
+    assert len(layers) == recorded["copper_layers"]
+    assert set(layers).issubset(gerber_layers(board).split(","))
+    thickness = re.search(r"\(thickness ([\d.]+)\)", board.read_text(encoding="utf-8"))
+    assert thickness is not None
+    assert float(thickness.group(1)) == recorded["board_thickness_mm"]

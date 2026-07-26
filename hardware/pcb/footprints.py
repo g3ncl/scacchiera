@@ -180,7 +180,7 @@ def tlv7042_dgk_footprint() -> str:
   (attr smd)
   (fp_rect (start -1.5 -1.5) (end 1.5 1.5) (stroke (width 0.1) (type default)) (fill none) (layer "F.Fab"))
   (fp_rect (start -2.45 -1.75) (end 2.45 1.75) (stroke (width 0.05) (type default)) (fill none) (layer "F.CrtYd"))
-  (fp_circle (center -1.15 -1.15) (end -1.0 -1.15) (stroke (width 0.15) (type default)) (fill none) (layer "F.SilkS"))
+  (fp_circle (center -0.5 -1.15) (end -0.35 -1.15) (stroke (width 0.15) (type default)) (fill none) (layer "F.SilkS"))
 ''' + "\n".join(pads) + "\n)\n"
 
 

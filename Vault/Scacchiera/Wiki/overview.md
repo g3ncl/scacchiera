@@ -22,8 +22,9 @@ safety requirements after the original 500 mA architecture proved unsuitable.
 [[commercial-power-subsystem-selection]] replaces the custom charger and raw-cell plan with
 [[pisugar3-plus]]. The purchased 18.5 Wh subsystem owns the cell, charging, protection,
 uninterrupted 5 V path, and I2C state reporting. This material change keeps the hub portions of V1
-and [[v2-static-connectivity|V2]] open until the hub begins at the regulated 5 V boundary. The
-lightbar and matrix evidence remains valid.
+and [[v2-static-connectivity|V2]] tied to the regulated 5 V boundary. Both gates now pass. The
+rebuilt four-layer hub has a reviewed reproducible route with zero DRC, connectivity, or schematic
+parity findings. V3 power and fault simulation is the next open gate.
 
 The earlier [[chessboard-quick-charge-architecture|custom PD architecture]] and
 [[quick-charge-module-evaluation|RBS18634 article]] remain historical evidence rather than active

@@ -374,3 +374,24 @@ schematic parity, immutable sources, model classification, and external power-co
 PCB DRC exposed 0.15 mm pad clearance in the generic KiCad VSSOP footprint, below the hub's 0.2 mm
 rule. Replaced it with a code-generated [[tlv7042dgkr]] DGK0008A land pattern using the dimensions
 in the filed Texas Instruments data sheet. The regenerated component audit and seven V1 tests pass.
+
+## [2026-07-26] verification | Close rebuilt hub V2
+
+Replaced the superseded hub placement and route around the commercial [[pisugar3-plus]] boundary.
+The 110 x 46 mm hub now uses four copper layers because the dense two-layer trials repeatedly
+stranded different MCU and NFC nets and left a fragmented return. USB VBUS, the temperature-gate
+branch, USB shield, reader SCLK, and ground stitching are deterministic code-owned geometry.
+
+The versioned route reproduces 0 DRC violations, 0 unconnected items, and 0 schematic-parity issues.
+Five focused static tests pass, so [[v2-static-connectivity]] and the hardware plan advance through
+V2. Power and fault simulation remains the next gate.
+
+## [2026-07-26] verification | Carry the four-layer stack into fabrication
+
+Auditing the four-layer decision found that the Gerber export named a fixed outer copper pair, so a
+hub fabrication package would have silently omitted In1.Cu and In2.Cu, including the inner VBUS and
+SCLK branches. The export now reads the stack from the board's own layer table, and a test asserts
+the generated hub matches the stackup recorded in
+[[v2-static-connectivity]]'s evidence file. Also corrected a stale hub comment claiming flashing runs
+over USB-Serial-JTAG: the inlet is power-only, so recovery is UART0 on J9, as the hub document
+already said. `make check` passes with 47 tests.

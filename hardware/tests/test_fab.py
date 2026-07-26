@@ -2,16 +2,44 @@ import csv
 from pathlib import Path
 
 from hardware.pcb.fab import (
+    GERBER_NON_COPPER_LAYERS,
     HAND_ASSEMBLY_ROUTES,
     HAND_BOM_COLUMNS,
     JLC_BOM_COLUMNS,
     JLC_CPL_COLUMNS,
     assembly_references,
+    gerber_layers,
     validate_assembly_designators,
     write_hand_bom,
     write_jlc_bom,
     write_jlc_cpl,
 )
+
+
+def _board_file(tmp_path: Path, name: str, copper: tuple[str, ...]) -> Path:
+    table = "\n".join(f'\t\t({index} "{layer}" signal)' for index, layer in enumerate(copper))
+    board = tmp_path / f"{name}.kicad_pcb"
+    board.write_text(
+        "(kicad_pcb\n\t(general\n\t\t(thickness 1)\n\t)\n\t(layers\n"
+        f"{table}\n"
+        '\t\t(25 "Edge.Cuts" user)\n\t)\n'
+        "\t(setup\n\t\t(pad_to_mask_clearance 0)\n\t)\n"
+        '\t(footprint "R_0402"\n\t\t(layer "F.Cu")\n\t)\n)\n',
+        encoding="utf-8",
+    )
+    return board
+
+
+def test_gerber_layers_follow_the_board_copper_stack(tmp_path: Path) -> None:
+    two_layer = _board_file(tmp_path, "two", ("F.Cu", "B.Cu"))
+    four_layer = _board_file(tmp_path, "four", ("F.Cu", "In1.Cu", "In2.Cu", "B.Cu"))
+
+    assert gerber_layers(two_layer).split(",") == [
+        "F.Cu", "B.Cu", *GERBER_NON_COPPER_LAYERS
+    ]
+    assert gerber_layers(four_layer).split(",") == [
+        "F.Cu", "In1.Cu", "In2.Cu", "B.Cu", *GERBER_NON_COPPER_LAYERS
+    ]
 
 
 def test_write_jlc_cpl_uses_jlcpcb_headers(tmp_path: Path) -> None:

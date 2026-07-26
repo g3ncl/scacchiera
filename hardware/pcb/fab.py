@@ -5,6 +5,7 @@ Runs entirely through `kicad-cli`, so it uses whatever board already sits in
 """
 
 import csv
+import re
 import shutil
 import subprocess
 import sys
@@ -23,9 +24,10 @@ LEGACY_ASSEMBLY_SUFFIXES = (
     "_jlc_cpl.csv",
 )
 
-GERBER_LAYERS = (
-    "F.Cu,B.Cu,F.Paste,B.Paste,F.Silkscreen,B.Silkscreen,F.Mask,B.Mask,Edge.Cuts"
+GERBER_NON_COPPER_LAYERS = (
+    "F.Paste", "B.Paste", "F.Silkscreen", "B.Silkscreen", "F.Mask", "B.Mask", "Edge.Cuts",
 )
+_COPPER_LAYER = re.compile(r'\(\d+ "([A-Za-z0-9]+\.Cu)" ')
 
 JLC_CPL_COLUMNS = ("Designator", "Mid X", "Mid Y", "Rotation", "Layer")
 JLC_BOM_COLUMNS = ("Comment", "Designator", "Footprint", "LCSC Part #")
@@ -35,6 +37,24 @@ HAND_BOM_COLUMNS = (
 )
 NON_ASSEMBLED_MPNS = frozenset({"PCB_COPPER"})
 HAND_ASSEMBLY_ROUTES = frozenset({"Hand"})
+
+
+def copper_layers(pcb_file: Path) -> tuple[str, ...]:
+    """Read the board's copper stack, in stack order, from its layer table.
+
+    The hub is four layers while the other two are two, so a fixed layer list
+    would silently ship Gerbers missing routed inner copper."""
+    # The layer table precedes (setup, so cutting there keeps per-footprint
+    # layer references out of the match.
+    header = pcb_file.read_text(encoding="utf-8").split("(setup", maxsplit=1)[0]
+    layers = tuple(dict.fromkeys(_COPPER_LAYER.findall(header)))
+    if not layers:
+        raise ValueError(f"{pcb_file} declares no copper layers")
+    return layers
+
+
+def gerber_layers(pcb_file: Path) -> str:
+    return ",".join((*copper_layers(pcb_file), *GERBER_NON_COPPER_LAYERS))
 
 
 def _is_assembled(row: dict[str, str], excluded_routes: frozenset[str] = frozenset()) -> bool:
@@ -168,7 +188,7 @@ def export_fab(name: str) -> tuple[Path, Path, Path, Path, Path, Path]:
         [
             KICAD_CLI, "pcb", "export", "gerbers",
             "--output", str(fab_dir),
-            "--layers", GERBER_LAYERS,
+            "--layers", gerber_layers(pcb_file),
             str(pcb_file),
         ],
         check=True,

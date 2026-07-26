@@ -1,6 +1,6 @@
 """Place the hub board and autoroute it with Freerouting.
 
-Functional zones left to right: USB entry and charging, battery and rails,
+Functional zones left to right: USB entry and temperature gate, managed rails,
 MCU and expander, reader and its front end, with the harness connectors on
 the board edges. The board lives in the service volume under one 50 mm player
 rail, so the envelope is long and shallow. Placement is deterministic; track
@@ -59,34 +59,26 @@ def _grid(
 
 def _placements() -> dict[str, Placement]:
     placements: dict[str, Placement] = {
-        # USB entry.
+        # External power enters here. The safety gate remains physically ahead
+        # of every connector and converter it controls.
         "J1": Placement(Position(6.0, 23.0), rotation=90.0),
-        "U9": Placement(Position(16.0, 36.0)),
-        "F1": Placement(Position(12.0, 12.0)),
-        # Charger and battery.
-        "U1": Placement(Position(22.0, 23.0)),
-        "Q1": Placement(Position(28.0, 34.0)),
-        "D1": Placement(Position(32.0, 34.0)),
-        "J2": Placement(Position(28.0, 41.0)),
-        "J3": Placement(Position(35.0, 41.0)),
-        "SW1": Placement(Position(30.0, 6.0)),
-        # Rails.
-        "U2": Placement(Position(36.0, 23.0)),
-        "L1": Placement(Position(36.0, 28.5)),
-        "U5": Placement(Position(46.0, 23.0)),
-        "L2": Placement(Position(46.0, 28.5)),
-        "U7": Placement(Position(52.5, 23.0)),
-        "U8": Placement(Position(52.5, 28.5)),
-        # MCU and expander. C28 and C27 decouple the module locally, tucked into
-        # the 3.3 mm gap between U8 and U4's left edge so they sit within 4 mm of
-        # U4 pin 3 at (58.1, 28.3). WiFi TX peaks at 382 mA and the regulator's
-        # bulk capacitors are 17 mm away.
-        "U4": Placement(Position(64.0, 30.0)),
-        # The gap between U8's courtyard (right edge 54.55) and U4's (left edge
-        # 57.3) is 2.75 mm, narrower than an 0805's 3.4 mm courtyard, so C27 is
-        # rotated to present its 1.96 mm side.
-        "C28": Placement(Position(55.925, 25.5)),
-        "C27": Placement(Position(55.925, 32.3), rotation=90.0),
+        "R3": Placement(Position(12.0, 17.5)),
+        "C12": Placement(Position(12.65, 20.0)),
+        "U2": Placement(Position(19.0, 23.0)),
+        "U1": Placement(Position(29.0, 23.0)),
+        "J2": Placement(Position(15.0, 42.5)),
+        "J11": Placement(Position(22.0, 42.5)),
+        "J3": Placement(Position(32.0, 42.5)),
+        # Managed 5 V returns through J3. Keep the buck switching loop compact
+        # and away from the reader front end at the opposite side of the board.
+        "U5": Placement(Position(42.0, 27.0)),
+        "L1": Placement(Position(49.0, 27.0)),
+        "U7": Placement(Position(53.5, 16.0)),
+        "U8": Placement(Position(53.5, 22.0)),
+        # MCU and expander.
+        "U4": Placement(Position(65.0, 29.5)),
+        "C28": Placement(Position(56.0, 32.0)),
+        "C27": Placement(Position(56.0, 28.5), rotation=90.0),
         "U6": Placement(Position(63.0, 12.0), rotation=90.0),
         # Reader.
         "U3": Placement(Position(84.0, 28.0)),
@@ -97,49 +89,58 @@ def _placements() -> dict[str, Placement]:
         "L4": Placement(Position(92.0, 30.0), rotation=90.0),
         # Edge connectors.
         "J4": Placement(Position(106.5, 23.0), rotation=270.0),
-        "J5": Placement(Position(53.0, 42.5)),
-        "J6": Placement(Position(66.5, 42.5)),
+        "J5": Placement(Position(47.0, 42.5)),
+        "J6": Placement(Position(60.5, 42.5)),
         "J7": Placement(Position(62.0, 3.5), rotation=180.0),
         "J8": Placement(Position(74.0, 3.5), rotation=180.0),
         "J9": Placement(Position(86.0, 3.5), rotation=180.0),
         "J10": Placement(Position(96.0, 3.5), rotation=180.0),
-        # TP1 and TP2 sit directly on reviewed route waypoints. This makes the
-        # recovery pads accessible without adding long, obstacle-blind stubs.
-        "TP1": Placement(Position(62.16138, 11.31167945), back=True),
-        "TP2": Placement(Position(55.9304, 10.1021), back=True),
-        "TP3": Placement(Position(45.0, 6.0), back=True),
+        "TP1": Placement(Position(59.0, 8.0), back=True),
+        "TP2": Placement(Position(56.0, 8.0), back=True),
+        "TP3": Placement(Position(49.0, 8.0), back=True),
+        "R17": Placement(Position(57.2, 16.0)),
+        "R18": Placement(Position(57.0, 18.5), rotation=90.0),
+        "R19": Placement(Position(57.0, 22.0), rotation=90.0),
+        # RF matching follows the transmit path toward J4. The receive tap and
+        # bias stay at the PN5180 pins so those high-impedance traces are short.
+        "C33": Placement(Position(95.0, 14.0), rotation=90.0),
+        "C34": Placement(Position(97.2, 14.0), rotation=90.0),
+        "C35": Placement(Position(99.4, 14.0), rotation=90.0),
+        "C36": Placement(Position(97.2, 17.4), rotation=90.0),
+        "C37": Placement(Position(89.8, 33.8)),
+        "R29": Placement(Position(87.0, 33.8)),
+        "R30": Placement(Position(84.0, 33.8)),
     }
-    # Grid pitches respect the courtyards: a rotated 0603 needs 3.4 mm between
-    # rows, an 0805 3.8 mm.
+    # Temperature window and input switch support. The references follow the
+    # signal flow: CC and shield nearest J1, then sensor references, switch
+    # decoupling and ADC telemetry.
+    placements.update(_grid(("R1", "R2"), (10.0, 10.0), 2, (2.4, 3.4), 90.0))
     placements.update(
-        _grid(("R4", "R5", "R6", "R7", "R8", "R9", "R10"), (16.0, 8.0), 4, (2.2, 3.4), 90.0)
+        _grid(
+            ("R4", "R5", "R6", "R7", "R8", "R9", "R10", "R11", "R12", "R13", "R14", "R15"),
+            (14.0, 8.0), 4, (3.0, 3.4), 90.0,
+        )
     )
-    placements.update(_grid(("C13", "C14", "C15"), (18.0, 30.0), 3, (3.6, 3.8), 90.0))
-    placements.update(_grid(("R1", "R2", "R3"), (14.0, 17.0), 3, (2.2, 3.4), 90.0))
-    placements.update(_grid(("C12",), (12.0, 40.0), 1, (3.6, 3.8), 90.0))
-    # Rail feedback and support parts.
-    placements.update(
-        _grid(("R11", "R12", "R13", "R14", "R15", "R16", "R17", "R18", "R19"), (30.0, 12.0), 5, (2.2, 3.4), 90.0)
-    )
-    placements.update(_grid(("C1", "C2", "C3", "C7", "C8", "C9"), (41.0, 32.5), 2, (3.6, 3.8), 90.0))
-    placements.update(_grid(("C10", "C11", "C6"), (48.0, 8.0), 3, (2.2, 3.4), 90.0))
+    placements.update(_grid(("C13", "C14", "C15", "C16", "C17"), (24.0, 30.0), 3, (3.6, 3.8), 90.0))
+    # Buck and protected LED rail support.
+    placements.update(_grid(("C1", "C2", "C3", "C4"), (39.0, 32.5), 2, (4.0, 3.8), 90.0))
+    placements.update(_grid(("C10", "C11", "C6"), (48.0, 10.0), 3, (2.6, 3.4), 90.0))
     # MCU support: strapping, I2C, button, latch resistors.
     placements.update(
-        _grid(("R20", "R21", "R22", "R23", "R24", "R25", "R26", "R31"), (70.0, 10.5), 4, (2.2, 3.4), 90.0)
+        _grid(("R20", "R21", "R22", "R23", "R24", "R25", "R26", "R31"), (69.0, 10.5), 4, (2.2, 3.4), 90.0)
     )
     # Reader supplies and crystal loads along the top, front end at the right.
     placements.update(
         _grid(("C20", "C21", "C22", "C23", "C24", "C25", "C26"), (76.0, 42.5), 7, (3.4, 2.2))
     )
-    placements.update(_grid(("C31", "C32", "R27", "R28"), (73.0, 33.0), 2, (3.4, 2.2)))
-    placements.update(_grid(("C33", "C34", "C35", "C36", "C37"), (95.0, 14.0), 2, (2.2, 3.4), 90.0))
-    placements.update(_grid(("R29", "R30"), (95.0, 28.0), 2, (2.2, 3.4), 90.0))
+    placements.update(_grid(("C31", "C32"), (75.0, 32.5), 2, (3.4, 2.2)))
+    placements.update(_grid(("R27", "R28"), (75.0, 34.8), 2, (3.4, 2.2)))
     return placements
 
 
 def generate_board(output: Path = OUTPUT / "hub.kicad_pcb") -> None:
     netlist = read_netlist(OUTPUT / "hub.net")
-    builder = BoardBuilder(netlist, board_thickness_mm=1.0)
+    builder = BoardBuilder(netlist, copper_layers=4, board_thickness_mm=1.0)
     builder.board.GetDesignSettings().m_CopperEdgeClearance = pcbnew.FromMM(0.25)
     # The stock GCT USB-C footprint holds 0.19 mm between its own mechanical
     # holes and its shield pads; that geometry is routinely fabricated, so the
@@ -168,53 +169,136 @@ def generate_board(output: Path = OUTPUT / "hub.kicad_pcb") -> None:
     top_left, top_right, bottom_left, bottom_right = shield_pads
     builder.add_track(
         "USB_SHIELD",
-        (top_left, Position(1.5, 17.3), Position(1.5, 28.7)),
+        (top_left, Position(2.2, 17.3), Position(2.2, 28.7)),
         0.4,
         pcbnew.B_Cu,
     )
     builder.add_track(
         "USB_SHIELD",
-        (top_right, Position(6.5, 17.3), Position(1.5, 17.3)),
+        (top_right, Position(6.5, 17.3), Position(2.2, 17.3)),
         0.4,
         pcbnew.B_Cu,
     )
     builder.add_track(
         "USB_SHIELD",
-        (bottom_left, Position(1.5, 28.7)),
+        (bottom_left, Position(2.2, 28.7)),
         0.4,
         pcbnew.B_Cu,
     )
     builder.add_track(
         "USB_SHIELD",
-        (bottom_right, Position(8.0, 28.7), Position(1.5, 28.7)),
+        (bottom_right, Position(8.0, 28.7), Position(2.2, 28.7)),
         0.4,
         pcbnew.B_Cu,
     )
-    builder.add_track(
-        "USB_SHIELD",
-        (Position(1.5, 17.3), Position(9.0, 15.0)),
-        0.4,
-        pcbnew.B_Cu,
-    )
-    builder.add_via("USB_SHIELD", Position(9.0, 15.0))
-    builder.add_track(
-        "USB_SHIELD",
-        (Position(9.0, 15.0), Position(10.5, 15.0)),
-        0.4,
-    )
-    builder.add_via("USB_SHIELD", Position(10.5, 15.0))
+    shield_resistor = builder.pad_position("R3", "1")
+    shield_capacitor = builder.pad_position("C12", "1")
+    shield_via = Position(shield_resistor.x, (shield_resistor.y + shield_capacitor.y) / 2)
     builder.add_track(
         "USB_SHIELD",
         (
-            Position(10.5, 15.0),
-            Position(15.5, 15.0),
-            Position(15.5, 18.0),
-            Position(17.2231, 18.0),
+            Position(2.2, 17.3),
+            Position(shield_via.x, 17.3),
+            shield_via,
         ),
         0.4,
         pcbnew.B_Cu,
     )
-    builder.add_via("GND", Position(45.0, 6.0))
+    builder.add_via("USB_SHIELD", shield_via)
+    builder.add_track(
+        "USB_SHIELD",
+        (shield_resistor, shield_via, shield_capacitor),
+        0.4,
+    )
+    # The receptacle's VBUS pads face the board edge and cannot escape around
+    # its signal row on the front face. Take the qualified input under the
+    # connector, then return beside the temperature-window pull-up.
+    vbus_pad = builder.pad_position("J1", "A9")
+    vbus_second_pad = builder.pad_position("J1", "A4")
+    vbus_pullup = builder.pad_position("R12", "1")
+    vbus_entry_via = Position(0.8, vbus_pad.y)
+    vbus_window_via = Position(vbus_pullup.x - 1.5, vbus_pullup.y)
+    builder.add_track("USB_VBUS", (vbus_pad, vbus_entry_via), 0.5)
+    builder.add_track(
+        "USB_VBUS",
+        (
+            vbus_second_pad,
+            Position(vbus_entry_via.x, vbus_second_pad.y),
+            vbus_entry_via,
+        ),
+        0.5,
+    )
+    builder.add_via("USB_VBUS", vbus_entry_via, diameter=0.8, drill=0.4)
+    builder.add_track(
+        "USB_VBUS",
+        (
+            vbus_entry_via,
+            Position(vbus_entry_via.x, 14.5),
+            Position(vbus_window_via.x, 14.5),
+            vbus_window_via,
+        ),
+        0.5,
+        pcbnew.B_Cu,
+    )
+    builder.add_via("USB_VBUS", vbus_window_via, diameter=0.8, drill=0.4)
+    builder.add_track("USB_VBUS", (vbus_window_via, vbus_pullup), 0.5)
+    vbus_reference = builder.pad_position("R4", "1")
+    vbus_reference_via = Position(15.5, 7.0)
+    builder.add_track(
+        "USB_VBUS",
+        (vbus_window_via, vbus_reference_via),
+        0.5,
+        pcbnew.B_Cu,
+    )
+    builder.add_via("USB_VBUS", vbus_reference_via, diameter=0.8, drill=0.4)
+    builder.add_track(
+        "USB_VBUS",
+        (
+            vbus_reference_via,
+            Position(vbus_reference_via.x, vbus_reference.y),
+            vbus_reference,
+        ),
+        0.5,
+    )
+    builder.add_track(
+        "USB_VBUS",
+        (vbus_reference, builder.pad_position("R5", "1")),
+        0.5,
+    )
+    vbus_comparator = builder.pad_position("U2", "8")
+    vbus_input_capacitor = builder.pad_position("C13", "1")
+    vbus_comparator_escape = Position(vbus_comparator.x + 2.5, vbus_comparator.y - 1.025)
+    vbus_input_capacitor_escape = Position(
+        vbus_input_capacitor.x + 2.0,
+        vbus_input_capacitor.y + 1.025,
+    )
+    for pad, escape in (
+        (vbus_comparator, vbus_comparator_escape),
+        (vbus_input_capacitor, vbus_input_capacitor_escape),
+    ):
+        builder.add_track("USB_VBUS", (pad, escape), 0.4)
+        builder.add_via("USB_VBUS", escape, diameter=0.8, drill=0.4)
+    sclk_reader = builder.pad_position("U3", "7")
+    sclk_mcu = builder.pad_position("U4", "25")
+    sclk_reader_via = Position(sclk_reader.x - 1.5, sclk_reader.y)
+    sclk_mcu_via = Position(sclk_mcu.x + 1.5, sclk_mcu.y)
+    builder.add_track("SCLK", (sclk_reader, sclk_reader_via), 0.2)
+    builder.add_via("SCLK", sclk_reader_via)
+    builder.add_track(
+        "SCLK",
+        (sclk_reader_via, sclk_mcu_via),
+        0.2,
+        pcbnew.In1_Cu,
+    )
+    builder.add_via("SCLK", sclk_mcu_via)
+    builder.add_track("SCLK", (sclk_mcu_via, sclk_mcu), 0.2)
+    for ground_via in (
+        Position(25.0, 38.0),
+        Position(35.0, 6.0),
+        Position(45.0, 6.0),
+        Position(100.0, 38.0),
+    ):
+        builder.add_via("GND", ground_via)
     builder.save(output)
 
 
@@ -258,10 +342,63 @@ def _postroute_fixups(board: pcbnew.BOARD) -> None:
     PN5180 reader, the USB-C receptacle, the matrix connector) by connecting
     each still-open pad to its net's nearest routed copper. Adaptive, so it
     survives the router's run-to-run variation instead of hard-coding a path."""
+    _deduplicate_vias(board)
+    _add_vbus_comparator_branch(board)
     board.BuildConnectivity()
     for footprint in board.GetFootprints():
         for pad in footprint.Pads():
             _close_pad(board, pad)
+
+
+def _add_vbus_comparator_branch(board: pcbnew.BOARD) -> None:
+    """Join the two VBUS regions the router cannot escape around U2."""
+    comparator = _pad_position(board, "U2", "8")
+    input_capacitor = _pad_position(board, "C13", "1")
+    comparator_via = (comparator[0] + 2.5, comparator[1] - 1.025)
+    input_capacitor_via = (input_capacitor[0] + 2.0, input_capacitor[1] + 1.025)
+    _route_waypoints(
+        board,
+        "USB_VBUS",
+        (
+            (comparator_via[0], comparator_via[1], "In2.Cu"),
+            (input_capacitor_via[0], input_capacitor_via[1], "In2.Cu"),
+        ),
+        width=0.4,
+    )
+
+
+def _pad_position(board: pcbnew.BOARD, reference: str, number: str) -> tuple[float, float]:
+    footprint = board.FindFootprintByReference(reference)
+    if footprint is None:
+        raise ValueError(f"footprint {reference} not found")
+    for pad in footprint.Pads():
+        if pad.GetNumber() == number:
+            position = pad.GetPosition()
+            return pcbnew.ToMM(position.x), pcbnew.ToMM(position.y)
+    raise ValueError(f"pad {reference}.{number} not found")
+
+
+def _deduplicate_vias(board: pcbnew.BOARD) -> None:
+    """Remove a fixed via repeated verbatim by a Specctra session import."""
+    seen: set[tuple[str, int, int]] = set()
+    duplicates: list[pcbnew.PCB_TRACK] = []
+    for track in board.Tracks():
+        if track.Type() != pcbnew.PCB_VIA_T:
+            continue
+        position = track.GetPosition()
+        # Specctra may return a fixed via one nanometre from its source
+        # coordinate. Treat sub-micron differences as the same drilled hole.
+        key = (
+            track.GetNetname(),
+            (position.x + 500) // 1000,
+            (position.y + 500) // 1000,
+        )
+        if key in seen:
+            duplicates.append(track)
+        else:
+            seen.add(key)
+    for duplicate in duplicates:
+        board.Remove(duplicate)
 
 
 def _close_pad(board: pcbnew.BOARD, pad: pcbnew.PAD) -> None:
@@ -371,7 +508,7 @@ def _finalize_ground(board_path: Path) -> None:
     the routed ground into planes and absorb the router's short ground spurs."""
     board = pcbnew.LoadBoard(str(board_path))
     if not board.Zones():
-        for layer in (pcbnew.F_Cu, pcbnew.B_Cu):
+        for layer in (pcbnew.F_Cu, pcbnew.In1_Cu, pcbnew.In2_Cu, pcbnew.B_Cu):
             zone = pcbnew.ZONE(board)
             zone.SetLayer(layer)
             zone.SetNet(board.FindNet("GND"))
