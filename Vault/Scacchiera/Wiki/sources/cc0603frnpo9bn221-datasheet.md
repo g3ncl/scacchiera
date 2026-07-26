@@ -3,7 +3,7 @@ type: source-summary
 tags:
   - wiki/source
   - wiki/component
-date_updated: 2026-07-25
+date_updated: 2026-07-26
 source_file: "Datasheets/CC0603FRNPO9BN221_C519500.pdf"
 source_title: "CC0603FRNPO9BN221 manufacturer datasheet"
 publisher: "Yageo"
@@ -21,6 +21,7 @@ code `C519500`. It is used by matrix C2 (220p C0G 2%), matrix C6 (220p C0G 2%), 
 
 - Library proof: manufacturer pin and package drawing checked against the SKiDL pin numbers, KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation.
 - Ratings used by the design: capacitance, tolerance, rated voltage, dielectric, temperature range, DC-bias behavior where published and package dimensions.
+- Exact selected limits: See the filed data sheet and structured audit..
 - Datasheet locator: part-number, characteristics and dimensions tables.
 - Simulation treatment: analytical, valid only for
   lumped model with datasheet tolerance, bias, ESR, DCR and temperature corners.

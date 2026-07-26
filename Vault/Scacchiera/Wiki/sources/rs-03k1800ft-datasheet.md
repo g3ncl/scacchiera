@@ -3,7 +3,7 @@ type: source-summary
 tags:
   - wiki/source
   - wiki/component
-date_updated: 2026-07-25
+date_updated: 2026-07-26
 source_file: "Datasheets/RS-03K1800FT_C286574.pdf"
 source_title: "RS-03K1800FT manufacturer datasheet"
 publisher: "Fenghua Advanced Technology"
@@ -21,6 +21,7 @@ code `C286574`. It is used by matrix R2 (180R 1%), matrix R5 (180R 1%), matrix R
 
 - Library proof: manufacturer pin and package drawing checked against the SKiDL pin numbers, KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation.
 - Ratings used by the design: value, tolerance, rated power, maximum working voltage, temperature coefficient, operating temperature and package dimensions.
+- Exact selected limits: See the filed data sheet and structured audit..
 - Datasheet locator: ratings, dimensions and part-number tables.
 - Simulation treatment: analytical, valid only for
   lumped model with datasheet tolerance, bias, ESR, DCR and temperature corners.

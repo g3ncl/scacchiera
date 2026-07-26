@@ -3,7 +3,7 @@ type: source-summary
 tags:
   - wiki/source
   - wiki/component
-date_updated: 2026-07-25
+date_updated: 2026-07-26
 source_file: "Datasheets/SDFL2012S100KTF_C1046.pdf"
 source_title: "SDFL2012S100KTF manufacturer datasheet"
 publisher: "Sunlord"
@@ -21,6 +21,7 @@ code `C1046`. It is used by matrix L1 (10uH), matrix L3 (10uH), matrix L5 (10uH)
 
 - Library proof: manufacturer pin and package drawing checked against the SKiDL pin numbers, KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation.
 - Ratings used by the design: inductance, tolerance, rated or saturation current, DC resistance, self-resonance, temperature range and package dimensions.
+- Exact selected limits: See the filed data sheet and structured audit..
 - Datasheet locator: electrical characteristics, ratings and dimensions tables.
 - Simulation treatment: analytical, valid only for
   lumped model with datasheet tolerance, bias, ESR, DCR and temperature corners.

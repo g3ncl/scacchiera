@@ -3,7 +3,7 @@ type: source-summary
 tags:
   - wiki/source
   - wiki/component
-date_updated: 2026-07-25
+date_updated: 2026-07-26
 source_file: "Datasheets/T37K3RGB-05C000112U1930_DIGIKEY-3147-T37K3RGB-05C000112U1930CT-ND.pdf"
 source_title: "T37K3RGB-05C000112U1930 manufacturer datasheet"
 publisher: "Harvatek"
@@ -21,6 +21,7 @@ code `3147-T37K3RGB-05C000112U1930CT-ND`. It is used by lightbar D1 (T37K3RGB-05
 
 - Library proof: manufacturer pin and package drawing checked against the SKiDL pin numbers, KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation.
 - Ratings used by the design: pinout, supply range, channel current, logic thresholds, timing, power, temperature, polarity and land pattern.
+- Exact selected limits: See the filed data sheet and structured audit..
 - Datasheet locator: pages 2 to 5, electrical, timing, outline and recommended pad pattern.
 - Simulation treatment: behavioral, valid only for
   datasheet maximum channel current and timing corners; digital protocol belongs to V6.

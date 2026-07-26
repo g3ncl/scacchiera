@@ -109,6 +109,7 @@ The 68 pF match value came from this bench; 220 pF would drag the system to 9 MH
 
 ## Cost
 
-The historical generated BOM belongs to the superseded MCP73871 hub. Recalculate the custom hub
-cost after the simplified schematic and route pass V1 and V2. The PiSugar 3 Plus is a separately
-purchased subsystem and must be included in complete-product cost, not the JLCPCB BOM.
+The regenerated engineering BOM is 13.402 EUR in estimated custom-board parts. This is not a
+factory quote and excludes assembly fees, the PiSugar 3 Plus, its cell sensor and cable assemblies.
+The purchased subsystem must be included in complete-product cost, not the JLCPCB BOM. Re-quote the
+hub after its new route passes V2.

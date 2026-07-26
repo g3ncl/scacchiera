@@ -355,3 +355,16 @@ with a data-sheet-derived footprint and documented current, saturation, resistan
 margins. Corrected the nominal cold threshold from the earlier estimate to about 5 degrees
 Celsius. Five focused static connectivity tests pass; generated-board ERC, BOM, V1 audit, routing,
 and full V2 closure continue in their applicable phases.
+
+## [2026-07-26] verification | Reclose V1 component proof
+
+Regenerated the component evidence from the rebuilt schematics. The exact inventory is now 44
+unique purchased fitted tuples, down from 59 after removing the custom charger, battery path and
+duplicate boost stages. Added explicit external records for [[pisugar3-plus]] and
+[[ntcle317e4103sba]] so their interface and safety-relevant ratings are checked without assigning
+fictional PCB footprints.
+
+The four new fitted power parts record their actual selected electrical and package limits, and
+the [[nr6045s4r7mt]] footprint follows its filed land pattern. The regenerated wiki catalog and
+structured audit have no open conflicts. Seven V1 component-proof tests pass, including exact
+schematic parity, immutable sources, model classification, and external power-component evidence.

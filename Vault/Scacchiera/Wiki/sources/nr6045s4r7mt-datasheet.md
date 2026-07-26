@@ -1,21 +1,28 @@
 ---
 type: source-summary
+tags:
+  - wiki/source
+  - wiki/component
 date_updated: 2026-07-26
-tags: [wiki/source, wiki/power]
+source_file: "Datasheets/NR6045S4R7MT_C42370396.pdf"
+source_title: "NR6045S4R7MT manufacturer datasheet"
+publisher: "Magnetsyc"
 ---
 
-# NR6045S4R7MT data sheet
+# NR6045S4R7MT datasheet
 
-Magnetsyc manufacturer data sheet for the [[nr6045s4r7mt]] shielded power inductor. The immutable
-source is [[../../Datasheets/NR6045S4R7MT_C42370396.pdf]].
+This source binds [NR6045S4R7MT](../entities/nr6045s4r7mt.md) to supplier order
+code `C42370396`. It is used by hub L1 (4.7uH).
 
-The selected 4.7 uH, 20 percent part has 34 mOhm maximum DC resistance, 4.97 A minimum saturation
-current, 3.3 A minimum heat-rating current, and a 6 x 6 x 4.5 mm package. Its operating range is
--40 to 125 degrees Celsius including self-heating. The recommended land pattern uses two
-1.7 x 5.7 mm pads separated by a 2.8 mm inner gap.
+[mpn::NR6045S4R7MT] [order_code::C42370396]
+[manufacturer::Magnetsyc] [footprint::Chessboard:NR6045S]
 
-[mpn::NR6045S4R7MT] [order_code::C42370396] [inductance_uh::4.7]
-[saturation_a::4.97] [thermal_a::3.3] [dcr_mohm::34]
+## Design facts reviewed
 
-It satisfies the [[ap63203wu-7]] requirement for 2.2 to 10 uH, DC current at least 35 percent above
-the 2 A load rating, saturation above peak current, and DCR below 100 mOhm.
+- Library proof: manufacturer pin and package drawing checked against the SKiDL pin numbers, KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation.
+- Ratings used by the design: pinout, no-connect and exposed-pad treatment, recommended operating range, absolute maximum voltage, current, power and temperature, startup state, thermal data and package.
+- Exact selected limits: 4.7 uH plus or minus 20 percent, 34 mOhm maximum DCR, 4.97 A minimum saturation, 3.3 A minimum thermal current, 6 x 6 x 4.5 mm body and 1.7 x 5.7 mm pads.
+- Datasheet locator: pin description, absolute maximum, recommended operation, electrical, thermal and package tables.
+- Simulation treatment: datasheet_bounded, valid only for
+  no distributable vendor ngspice model was identified; V3 may use only parameters enumerated in this part's filed datasheet and must sweep their full published limits; digital protocol behavior belongs to V6.
+- Conflicts: none open. Any later catalog or document mismatch reopens V1.

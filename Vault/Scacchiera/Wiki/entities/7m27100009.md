@@ -3,7 +3,7 @@ type: entity
 tags:
   - wiki/entity
   - wiki/component
-date_updated: 2026-07-25
+date_updated: 2026-07-26
 source_count: 1
 ---
 

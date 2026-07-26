@@ -3,7 +3,7 @@ type: source-summary
 tags:
   - wiki/source
   - wiki/component
-date_updated: 2026-07-25
+date_updated: 2026-07-26
 source_file: "Datasheets/BAR64-02V_C5295579.pdf"
 source_title: "BAR64-02V manufacturer datasheet"
 publisher: "Jiangsu Changjing Electronics Technology"
@@ -21,6 +21,7 @@ code `C5295579`. It is used by matrix D1 (BAR64-02V), matrix D2 (BAR64-02V), mat
 
 - Library proof: manufacturer pin and package drawing checked against the SKiDL pin numbers, KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation.
 - Ratings used by the design: pinout, no-connect and exposed-pad treatment, recommended operating range, absolute maximum voltage, current, power and temperature, startup state, thermal data and package.
+- Exact selected limits: See the filed data sheet and structured audit..
 - Datasheet locator: pin description, absolute maximum, recommended operation, electrical, thermal and package tables.
 - Simulation treatment: datasheet_bounded, valid only for
   2.5 ohm maximum at 10 mA and 100 MHz; 0.55 pF maximum at 1 V and 0.35 pF maximum at 5 V; V3 sweeps those published maxima.

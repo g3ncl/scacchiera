@@ -3,7 +3,7 @@ type: source-summary
 tags:
   - wiki/source
   - wiki/component
-date_updated: 2026-07-25
+date_updated: 2026-07-26
 source_file: "Datasheets/GRM1555C1H221JA01D_C71693.pdf"
 source_title: "GRM1555C1H221JA01D manufacturer datasheet"
 publisher: "Murata"
@@ -21,6 +21,7 @@ code `C71693`. It is used by hub C33 (220p C0G 2%), hub C36 (220p C0G 2%).
 
 - Library proof: manufacturer pin and package drawing checked against the SKiDL pin numbers, KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation.
 - Ratings used by the design: capacitance, tolerance, rated voltage, dielectric, temperature range, DC-bias behavior where published and package dimensions.
+- Exact selected limits: See the filed data sheet and structured audit..
 - Datasheet locator: part-number, characteristics and dimensions tables.
 - Simulation treatment: analytical, valid only for
   lumped model with datasheet tolerance, bias, ESR, DCR and temperature corners.

@@ -3,7 +3,7 @@ type: source-summary
 tags:
   - wiki/source
   - wiki/component
-date_updated: 2026-07-25
+date_updated: 2026-07-26
 source_file: "Datasheets/BSS123-7-F_C85107.pdf"
 source_title: "BSS123-7-F manufacturer datasheet"
 publisher: "Diodes Incorporated"
@@ -21,6 +21,7 @@ code `C85107`. It is used by matrix Q1 (BSS123-7-F), matrix Q3 (BSS123-7-F), mat
 
 - Library proof: manufacturer pin and package drawing checked against the SKiDL pin numbers, KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation.
 - Ratings used by the design: pinout, no-connect and exposed-pad treatment, recommended operating range, absolute maximum voltage, current, power and temperature, startup state, thermal data and package.
+- Exact selected limits: See the filed data sheet and structured audit..
 - Datasheet locator: pin description, absolute maximum, recommended operation, electrical, thermal and package tables.
 - Simulation treatment: vendor, valid only for
   Diodes model for BSS123, D-G-S order; corner limits remain datasheet bounded.

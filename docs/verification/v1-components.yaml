@@ -1,6 +1,6 @@
 version: 1
 milestone: V1
-reviewed: '2026-07-25'
+reviewed: '2026-07-26'
 policy: Every purchased fitted component is exact, sourced, backed by an immutable
   manufacturer datasheet, library-audited, ratings-audited and model-classified.
 components:
@@ -10,7 +10,7 @@ components:
   order_code: C1546
   availability:
     status: available
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     source: https://jlcpcb.com/partdetail?part=C1546
   datasheet: Vault/Scacchiera/Datasheets/0402CG101J500NT_C1546.pdf
   wiki_source: Vault/Scacchiera/Wiki/sources/0402cg101j500nt-datasheet.md
@@ -23,7 +23,7 @@ components:
     value: 100p C0G
   library_audit:
     status: passed
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
       KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
     checks:
@@ -52,7 +52,7 @@ components:
   order_code: C1548
   availability:
     status: available
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     source: https://jlcpcb.com/partdetail?part=C1548
   datasheet: Vault/Scacchiera/Datasheets/0402CG150J500NT_C1548.pdf
   wiki_source: Vault/Scacchiera/Wiki/sources/0402cg150j500nt-datasheet.md
@@ -68,7 +68,7 @@ components:
     value: 15p C0G
   library_audit:
     status: passed
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
       KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
     checks:
@@ -97,7 +97,7 @@ components:
   order_code: C22775
   availability:
     status: available
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     source: https://jlcpcb.com/partdetail?part=C22775
   datasheet: Vault/Scacchiera/Datasheets/0603WAF1000T5E_C22775.pdf
   wiki_source: Vault/Scacchiera/Wiki/sources/0603waf1000t5e-datasheet.md
@@ -113,7 +113,7 @@ components:
     value: 100R
   library_audit:
     status: passed
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
       KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
     checks:
@@ -142,7 +142,7 @@ components:
   order_code: C21190
   availability:
     status: available
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     source: https://jlcpcb.com/partdetail?part=C21190
   datasheet: Vault/Scacchiera/Datasheets/0603WAF1001T5E_C21190.pdf
   wiki_source: Vault/Scacchiera/Wiki/sources/0603waf1001t5e-datasheet.md
@@ -158,7 +158,7 @@ components:
     value: 1k
   library_audit:
     status: passed
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
       KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
     checks:
@@ -187,7 +187,7 @@ components:
   order_code: C25804
   availability:
     status: available
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     source: https://jlcpcb.com/partdetail?part=C25804
   datasheet: Vault/Scacchiera/Datasheets/0603WAF1002T5E_C25804.pdf
   wiki_source: Vault/Scacchiera/Wiki/sources/0603waf1002t5e-datasheet.md
@@ -196,13 +196,7 @@ components:
   footprint: Resistor_SMD:R_0603_1608Metric
   uses:
   - board: hub
-    reference: R8
-    value: 10k
-  - board: hub
-    reference: R9
-    value: 10k
-  - board: hub
-    reference: R10
+    reference: R4
     value: 10k
   - board: hub
     reference: R20
@@ -218,7 +212,7 @@ components:
     value: 10k
   library_audit:
     status: passed
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
       KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
     checks:
@@ -247,7 +241,7 @@ components:
   order_code: C25803
   availability:
     status: available
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     source: https://jlcpcb.com/partdetail?part=C25803
   datasheet: Vault/Scacchiera/Datasheets/0603WAF1003T5E_C25803.pdf
   wiki_source: Vault/Scacchiera/Wiki/sources/0603waf1003t5e-datasheet.md
@@ -304,10 +298,28 @@ components:
     reference: R48
     value: 100k 1%
   - board: hub
+    reference: R6
+    value: 100k 1%
+  - board: hub
+    reference: R7
+    value: 100k 1%
+  - board: hub
+    reference: R8
+    value: 100k 1%
+  - board: hub
+    reference: R9
+    value: 100k 1%
+  - board: hub
+    reference: R10
+    value: 100k 1%
+  - board: hub
+    reference: R11
+    value: 100k 1%
+  - board: hub
     reference: R12
     value: 100k
   - board: hub
-    reference: R16
+    reference: R15
     value: 100k
   - board: hub
     reference: R18
@@ -323,7 +335,7 @@ components:
     value: 100k
   library_audit:
     status: passed
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
       KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
     checks:
@@ -352,7 +364,7 @@ components:
   order_code: C22935
   availability:
     status: available
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     source: https://jlcpcb.com/partdetail?part=C22935
   datasheet: Vault/Scacchiera/Datasheets/0603WAF1004T5E_C22935.pdf
   wiki_source: Vault/Scacchiera/Wiki/sources/0603waf1004t5e-datasheet.md
@@ -364,11 +376,14 @@ components:
     reference: R3
     value: 1M
   - board: hub
-    reference: R11
+    reference: R13
+    value: 1M
+  - board: hub
+    reference: R14
     value: 1M
   library_audit:
     status: passed
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
       KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
     checks:
@@ -397,7 +412,7 @@ components:
   order_code: C22769
   availability:
     status: available
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     source: https://jlcpcb.com/partdetail?part=C22769
   datasheet: Vault/Scacchiera/Datasheets/0603WAF150KT5E_C22769.pdf
   wiki_source: Vault/Scacchiera/Wiki/sources/0603waf150kt5e-datasheet.md
@@ -455,133 +470,7 @@ components:
     value: 1.5R 1%
   library_audit:
     status: passed
-    checked: '2026-07-25'
-    evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
-      KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
-    checks:
-    - symbol_pin_numbers_and_names
-    - symbol_electrical_types
-    - exposed_and_no_connect_pins
-    - footprint_pad_numbers
-    - package_dimensions
-    - polarity_and_pin_one
-    - assembly_side
-    - cpl_zero_rotation
-  ratings_audit:
-    status: passed
-    fields: value, tolerance, rated power, maximum working voltage, temperature coefficient,
-      operating temperature and package dimensions
-    datasheet_locator: ratings, dimensions and part-number tables
-  simulation_model:
-    kind: analytical
-    path: hardware/sim
-    valid_region: lumped model with datasheet tolerance, bias, ESR, DCR and temperature
-      corners
-  conflicts: []
-- mpn: 0603WAF2001T5E
-  manufacturer: UNI-ROYAL
-  supplier: JLCPCB
-  order_code: C22975
-  availability:
-    status: available
-    checked: '2026-07-25'
-    source: https://jlcpcb.com/partdetail?part=C22975
-  datasheet: Vault/Scacchiera/Datasheets/0603WAF2001T5E_C22975.pdf
-  wiki_source: Vault/Scacchiera/Wiki/sources/0603waf2001t5e-datasheet.md
-  wiki_entity: Vault/Scacchiera/Wiki/entities/0603waf2001t5e.md
-  category: resistor
-  footprint: Resistor_SMD:R_0603_1608Metric
-  uses:
-  - board: hub
-    reference: R7
-    value: 2.0k
-  library_audit:
-    status: passed
-    checked: '2026-07-25'
-    evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
-      KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
-    checks:
-    - symbol_pin_numbers_and_names
-    - symbol_electrical_types
-    - exposed_and_no_connect_pins
-    - footprint_pad_numbers
-    - package_dimensions
-    - polarity_and_pin_one
-    - assembly_side
-    - cpl_zero_rotation
-  ratings_audit:
-    status: passed
-    fields: value, tolerance, rated power, maximum working voltage, temperature coefficient,
-      operating temperature and package dimensions
-    datasheet_locator: ratings, dimensions and part-number tables
-  simulation_model:
-    kind: analytical
-    path: hardware/sim
-    valid_region: lumped model with datasheet tolerance, bias, ESR, DCR and temperature
-      corners
-  conflicts: []
-- mpn: 0603WAF2492T5E
-  manufacturer: UNI-ROYAL
-  supplier: JLCPCB
-  order_code: C25962
-  availability:
-    status: available
-    checked: '2026-07-25'
-    source: https://jlcpcb.com/partdetail?part=C25962
-  datasheet: Vault/Scacchiera/Datasheets/0603WAF2492T5E_C25962.pdf
-  wiki_source: Vault/Scacchiera/Wiki/sources/0603waf2492t5e-datasheet.md
-  wiki_entity: Vault/Scacchiera/Wiki/entities/0603waf2492t5e.md
-  category: resistor
-  footprint: Resistor_SMD:R_0603_1608Metric
-  uses:
-  - board: hub
-    reference: R6
-    value: 24.9k 1%
-  library_audit:
-    status: passed
-    checked: '2026-07-25'
-    evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
-      KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
-    checks:
-    - symbol_pin_numbers_and_names
-    - symbol_electrical_types
-    - exposed_and_no_connect_pins
-    - footprint_pad_numbers
-    - package_dimensions
-    - polarity_and_pin_one
-    - assembly_side
-    - cpl_zero_rotation
-  ratings_audit:
-    status: passed
-    fields: value, tolerance, rated power, maximum working voltage, temperature coefficient,
-      operating temperature and package dimensions
-    datasheet_locator: ratings, dimensions and part-number tables
-  simulation_model:
-    kind: analytical
-    path: hardware/sim
-    valid_region: lumped model with datasheet tolerance, bias, ESR, DCR and temperature
-      corners
-  conflicts: []
-- mpn: 0603WAF3303T5E
-  manufacturer: UNI-ROYAL
-  supplier: JLCPCB
-  order_code: C23137
-  availability:
-    status: available
-    checked: '2026-07-25'
-    source: https://jlcpcb.com/partdetail?part=C23137
-  datasheet: Vault/Scacchiera/Datasheets/0603WAF3303T5E_C23137.pdf
-  wiki_source: Vault/Scacchiera/Wiki/sources/0603waf3303t5e-datasheet.md
-  wiki_entity: Vault/Scacchiera/Wiki/entities/0603waf3303t5e.md
-  category: resistor
-  footprint: Resistor_SMD:R_0603_1608Metric
-  uses:
-  - board: hub
-    reference: R4
-    value: 330k 1%
-  library_audit:
-    status: passed
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
       KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
     checks:
@@ -610,7 +499,7 @@ components:
   order_code: C23153
   availability:
     status: available
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     source: https://jlcpcb.com/partdetail?part=C23153
   datasheet: Vault/Scacchiera/Datasheets/0603WAF3902T5E_C23153.pdf
   wiki_source: Vault/Scacchiera/Wiki/sources/0603waf3902t5e-datasheet.md
@@ -619,11 +508,14 @@ components:
   footprint: Resistor_SMD:R_0603_1608Metric
   uses:
   - board: hub
+    reference: R5
+    value: 39k 1%
+  - board: hub
     reference: R17
     value: 39k 1%
   library_audit:
     status: passed
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
       KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
     checks:
@@ -652,7 +544,7 @@ components:
   order_code: C23162
   availability:
     status: available
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     source: https://jlcpcb.com/partdetail?part=C23162
   datasheet: Vault/Scacchiera/Datasheets/0603WAF4701T5E_C23162.pdf
   wiki_source: Vault/Scacchiera/Wiki/sources/0603waf4701t5e-datasheet.md
@@ -668,7 +560,7 @@ components:
     value: 4.7k
   library_audit:
     status: passed
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
       KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
     checks:
@@ -697,7 +589,7 @@ components:
   order_code: C23186
   availability:
     status: available
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     source: https://jlcpcb.com/partdetail?part=C23186
   datasheet: Vault/Scacchiera/Datasheets/0603WAF5101T5E_C23186.pdf
   wiki_source: Vault/Scacchiera/Wiki/sources/0603waf5101t5e-datasheet.md
@@ -713,7 +605,7 @@ components:
     value: 5.1k
   library_audit:
     status: passed
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
       KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
     checks:
@@ -730,90 +622,6 @@ components:
     fields: value, tolerance, rated power, maximum working voltage, temperature coefficient,
       operating temperature and package dimensions
     datasheet_locator: ratings, dimensions and part-number tables
-  simulation_model:
-    kind: analytical
-    path: hardware/sim
-    valid_region: lumped model with datasheet tolerance, bias, ESR, DCR and temperature
-      corners
-  conflicts: []
-- mpn: 0603WAF9102T5E
-  manufacturer: UNI-ROYAL
-  supplier: JLCPCB
-  order_code: C23265
-  availability:
-    status: available
-    checked: '2026-07-25'
-    source: https://jlcpcb.com/partdetail?part=C23265
-  datasheet: Vault/Scacchiera/Datasheets/0603WAF9102T5E_C23265.pdf
-  wiki_source: Vault/Scacchiera/Wiki/sources/0603waf9102t5e-datasheet.md
-  wiki_entity: Vault/Scacchiera/Wiki/entities/0603waf9102t5e.md
-  category: resistor
-  footprint: Resistor_SMD:R_0603_1608Metric
-  uses:
-  - board: hub
-    reference: R14
-    value: 91k
-  library_audit:
-    status: passed
-    checked: '2026-07-25'
-    evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
-      KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
-    checks:
-    - symbol_pin_numbers_and_names
-    - symbol_electrical_types
-    - exposed_and_no_connect_pins
-    - footprint_pad_numbers
-    - package_dimensions
-    - polarity_and_pin_one
-    - assembly_side
-    - cpl_zero_rotation
-  ratings_audit:
-    status: passed
-    fields: value, tolerance, rated power, maximum working voltage, temperature coefficient,
-      operating temperature and package dimensions
-    datasheet_locator: ratings, dimensions and part-number tables
-  simulation_model:
-    kind: analytical
-    path: hardware/sim
-    valid_region: lumped model with datasheet tolerance, bias, ESR, DCR and temperature
-      corners
-  conflicts: []
-- mpn: '74438357010'
-  manufacturer: "W\xFCrth Elektronik"
-  supplier: DigiKey
-  order_code: 732-11197-1-ND
-  availability:
-    status: available
-    checked: '2026-07-25'
-    source: https://www.digikey.com/en/products/detail/w%C3%BCrth-elektronik/74438357010/6833535
-  datasheet: Vault/Scacchiera/Datasheets/74438357010_WUERTH-74438357010.pdf
-  wiki_source: Vault/Scacchiera/Wiki/sources/74438357010-datasheet.md
-  wiki_entity: Vault/Scacchiera/Wiki/entities/74438357010.md
-  category: inductor
-  footprint: Inductor_SMD:L_Wuerth_MAPI-3015
-  uses:
-  - board: hub
-    reference: L2
-    value: 1uH
-  library_audit:
-    status: passed
-    checked: '2026-07-25'
-    evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
-      KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
-    checks:
-    - symbol_pin_numbers_and_names
-    - symbol_electrical_types
-    - exposed_and_no_connect_pins
-    - footprint_pad_numbers
-    - package_dimensions
-    - polarity_and_pin_one
-    - assembly_side
-    - cpl_zero_rotation
-  ratings_audit:
-    status: passed
-    fields: inductance, tolerance, rated or saturation current, DC resistance, self-resonance,
-      temperature range and package dimensions
-    datasheet_locator: electrical characteristics, ratings and dimensions tables
   simulation_model:
     kind: analytical
     path: hardware/sim
@@ -826,7 +634,7 @@ components:
   order_code: C5947
   availability:
     status: available
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     source: https://jlcpcb.com/partdetail?part=C5947
   datasheet: Vault/Scacchiera/Datasheets/74HC595D-118_C5947.pdf
   wiki_source: Vault/Scacchiera/Wiki/sources/74hc595d-118-datasheet.md
@@ -842,7 +650,7 @@ components:
     value: 74HC595D,118
   library_audit:
     status: passed
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
       KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
     checks:
@@ -874,7 +682,7 @@ components:
   order_code: C90919
   availability:
     status: available
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     source: https://jlcpcb.com/partdetail?part=C90919
   datasheet: Vault/Scacchiera/Datasheets/7M27100009_C90919.pdf
   wiki_source: Vault/Scacchiera/Wiki/sources/7m27100009-datasheet.md
@@ -887,7 +695,7 @@ components:
     value: 27.12MHz 7M27100009
   library_audit:
     status: passed
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
       KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
     checks:
@@ -916,7 +724,7 @@ components:
   order_code: C225127
   availability:
     status: available
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     source: https://jlcpcb.com/partdetail?part=C225127
   datasheet: Vault/Scacchiera/Datasheets/A1257WR-S-4P_C225127.pdf
   wiki_source: Vault/Scacchiera/Wiki/sources/a1257wr-s-4p-datasheet.md
@@ -926,6 +734,9 @@ components:
   uses:
   - board: lightbar
     reference: J1
+    value: A1257WR-S-4P
+  - board: hub
+    reference: J3
     value: A1257WR-S-4P
   - board: hub
     reference: J7
@@ -938,7 +749,7 @@ components:
     value: A1257WR-S-4P
   library_audit:
     status: passed
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
       KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
     checks:
@@ -961,29 +772,26 @@ components:
     valid_region: contact and interconnect parasitics derived from rated contacts
       and routed geometry
   conflicts: []
-- mpn: B2B-PH-K-S(LF)(SN)
-  manufacturer: JST
+- mpn: AP22811AW5-7
+  manufacturer: Diodes Incorporated
   supplier: JLCPCB
-  order_code: C131337
+  order_code: C3001660
   availability:
     status: available
-    checked: '2026-07-25'
-    source: https://jlcpcb.com/partdetail?part=C131337
-  datasheet: Vault/Scacchiera/Datasheets/B2B-PH-K-S-LF-SN_C131337.pdf
-  wiki_source: Vault/Scacchiera/Wiki/sources/b2b-ph-k-s-lf-sn-datasheet.md
-  wiki_entity: Vault/Scacchiera/Wiki/entities/b2b-ph-k-s-lf-sn.md
-  category: connector
-  footprint: Connector_JST:JST_PH_B2B-PH-K_1x02_P2.00mm_Vertical
+    checked: '2026-07-26'
+    source: https://jlcpcb.com/partdetail?part=C3001660
+  datasheet: Vault/Scacchiera/Datasheets/AP22811AW5-7_C3001660.pdf
+  wiki_source: Vault/Scacchiera/Wiki/sources/ap22811aw5-7-datasheet.md
+  wiki_entity: Vault/Scacchiera/Wiki/entities/ap22811aw5-7.md
+  category: semiconductor
+  footprint: Package_TO_SOT_SMD:SOT-23-5
   uses:
   - board: hub
-    reference: J2
-    value: B2B-PH-K-S(LF)(SN)
-  - board: hub
-    reference: J3
-    value: B2B-PH-K-S(LF)(SN)
+    reference: U1
+    value: AP22811AW5-7
   library_audit:
     status: passed
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
       KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
     checks:
@@ -997,14 +805,62 @@ components:
     - cpl_zero_rotation
   ratings_audit:
     status: passed
-    fields: pin numbering, current, voltage, contact resistance, temperature, mating
-      direction and package dimensions
-    datasheet_locator: ratings, ordering information and dimensional drawing
+    fields: pinout, no-connect and exposed-pad treatment, recommended operating range,
+      absolute maximum voltage, current, power and temperature, startup state, thermal
+      data and package
+    datasheet_locator: pin description, absolute maximum, recommended operation, electrical,
+      thermal and package tables
   simulation_model:
-    kind: layout_derived
+    kind: datasheet_bounded
     path: hardware/sim
-    valid_region: contact and interconnect parasitics derived from rated contacts
-      and routed geometry
+    valid_region: no distributable vendor ngspice model was identified; V3 may use
+      only parameters enumerated in this part's filed datasheet and must sweep their
+      full published limits; digital protocol behavior belongs to V6
+  conflicts: []
+- mpn: AP63203WU-7
+  manufacturer: Diodes Incorporated
+  supplier: JLCPCB
+  order_code: C780769
+  availability:
+    status: available
+    checked: '2026-07-26'
+    source: https://jlcpcb.com/partdetail?part=C780769
+  datasheet: Vault/Scacchiera/Datasheets/AP63203WU-7_C780769.pdf
+  wiki_source: Vault/Scacchiera/Wiki/sources/ap63203wu-7-datasheet.md
+  wiki_entity: Vault/Scacchiera/Wiki/entities/ap63203wu-7.md
+  category: semiconductor
+  footprint: Package_TO_SOT_SMD:SOT-23-6
+  uses:
+  - board: hub
+    reference: U5
+    value: AP63203WU-7
+  library_audit:
+    status: passed
+    checked: '2026-07-26'
+    evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
+      KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
+    checks:
+    - symbol_pin_numbers_and_names
+    - symbol_electrical_types
+    - exposed_and_no_connect_pins
+    - footprint_pad_numbers
+    - package_dimensions
+    - polarity_and_pin_one
+    - assembly_side
+    - cpl_zero_rotation
+  ratings_audit:
+    status: passed
+    fields: pinout, no-connect and exposed-pad treatment, recommended operating range,
+      absolute maximum voltage, current, power and temperature, startup state, thermal
+      data and package
+    datasheet_locator: pin description, absolute maximum, recommended operation, electrical,
+      thermal and package tables
+  simulation_model:
+    kind: datasheet_bounded
+    path: hardware/sim
+    valid_region: no distributable vendor ngspice model was identified; V3 may use
+      only parameters enumerated in this part's filed datasheet and must sweep their
+      full published limits; digital protocol behavior belongs to V6
   conflicts: []
 - mpn: BAR64-02V
   manufacturer: Jiangsu Changjing Electronics Technology
@@ -1012,7 +868,7 @@ components:
   order_code: C5295579
   availability:
     status: available
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     source: https://jlcpcb.com/partdetail?part=C5295579
   datasheet: Vault/Scacchiera/Datasheets/BAR64-02V_C5295579.pdf
   wiki_source: Vault/Scacchiera/Wiki/sources/bar64-02v-datasheet.md
@@ -1118,7 +974,7 @@ components:
     value: BAR64-02V
   library_audit:
     status: passed
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
       KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
     checks:
@@ -1143,58 +999,13 @@ components:
     valid_region: 2.5 ohm maximum at 10 mA and 100 MHz; 0.55 pF maximum at 1 V and
       0.35 pF maximum at 5 V; V3 sweeps those published maxima
   conflicts: []
-- mpn: BAT54H
-  manufacturer: Jiangsu Changjing Electronics Technology
-  supplier: JLCPCB
-  order_code: C475620
-  availability:
-    status: available
-    checked: '2026-07-25'
-    source: https://jlcpcb.com/partdetail?part=C475620
-  datasheet: Vault/Scacchiera/Datasheets/BAT54H_C475620.pdf
-  wiki_source: Vault/Scacchiera/Wiki/sources/bat54h-datasheet.md
-  wiki_entity: Vault/Scacchiera/Wiki/entities/bat54h.md
-  category: semiconductor
-  footprint: Diode_SMD:D_SOD-323
-  uses:
-  - board: hub
-    reference: D1
-    value: BAT54H
-  library_audit:
-    status: passed
-    checked: '2026-07-25'
-    evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
-      KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
-    checks:
-    - symbol_pin_numbers_and_names
-    - symbol_electrical_types
-    - exposed_and_no_connect_pins
-    - footprint_pad_numbers
-    - package_dimensions
-    - polarity_and_pin_one
-    - assembly_side
-    - cpl_zero_rotation
-  ratings_audit:
-    status: passed
-    fields: pinout, no-connect and exposed-pad treatment, recommended operating range,
-      absolute maximum voltage, current, power and temperature, startup state, thermal
-      data and package
-    datasheet_locator: pin description, absolute maximum, recommended operation, electrical,
-      thermal and package tables
-  simulation_model:
-    kind: datasheet_bounded
-    path: hardware/sim
-    valid_region: no distributable vendor ngspice model was identified; V3 may use
-      only parameters enumerated in this part's filed datasheet and must sweep their
-      full published limits; digital protocol behavior belongs to V6
-  conflicts: []
 - mpn: BSS123-7-F
   manufacturer: Diodes Incorporated
   supplier: JLCPCB
   order_code: C85107
   availability:
     status: available
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     source: https://jlcpcb.com/partdetail?part=C85107
   datasheet: Vault/Scacchiera/Datasheets/BSS123-7-F_C85107.pdf
   wiki_source: Vault/Scacchiera/Wiki/sources/bss123-7-f-datasheet.md
@@ -1252,7 +1063,7 @@ components:
     value: BSS123-7-F
   library_audit:
     status: passed
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
       KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
     checks:
@@ -1283,7 +1094,7 @@ components:
   order_code: C85202
   availability:
     status: available
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     source: https://jlcpcb.com/partdetail?part=C85202
   datasheet: Vault/Scacchiera/Datasheets/BSS84-7-F_C85202.pdf
   wiki_source: Vault/Scacchiera/Wiki/sources/bss84-7-f-datasheet.md
@@ -1341,7 +1152,7 @@ components:
     value: BSS84-7-F
   library_audit:
     status: passed
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
       KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
     checks:
@@ -1372,7 +1183,7 @@ components:
   order_code: C519500
   availability:
     status: available
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     source: https://jlcpcb.com/partdetail?part=C519500
   datasheet: Vault/Scacchiera/Datasheets/CC0603FRNPO9BN221_C519500.pdf
   wiki_source: Vault/Scacchiera/Wiki/sources/cc0603frnpo9bn221-datasheet.md
@@ -1430,7 +1241,7 @@ components:
     value: 220p C0G 2%
   library_audit:
     status: passed
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
       KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
     checks:
@@ -1459,7 +1270,7 @@ components:
   order_code: C107198
   availability:
     status: available
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     source: https://jlcpcb.com/partdetail?part=C107198
   datasheet: Vault/Scacchiera/Datasheets/CC1206KKX7RCBB472_C107198.pdf
   wiki_source: Vault/Scacchiera/Wiki/sources/cc1206kkx7rcbb472-datasheet.md
@@ -1472,7 +1283,7 @@ components:
     value: 4.7n 1kV
   library_audit:
     status: passed
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
       KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
     checks:
@@ -1501,7 +1312,7 @@ components:
   order_code: C52923
   availability:
     status: available
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     source: https://jlcpcb.com/partdetail?part=C52923
   datasheet: Vault/Scacchiera/Datasheets/CL05A105KA5NQNC_C52923_manufacturer.pdf
   wiki_source: Vault/Scacchiera/Wiki/sources/cl05a105ka5nqnc-datasheet.md
@@ -1517,7 +1328,7 @@ components:
     value: 1u 10V
   library_audit:
     status: passed
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
       KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
     checks:
@@ -1546,7 +1357,7 @@ components:
   order_code: C1525
   availability:
     status: available
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     source: https://jlcpcb.com/partdetail?part=C1525
   datasheet: Vault/Scacchiera/Datasheets/CL05B104KO5NNNC_C1525_manufacturer.pdf
   wiki_source: Vault/Scacchiera/Wiki/sources/cl05b104ko5nnnc-datasheet.md
@@ -1651,6 +1462,18 @@ components:
     reference: C61
     value: 100n X7R 10%
   - board: hub
+    reference: C15
+    value: 100n
+  - board: hub
+    reference: C16
+    value: 100n
+  - board: hub
+    reference: C17
+    value: 100n
+  - board: hub
+    reference: C1
+    value: 100n
+  - board: hub
     reference: C10
     value: 100n
   - board: hub
@@ -1673,7 +1496,7 @@ components:
     value: 100n
   library_audit:
     status: passed
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
       KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
     checks:
@@ -1702,7 +1525,7 @@ components:
   order_code: C15849
   availability:
     status: available
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     source: https://jlcpcb.com/partdetail?part=C15849
   datasheet: Vault/Scacchiera/Datasheets/CL10A105KB8NNNC_C15849_manufacturer.pdf
   wiki_source: Vault/Scacchiera/Wiki/sources/cl10a105kb8nnnc-datasheet.md
@@ -1711,11 +1534,14 @@ components:
   footprint: Capacitor_SMD:C_0603_1608Metric
   uses:
   - board: hub
+    reference: C13
+    value: 1u 10V
+  - board: hub
     reference: C6
     value: 1u
   library_audit:
     status: passed
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
       KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
     checks:
@@ -1744,7 +1570,7 @@ components:
   order_code: C23630
   availability:
     status: available
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     source: https://jlcpcb.com/partdetail?part=C23630
   datasheet: Vault/Scacchiera/Datasheets/CL10A225KO8NNNC_C23630_manufacturer.pdf
   wiki_source: Vault/Scacchiera/Wiki/sources/cl10a225ko8nnnc-datasheet.md
@@ -1757,7 +1583,7 @@ components:
     value: 2.2u 16V
   library_audit:
     status: passed
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
       KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
     checks:
@@ -1786,7 +1612,7 @@ components:
   order_code: C15850
   availability:
     status: available
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     source: https://jlcpcb.com/partdetail?part=C15850
   datasheet: Vault/Scacchiera/Datasheets/CL21A106KAYNNNE_C15850_manufacturer.pdf
   wiki_source: Vault/Scacchiera/Wiki/sources/cl21a106kaynnne-datasheet.md
@@ -1798,14 +1624,14 @@ components:
     reference: C14
     value: 10u 10V
   - board: hub
-    reference: C7
+    reference: C2
     value: 10u 10V
   - board: hub
     reference: C27
     value: 10u 10V
   library_audit:
     status: passed
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
       KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
     checks:
@@ -1834,7 +1660,7 @@ components:
   order_code: C45783
   availability:
     status: available
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     source: https://jlcpcb.com/partdetail?part=C45783
   datasheet: Vault/Scacchiera/Datasheets/CL21A226MAQNNNE_C45783_manufacturer.pdf
   wiki_source: Vault/Scacchiera/Wiki/sources/cl21a226maqnnne-datasheet.md
@@ -1843,68 +1669,14 @@ components:
   footprint: Capacitor_SMD:C_0805_2012Metric
   uses:
   - board: hub
-    reference: C1
-    value: 22u
-  - board: hub
-    reference: C2
-    value: 22u
-  - board: hub
     reference: C3
-    value: 22u
-  - board: hub
-    reference: C8
     value: 22u 10V
   - board: hub
-    reference: C9
+    reference: C4
     value: 22u 10V
   library_audit:
     status: passed
-    checked: '2026-07-25'
-    evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
-      KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
-    checks:
-    - symbol_pin_numbers_and_names
-    - symbol_electrical_types
-    - exposed_and_no_connect_pins
-    - footprint_pad_numbers
-    - package_dimensions
-    - polarity_and_pin_one
-    - assembly_side
-    - cpl_zero_rotation
-  ratings_audit:
-    status: passed
-    fields: capacitance, tolerance, rated voltage, dielectric, temperature range,
-      DC-bias behavior where published and package dimensions
-    datasheet_locator: part-number, characteristics and dimensions tables
-  simulation_model:
-    kind: analytical
-    path: hardware/sim
-    valid_region: lumped model with datasheet tolerance, bias, ESR, DCR and temperature
-      corners
-  conflicts: []
-- mpn: CL21A475KAQNNNE
-  manufacturer: Samsung Electro-Mechanics
-  supplier: JLCPCB
-  order_code: C1779
-  availability:
-    status: available
-    checked: '2026-07-25'
-    source: https://jlcpcb.com/partdetail?part=C1779
-  datasheet: Vault/Scacchiera/Datasheets/CL21A475KAQNNNE_C1779_manufacturer.pdf
-  wiki_source: Vault/Scacchiera/Wiki/sources/cl21a475kaqnnne-datasheet.md
-  wiki_entity: Vault/Scacchiera/Wiki/entities/cl21a475kaqnnne.md
-  category: capacitor
-  footprint: Capacitor_SMD:C_0805_2012Metric
-  uses:
-  - board: hub
-    reference: C13
-    value: 4.7u 10V
-  - board: hub
-    reference: C15
-    value: 4.7u 10V
-  library_audit:
-    status: passed
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
       KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
     checks:
@@ -1933,7 +1705,7 @@ components:
   order_code: C49066
   availability:
     status: available
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     source: https://jlcpcb.com/partdetail?part=C49066
   datasheet: Vault/Scacchiera/Datasheets/CL32A107MQVNNNE_C49066_manufacturer.pdf
   wiki_source: Vault/Scacchiera/Wiki/sources/cl32a107mqvnnne-datasheet.md
@@ -1946,7 +1718,7 @@ components:
     value: 100u 6.3V
   library_audit:
     status: passed
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
       KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
     checks:
@@ -1969,100 +1741,13 @@ components:
     valid_region: lumped model with datasheet tolerance, bias, ESR, DCR and temperature
       corners
   conflicts: []
-- mpn: DFE201610E-R47M=P2
-  manufacturer: Murata
-  supplier: JLCPCB
-  order_code: C269773
-  availability:
-    status: available
-    checked: '2026-07-25'
-    source: https://jlcpcb.com/partdetail?part=C269773
-  datasheet: Vault/Scacchiera/Datasheets/DFE201610E-R47M-P2_C269773.pdf
-  wiki_source: Vault/Scacchiera/Wiki/sources/dfe201610e-r47m-p2-datasheet.md
-  wiki_entity: Vault/Scacchiera/Wiki/entities/dfe201610e-r47m-p2.md
-  category: inductor
-  footprint: Inductor_SMD:L_Murata_DFE201610P
-  uses:
-  - board: hub
-    reference: L1
-    value: 0.47uH
-  library_audit:
-    status: passed
-    checked: '2026-07-25'
-    evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
-      KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
-    checks:
-    - symbol_pin_numbers_and_names
-    - symbol_electrical_types
-    - exposed_and_no_connect_pins
-    - footprint_pad_numbers
-    - package_dimensions
-    - polarity_and_pin_one
-    - assembly_side
-    - cpl_zero_rotation
-  ratings_audit:
-    status: passed
-    fields: inductance, tolerance, rated or saturation current, DC resistance, self-resonance,
-      temperature range and package dimensions
-    datasheet_locator: electrical characteristics, ratings and dimensions tables
-  simulation_model:
-    kind: analytical
-    path: hardware/sim
-    valid_region: lumped model with datasheet tolerance, bias, ESR, DCR and temperature
-      corners
-  conflicts: []
-- mpn: DMP2035U-7
-  manufacturer: Diodes Incorporated
-  supplier: JLCPCB
-  order_code: C110499
-  availability:
-    status: available
-    checked: '2026-07-25'
-    source: https://jlcpcb.com/partdetail?part=C110499
-  datasheet: Vault/Scacchiera/Datasheets/DMP2035U-7_C110499.pdf
-  wiki_source: Vault/Scacchiera/Wiki/sources/dmp2035u-7-datasheet.md
-  wiki_entity: Vault/Scacchiera/Wiki/entities/dmp2035u-7.md
-  category: semiconductor
-  footprint: Package_TO_SOT_SMD:SOT-23
-  uses:
-  - board: hub
-    reference: Q1
-    value: DMP2035U-7
-  library_audit:
-    status: passed
-    checked: '2026-07-25'
-    evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
-      KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
-    checks:
-    - symbol_pin_numbers_and_names
-    - symbol_electrical_types
-    - exposed_and_no_connect_pins
-    - footprint_pad_numbers
-    - package_dimensions
-    - polarity_and_pin_one
-    - assembly_side
-    - cpl_zero_rotation
-  ratings_audit:
-    status: passed
-    fields: pinout, no-connect and exposed-pad treatment, recommended operating range,
-      absolute maximum voltage, current, power and temperature, startup state, thermal
-      data and package
-    datasheet_locator: pin description, absolute maximum, recommended operation, electrical,
-      thermal and package tables
-  simulation_model:
-    kind: datasheet_bounded
-    path: hardware/sim
-    valid_region: no distributable vendor ngspice model was identified; V3 may use
-      only parameters enumerated in this part's filed datasheet and must sweep their
-      full published limits; digital protocol behavior belongs to V6
-  conflicts: []
 - mpn: ESP32-C6-MINI-1U-N4
   manufacturer: Espressif Systems
   supplier: DigiKey
   order_code: 1965-ESP32-C6-MINI-1U-N4CT-ND
   availability:
     status: available
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     source: https://www.digikey.es/es/products/detail/espressif-systems/ESP32-C6-MINI-1U-N4/21292143
   datasheet: Vault/Scacchiera/Datasheets/ESP32-C6-MINI-1U-N4_C7558096.pdf
   wiki_source: Vault/Scacchiera/Wiki/sources/esp32-c6-mini-1u-n4-datasheet.md
@@ -2075,7 +1760,7 @@ components:
     value: ESP32-C6-MINI-1U-N4
   library_audit:
     status: passed
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
       KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
     checks:
@@ -2107,7 +1792,7 @@ components:
   order_code: C71693
   availability:
     status: available
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     source: https://jlcpcb.com/partdetail?part=C71693
   datasheet: Vault/Scacchiera/Datasheets/GRM1555C1H221JA01D_C71693.pdf
   wiki_source: Vault/Scacchiera/Wiki/sources/grm1555c1h221ja01d-datasheet.md
@@ -2123,7 +1808,7 @@ components:
     value: 220p C0G 2%
   library_audit:
     status: passed
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
       KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
     checks:
@@ -2152,7 +1837,7 @@ components:
   order_code: C76977
   availability:
     status: available
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     source: https://jlcpcb.com/partdetail?part=C76977
   datasheet: Vault/Scacchiera/Datasheets/GRM1555C1H680JA01D_C76977.pdf
   wiki_source: Vault/Scacchiera/Wiki/sources/grm1555c1h680ja01d-datasheet.md
@@ -2165,7 +1850,7 @@ components:
     value: 68p C0G 2%
   library_audit:
     status: passed
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
       KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
     checks:
@@ -2188,55 +1873,13 @@ components:
     valid_region: lumped model with datasheet tolerance, bias, ESR, DCR and temperature
       corners
   conflicts: []
-- mpn: JS102011SAQN
-  manufacturer: C&K
-  supplier: JLCPCB
-  order_code: C221660
-  availability:
-    status: available
-    checked: '2026-07-25'
-    source: https://jlcpcb.com/partdetail?part=C221660
-  datasheet: Vault/Scacchiera/Datasheets/JS102011SAQN_C221660.pdf
-  wiki_source: Vault/Scacchiera/Wiki/sources/js102011saqn-datasheet.md
-  wiki_entity: Vault/Scacchiera/Wiki/entities/js102011saqn.md
-  category: switch
-  footprint: Button_Switch_SMD:SW_SPDT_CK_JS102011SAQN
-  uses:
-  - board: hub
-    reference: SW1
-    value: POWER
-  library_audit:
-    status: passed
-    checked: '2026-07-25'
-    evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
-      KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
-    checks:
-    - symbol_pin_numbers_and_names
-    - symbol_electrical_types
-    - exposed_and_no_connect_pins
-    - footprint_pad_numbers
-    - package_dimensions
-    - polarity_and_pin_one
-    - assembly_side
-    - cpl_zero_rotation
-  ratings_audit:
-    status: passed
-    fields: contact arrangement, current, voltage, contact resistance, travel, lifetime,
-      temperature and package dimensions
-    datasheet_locator: specifications, circuit and dimensions
-  simulation_model:
-    kind: layout_derived
-    path: hardware/sim
-    valid_region: contact and interconnect parasitics derived from rated contacts
-      and routed geometry
-  conflicts: []
 - mpn: LQW2BASR47J00L
   manufacturer: Murata
   supplier: JLCPCB
   order_code: C337959
   availability:
     status: available
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     source: https://jlcpcb.com/partdetail?part=C337959
   datasheet: Vault/Scacchiera/Datasheets/LQW2BASR47J00L_C337959.pdf
   wiki_source: Vault/Scacchiera/Wiki/sources/lqw2basr47j00l-datasheet.md
@@ -2252,7 +1895,7 @@ components:
     value: 470nH
   library_audit:
     status: passed
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
       KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
     checks:
@@ -2275,26 +1918,26 @@ components:
     valid_region: lumped model with datasheet tolerance, bias, ESR, DCR and temperature
       corners
   conflicts: []
-- mpn: MCP73871T-2CCI/ML
-  manufacturer: Microchip Technology
+- mpn: NR6045S4R7MT
+  manufacturer: Magnetsyc
   supplier: JLCPCB
-  order_code: C511310
+  order_code: C42370396
   availability:
     status: available
-    checked: '2026-07-25'
-    source: https://jlcpcb.com/partdetail?part=C511310
-  datasheet: Vault/Scacchiera/Datasheets/MCP73871T-2CCI-ML_C511310.pdf
-  wiki_source: Vault/Scacchiera/Wiki/sources/mcp73871t-2cci-ml-datasheet.md
-  wiki_entity: Vault/Scacchiera/Wiki/entities/mcp73871t-2cci-ml.md
+    checked: '2026-07-26'
+    source: https://jlcpcb.com/partdetail?part=C42370396
+  datasheet: Vault/Scacchiera/Datasheets/NR6045S4R7MT_C42370396.pdf
+  wiki_source: Vault/Scacchiera/Wiki/sources/nr6045s4r7mt-datasheet.md
+  wiki_entity: Vault/Scacchiera/Wiki/entities/nr6045s4r7mt.md
   category: semiconductor
-  footprint: Package_DFN_QFN:QFN-20-1EP_4x4mm_P0.5mm_EP2.6x2.6mm
+  footprint: Chessboard:NR6045S
   uses:
   - board: hub
-    reference: U1
-    value: MCP73871T-2CCI/ML
+    reference: L1
+    value: 4.7uH
   library_audit:
     status: passed
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
       KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
     checks:
@@ -2320,55 +1963,13 @@ components:
       only parameters enumerated in this part's filed datasheet and must sweep their
       full published limits; digital protocol behavior belongs to V6
   conflicts: []
-- mpn: MF-MSMF050-2
-  manufacturer: Bourns
-  supplier: JLCPCB
-  order_code: C17313
-  availability:
-    status: available
-    checked: '2026-07-25'
-    source: https://jlcpcb.com/partdetail?part=C17313
-  datasheet: Vault/Scacchiera/Datasheets/MF-MSMF050-2_C17313.pdf
-  wiki_source: Vault/Scacchiera/Wiki/sources/mf-msmf050-2-datasheet.md
-  wiki_entity: Vault/Scacchiera/Wiki/entities/mf-msmf050-2.md
-  category: resettable_fuse
-  footprint: Fuse:Fuse_1206_3216Metric
-  uses:
-  - board: hub
-    reference: F1
-    value: 500mA resettable
-  library_audit:
-    status: passed
-    checked: '2026-07-25'
-    evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
-      KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
-    checks:
-    - symbol_pin_numbers_and_names
-    - symbol_electrical_types
-    - exposed_and_no_connect_pins
-    - footprint_pad_numbers
-    - package_dimensions
-    - polarity_and_pin_one
-    - assembly_side
-    - cpl_zero_rotation
-  ratings_audit:
-    status: passed
-    fields: hold current, trip current, maximum voltage, trip time, resistance, temperature
-      derating and package dimensions
-    datasheet_locator: electrical characteristics, derating curves and dimensions
-  simulation_model:
-    kind: analytical
-    path: hardware/sim
-    valid_region: lumped model with datasheet tolerance, bias, ESR, DCR and temperature
-      corners
-  conflicts: []
 - mpn: PN5180A0HN/C3E
   manufacturer: NXP Semiconductors
   supplier: JLCPCB
   order_code: C1526287
   availability:
     status: available
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     source: https://jlcpcb.com/partdetail?part=C1526287
   datasheet: Vault/Scacchiera/Datasheets/PN5180A0HN-C3E_C1526287.pdf
   wiki_source: Vault/Scacchiera/Wiki/sources/pn5180a0hn-c3e-datasheet.md
@@ -2381,7 +1982,7 @@ components:
     value: PN5180A0HN/C3E
   library_audit:
     status: passed
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
       KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
     checks:
@@ -2407,139 +2008,13 @@ components:
       only parameters enumerated in this part's filed datasheet and must sweep their
       full published limits; digital protocol behavior belongs to V6
   conflicts: []
-- mpn: RC0603FR-07110KL
-  manufacturer: Yageo
-  supplier: JLCPCB
-  order_code: C137807
-  availability:
-    status: available
-    checked: '2026-07-25'
-    source: https://jlcpcb.com/partdetail?part=C137807
-  datasheet: Vault/Scacchiera/Datasheets/RC0603FR-07110KL_C137807.pdf
-  wiki_source: Vault/Scacchiera/Wiki/sources/rc0603fr-07110kl-datasheet.md
-  wiki_entity: Vault/Scacchiera/Wiki/entities/rc0603fr-07110kl.md
-  category: resistor
-  footprint: Resistor_SMD:R_0603_1608Metric
-  uses:
-  - board: hub
-    reference: R5
-    value: 110k 1%
-  library_audit:
-    status: passed
-    checked: '2026-07-25'
-    evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
-      KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
-    checks:
-    - symbol_pin_numbers_and_names
-    - symbol_electrical_types
-    - exposed_and_no_connect_pins
-    - footprint_pad_numbers
-    - package_dimensions
-    - polarity_and_pin_one
-    - assembly_side
-    - cpl_zero_rotation
-  ratings_audit:
-    status: passed
-    fields: value, tolerance, rated power, maximum working voltage, temperature coefficient,
-      operating temperature and package dimensions
-    datasheet_locator: ratings, dimensions and part-number tables
-  simulation_model:
-    kind: analytical
-    path: hardware/sim
-    valid_region: lumped model with datasheet tolerance, bias, ESR, DCR and temperature
-      corners
-  conflicts: []
-- mpn: RC0603FR-07511KL
-  manufacturer: Yageo
-  supplier: JLCPCB
-  order_code: C188257
-  availability:
-    status: available
-    checked: '2026-07-25'
-    source: https://jlcpcb.com/partdetail?part=C188257
-  datasheet: Vault/Scacchiera/Datasheets/RC0603FR-07511KL_C188257.pdf
-  wiki_source: Vault/Scacchiera/Wiki/sources/rc0603fr-07511kl-datasheet.md
-  wiki_entity: Vault/Scacchiera/Wiki/entities/rc0603fr-07511kl.md
-  category: resistor
-  footprint: Resistor_SMD:R_0603_1608Metric
-  uses:
-  - board: hub
-    reference: R13
-    value: 511k
-  library_audit:
-    status: passed
-    checked: '2026-07-25'
-    evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
-      KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
-    checks:
-    - symbol_pin_numbers_and_names
-    - symbol_electrical_types
-    - exposed_and_no_connect_pins
-    - footprint_pad_numbers
-    - package_dimensions
-    - polarity_and_pin_one
-    - assembly_side
-    - cpl_zero_rotation
-  ratings_audit:
-    status: passed
-    fields: value, tolerance, rated power, maximum working voltage, temperature coefficient,
-      operating temperature and package dimensions
-    datasheet_locator: ratings, dimensions and part-number tables
-  simulation_model:
-    kind: analytical
-    path: hardware/sim
-    valid_region: lumped model with datasheet tolerance, bias, ESR, DCR and temperature
-      corners
-  conflicts: []
-- mpn: RC0603FR-07732KL
-  manufacturer: Yageo
-  supplier: JLCPCB
-  order_code: C246003
-  availability:
-    status: available
-    checked: '2026-07-25'
-    source: https://jlcpcb.com/partdetail?part=C246003
-  datasheet: Vault/Scacchiera/Datasheets/RC0603FR-07732KL_C246003.pdf
-  wiki_source: Vault/Scacchiera/Wiki/sources/rc0603fr-07732kl-datasheet.md
-  wiki_entity: Vault/Scacchiera/Wiki/entities/rc0603fr-07732kl.md
-  category: resistor
-  footprint: Resistor_SMD:R_0603_1608Metric
-  uses:
-  - board: hub
-    reference: R15
-    value: 732k
-  library_audit:
-    status: passed
-    checked: '2026-07-25'
-    evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
-      KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
-    checks:
-    - symbol_pin_numbers_and_names
-    - symbol_electrical_types
-    - exposed_and_no_connect_pins
-    - footprint_pad_numbers
-    - package_dimensions
-    - polarity_and_pin_one
-    - assembly_side
-    - cpl_zero_rotation
-  ratings_audit:
-    status: passed
-    fields: value, tolerance, rated power, maximum working voltage, temperature coefficient,
-      operating temperature and package dimensions
-    datasheet_locator: ratings, dimensions and part-number tables
-  simulation_model:
-    kind: analytical
-    path: hardware/sim
-    valid_region: lumped model with datasheet tolerance, bias, ESR, DCR and temperature
-      corners
-  conflicts: []
 - mpn: RS-03K1800FT
   manufacturer: Fenghua Advanced Technology
   supplier: JLCPCB
   order_code: C286574
   availability:
     status: available
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     source: https://jlcpcb.com/partdetail?part=C286574
   datasheet: Vault/Scacchiera/Datasheets/RS-03K1800FT_C286574.pdf
   wiki_source: Vault/Scacchiera/Wiki/sources/rs-03k1800ft-datasheet.md
@@ -2597,7 +2072,7 @@ components:
     value: 180R 1%
   library_audit:
     status: passed
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
       KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
     checks:
@@ -2626,7 +2101,7 @@ components:
   order_code: C1046
   availability:
     status: available
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     source: https://jlcpcb.com/partdetail?part=C1046
   datasheet: Vault/Scacchiera/Datasheets/SDFL2012S100KTF_C1046.pdf
   wiki_source: Vault/Scacchiera/Wiki/sources/sdfl2012s100ktf-datasheet.md
@@ -2684,7 +2159,7 @@ components:
     value: 10uH
   library_audit:
     status: passed
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
       KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
     checks:
@@ -2713,7 +2188,7 @@ components:
   order_code: C189893
   availability:
     status: available
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     source: https://jlcpcb.com/partdetail?part=C189893
   datasheet: Vault/Scacchiera/Datasheets/SM02B-GHS-TB-LF-SN_C189893.pdf
   wiki_source: Vault/Scacchiera/Wiki/sources/sm02b-ghs-tb-lf-sn-datasheet.md
@@ -2722,11 +2197,17 @@ components:
   footprint: Connector_JST:JST_GH_SM02B-GHS-TB_1x02-1MP_P1.25mm_Horizontal
   uses:
   - board: hub
+    reference: J2
+    value: SM02B-GHS-TB(LF)(SN)
+  - board: hub
     reference: J10
+    value: SM02B-GHS-TB(LF)(SN)
+  - board: hub
+    reference: J11
     value: SM02B-GHS-TB(LF)(SN)
   library_audit:
     status: passed
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
       KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
     checks:
@@ -2755,7 +2236,7 @@ components:
   order_code: C495552
   availability:
     status: available
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     source: https://jlcpcb.com/partdetail?part=C495552
   datasheet: Vault/Scacchiera/Datasheets/SM07B-GHS-TB-LF-SN_C495552.pdf
   wiki_source: Vault/Scacchiera/Wiki/sources/sm07b-ghs-tb-lf-sn-datasheet.md
@@ -2777,7 +2258,7 @@ components:
     value: SM07B-GHS-TB(LF)(SN)
   library_audit:
     status: passed
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
       KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
     checks:
@@ -2806,7 +2287,7 @@ components:
   order_code: C7484
   availability:
     status: available
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     source: https://jlcpcb.com/partdetail?part=C7484
   datasheet: Vault/Scacchiera/Datasheets/SN74AHCT1G125DBVR_C7484.pdf
   wiki_source: Vault/Scacchiera/Wiki/sources/sn74ahct1g125dbvr-datasheet.md
@@ -2819,7 +2300,7 @@ components:
     value: SN74AHCT1G125DBVR
   library_audit:
     status: passed
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
       KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
     checks:
@@ -2851,7 +2332,7 @@ components:
   order_code: 3147-T37K3RGB-05C000112U1930CT-ND
   availability:
     status: available
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     source: https://www.digikey.com/en/products/detail/harvatek-corporation/T37K3RGB-05C000112U1930/12177237
   datasheet: Vault/Scacchiera/Datasheets/T37K3RGB-05C000112U1930_DIGIKEY-3147-T37K3RGB-05C000112U1930CT-ND.pdf
   wiki_source: Vault/Scacchiera/Wiki/sources/t37k3rgb-05c000112u1930-datasheet.md
@@ -2903,7 +2384,7 @@ components:
     value: T37K3RGB-05C000112U1930
   library_audit:
     status: passed
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
       KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
     checks:
@@ -2933,7 +2414,7 @@ components:
   order_code: C130204
   availability:
     status: available
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     source: https://jlcpcb.com/partdetail?part=C130204
   datasheet: Vault/Scacchiera/Datasheets/TCA9535PWR_C130204.pdf
   wiki_source: Vault/Scacchiera/Wiki/sources/tca9535pwr-datasheet.md
@@ -2946,7 +2427,52 @@ components:
     value: TCA9535PWR
   library_audit:
     status: passed
-    checked: '2026-07-25'
+    checked: '2026-07-26'
+    evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
+      KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
+    checks:
+    - symbol_pin_numbers_and_names
+    - symbol_electrical_types
+    - exposed_and_no_connect_pins
+    - footprint_pad_numbers
+    - package_dimensions
+    - polarity_and_pin_one
+    - assembly_side
+    - cpl_zero_rotation
+  ratings_audit:
+    status: passed
+    fields: pinout, no-connect and exposed-pad treatment, recommended operating range,
+      absolute maximum voltage, current, power and temperature, startup state, thermal
+      data and package
+    datasheet_locator: pin description, absolute maximum, recommended operation, electrical,
+      thermal and package tables
+  simulation_model:
+    kind: datasheet_bounded
+    path: hardware/sim
+    valid_region: no distributable vendor ngspice model was identified; V3 may use
+      only parameters enumerated in this part's filed datasheet and must sweep their
+      full published limits; digital protocol behavior belongs to V6
+  conflicts: []
+- mpn: TLV7042DGKR
+  manufacturer: Texas Instruments
+  supplier: JLCPCB
+  order_code: C2760466
+  availability:
+    status: available
+    checked: '2026-07-26'
+    source: https://jlcpcb.com/partdetail?part=C2760466
+  datasheet: Vault/Scacchiera/Datasheets/TLV7042DGKR_C2760466.pdf
+  wiki_source: Vault/Scacchiera/Wiki/sources/tlv7042dgkr-datasheet.md
+  wiki_entity: Vault/Scacchiera/Wiki/entities/tlv7042dgkr.md
+  category: semiconductor
+  footprint: Package_SO:VSSOP-8_3x3mm_P0.65mm
+  uses:
+  - board: hub
+    reference: U2
+    value: TLV7042DGKR
+  library_audit:
+    status: passed
+    checked: '2026-07-26'
     evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
       KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
     checks:
@@ -2978,7 +2504,7 @@ components:
   order_code: C111738
   availability:
     status: available
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     source: https://jlcpcb.com/partdetail?part=C111738
   datasheet: Vault/Scacchiera/Datasheets/TPS2553DBVR-1_C111738.pdf
   wiki_source: Vault/Scacchiera/Wiki/sources/tps2553dbvr-1-datasheet.md
@@ -2991,7 +2517,7 @@ components:
     value: TPS2553DBVR-1
   library_audit:
     status: passed
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
       KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
     checks:
@@ -3016,101 +2542,13 @@ components:
     valid_region: TI unencrypted transient PSpice model; V3 must prove ngspice compatibility
       and sweep datasheet input, load, temperature and external-component limits
   conflicts: []
-- mpn: TPS61023DRLR
-  manufacturer: Texas Instruments
-  supplier: JLCPCB
-  order_code: C919459
-  availability:
-    status: available
-    checked: '2026-07-25'
-    source: https://jlcpcb.com/partdetail?part=C919459
-  datasheet: Vault/Scacchiera/Datasheets/TPS61023DRLR_C919459.pdf
-  wiki_source: Vault/Scacchiera/Wiki/sources/tps61023drlr-datasheet.md
-  wiki_entity: Vault/Scacchiera/Wiki/entities/tps61023drlr.md
-  category: semiconductor
-  footprint: Package_TO_SOT_SMD:Texas_R-PDSO-N6_DRL-6
-  uses:
-  - board: hub
-    reference: U5
-    value: TPS61023DRLR
-  library_audit:
-    status: passed
-    checked: '2026-07-25'
-    evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
-      KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
-    checks:
-    - symbol_pin_numbers_and_names
-    - symbol_electrical_types
-    - exposed_and_no_connect_pins
-    - footprint_pad_numbers
-    - package_dimensions
-    - polarity_and_pin_one
-    - assembly_side
-    - cpl_zero_rotation
-  ratings_audit:
-    status: passed
-    fields: pinout, no-connect and exposed-pad treatment, recommended operating range,
-      absolute maximum voltage, current, power and temperature, startup state, thermal
-      data and package
-    datasheet_locator: pin description, absolute maximum, recommended operation, electrical,
-      thermal and package tables
-  simulation_model:
-    kind: vendor
-    path: hardware/sim/models/vendor/TPS61023_SLVMD68A.zip
-    valid_region: TI unencrypted transient PSpice model; V3 must prove ngspice compatibility
-      and sweep datasheet input, load, temperature and external-component limits
-  conflicts: []
-- mpn: TPS63802DLAR
-  manufacturer: Texas Instruments
-  supplier: JLCPCB
-  order_code: C2845237
-  availability:
-    status: available
-    checked: '2026-07-25'
-    source: https://jlcpcb.com/partdetail?part=C2845237
-  datasheet: Vault/Scacchiera/Datasheets/TPS63802DLAR_C2845237.pdf
-  wiki_source: Vault/Scacchiera/Wiki/sources/tps63802dlar-datasheet.md
-  wiki_entity: Vault/Scacchiera/Wiki/entities/tps63802dlar.md
-  category: semiconductor
-  footprint: Package_SON:Texas_S-PVSON-N10
-  uses:
-  - board: hub
-    reference: U2
-    value: TPS63802DLAR
-  library_audit:
-    status: passed
-    checked: '2026-07-25'
-    evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
-      KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
-    checks:
-    - symbol_pin_numbers_and_names
-    - symbol_electrical_types
-    - exposed_and_no_connect_pins
-    - footprint_pad_numbers
-    - package_dimensions
-    - polarity_and_pin_one
-    - assembly_side
-    - cpl_zero_rotation
-  ratings_audit:
-    status: passed
-    fields: pinout, no-connect and exposed-pad treatment, recommended operating range,
-      absolute maximum voltage, current, power and temperature, startup state, thermal
-      data and package
-    datasheet_locator: pin description, absolute maximum, recommended operation, electrical,
-      thermal and package tables
-  simulation_model:
-    kind: vendor
-    path: hardware/sim/models/vendor/TPS63802_SLVMCX1C.zip
-    valid_region: TI unencrypted transient PSpice model; V3 must prove ngspice compatibility
-      and sweep datasheet input, load, temperature and external-component limits
-  conflicts: []
 - mpn: USB4105-GF-A
   manufacturer: GCT
   supplier: JLCPCB
   order_code: C3020560
   availability:
     status: available
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     source: https://jlcpcb.com/partdetail?part=C3020560
   datasheet: Vault/Scacchiera/Datasheets/USB4105-GF-A_C3020560.pdf
   wiki_source: Vault/Scacchiera/Wiki/sources/usb4105-gf-a-datasheet.md
@@ -3123,7 +2561,7 @@ components:
     value: USB4105-GF-A
   library_audit:
     status: passed
-    checked: '2026-07-25'
+    checked: '2026-07-26'
     evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
       KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
     checks:
@@ -3146,48 +2584,63 @@ components:
     valid_region: contact and interconnect parasitics derived from rated contacts
       and routed geometry
   conflicts: []
-- mpn: USBLC6-2SC6
-  manufacturer: UMW (UTD Semiconductor)
-  supplier: JLCPCB
-  order_code: C2687116
+external_components:
+- mpn: PiSugar 3 Plus
+  role: Purchased UPS, charger, protected 5 V supply and battery telemetry subsystem
+  supplier: PiSugar Kitchen
+  order_code: PiSugar 3 Plus Portable 5000 mAh UPS
   availability:
     status: available
-    checked: '2026-07-25'
-    source: https://jlcpcb.com/partdetail?part=C2687116
-  datasheet: Vault/Scacchiera/Datasheets/USBLC6-2SC6_C2687116.pdf
-  wiki_source: Vault/Scacchiera/Wiki/sources/usblc6-2sc6-datasheet.md
-  wiki_entity: Vault/Scacchiera/Wiki/entities/usblc6-2sc6.md
-  category: semiconductor
-  footprint: Package_TO_SOT_SMD:SOT-23-6
-  uses:
-  - board: hub
-    reference: U9
-    value: USBLC6-2SC6
-  library_audit:
+    checked: '2026-07-26'
+    source: https://www.pisugar.com/products/pisugar-3-series
+  datasheets:
+  - Vault/Scacchiera/Datasheets/PISUGAR3_PLUS_product.md
+  - Vault/Scacchiera/Datasheets/PISUGAR3_PLUS_i2c.md
+  - Vault/Scacchiera/Datasheets/PISUGAR3_PLUS_safety.md
+  - Vault/Scacchiera/Datasheets/955465_PISUGAR5000_UN38.3.pdf
+  wiki_source: Vault/Scacchiera/Wiki/sources/pisugar3-plus-manufacturer-docs.md
+  wiki_entity: Vault/Scacchiera/Wiki/entities/pisugar3-plus.md
+  interface_audit:
     status: passed
-    checked: '2026-07-25'
-    evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
-      KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
-    checks:
-    - symbol_pin_numbers_and_names
-    - symbol_electrical_types
-    - exposed_and_no_connect_pins
-    - footprint_pad_numbers
-    - package_dimensions
-    - polarity_and_pin_one
-    - assembly_side
-    - cpl_zero_rotation
+    evidence: Hub J2 supplies qualified 5 V and ground to the documented PiSugar input
+      pads; hub J3 returns regulated 5 V, ground, 3.3 V I2C SCL and SDA; the raw cell
+      never connects to the custom PCB
   ratings_audit:
     status: passed
-    fields: pinout, no-connect and exposed-pad treatment, recommended operating range,
-      absolute maximum voltage, current, power and temperature, startup state, thermal
-      data and package
-    datasheet_locator: pin description, absolute maximum, recommended operation, electrical,
-      thermal and package tables
+    fields: 5 V input, included 5000 mAh 18.5 Wh cell, regulated 5 V output, 3 A maximum
+      discharge statement, 0 to 40 degree Celsius battery operating range, ventilation
+    datasheet_locator: product specification, safety warnings, battery notes and I2C
+      map
   simulation_model:
     kind: datasheet_bounded
     path: hardware/sim
-    valid_region: no distributable vendor ngspice model was identified; V3 may use
-      only parameters enumerated in this part's filed datasheet and must sweep their
-      full published limits; digital protocol behavior belongs to V6
+    valid_region: commercial black-box 5 V boundary and documented I2C state; V3 sweeps
+      published limits and V8 calibrates handover, runtime, recharge and thermal behavior
+  conflicts: []
+- mpn: NTCLE317E4103SBA
+  role: Cell-bonded off-board charge-temperature sensor
+  supplier: JLCPCB/LCSC
+  order_code: C3154341
+  availability:
+    status: available
+    checked: '2026-07-26'
+    source: https://www.lcsc.com/product-detail/C3154341.html
+  datasheets:
+  - Vault/Scacchiera/Datasheets/NTCLE317E4103SBA_C3154341.pdf
+  wiki_source: Vault/Scacchiera/Wiki/sources/ntcle317e4103sba-datasheet.md
+  wiki_entity: Vault/Scacchiera/Wiki/entities/ntcle317e4103sba.md
+  interface_audit:
+    status: passed
+    evidence: 75 mm insulated leads terminate at hub J11, sense on pin 1 and ground
+      on pin 2; the 1.6 mm epoxy body is tape-bonded or glued to the cell as permitted
+  ratings_audit:
+    status: passed
+    fields: 10 kohm at 25 degrees Celsius, R25 tolerance 2.19 percent, B25/85 3984
+      K plus or minus 0.5 percent, 0.5 degree accuracy from 25 to 85 degrees Celsius
+    datasheet_locator: quick reference, mounting, dimensions and ordering table
+  simulation_model:
+    kind: analytical
+    path: hardware/sim
+    valid_region: V3 beta-equation resistance model sweeps filed R25, beta, comparator
+      and resistor corners; V8 measures the assembled trip temperatures
   conflicts: []

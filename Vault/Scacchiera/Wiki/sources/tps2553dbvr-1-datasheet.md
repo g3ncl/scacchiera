@@ -3,7 +3,7 @@ type: source-summary
 tags:
   - wiki/source
   - wiki/component
-date_updated: 2026-07-25
+date_updated: 2026-07-26
 source_file: "Datasheets/TPS2553DBVR-1_C111738.pdf"
 source_title: "TPS2553DBVR-1 manufacturer datasheet"
 publisher: "Texas Instruments"
@@ -21,6 +21,7 @@ code `C111738`. It is used by hub U7 (TPS2553DBVR-1).
 
 - Library proof: manufacturer pin and package drawing checked against the SKiDL pin numbers, KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation.
 - Ratings used by the design: pinout, no-connect and exposed-pad treatment, recommended operating range, absolute maximum voltage, current, power and temperature, startup state, thermal data and package.
+- Exact selected limits: See the filed data sheet and structured audit..
 - Datasheet locator: pin description, absolute maximum, recommended operation, electrical, thermal and package tables.
 - Simulation treatment: vendor, valid only for
   TI unencrypted transient PSpice model; V3 must prove ngspice compatibility and sweep datasheet input, load, temperature and external-component limits.

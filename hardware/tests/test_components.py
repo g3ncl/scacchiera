@@ -27,7 +27,7 @@ def test_every_fitted_purchased_mpn_has_one_exact_audit_record() -> None:
         (part.mpn, part.supplier, part.order_code, part.footprint)
         for part in _bound_parts()
     }
-    assert len(audited) == 59
+    assert len(audited) == 44
     assert audited == bound
 
 
@@ -73,7 +73,7 @@ def test_availability_and_simulation_treatment_are_recorded() -> None:
         mpn = str(record["mpn"])
         availability = require_mapping(record.get("availability"), f"{mpn} availability")
         assert availability.get("status") == "available"
-        assert availability.get("checked") == "2026-07-25"
+        assert availability.get("checked") == "2026-07-26"
         source = require_nonempty_string(availability.get("source"), f"{mpn} availability source")
         assert source.startswith("https://")
         model = require_mapping(record.get("simulation_model"), f"{mpn} model")
@@ -104,3 +104,36 @@ def test_environmental_declarations_are_not_used_as_samsung_datasheets() -> None
     for record in _components():
         if record.get("manufacturer") == "Samsung Electro-Mechanics":
             assert str(record["datasheet"]).endswith("_manufacturer.pdf")
+
+
+def test_external_power_components_are_exact_sourced_and_modelled() -> None:
+    document = load_component_audit()
+    records = [
+        require_mapping(raw, "external component")
+        for raw in require_list(document.get("external_components"), "external components")
+    ]
+    assert {record.get("mpn") for record in records} == {
+        "PiSugar 3 Plus", "NTCLE317E4103SBA"
+    }
+    for record in records:
+        mpn = require_nonempty_string(record.get("mpn"), "external MPN")
+        require_nonempty_string(record.get("supplier"), f"{mpn} supplier")
+        require_nonempty_string(record.get("order_code"), f"{mpn} order code")
+        availability = require_mapping(record.get("availability"), f"{mpn} availability")
+        assert availability.get("status") == "available"
+        assert availability.get("checked") == "2026-07-26"
+        for relative in require_list(record.get("datasheets"), f"{mpn} datasheets"):
+            source = ROOT / require_nonempty_string(relative, f"{mpn} datasheet")
+            assert source.is_file()
+            assert source.stat().st_size > 100
+        for field in ("wiki_source", "wiki_entity"):
+            wiki_page = ROOT / require_nonempty_string(record.get(field), f"{mpn} {field}")
+            assert wiki_page.is_file()
+        interface = require_mapping(record.get("interface_audit"), f"{mpn} interface")
+        ratings = require_mapping(record.get("ratings_audit"), f"{mpn} ratings")
+        model = require_mapping(record.get("simulation_model"), f"{mpn} model")
+        assert interface.get("status") == "passed"
+        assert ratings.get("status") == "passed"
+        assert model.get("kind") in {"analytical", "datasheet_bounded"}
+        require_nonempty_string(model.get("valid_region"), f"{mpn} model region")
+        assert record.get("conflicts") == []

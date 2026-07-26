@@ -3,7 +3,7 @@ type: source-summary
 tags:
   - wiki/source
   - wiki/component
-date_updated: 2026-07-25
+date_updated: 2026-07-26
 source_file: "Datasheets/CL32A107MQVNNNE_C49066_manufacturer.pdf"
 source_title: "CL32A107MQVNNNE manufacturer datasheet"
 publisher: "Samsung Electro-Mechanics"
@@ -21,6 +21,7 @@ code `C49066`. It is used by lightbar C15 (100u 6.3V).
 
 - Library proof: manufacturer pin and package drawing checked against the SKiDL pin numbers, KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation.
 - Ratings used by the design: capacitance, tolerance, rated voltage, dielectric, temperature range, DC-bias behavior where published and package dimensions.
+- Exact selected limits: See the filed data sheet and structured audit..
 - Datasheet locator: part-number, characteristics and dimensions tables.
 - Simulation treatment: analytical, valid only for
   lumped model with datasheet tolerance, bias, ESR, DCR and temperature corners.

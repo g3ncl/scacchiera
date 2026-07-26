@@ -29,6 +29,114 @@ from hardware.pcb.matrix import build_matrix  # noqa: E402
 DATASHEETS = ROOT / "Vault" / "Scacchiera" / "Datasheets"
 WIKI = ROOT / "Vault" / "Scacchiera" / "Wiki"
 AUDIT_PATH = ROOT / "docs" / "verification" / "v1-components.yaml"
+REVIEW_DATE = "2026-07-26"
+
+DESIGN_FACTS = {
+    "AP22811AW5-7": (
+        "2.7 to 5.5 V input, 2 A continuous current, 65 mOhm maximum on-resistance at 5 V and "
+        "25 degrees Celsius, 2.2 to 3.2 A overload limit, active-high enable, open-drain fault, "
+        "reverse blocking, output discharge, UVLO and thermal shutdown"
+    ),
+    "AP63203WU-7": (
+        "3.8 to 32 V input, fixed 3.3 V output, 2 A continuous current, 1.1 MHz switching, "
+        "4.7 uH selected inside the 2.2 to 10 uH range, 10 uF input, two 22 uF output and "
+        "100 nF bootstrap"
+    ),
+    "NR6045S4R7MT": (
+        "4.7 uH plus or minus 20 percent, 34 mOhm maximum DCR, 4.97 A minimum saturation, "
+        "3.3 A minimum thermal current, 6 x 6 x 4.5 mm body and 1.7 x 5.7 mm pads"
+    ),
+    "TLV7042DGKR": (
+        "1.6 to 6.5 V supply, rail-to-rail fail-safe inputs, open-drain outputs, internal "
+        "hysteresis and power-on reset, 8 mV maximum input offset at 25 degrees Celsius, "
+        "DGK VSSOP-8 pinout"
+    ),
+}
+
+EXTERNAL_COMPONENTS: tuple[dict[str, Any], ...] = (
+    {
+        "mpn": "PiSugar 3 Plus",
+        "role": "Purchased UPS, charger, protected 5 V supply and battery telemetry subsystem",
+        "supplier": "PiSugar Kitchen",
+        "order_code": "PiSugar 3 Plus Portable 5000 mAh UPS",
+        "availability": {
+            "status": "available",
+            "checked": REVIEW_DATE,
+            "source": "https://www.pisugar.com/products/pisugar-3-series",
+        },
+        "datasheets": [
+            "Vault/Scacchiera/Datasheets/PISUGAR3_PLUS_product.md",
+            "Vault/Scacchiera/Datasheets/PISUGAR3_PLUS_i2c.md",
+            "Vault/Scacchiera/Datasheets/PISUGAR3_PLUS_safety.md",
+            "Vault/Scacchiera/Datasheets/955465_PISUGAR5000_UN38.3.pdf",
+        ],
+        "wiki_source": "Vault/Scacchiera/Wiki/sources/pisugar3-plus-manufacturer-docs.md",
+        "wiki_entity": "Vault/Scacchiera/Wiki/entities/pisugar3-plus.md",
+        "interface_audit": {
+            "status": "passed",
+            "evidence": (
+                "Hub J2 supplies qualified 5 V and ground to the documented PiSugar input pads; "
+                "hub J3 returns regulated 5 V, ground, 3.3 V I2C SCL and SDA; the raw cell never "
+                "connects to the custom PCB"
+            ),
+        },
+        "ratings_audit": {
+            "status": "passed",
+            "fields": (
+                "5 V input, included 5000 mAh 18.5 Wh cell, regulated 5 V output, 3 A maximum "
+                "discharge statement, 0 to 40 degree Celsius battery operating range, ventilation"
+            ),
+            "datasheet_locator": "product specification, safety warnings, battery notes and I2C map",
+        },
+        "simulation_model": {
+            "kind": "datasheet_bounded",
+            "path": "hardware/sim",
+            "valid_region": (
+                "commercial black-box 5 V boundary and documented I2C state; V3 sweeps published "
+                "limits and V8 calibrates handover, runtime, recharge and thermal behavior"
+            ),
+        },
+        "conflicts": [],
+    },
+    {
+        "mpn": "NTCLE317E4103SBA",
+        "role": "Cell-bonded off-board charge-temperature sensor",
+        "supplier": "JLCPCB/LCSC",
+        "order_code": "C3154341",
+        "availability": {
+            "status": "available",
+            "checked": REVIEW_DATE,
+            "source": "https://www.lcsc.com/product-detail/C3154341.html",
+        },
+        "datasheets": ["Vault/Scacchiera/Datasheets/NTCLE317E4103SBA_C3154341.pdf"],
+        "wiki_source": "Vault/Scacchiera/Wiki/sources/ntcle317e4103sba-datasheet.md",
+        "wiki_entity": "Vault/Scacchiera/Wiki/entities/ntcle317e4103sba.md",
+        "interface_audit": {
+            "status": "passed",
+            "evidence": (
+                "75 mm insulated leads terminate at hub J11, sense on pin 1 and ground on pin 2; "
+                "the 1.6 mm epoxy body is tape-bonded or glued to the cell as permitted"
+            ),
+        },
+        "ratings_audit": {
+            "status": "passed",
+            "fields": (
+                "10 kohm at 25 degrees Celsius, R25 tolerance 2.19 percent, B25/85 3984 K plus or "
+                "minus 0.5 percent, 0.5 degree accuracy from 25 to 85 degrees Celsius"
+            ),
+            "datasheet_locator": "quick reference, mounting, dimensions and ordering table",
+        },
+        "simulation_model": {
+            "kind": "analytical",
+            "path": "hardware/sim",
+            "valid_region": (
+                "V3 beta-equation resistance model sweeps filed R25, beta, comparator and resistor "
+                "corners; V8 measures the assembled trip temperatures"
+            ),
+        },
+        "conflicts": [],
+    },
+)
 
 
 @dataclass(frozen=True)
@@ -320,7 +428,7 @@ def _record(part: BoundPart) -> dict[str, Any]:
         "order_code": part.order_code,
         "availability": {
             "status": "available",
-            "checked": "2026-07-25",
+            "checked": REVIEW_DATE,
             "source": AVAILABILITY_SOURCES.get(
                 part.order_code,
                 f"https://jlcpcb.com/partdetail?part={part.order_code}",
@@ -334,7 +442,7 @@ def _record(part: BoundPart) -> dict[str, Any]:
         "uses": [use.__dict__ for use in part.uses],
         "library_audit": {
             "status": "passed",
-            "checked": "2026-07-25",
+            "checked": REVIEW_DATE,
             "evidence": (
                 "manufacturer pin and package drawing checked against the SKiDL pin numbers, "
                 "KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation"
@@ -368,12 +476,13 @@ def _write_wiki_page(record: dict[str, Any]) -> None:
     use_text = ", ".join(
         f"{use['board']} {use['reference']} ({use['value']})" for use in uses
     )
+    design_fact = DESIGN_FACTS.get(str(record["mpn"]), "See the filed data sheet and structured audit.")
     source_text = f"""---
 type: source-summary
 tags:
   - wiki/source
   - wiki/component
-date_updated: 2026-07-25
+date_updated: {REVIEW_DATE}
 source_file: "{str(record['datasheet']).removeprefix('Vault/Scacchiera/')}"
 source_title: "{record['mpn']} manufacturer datasheet"
 publisher: "{record['manufacturer']}"
@@ -391,6 +500,7 @@ code `{record['order_code']}`. It is used by {use_text}.
 
 - Library proof: {record['library_audit']['evidence']}.
 - Ratings used by the design: {record['ratings_audit']['fields']}.
+- Exact selected limits: {design_fact}.
 - Datasheet locator: {record['ratings_audit']['datasheet_locator']}.
 - Simulation treatment: {record['simulation_model']['kind']}, valid only for
   {record['simulation_model']['valid_region']}.
@@ -401,7 +511,7 @@ type: entity
 tags:
   - wiki/entity
   - wiki/component
-date_updated: 2026-07-25
+date_updated: {REVIEW_DATE}
 source_count: 1
 ---
 
@@ -426,11 +536,11 @@ def _update_wiki_index(records: list[dict[str, Any]]) -> None:
     start = "<!-- V1-COMPONENT-CATALOG:START -->"
     end = "<!-- V1-COMPONENT-CATALOG:END -->"
     source_rows = "\n".join(
-        f"| [[{_slug(str(record['mpn']))}-datasheet]] | {record['manufacturer']} | 2026-07-25 |"
+        f"| [[{_slug(str(record['mpn']))}-datasheet]] | {record['manufacturer']} | {REVIEW_DATE} |"
         for record in records
     )
     entity_rows = "\n".join(
-        f"| [[{_slug(str(record['mpn']))}]] | 1 | 2026-07-25 |" for record in records
+        f"| [[{_slug(str(record['mpn']))}]] | 1 | {REVIEW_DATE} |" for record in records
     )
     catalog = f"""{start}
 ## V1 component datasheet sources
@@ -463,12 +573,13 @@ def main() -> None:
     document = {
         "version": 1,
         "milestone": "V1",
-        "reviewed": "2026-07-25",
+        "reviewed": REVIEW_DATE,
         "policy": (
             "Every purchased fitted component is exact, sourced, backed by an immutable "
             "manufacturer datasheet, library-audited, ratings-audited and model-classified."
         ),
         "components": records,
+        "external_components": list(EXTERNAL_COMPONENTS),
     }
     AUDIT_PATH.write_text(yaml.safe_dump(document, sort_keys=False), encoding="utf-8")
     for record in records:
