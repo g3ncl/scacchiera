@@ -44,9 +44,10 @@ scoped test-article order. V0 through V9 permit a final-board order.
   Plus boundary and off-board NTCLE317E4103SBA cell sensor. Every record has dated availability,
   immutable manufacturer sources, wiki ingestion, library or interface proof, ratings, model
   treatment, and no open conflict. The AP63203WU-7, AP22811AW5-7, TLV7042DGKR and NR6045S4R7MT
-  records include their exact selected limits and footprints. The rejected SWPA catalog binding
-  remains as contradiction evidence rather than a waiver. Evidence: 7 component-proof tests and
-  4 matrix vendor-model tests passed on 2026-07-26.
+  records include their exact selected limits and footprints. TLV7042DGKR uses the manufacturer's
+  DGK0008A land pattern because the generic KiCad VSSOP footprint does not meet the board's 0.2 mm
+  clearance. The rejected SWPA catalog binding remains as contradiction evidence rather than a
+  waiver. Evidence: 7 component-proof tests and 4 matrix vendor-model tests passed on 2026-07-26.
 - [ ] V2 connectivity and static electrical checks: the lightbar and matrix remain valid. The hub
   schematic and route are superseded by the commercial 5 V boundary and must be regenerated and
   re-reviewed. Historical evidence follows: clean generation runs full SKiDL and KiCad ERC,
@@ -163,8 +164,8 @@ in [simulation-workflow.md](simulation-workflow.md).
 ## Status
 
 Revised 2026-07-26. V0 passes with ordinary 5 V/2 A charging and bounded recharge time included.
-The PiSugar 3 Plus is the selected purchased battery subsystem. V1 and V2 remain open for the hub
-because the former MCP73871 schematic and route do not implement this boundary. The lightbar and
+The PiSugar 3 Plus is the selected purchased battery subsystem. V1 passes for the rebuilt hub; V2
+remains open because the former MCP73871 route does not implement this boundary. The lightbar and
 matrix retain their passing component, static, simulation, and layout evidence. The 10 uH matrix
 choke's ambiguous 15 mA datasheet rating remains a V3 corner and fault-model concern, not a waived
 check.

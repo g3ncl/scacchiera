@@ -37,7 +37,8 @@ The rebuilt hub removed the custom lithium charger and duplicate conversion stag
 [[ap63203wu-7-datasheet]], [[ap22811aw5-7-datasheet]], [[tlv7042dgkr-datasheet]], and
 [[nr6045s4r7mt-datasheet]] records include the exact limits used by the design. The rejected
 [[swpa5045s4r7mt-datasheet]] remains visible because the manufacturer table does not substantiate
-the catalog MPN.
+the catalog MPN. The comparator uses a code-generated DGK0008A manufacturer land pattern after PCB
+DRC showed the generic KiCad VSSOP footprint could not maintain the board's 0.2 mm clearance.
 
 [component_count::44] [external_component_count::2] [open_conflict_count::0]
 [vendor_model_count::3]

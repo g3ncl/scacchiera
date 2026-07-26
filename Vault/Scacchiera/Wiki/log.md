@@ -368,3 +368,9 @@ The four new fitted power parts record their actual selected electrical and pack
 the [[nr6045s4r7mt]] footprint follows its filed land pattern. The regenerated wiki catalog and
 structured audit have no open conflicts. Seven V1 component-proof tests pass, including exact
 schematic parity, immutable sources, model classification, and external power-component evidence.
+
+## [2026-07-26] verification | Bind exact comparator footprint
+
+PCB DRC exposed 0.15 mm pad clearance in the generic KiCad VSSOP footprint, below the hub's 0.2 mm
+rule. Replaced it with a code-generated [[tlv7042dgkr]] DGK0008A land pattern using the dimensions
+in the filed Texas Instruments data sheet. The regenerated component audit and seven V1 tests pass.

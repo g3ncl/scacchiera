@@ -15,7 +15,7 @@ This source binds [TLV7042DGKR](../entities/tlv7042dgkr.md) to supplier order
 code `C2760466`. It is used by hub U2 (TLV7042DGKR).
 
 [mpn::TLV7042DGKR] [order_code::C2760466]
-[manufacturer::Texas Instruments] [footprint::Package_SO:VSSOP-8_3x3mm_P0.65mm]
+[manufacturer::Texas Instruments] [footprint::Chessboard:TLV7042_DGK]
 
 ## Design facts reviewed
 

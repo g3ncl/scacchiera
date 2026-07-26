@@ -158,12 +158,39 @@ def nr6045s_footprint() -> str:
 )\n'''
 
 
+def tlv7042_dgk_footprint() -> str:
+    """TI DGK0008A land pattern from the TLV7042 data sheet."""
+    pads = []
+    for number, x, y in (
+        (1, -1.5, -0.975), (2, -1.5, -0.325), (3, -1.5, 0.325), (4, -1.5, 0.975),
+        (5, 1.5, 0.975), (6, 1.5, 0.325), (7, 1.5, -0.325), (8, 1.5, -0.975),
+    ):
+        pads.append(
+            f'  (pad "{number}" smd roundrect (at {x} {y}) (size 1.4 0.45) '
+            '(layers "F.Cu" "F.Paste" "F.Mask") (roundrect_rratio 0.2))'
+        )
+    return '''(footprint "TLV7042_DGK"
+  (version 20240108)
+  (generator pcbnew)
+  (layer "F.Cu")
+  (descr "Texas Instruments DGK0008A manufacturer land pattern")
+  (tags "VSSOP-8 DGK")
+  (property "Reference" "REF**" (at 0 -2.8 0) (layer "F.SilkS"))
+  (property "Value" "TLV7042_DGK" (at 0 2.8 0) (layer "F.Fab"))
+  (attr smd)
+  (fp_rect (start -1.5 -1.5) (end 1.5 1.5) (stroke (width 0.1) (type default)) (fill none) (layer "F.Fab"))
+  (fp_rect (start -2.45 -1.75) (end 2.45 1.75) (stroke (width 0.05) (type default)) (fill none) (layer "F.CrtYd"))
+  (fp_circle (center -1.15 -1.15) (end -1.0 -1.15) (stroke (width 0.15) (type default)) (fill none) (layer "F.SilkS"))
+''' + "\n".join(pads) + "\n)\n"
+
+
 def write_footprints(output: Path = OUTPUT) -> None:
     output.mkdir(parents=True, exist_ok=True)
     (output / "Antenna_Line.kicad_mod").write_text(antenna_line_footprint(), encoding="utf-8")
     (output / "ESP32-C6-MINI-1U.kicad_mod").write_text(esp32_footprint(), encoding="utf-8")
     (output / "T37K3RGB-05C000112U1930.kicad_mod").write_text(t37k3rgb_footprint(), encoding="utf-8")
     (output / "NR6045S.kicad_mod").write_text(nr6045s_footprint(), encoding="utf-8")
+    (output / "TLV7042_DGK.kicad_mod").write_text(tlv7042_dgk_footprint(), encoding="utf-8")
 
 
 if __name__ == "__main__":

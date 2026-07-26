@@ -2465,7 +2465,7 @@ components:
   wiki_source: Vault/Scacchiera/Wiki/sources/tlv7042dgkr-datasheet.md
   wiki_entity: Vault/Scacchiera/Wiki/entities/tlv7042dgkr.md
   category: semiconductor
-  footprint: Package_SO:VSSOP-8_3x3mm_P0.65mm
+  footprint: Chessboard:TLV7042_DGK
   uses:
   - board: hub
     reference: U2

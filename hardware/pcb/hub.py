@@ -95,7 +95,7 @@ def _temperature_comparator(circuit: Circuit) -> Part:
         circuit,
         "U2",
         "TLV7042DGKR",
-        "Package_SO:VSSOP-8_3x3mm_P0.65mm",
+        "Chessboard:TLV7042_DGK",
         tuple(
             PinDefinition(str(index), name)
             for index, name in enumerate(
