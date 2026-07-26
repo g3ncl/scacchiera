@@ -10,24 +10,31 @@ layout in `hardware/pcb/hub_layout.py`.
 ## Power
 
 The hub receives regulated 5 V from the purchased PiSugar 3 Plus described in
-[power-subsystem.md](power-subsystem.md). PiSugar owns the cell, charger, battery protection,
-5 V conversion, charging connector, UPS handover, and battery telemetry. The custom hub contains no
-raw-cell connection and no USB charging circuit.
+[power-subsystem.md](power-subsystem.md). PiSugar owns the cell, charger, battery protection, 5 V
+conversion, UPS handover, and battery telemetry. The custom hub never connects to the raw cell.
 
-One buck converter makes 3.3 V for the MCU, reader, displays, and matrix. The exact converter remains
-an open V1 selection. The light bars use the managed 5 V rail directly through the TPS2553
-latch-off current limiter, with their data driven through an AHCT buffer at 5 V logic. This removes
-the former TPS61023 boost and its duplicate energy conversion.
+The product's power-only USB-C inlet presents passive Type-C sink resistors and accepts only a
+qualified fixed 5 V/2 A adapter. AP22811AW5-7 gates that input to the PiSugar 5 V pad and adds
+current limiting, short-circuit protection, output discharge, thermal protection, and reverse
+current blocking. Its enable is the wired result of both TLV7042DGKR comparisons around a
+cell-bonded NTCLE317E4103SBA sensor. A 10 kohm sensor bias and 39k/100k and 150k/100k reference
+dividers produce conservative nominal cold and hot trips near 8 and 34 degrees Celsius. An open
+sensor trips cold and a shorted sensor trips hot. Firmware receives a divided sensor voltage for
+reporting but has no path that can override the cutoff.
+
+AP63203WU-7 and a 4.7 uH SWPA5045S4R7MT make 3.3 V from PiSugar's managed 5 V. The fixed-output
+buck uses the data sheet's 10 uF input, two 22 uF output, and 100 nF bootstrap network. The light
+bars use managed 5 V directly through the TPS2553 latch-off current limiter, with their data driven
+through an AHCT buffer at 5 V logic. This removes the former TPS63802 buck-boost, TPS61023 boost,
+battery connector, charger, and duplicate conversion stages.
 
 PiSugar shares I2C with the hub and reports source presence, battery voltage, estimated percentage,
-and control state. A separate cell-contact sensor and hardware interlock must disable charging
-outside 0 to 40 degrees Celsius because PiSugar reports charger-chip temperature rather than cell
-temperature. Until that interlock and its fail-safe behavior pass V1 through V8, the power system
-is not release-ready.
+and control state. Its charger-chip temperature remains useful telemetry but is not used as cell
+temperature. The analog cutoff and its open/short fault behavior remain subject to V3 and V8.
 
 ## MCU and slow control
 
-ESP32-C6-MINI-1U-N4: WiFi 6 for the browser client, native USB on a service-only interface, one SPI bus
+ESP32-C6-MINI-1U-N4: WiFi 6 for the browser client, one SPI bus
 shared by the reader, both displays, and the matrix selection registers. A TCA9535 I2C expander
 carries every slow signal: the matrix latch (SEL_RCLK), reader reset, display DC and reset, LED
 rail enable, LED fault, and the single button (polled, 10 k pullup, 2-pin connector). PiSugar
@@ -35,7 +42,7 @@ telemetry and control remain directly on I2C rather than consuming expander pins
 
 The pin map comes from datasheet v1.5 Table 3-1, not from the C3 module this replaced. The C6 is
 pin compatible with the C3-MINI series only on power, ground, EN and UART0: most GPIO numbers
-differ, and native USB moves from the C3's pins 26/27 to **pins 17/18**, while pin 21 becomes NC.
+differ. Native USB pins 17 and 18 are unused because the external USB-C inlet is power-only.
 SPI sits on the FSPI-native pins (SCLK on IO6, MOSI on IO7, MISO on IO2) so the bus avoids the GPIO
 matrix. I2C stays on pins 22 and 23 because IO8 and IO9 are the C6 boot strapping pins and the
 4.7 k bus pullups hold them high for SPI boot, which also makes IO9 the download-mode recovery pin.
@@ -75,8 +82,9 @@ stays balanced. RX taps the bus through 100 pF and 1 k into RXP, with RXN refere
 
 All low-voltage harnesses use locking connectors: the 7-pin matrix link (RF bus between grounds,
 3V3, serial selection), two 7-pin display connectors (3V3 SPI plus DC and reset), two 4-pin light
-bar connectors chained through LED_RETURN, the PiSugar 5 V and I2C link, a 4-pin UART service
-connector, and the 2-pin button. There is no battery connector on the hub.
+bar connectors chained through LED_RETURN, a 2-pin qualified 5 V output to the PiSugar input pad,
+a 4-pin PiSugar 5 V and I2C return, the 2-pin cell thermistor, a 4-pin UART service connector, and
+the 2-pin button. There is no battery connector on the hub.
 
 ## Board
 

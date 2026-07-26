@@ -329,3 +329,15 @@ The custom TPS25730S/BQ25638 charger and RBS18634 test article are historical, n
 The manufacturer documents uninterrupted cable changes and an included transport-tested cell, but
 also expose two release obligations: the vendor assembly is 57 mm across a 50 mm rail, and its
 temperature register measures the charger IC rather than the cell. Neither issue is waived.
+
+## [2026-07-26] design | Bind the simplified hub power boundary
+
+Filed and ingested [[ap63203wu-7]], [[swpa5045s4r7mt]], [[ap22811aw5-7]], [[tlv7042]], and
+[[ntcle317e4103sba]]. The hub will accept a qualified fixed 5 V/2 A source, gate it to the PiSugar
+input pad through an independent analog cell-temperature window, receive uninterrupted 5 V back,
+and make 3.3 V with one fixed-output buck.
+
+The analog window uses only existing E96 resistor values and nominally permits charging from about
+8 to 34 degrees Celsius. This deliberate inner guard band absorbs component error inside the
+PiSugar manufacturer's 0 to 40 degree operating range. Open and short sensor wiring both disable
+charging. Created [[fail-safe-cell-temperature-window]] and updated [[overview]] and [[index]].

@@ -41,9 +41,10 @@ scoped test-article order. V0 through V9 permit a final-board order.
 - [ ] V1 component and library proof: the former 59-part proof remains valid for the lightbar and
   matrix, but the hub portion is reopened by the new commercial 5 V boundary. The selected PiSugar
   3 Plus manufacturer documents, I2C register map, safety instructions, STEP assembly, and supplied
-  cell UN 38.3 report are filed in the vault. The custom 3.3 V buck, cell-temperature interlock,
-  PiSugar harness, and changed support parts still require exact sourcing, immutable datasheets,
-  library audit, ratings audit, and model classification before this gate can pass again.
+  cell UN 38.3 report are filed in the vault. The AP63203WU-7 buck, SWPA5045S4R7MT inductor,
+  AP22811AW5-7 input switch, TLV7042DGKR comparator, and NTCLE317E4103SBA cell sensor are now exact
+  selections with immutable manufacturer data sheets. Their schematic binding, PiSugar harness,
+  library audit, ratings audit, and model classification remain before this gate can pass again.
   Historical evidence follows:
   [verification/v1-components.yaml](verification/v1-components.yaml) have exact supplier and order
   codes, dated availability, immutable manufacturer datasheets, per-part wiki ingestion, complete
@@ -101,9 +102,9 @@ against the functional requirement it serves.
 - [x] Matrix board schematic: `hardware/pcb/matrix.py`, ERC clean, BOM 4.80 EUR in parts, spec
   in [hardware/matrix.md](hardware/matrix.md).
 - [ ] Hub board schematic: the previous MCP73871 design in `hardware/pcb/hub.py` is superseded. It
-  must accept the PiSugar 3 Plus regulated 5 V and I2C interface, generate 3.3 V with one buck,
-  distribute protected 5 V to the light bars, and independently inhibit charging outside the
-  qualified cell-temperature range before this milestone closes again. The subsystem boundary is
+  must accept the PiSugar 3 Plus regulated 5 V and I2C interface, implement the selected AP63203
+  buck and independent analog cell-temperature cutoff, and distribute protected 5 V to the light
+  bars before this milestone closes again. The subsystem boundary is
   in [hardware/power-subsystem.md](hardware/power-subsystem.md), and hub rationale is in
   [hardware/hub.md](hardware/hub.md). Revised 2026-07-25: U4 to ESP32-C6-MINI-1U-N4 with the C6
   pin map from datasheet Table 3-1 (native USB moves to pins 17/18), Y1 to a stocked 3225

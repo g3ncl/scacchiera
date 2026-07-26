@@ -28,7 +28,9 @@ lightbar and matrix evidence remains valid.
 The earlier [[chessboard-quick-charge-architecture|custom PD architecture]] and
 [[quick-charge-module-evaluation|RBS18634 article]] remain historical evidence rather than active
 designs. The current open risks are enclosure ventilation, the module's seven-millimetre rail-width
-conflict, explicit cell-temperature gating, measured recharge time, and representative runtime.
+conflict, measured recharge time, and representative runtime. The selected
+[[fail-safe-cell-temperature-window]] uses a wired thermistor and analog comparators so firmware
+cannot override the qualified charge range.
 
 ## NFC Game Board: the reference project
 

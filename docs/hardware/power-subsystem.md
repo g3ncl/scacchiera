@@ -9,7 +9,9 @@ verification evidence required by [the simulation workflow](../simulation-workfl
 The selected subsystem is one PiSugar 3 Plus with its supplied 5000 mAh, 3.7 V pouch cell. The
 manufacturer specifies a 5 V input and output, both rated up to 3 A, full UPS behavior during source
 insertion and removal, and an I2C interface at address `0x57`. The hub uses the extension header's
-5 V, ground, SDA, and SCL signals. The PiSugar USB-C connector is the product charging inlet.
+5 V, ground, SDA, and SCL signals. A two-wire harness from the hub's protected 5 V charge output
+terminates at the documented PiSugar 5 V input pad. The PiSugar USB connectors stay internal and
+unused.
 
 The subsystem is outside the custom hub BOM and is not reproduced from an unpublished schematic.
 Its immutable evidence is the [product documentation](../../Vault/Scacchiera/Datasheets/PISUGAR3_PLUS_product.md),
@@ -21,15 +23,16 @@ Its immutable evidence is the [product documentation](../../Vault/Scacchiera/Dat
 ## Electrical boundary
 
 PiSugar supplies the hub with regulated 5 V. The light-bar branch uses that rail through its
-existing latch-off current limiter. One buck converter generates 3.3 V for the MCU, reader,
+existing latch-off current limiter. An AP63203WU-7 buck generates 3.3 V for the MCU, reader,
 displays, and matrix. PiSugar I2C supplies external-power presence, charge enable, output enable,
 delayed output shutdown, battery voltage, and estimated percentage. Its temperature register is
 the charger IC temperature, not cell temperature.
 
-The hub retains an independent cell-contact temperature sensor and charge interlock because the
-functional specification requires actual cell temperature to gate charging. This circuit remains
-an open V1 selection. Native USB debug, if retained, uses a separate service-only connector and is
-not connected to the battery charging input.
+The product's power-only USB-C inlet feeds an AP22811AW5-7 switch whose enable comes from a
+TLV7042DGKR analog window around a cell-bonded NTCLE317E4103SBA thermistor. Nominal trip points near
+8 and 34 degrees Celsius deliberately stay inside the published 0 to 40 degree boundary. Open or
+short thermistor wiring disables the switch. Firmware reads a divided copy for status, but cannot
+override the hardware cutoff. Debug uses the locking UART service connector.
 
 ## Mechanical boundary
 
