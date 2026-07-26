@@ -7,7 +7,7 @@ sources:
   docs/functional/gameplay.md: 461a3ce900ad7e2bfe67bc4f424bfa5b899486ad70e7820304bceae711a65097
   docs/functional/interface.md: 9d5aa00b924f575a50c5e1f5020e19c7470c0e618da78e05f585d669c9d59b71
   docs/functional/physical.md: 5f7888874f7e5a848dffe02f8d00c3a26ac5ebeb4aeb0ae89a0bc7ecee5779b3
-  docs/functional/power.md: ca5fc14a3dc27cfbfc0013435473dc0626bc24b55c384f8e0f63150f54955788
+  docs/functional/power.md: 97039f535d4d6dd04a90d63c7604bde29fbb284db67cd88c3665421472dd5538
 
 requirements:
   - id: PRINCIPLE-001
@@ -267,12 +267,12 @@ requirements:
     test_ids: [TEST-POWER-RUNTIME-002]
   - id: POWER-CHARGE-001
     source: {path: docs/functional/power.md, locator: USB-C charging}
-    statement: A compliant 9 V 3 A USB-C PD source charges an idle board from 10 to 80 percent in no more than 90 minutes at 20 to 25 degrees Celsius.
+    statement: A compliant 5 V 2 A USB source charges an idle board from 10 to 80 percent in no more than 120 minutes at 20 to 25 degrees Celsius, without requiring USB Power Delivery.
     criterion_ids: [POWER-CHARGE-10-80]
     test_ids: [TEST-POWER-CHARGE-001, TEST-V8-CHARGE-001]
   - id: POWER-CHARGE-002
     source: {path: docs/functional/power.md, locator: USB-C charging}
-    statement: A compliant 9 V 3 A USB-C PD source charges an idle board from 10 percent to normal full-charge termination in no more than 150 minutes at 20 to 25 degrees Celsius.
+    statement: A compliant 5 V 2 A USB source charges an idle board from 10 percent to normal full-charge termination in no more than 210 minutes at 20 to 25 degrees Celsius.
     criterion_ids: [POWER-CHARGE-10-FULL]
     test_ids: [TEST-POWER-CHARGE-002, TEST-V8-CHARGE-001]
   - id: POWER-CHARGE-003

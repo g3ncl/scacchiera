@@ -19,15 +19,16 @@ release authority. [[verification-evidence-model]] records the executable V0 str
 functional power specification adds bounded runtime, charge time, source fallback, and battery
 safety requirements after the original 500 mA architecture proved unsuitable.
 
-[[chessboard-quick-charge-architecture]] replaces that hub power input with [[tps25730s]],
-[[bq25638]], and a protected assembly based on [[inr-21700-m65a]]. This material design change has
-reopened the hub portions of V1 and [[v2-static-connectivity|V2]]. The lightbar and matrix evidence
-remains valid. No later gate may treat the former MCP73871 schematic or route as current evidence.
+[[commercial-power-subsystem-selection]] replaces the custom charger and raw-cell plan with
+[[pisugar3-plus]]. The purchased 18.5 Wh subsystem owns the cell, charging, protection,
+uninterrupted 5 V path, and I2C state reporting. This material change keeps the hub portions of V1
+and [[v2-static-connectivity|V2]] open until the hub begins at the regulated 5 V boundary. The
+lightbar and matrix evidence remains valid.
 
-[[quick-charge-module-evaluation]] identifies the 6.76 EUR [[rbs18634]] as the smallest charge and
-thermal test article. Its [[sw6106]] controller supports 4 A PD charging, but unpublished
-module-level NTC wiring, handover, protection, and revision details keep it outside the final hub
-BOM unless measurement and later qualification close those gaps.
+The earlier [[chessboard-quick-charge-architecture|custom PD architecture]] and
+[[quick-charge-module-evaluation|RBS18634 article]] remain historical evidence rather than active
+designs. The current open risks are enclosure ventilation, the module's seven-millimetre rail-width
+conflict, explicit cell-temperature gating, measured recharge time, and representative runtime.
 
 ## NFC Game Board: the reference project
 

@@ -8,6 +8,10 @@ tags:
 
 # Quick-charge module evaluation
 
+This evaluation is superseded by [[commercial-power-subsystem-selection]]. The RBS18634 is no
+longer the named V8 article because the selected [[pisugar3-plus]] includes the battery, UPS power
+path, telemetry, and cell transport evidence.
+
 Cheap 1S fast-charge boards exist. The most useful named candidate found for the chessboard is the
 6.76 EUR [[rbs18634]], based on [[sw6106]]. It negotiates USB-C PD, can request a voltage above
 5 V, and advertises up to 4 A cell charging. An ideal 4 A constant-current interval supplies 70

@@ -61,6 +61,8 @@ One [[wiki/source]] summary per ingested raw source. Factual, no interpretation.
 | [[pmp23456-reference-design]] | TI reference-design test report | 2026-07-26 |
 | [[sw6106-datasheet]] | component datasheet | 2026-07-26 |
 | [[rbs18634-datasheet]] | module product sheet | 2026-07-26 |
+| [[pisugar3-plus-manufacturer-docs]] | commercial UPS manufacturer documentation | 2026-07-26 |
+| [[955465-un38-3]] | battery UN 38.3 test report | 2026-07-26 |
 
 ## Entities
 
@@ -81,6 +83,7 @@ People, tools, orgs, repos. See [[wiki/entity]] pages.
 | [[tps25730s]] | 2 | 2026-07-26 |
 | [[sw6106]] | 2 | 2026-07-26 |
 | [[rbs18634]] | 2 | 2026-07-26 |
+| [[pisugar3-plus]] | 2 | 2026-07-26 |
 
 <!-- V1-COMPONENT-CATALOG:START -->
 ## V1 component datasheet sources
@@ -227,6 +230,7 @@ Ideas, patterns, techniques. See [[wiki/concept]] pages.
 | [[pin-diode-antenna-switching]]         | high       | 1            | 2026-07-24 |
 | [[jlcpcb-basic-part-sourcing]]          | medium     | 3            | 2026-07-25 |
 | [[usb-c-pd-fast-charging]]              | high       | 6            | 2026-07-26 |
+| [[commercial-battery-subsystem]]        | high       | 4            | 2026-07-26 |
 |                                         |            |              |            |
 
 ## Synthesis
@@ -242,3 +246,4 @@ Query answers filed back into the wiki. See [[wiki/synthesis]] pages.
 | [[v2-static-connectivity]] | How are schematic connectivity and routed boards proven equivalent? | 2026-07-26 |
 | [[chessboard-quick-charge-architecture]] | How can recharge time become much shorter than useful play time? | 2026-07-26 |
 | [[quick-charge-module-evaluation]] | Can a cheap purchased board de-risk quick charging? | 2026-07-26 |
+| [[commercial-power-subsystem-selection]] | Which purchased subsystem should own the battery and charging? | 2026-07-26 |

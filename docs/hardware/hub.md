@@ -1,7 +1,7 @@
 # Hub board
 
-The board that thinks and powers: WiFi MCU, ISO 15693 reader, battery power path, and every
-harness connector. It lives in the service volume under one 50 mm player rail
+The board that thinks and distributes power: WiFi MCU, ISO 15693 reader, regulated 5 V input,
+and every harness connector. It lives in the service volume under one 50 mm player rail
 ([functional/physical.md](../functional/physical.md)) and serves the whole of
 [functional/gameplay.md](../functional/gameplay.md) and
 [functional/interface.md](../functional/interface.md). Schematic in `hardware/pcb/hub.py`,
@@ -9,32 +9,29 @@ layout in `hardware/pcb/hub_layout.py`.
 
 ## Power
 
-The former passive Type-C sink and MCP73871 500 mA linear charger are superseded. The final target
-uses a TPS25730S autonomous sink to negotiate 5 V/3 A or 9 V/3 A, followed by a BQ25638 switching
-charger with an NVDC system power path. The target battery is a protected 1S assembly based on one
-6.5 Ah Molicel INR-21700-M65A cell, with its thermistor bonded to the cell and brought to the
-charger. The charge setting is 4 A when the PD contract, system demand, and cell temperature allow
-it. A lower-power source remains safe but charges more slowly.
+The hub receives regulated 5 V from the purchased PiSugar 3 Plus described in
+[power-subsystem.md](power-subsystem.md). PiSugar owns the cell, charger, battery protection,
+5 V conversion, charging connector, UPS handover, and battery telemetry. The custom hub contains no
+raw-cell connection and no USB charging circuit.
 
-The TPS63802 still makes 3V3 across the cell range. The light bars' 5 V still comes from a
-TPS61023 boost that true-disconnects when disabled, feeds a TPS2553 latch-off current limiter, and
-drives the pixel data line through an AHCT buffer at 5 V logic. Charger status and telemetry must
-support the low-battery save-and-shutdown behavior and report source-limited or
-temperature-limited charging.
+One buck converter makes 3.3 V for the MCU, reader, displays, and matrix. The exact converter remains
+an open V1 selection. The light bars use the managed 5 V rail directly through the TPS2553
+latch-off current limiter, with their data driven through an AHCT buffer at 5 V logic. This removes
+the former TPS61023 boost and its duplicate energy conversion.
 
-The 6.76 EUR SW6106 RBS18634 board in
-[quick-charge-test-article.md](quick-charge-test-article.md) is a battery and thermal test article,
-not the final power path. Its controller supports 4 A PD charging, but the module documentation
-does not prove NTC wiring, uninterrupted cable handover, or controlled revision. Those are measured
-unknowns rather than reasons to weaken the functional requirements.
+PiSugar shares I2C with the hub and reports source presence, battery voltage, estimated percentage,
+and control state. A separate cell-contact sensor and hardware interlock must disable charging
+outside 0 to 40 degrees Celsius because PiSugar reports charger-chip temperature rather than cell
+temperature. Until that interlock and its fail-safe behavior pass V1 through V8, the power system
+is not release-ready.
 
 ## MCU and slow control
 
-ESP32-C6-MINI-1U-N4: WiFi 6 for the browser client, native USB for charging-time debug, one SPI bus
+ESP32-C6-MINI-1U-N4: WiFi 6 for the browser client, native USB on a service-only interface, one SPI bus
 shared by the reader, both displays, and the matrix selection registers. A TCA9535 I2C expander
 carries every slow signal: the matrix latch (SEL_RCLK), reader reset, display DC and reset, LED
-rail enable, USB current select, charger status, LED fault, and the single button (polled, 10 k
-pullup, 2-pin connector).
+rail enable, LED fault, and the single button (polled, 10 k pullup, 2-pin connector). PiSugar
+telemetry and control remain directly on I2C rather than consuming expander pins.
 
 The pin map comes from datasheet v1.5 Table 3-1, not from the C3 module this replaced. The C6 is
 pin compatible with the C3-MINI series only on power, ground, EN and UART0: most GPIO numbers
@@ -76,20 +73,16 @@ stays balanced. RX taps the bus through 100 pF and 1 k into RXP, with RXN refere
 
 ## Interfaces
 
-All JST GH except the JST PH battery pair: the 7-pin matrix link (RF bus between grounds, 3V3,
-serial selection), two 7-pin display connectors (3V3 SPI plus DC and reset), two 4-pin light bar
-connectors chained through LED_RETURN, a 4-pin UART service connector, and the 2-pin button.
+All low-voltage harnesses use locking connectors: the 7-pin matrix link (RF bus between grounds,
+3V3, serial selection), two 7-pin display connectors (3V3 SPI plus DC and reset), two 4-pin light
+bar connectors chained through LED_RETURN, the PiSugar 5 V and I2C link, a 4-pin UART service
+connector, and the 2-pin button. There is no battery connector on the hub.
 
 ## Board
 
-110 x 46 mm, 2 layers, in the service volume under one player rail. Components are placed
-deterministically by functional zone (USB and charging, rails, MCU and expander, reader and its
-front end, edge connectors). Normal builds import the reviewed route in
-`hardware/pcb/routes/hub.ses`; `make pcb-hub-reroute` is the explicit command for producing a new
-Freerouting candidate. The USB shield tabs and recovery pads have deterministic routes, the
-TPS63802 and PN5180 exposed pads are grounded, and both-face ground pours are filled afterward.
-`make pcb-hub-drc` checks schematic parity and is clean: 0 violations, 0 unconnected, 0 parity
-issues.
+The target remains at most 110 x 46 mm, 2 layers, in the service volume under one player rail.
+The existing placement and reviewed route belong to the superseded charger design. They are
+historical evidence only until regenerated around the 5 V boundary and checked again at V2.
 
 ## Mounting
 
@@ -105,10 +98,6 @@ The 68 pF match value came from this bench; 220 pF would drag the system to 9 MH
 
 ## Cost
 
-The 16.21 EUR historical generated BOM belongs to the superseded MCP73871 hub. Recalculate the hub
-cost after the PD charger schematic and route pass V1 and V2. The RBS18634 test article costs
-6.76 EUR before shipping and is lab evidence, not part of the production BOM.
-
-Seven Extended lines go to JLCPCB, all of them genuinely reflow-only: J1 (USB-C), U1, U2, U3, U5,
-U4 and Y1. Everything else Extended is hand-fitted from `hub_hand_bom.csv`, including the 0402 C0G
-RF and timing capacitors and the 0.65 mm TSSOP expander, which removes three feeder changes.
+The historical generated BOM belongs to the superseded MCP73871 hub. Recalculate the custom hub
+cost after the simplified schematic and route pass V1 and V2. The PiSugar 3 Plus is a separately
+purchased subsystem and must be included in complete-product cost, not the JLCPCB BOM.

@@ -6,9 +6,10 @@ vault. The complete bound BOM was checked live again on 2026-07-25. Stock and pr
 time-sensitive.
 
 The hub selections and quotes in this register describe the last generated MCP73871 design. That
-hub is superseded by the USB-C PD redesign in [hub.md](hub.md), so none of its hub counts, costs,
-or order files are current release evidence. Update this register from the regenerated PD hub only
-after its V1 and V2 gates pass. Lightbar and matrix selections remain current.
+hub is superseded by the commercial 5 V subsystem boundary in [hub.md](hub.md), so none of its hub
+counts, costs, or order files are current release evidence. Update this register from the
+regenerated simplified hub only after its V1 and V2 gates pass. Lightbar and matrix selections
+remain current.
 
 `make pcb-fab` emits the upload pair `<board>_jlcpcb_bom.csv` and
 `<board>_jlcpcb_cpl.csv`, and rejects the export if their designators differ. The internal costed file is named

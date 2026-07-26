@@ -10,6 +10,10 @@ tags:
 
 # USB-C PD fast charging
 
+This was the custom-charger design considered before the project adopted a
+[[commercial-battery-subsystem]]. It remains useful research, but it is no longer the selected
+chessboard architecture.
+
 The chessboard's quick-charge architecture uses [[tps25730s]] to establish an explicit USB-C PD
 contract and [[bq25638]] to convert that power efficiently into a controlled single-cell charge
 while maintaining the system rail. This replaces the MCP73871 linear charger, whose USB mode caps

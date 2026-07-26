@@ -42,20 +42,19 @@ here only as interfaces, not as boards.
 - **Cost target:** 25 EUR (area-dominated fab around 15 EUR, plus 16 PIN diodes, shift
   registers, and passives).
 
-### 2. Hub board (controller and power)
+### 2. Hub board (controller and power distribution)
 
 - **Responsibility:** everything that thinks or powers. WiFi MCU running the game logic
   ([gameplay.md](../functional/gameplay.md) entirely, including clock, PGN storage, browser
-  client), the NFC reader IC with its matched front end driving the matrix RF bus, USB-C charging
-  of a 1-cell Li-ion battery with voltage monitoring for the low-battery shutdown behavior, 3.3 V
-  regulation, the PIN-diode reverse-bias supply, the single button, and the connectors fanning out
-  to every other surface.
+  client), the NFC reader IC with its matched front end driving the matrix RF bus, one regulated
+  5 V input, 3.3 V regulation, the PIN-diode reverse-bias supply, the independent cell-temperature
+  interlock, the single button, and the connectors fanning out to every other surface.
 - **Interfaces:** matrix board (RF feed, line select, bias); two display modules (shared bus,
-  I2C or SPI, decided at schematic time); two light bars (few-wire serial); button; USB-C;
-  battery.
+  I2C or SPI, decided at schematic time); two light bars (few-wire serial); button; PiSugar 5 V and
+  I2C; service-only debug.
 - **Envelope:** fits the service volume under one 50 mm player rail, conductive parts kept out of
   the play area per the read-budget rule.
-- **Cost target:** 30 EUR (MCU module, reader IC, charger, regulators, connectors).
+- **Cost target:** 25 EUR (MCU module, reader IC, buck regulator, safety interlock, connectors).
 
 ### 3. Light bar board (x2, one design)
 
@@ -82,23 +81,24 @@ for the same reason the display modules are: an order that forgets them is incom
   antenna PCB was considered and rejected: its radiation pattern is the one thing in this project
   that no ngspice test can validate, and per-attempt iteration costs a fabrication run rather than
   a euro.
-- **Battery**, one protected 1S assembly based on a Molicel INR-21700-M65A cell, with a bonded
-  thermistor and a locking connector rated for the 4 A charge path. The exact assembly and
-  connector remain open V1 selections.
+- **One PiSugar 3 Plus battery subsystem with its supplied 5000 mAh cell.** It provides the
+  charging inlet, protection, UPS power path, regulated 5 V output, and I2C telemetry. Its filed
+  assembly is about 65 x 57 x 9.22 mm and therefore requires the ventilated rear cassette defined
+  in [power-subsystem.md](power-subsystem.md), not the 50 mm player-rail service volume.
 
 ## Why this split
 
 - The matrix board is large but cheap and dumb; the hub is small but dense. Separating them means
   a controller respin never pays for 900 square centimeters of fab, and the big board has no
   fine-pitch assembly.
-- The functional spec already forces the split physically: the battery, shields, and hub must sit
-  under the rails, while the sensing plane must sit under the play area with nothing conductive
-  within 10 mm behind it.
+- The functional spec already forces the split physically: the hub and shields sit under the
+  rails, the commercial battery subsystem sits in a rear service cassette, and the sensing plane
+  stays free of conductive parts within its required clearance.
 - The light bars are separate because they live in a different mechanical position (behind the
   rail diffusers) and are trivially small; folding them into the hub would tie the hub's outline
   to the diffuser geometry.
-- Rough total per unit in customs parts and fab: about 65 EUR plus the two purchased display
-  modules.
+- Rough total per unit in custom parts and fab remains to be regenerated, with the PiSugar and two
+  display modules counted as purchased accessories.
 
 ## Build order
 

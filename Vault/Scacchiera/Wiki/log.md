@@ -317,3 +317,15 @@ does not publish its NTC wiring, schematic, complete BOM, dimensions, sustained 
 handover time, or revision control. Updated [[chessboard-quick-charge-architecture]],
 [[usb-c-pd-fast-charging]], [[overview]], and [[index]] without treating unknown module behavior as
 validated evidence.
+
+## [2026-07-26] decision | Select a commercial battery subsystem
+
+Filed the complete PiSugar 3 Plus product, I2C, safety, 3D, and 955465-cell UN 38.3 sources. Created
+[[pisugar3-plus-manufacturer-docs]], [[955465-un38-3]], [[pisugar3-plus]],
+[[commercial-battery-subsystem]], and [[commercial-power-subsystem-selection]].
+
+The selected boundary is a purchased 5,000 mAh UPS producing regulated 5 V with I2C state data.
+The custom TPS25730S/BQ25638 charger and RBS18634 test article are historical, not active designs.
+The manufacturer documents uninterrupted cable changes and an included transport-tested cell, but
+also expose two release obligations: the vendor assembly is 57 mm across a 50 mm rail, and its
+temperature register measures the charger IC rather than the cell. Neither issue is waived.

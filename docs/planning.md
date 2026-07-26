@@ -35,21 +35,23 @@ scoped test-article order. V0 through V9 permit a final-board order.
   reviewed functional sources by SHA-256. Forty-two numeric criteria in
   [hardware/criteria.yaml](hardware/criteria.yaml) record units, evidence, conditions, and margin.
   `hardware/tests/test_traceability.py` enforces source freshness, schema completeness, unique IDs,
-  and bidirectional requirement/criterion links. The 2026-07-26 revision adds runtime, USB-C PD
-  charge-time, fallback, protection, and temperature requirements. Evidence: 5 tests passed on
-  2026-07-26.
+  and bidirectional requirement/criterion links. The 2026-07-26 revision specifies runtime,
+  5 V/2 A charge-time, fallback, protection, and cell-temperature requirements without requiring
+  USB Power Delivery. Evidence: 5 tests passed on 2026-07-26.
 - [ ] V1 component and library proof: the former 59-part proof remains valid for the lightbar and
-  matrix, but the hub portion is reopened by the quick-charge redesign. The TPS25730S, BQ25638,
-  protected battery assembly, high-current connector, and changed support parts require exact
-  sourcing, immutable datasheets, library audit, ratings audit, and model classification before
-  this gate can pass again. Historical evidence follows:
+  matrix, but the hub portion is reopened by the new commercial 5 V boundary. The selected PiSugar
+  3 Plus manufacturer documents, I2C register map, safety instructions, STEP assembly, and supplied
+  cell UN 38.3 report are filed in the vault. The custom 3.3 V buck, cell-temperature interlock,
+  PiSugar harness, and changed support parts still require exact sourcing, immutable datasheets,
+  library audit, ratings audit, and model classification before this gate can pass again.
+  Historical evidence follows:
   [verification/v1-components.yaml](verification/v1-components.yaml) have exact supplier and order
   codes, dated availability, immutable manufacturer datasheets, per-part wiki ingestion, complete
   library and rating audits, declared model treatment, and no open document conflict. The audit
   replaced the lightbar LED and both matrix MOSFET selections rather than waiving conflicts.
   Evidence: 6 component-proof tests and 4 matrix vendor-model tests passed on 2026-07-25.
 - [ ] V2 connectivity and static electrical checks: the lightbar and matrix remain valid. The hub
-  schematic and route are superseded by the quick-charge requirements and must be regenerated and
+  schematic and route are superseded by the commercial 5 V boundary and must be regenerated and
   re-reviewed. Historical evidence follows: clean generation runs full SKiDL and KiCad ERC,
   imports reviewed deterministic routing sessions, and runs PCB DRC with schematic parity on all
   three boards. [verification/v2-static.yaml](verification/v2-static.yaml) records the four
@@ -99,8 +101,10 @@ against the functional requirement it serves.
 - [x] Matrix board schematic: `hardware/pcb/matrix.py`, ERC clean, BOM 4.80 EUR in parts, spec
   in [hardware/matrix.md](hardware/matrix.md).
 - [ ] Hub board schematic: the previous MCP73871 design in `hardware/pcb/hub.py` is superseded. It
-  must be replaced by the TPS25730S and BQ25638 USB-C PD power path and protected 6.5 Ah battery
-  assembly before this milestone closes again. Historical implementation and rationale are in
+  must accept the PiSugar 3 Plus regulated 5 V and I2C interface, generate 3.3 V with one buck,
+  distribute protected 5 V to the light bars, and independently inhibit charging outside the
+  qualified cell-temperature range before this milestone closes again. The subsystem boundary is
+  in [hardware/power-subsystem.md](hardware/power-subsystem.md), and hub rationale is in
   [hardware/hub.md](hardware/hub.md). Revised 2026-07-25: U4 to ESP32-C6-MINI-1U-N4 with the C6
   pin map from datasheet Table 3-1 (native USB moves to pins 17/18), Y1 to a stocked 3225
   27.12 MHz crystal with 15 pF loads, plus local module decoupling and IO9/EN recovery pads.
@@ -126,8 +130,10 @@ evidence is an analytical formula; it needs a passing simulation.
   vendor MOSFET models.
 - [ ] Hub board SPICE validation: the existing RF-only bench still drives the 16-cell bus
   through the PN5180 TX path; the selected loop's field peaks at 13.86 MHz at 60 mA per volt of
-  drive and preserves useful RF evidence, but it does not validate the replacement PD, charger,
-  battery, power path, or fault behavior. The 68 pF series match value came from this bench.
+  drive and preserves useful RF evidence, but it does not validate the replacement 5 V-to-3.3 V
+  buck, current limiter, cell-temperature interlock, startup, shutdown, or fault behavior. PiSugar
+  charge and handover behavior is measured at V8 rather than represented by an invented internal
+  model. The 68 pF series match value came from this bench.
 
 ### M4: PCB layout, as code (per board)
 
@@ -146,11 +152,8 @@ DoD: the layout is generated from code, DRC is clean, and it fits the board's en
   and the Q24 rail escape is deterministic as well. `make pcb-matrix-drc` is reproducibly clean:
   0 violations, 0 unconnected, and 0 schematic parity issues.
 - [ ] Hub board layout: the existing `hardware/pcb/hub_layout.py` route belongs to the superseded
-  charger and must be replaced after the quick-charge schematic is complete. Its historical
-  placement and both-face ground
-  pours. The reviewed route session is completed by deterministic USB shield, recovery-pad, and
-  ground stitching geometry. `make pcb-hub-drc` is reproducibly clean: 0 violations,
-  0 unconnected, and 0 schematic parity issues.
+  charger and must be replaced after the simplified 5 V-input schematic is complete. Its historical
+  placement, routing, and clean DRC are not current release evidence.
 
 ## Legacy definition of done for design generation
 
@@ -161,16 +164,19 @@ in [simulation-workflow.md](simulation-workflow.md).
 
 ## Status
 
-Revised 2026-07-26. V0 passes with the quick-charge requirements included. V1 and V2 are reopened
-for the hub because the former MCP73871 design cannot meet them. The lightbar and matrix retain their
-passing component, static, simulation, and layout evidence. The 10 uH matrix choke's ambiguous
-15 mA datasheet rating remains a V3 corner and fault-model concern, not a waived check.
+Revised 2026-07-26. V0 passes with ordinary 5 V/2 A charging and bounded recharge time included.
+The PiSugar 3 Plus is the selected purchased battery subsystem. V1 and V2 remain open for the hub
+because the former MCP73871 schematic and route do not implement this boundary. The lightbar and
+matrix retain their passing component, static, simulation, and layout evidence. The 10 uH matrix
+choke's ambiguous 15 mA datasheet rating remains a V3 corner and fault-model concern, not a waived
+check.
 
 No board is authorized for a test-article order until V3 through V7 pass. Firmware and the companion
 app have not started, so V5 and V6 remain open.
 
-The named V8 charge article is the 6.76 EUR MakerMind RBS18634 SW6106 module described in
-[hardware/quick-charge-test-article.md](hardware/quick-charge-test-article.md). It can measure the
-M65A charge-rate, temperature, NTC, and cable-handover risks without fabricating the final hub. It
-does not close V1 or replace the final NVDC path because its module BOM, NTC wiring, protection
-thresholds, sustained rating, dimensions, and revision control are unpublished.
+The named V8 article is the exact production-intent PiSugar 3 Plus and supplied cell described in
+[hardware/power-subsystem.md](hardware/power-subsystem.md). V8 must measure charge time, runtime,
+cable handover, thermals, I2C behavior, and NFC performance in the representative ventilated
+enclosure. The module does not measure cell temperature, so an independent fail-safe charge
+interlock remains mandatory and open. No purchase or test-article order is authorized until V3
+through V7 pass.
