@@ -30,7 +30,9 @@ The earlier [[chessboard-quick-charge-architecture|custom PD architecture]] and
 designs. The current open risks are enclosure ventilation, the module's seven-millimetre rail-width
 conflict, measured recharge time, and representative runtime. The selected
 [[fail-safe-cell-temperature-window]] uses a wired thermistor and analog comparators so firmware
-cannot override the qualified charge range.
+cannot override the qualified charge range. Hub L1 is the fully documented [[nr6045s4r7mt]];
+the earlier [[swpa5045s4r7mt]] catalog binding is rejected because its claimed MPN is absent from
+the manufacturer series table.
 
 ## NFC Game Board: the reference project
 

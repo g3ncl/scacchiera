@@ -14,7 +14,7 @@ outputs wire together and directly enable [[ap22811aw5-7]], so firmware cannot f
 the analog window is false.
 
 The 10 kohm sensor bias and existing E96 resistor values produce conservative nominal trip points
-near 8 degrees Celsius and 34 degrees Celsius. This narrower window absorbs thermistor, comparator,
+near 5 degrees Celsius and 34 degrees Celsius. This narrower window absorbs thermistor, comparator,
 and resistor error while staying inside the manufacturer's 0 to 40 degree operating boundary. An
 open sensor reads cold and a shorted sensor reads hot, so either wiring fault disables the input.
 

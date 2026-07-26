@@ -17,6 +17,6 @@ sheet permits 2.2 to 10 uH and requires adequate saturation and RMS current marg
 [mpn::AP63203WU-7] [order_code::C780769] [output_v::3.3] [output_a::2]
 [package::TSOT-23-6]
 
-The selected 4.7 uH [[swpa5045s4r7mt]] remains inside the allowed range, with 5 A saturation and
-3.2 A thermal current ratings. The fixed-output part eliminates the former feedback divider and
+The selected 4.7 uH [[nr6045s4r7mt]] remains inside the allowed range, with 4.97 A minimum
+saturation and 3.3 A minimum thermal current ratings. The fixed-output part eliminates the former feedback divider and
 the buck-boost converter's second switch node.

@@ -68,6 +68,7 @@ One [[wiki/source]] summary per ingested raw source. Factual, no interpretation.
 | [[tlv7042-datasheet]] | component datasheet | 2026-07-26 |
 | [[ntcle317e4103sba-datasheet]] | component datasheet | 2026-07-26 |
 | [[swpa5045s4r7mt-datasheet]] | component datasheet | 2026-07-26 |
+| [[nr6045s4r7mt-datasheet]] | component datasheet | 2026-07-26 |
 
 ## Entities
 
@@ -94,6 +95,7 @@ People, tools, orgs, repos. See [[wiki/entity]] pages.
 | [[tlv7042]] | 1 | 2026-07-26 |
 | [[ntcle317e4103sba]] | 1 | 2026-07-26 |
 | [[swpa5045s4r7mt]] | 1 | 2026-07-26 |
+| [[nr6045s4r7mt]] | 1 | 2026-07-26 |
 
 <!-- V1-COMPONENT-CATALOG:START -->
 ## V1 component datasheet sources

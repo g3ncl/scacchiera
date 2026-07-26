@@ -98,14 +98,17 @@ def test_hub_connectors_and_usb_use_the_reviewed_pin_order() -> None:
     )
     assert _pin_map(hub, "J9", 4) == ("3V3", "GND", "UART_TX", "UART_RX")
     assert _pin_map(hub, "J10", 2) == ("BUTTON_N", "GND")
+    assert _pin_map(hub, "J2", 2) == ("CHARGE_5V", "GND")
+    assert _pin_map(hub, "J3", 4) == ("PISUGAR_5V", "GND", "I2C_SCL", "I2C_SDA")
+    assert _pin_map(hub, "J11", 2) == ("THERM_SENSE", "GND")
 
     expected_usb = {
         "A1": "GND", "A12": "GND", "B1": "GND", "B12": "GND",
-        "A4": "USB_VBUS_RAW", "A9": "USB_VBUS_RAW",
-        "B4": "USB_VBUS_RAW", "B9": "USB_VBUS_RAW",
+        "A4": "USB_VBUS", "A9": "USB_VBUS",
+        "B4": "USB_VBUS", "B9": "USB_VBUS",
         "A5": "USB_CC1", "B5": "USB_CC2",
-        "A6": "USB_D+", "B6": "USB_D+",
-        "A7": "USB_D-", "B7": "USB_D-",
+        "A6": "__NOCONNECT", "B6": "__NOCONNECT",
+        "A7": "__NOCONNECT", "B7": "__NOCONNECT",
         "A8": "__NOCONNECT", "B8": "__NOCONNECT", "SH": "USB_SHIELD",
     }
     assert {pin: _net(hub, "J1", pin) for pin in expected_usb} == expected_usb
@@ -114,7 +117,8 @@ def test_hub_connectors_and_usb_use_the_reviewed_pin_order() -> None:
 def test_startup_defaults_exposed_pads_and_recovery_are_defined() -> None:
     hub = build_hub()
     expected_resistors = {
-        "R11": ({"POWER_EN", "GND"}, "1M"),
+        "R12": ({"CHARGE_TEMP_OK", "USB_VBUS"}, "100k"),
+        "R15": ({"CHARGE_INPUT_FAULT_N", "3V3"}, "100k"),
         "R19": ({"LED_DATA", "GND"}, "100k"),
         "R20": ({"MCU_EN", "3V3"}, "10k"),
         "R21": ({"I2C_SCL", "3V3"}, "4.7k"),
@@ -131,8 +135,25 @@ def test_startup_defaults_exposed_pads_and_recovery_are_defined() -> None:
         assert str(part.value) == value
 
     assert _net(hub, "U4", "8") == "MCU_EN"
-    assert _net(hub, "U2", "11") == "GND"
     assert _net(hub, "U3", "41") == "GND"
     assert (_net(hub, "TP1", "1"), _net(hub, "TP2", "1"), _net(hub, "TP3", "1")) == (
         "I2C_SDA", "MCU_EN", "GND"
     )
+
+
+def test_power_boundary_and_temperature_gate_are_hardware_defined() -> None:
+    hub = build_hub()
+    assert _pin_map(hub, "U1", 5) == (
+        "CHARGE_5V", "GND", "CHARGE_INPUT_FAULT_N", "CHARGE_TEMP_OK", "USB_VBUS"
+    )
+    assert _pin_map(hub, "U2", 8) == (
+        "CHARGE_TEMP_OK", "THERM_SENSE", "THERM_COLD_REF", "GND",
+        "THERM_SENSE", "THERM_HOT_REF", "CHARGE_TEMP_OK", "USB_VBUS",
+    )
+    assert _pin_map(hub, "U5", 6) == (
+        "3V3", "PISUGAR_5V", "PISUGAR_5V", "GND", "BUCK_SW", "BUCK_BST"
+    )
+    assert _pin_map(hub, "L1", 2) == ("BUCK_SW", "3V3")
+    assert _net(hub, "U4", "5") == "TEMP_SENSE_ADC"
+    assert _net(hub, "U4", "17") == "__NOCONNECT"
+    assert _net(hub, "U4", "18") == "__NOCONNECT"

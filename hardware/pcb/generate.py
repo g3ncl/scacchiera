@@ -8,6 +8,7 @@ from skidl import Circuit
 
 from hardware.pcb.bom import missing_manufacturer_parts, write_bom
 from hardware.pcb.erc import add_reviewed_no_connects, run_reviewed_erc
+from hardware.pcb.hub import NO_CONNECTS as HUB_NO_CONNECTS
 from hardware.pcb.hub import build_hub
 from hardware.pcb.lightbar import build_lightbar
 from hardware.pcb.matrix import build_matrix
@@ -27,12 +28,9 @@ SCHEMATIC_SEEDS = {"lightbar": 0, "matrix": 6, "hub": 3}
 NO_CONNECTS: dict[str, frozenset[str]] = {
     "matrix": frozenset({"U2:9"}),
     "hub": frozenset(
-        {
-            "J1:A8", "J1:B8", "J8:4", "SW1:3",
-            *(f"U3:{pin}" for pin in (2, 11, 14, 20, 23, 24, 31, 32, 33, 34, 35, 40)),
-            *(f"U4:{pin}" for pin in (4, 5, 7, 9, 10, 15, 16, 19, 20, 21, 32, 33, 34, 35)),
-            *(f"U6:{pin}" for pin in (1, 18, 19, 20)),
-        }
+        f"{reference}:{pin}"
+        for reference, pins in HUB_NO_CONNECTS.items()
+        for pin in pins
     ),
 }
 

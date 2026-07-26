@@ -17,12 +17,13 @@ The product's power-only USB-C inlet presents passive Type-C sink resistors and 
 qualified fixed 5 V/2 A adapter. AP22811AW5-7 gates that input to the PiSugar 5 V pad and adds
 current limiting, short-circuit protection, output discharge, thermal protection, and reverse
 current blocking. Its enable is the wired result of both TLV7042DGKR comparisons around a
-cell-bonded NTCLE317E4103SBA sensor. A 10 kohm sensor bias and 39k/100k and 150k/100k reference
-dividers produce conservative nominal cold and hot trips near 8 and 34 degrees Celsius. An open
+cell-bonded NTCLE317E4103SBA sensor. A 10 kohm sensor bias, a 39k/100k cold reference, and a
+300k/200k hot reference made from existing 100k resistors produce conservative nominal trips near
+5 and 34 degrees Celsius. An open
 sensor trips cold and a shorted sensor trips hot. Firmware receives a divided sensor voltage for
 reporting but has no path that can override the cutoff.
 
-AP63203WU-7 and a 4.7 uH SWPA5045S4R7MT make 3.3 V from PiSugar's managed 5 V. The fixed-output
+AP63203WU-7 and a 4.7 uH NR6045S4R7MT make 3.3 V from PiSugar's managed 5 V. The fixed-output
 buck uses the data sheet's 10 uF input, two 22 uF output, and 100 nF bootstrap network. The light
 bars use managed 5 V directly through the TPS2553 latch-off current limiter, with their data driven
 through an AHCT buffer at 5 V logic. This removes the former TPS63802 buck-boost, TPS61023 boost,
@@ -43,16 +44,17 @@ telemetry and control remain directly on I2C rather than consuming expander pins
 The pin map comes from datasheet v1.5 Table 3-1, not from the C3 module this replaced. The C6 is
 pin compatible with the C3-MINI series only on power, ground, EN and UART0: most GPIO numbers
 differ. Native USB pins 17 and 18 are unused because the external USB-C inlet is power-only.
-SPI sits on the FSPI-native pins (SCLK on IO6, MOSI on IO7, MISO on IO2) so the bus avoids the GPIO
-matrix. I2C stays on pins 22 and 23 because IO8 and IO9 are the C6 boot strapping pins and the
+IO2 provides ADC1_CH2 for independent cell-temperature telemetry. SPI uses nearby right-edge GPIOs
+through the GPIO matrix to keep the reader route short. I2C stays on pins 22 and 23 because IO8 and
+IO9 are the C6 boot strapping pins and the
 4.7 k bus pullups hold them high for SPI boot, which also makes IO9 the download-mode recovery pin.
 IO15 is left unused because it is the JTAG-source strapping pin.
 
 C27 (10 uF) and C28 (100 nF) decouple the module locally at pin 3: WiFi TX peaks at 382 mA
 (Table 6-4) and the regulator's own output capacitors are centimetres away. TP1, TP2 and TP3 expose
 IO9, EN and ground, because the single button sits behind the polled expander and cannot hold IO9
-low at reset; shorting TP1 to TP3 and pulsing TP2 forces joint download boot if firmware ever
-breaks the USB peripheral.
+low at reset; shorting TP1 to TP3 and pulsing TP2 forces joint download boot for recovery through
+the UART service connector.
 
 The module carries an external antenna connector rather than a PCB antenna, which keeps it at
 12.5 mm and needs no copper keepout. The antenna itself is a purchased accessory, not a board part:
@@ -90,7 +92,8 @@ the 2-pin button. There is no battery connector on the hub.
 
 The target remains at most 110 x 46 mm, 2 layers, in the service volume under one player rail.
 The existing placement and reviewed route belong to the superseded charger design. They are
-historical evidence only until regenerated around the 5 V boundary and checked again at V2.
+historical evidence only until regenerated around the 5 V boundary and checked again at V2. The
+current SKiDL schematic implements the new boundary and its focused static connectivity tests pass.
 
 ## Mounting
 

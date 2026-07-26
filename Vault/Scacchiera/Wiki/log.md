@@ -341,3 +341,17 @@ The analog window uses only existing E96 resistor values and nominally permits c
 8 to 34 degrees Celsius. This deliberate inner guard band absorbs component error inside the
 PiSugar manufacturer's 0 to 40 degree operating range. Open and short sensor wiring both disable
 charging. Created [[fail-safe-cell-temperature-window]] and updated [[overview]] and [[index]].
+
+## [2026-07-26] design | Implement the commercial power boundary
+
+Replaced the superseded charger and boost tree in the authoritative hub schematic with the
+power-only USB-C inlet, [[tlv7042]] temperature gate, [[ap22811aw5-7]] protected PiSugar input,
+PiSugar 5 V and I2C return, [[ap63203wu-7]] 3.3 V buck, and direct protected lightbar supply. IO2
+now measures the divided thermistor voltage while UART remains the recovery interface.
+
+The earlier [[swpa5045s4r7mt]] selection failed a manufacturer-table cross-check before binding:
+the claimed MPN is absent from the filed series data. Filed and bound [[nr6045s4r7mt]] instead,
+with a data-sheet-derived footprint and documented current, saturation, resistance, and thermal
+margins. Corrected the nominal cold threshold from the earlier estimate to about 5 degrees
+Celsius. Five focused static connectivity tests pass; generated-board ERC, BOM, V1 audit, routing,
+and full V2 closure continue in their applicable phases.

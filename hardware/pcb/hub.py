@@ -1,10 +1,10 @@
-"""Hub board: power, WiFi MCU, ISO 15693 reader, and every external interface.
+"""Hub board: protected power input, WiFi MCU, ISO 15693 reader, and interfaces.
 
-The power tree, MCU pin map, and peripheral rails are carried over from the
-previous hub generation, which cleared ERC and review before the rebuild: USB-C
-into an MCP73871 power-path charger, one protected Li-ion cell, a TPS63802
-buck-boost making 3V3, and a gated TPS61023 5 V boost with a TPS2553 limiter
-feeding the light bars through a 5 V data buffer.
+The product USB-C input passes through an independent cell-temperature gate to
+the PiSugar 3 Plus. That purchased subsystem owns the lithium cell, charging,
+protection, UPS transfer, and battery telemetry. Its managed 5 V output returns
+to this board, where one fixed-output buck makes 3V3 and a TPS2553 protects the
+light bars.
 
 What changed with the row-column matrix: the four quadrant harnesses and their
 74HC139 decoder collapse into one 7-pin matrix link (RF bus between grounds,
@@ -24,19 +24,17 @@ from hardware.pcb.parts import (
     component,
     esp32_c6_mini_1u,
     mounting_hole,
-    tps63802,
     two_pin,
     usb_c_receptacle,
 )
 
 
 NO_CONNECTS: dict[str, tuple[str, ...]] = {
-    "J1": ("A8", "B8"),
+    "J1": ("A6", "A7", "A8", "B6", "B7", "B8"),
     "J8": ("4",),
-    "SW1": ("3",),
     "U3": ("2", "11", "14", "20", "23", "24", "31", "32", "33", "34", "35", "40"),
-    "U4": ("4", "5", "7", "9", "10", "15", "16", "19", "20", "21", "32", "33", "34", "35"),
-    "U6": ("1", "18", "19", "20"),
+    "U4": ("4", "7", "9", "10", "15", "16", "17", "18", "19", "20", "21", "32", "33", "34", "35"),
+    "U6": ("1", "13", "14", "15", "18", "19", "20"),
 }
 
 
@@ -76,20 +74,54 @@ def _rc(circuit: Circuit, ref: str, value: str, mpn: str, cost: float = 0.002) -
     return two_pin(circuit, ref, value, footprint, mpn=mpn, unit_cost_eur=cost)
 
 
-def _charger(circuit: Circuit) -> Part:
-    names = (
-        "OUT", "VPCC", "SEL", "PROG2", "THERM", "PG_N", "STAT2", "STAT1_LBO", "TE_N", "VSS",
-        "VSS", "PROG3", "PROG1", "VBAT", "VBAT", "VBAT_SENSE", "CE", "IN", "IN", "OUT", "VSS",
-    )
+def _charge_input_switch(circuit: Circuit) -> Part:
     return component(
         circuit,
         "U1",
-        "MCP73871T-2CCI/ML",
-        "Package_DFN_QFN:QFN-20-1EP_4x4mm_P0.5mm_EP2.6x2.6mm",
-        tuple(PinDefinition(str(index), name) for index, name in enumerate(names, start=1)),
-        mpn="MCP73871T-2CCI/ML",
-        description="USB power-path Li-ion charger",
-        unit_cost_eur=1.20,
+        "AP22811AW5-7",
+        "Package_TO_SOT_SMD:SOT-23-5",
+        tuple(
+            PinDefinition(str(index), name)
+            for index, name in enumerate(("OUT", "GND", "FLG_N", "EN", "IN"), start=1)
+        ),
+        mpn="AP22811AW5-7",
+        description="Temperature-gated, current-limited PiSugar input switch",
+        unit_cost_eur=0.20,
+    )
+
+
+def _temperature_comparator(circuit: Circuit) -> Part:
+    return component(
+        circuit,
+        "U2",
+        "TLV7042DGKR",
+        "Package_SO:VSSOP-8_3x3mm_P0.65mm",
+        tuple(
+            PinDefinition(str(index), name)
+            for index, name in enumerate(
+                ("OUTA", "INA-", "INA+", "GND", "INB+", "INB-", "OUTB", "VCC"),
+                start=1,
+            )
+        ),
+        mpn="TLV7042DGKR",
+        description="Fail-safe cold and hot cell-temperature window",
+        unit_cost_eur=0.35,
+    )
+
+
+def _buck(circuit: Circuit) -> Part:
+    return component(
+        circuit,
+        "U5",
+        "AP63203WU-7",
+        "Package_TO_SOT_SMD:SOT-23-6",
+        tuple(
+            PinDefinition(str(index), name)
+            for index, name in enumerate(("FB", "EN", "VIN", "GND", "SW", "BST"), start=1)
+        ),
+        mpn="AP63203WU-7",
+        description="Fixed 3.3 V, 2 A synchronous buck converter",
+        unit_cost_eur=0.35,
     )
 
 
@@ -109,20 +141,6 @@ def _pn5180(circuit: Circuit) -> Part:
         mpn="PN5180A0HN/C3E",
         description="ISO 15693 and NFC reader frontend",
         unit_cost_eur=3.80,
-    )
-
-
-def _led_boost(circuit: Circuit) -> Part:
-    names = ("VIN", "EN", "FB", "GND", "VOUT", "SW")
-    return component(
-        circuit,
-        "U5",
-        "TPS61023DRLR",
-        "Package_TO_SOT_SMD:Texas_R-PDSO-N6_DRL-6",
-        tuple(PinDefinition(str(index), name) for index, name in enumerate(names, start=1)),
-        mpn="TPS61023DRLR",
-        description="True-disconnect 5 V LED boost",
-        unit_cost_eur=0.60,
     )
 
 
@@ -162,39 +180,13 @@ def _build_power(circuit: Circuit, nets: dict[str, Net]) -> None:
     for pin in ("A1", "A12", "B1", "B12"):
         _connect(nets["GND"], usb, pin)
     for pin in ("A4", "A9", "B4", "B9"):
-        _connect(nets["USB_VBUS_RAW"], usb, pin)
-    for pin in ("A6", "B6"):
-        _connect(nets["USB_D+"], usb, pin)
-    for pin in ("A7", "B7"):
-        _connect(nets["USB_D-"], usb, pin)
+        _connect(nets["USB_VBUS"], usb, pin)
     _no_connect(circuit, usb, NO_CONNECTS["J1"])
     for index, pin in (("1", "A5"), ("2", "B5")):
         rd = _rc(circuit, f"R{index}", "5.1k", "0603WAF5101T5E")
         _connect(_pin_net(circuit, f"USB_CC{index}", usb, pin), rd, "1")
         _connect(nets["GND"], rd, "2")
 
-    usb_fuse = two_pin(
-        circuit, "F1", "500mA resettable", "Fuse:Fuse_1206_3216Metric",
-        mpn="MF-MSMF050-2", unit_cost_eur=0.10,
-    )
-    _connect(nets["USB_VBUS_RAW"], usb_fuse, "1")
-    _connect(nets["USB_VBUS"], usb_fuse, "2")
-    usb_esd = component(
-        circuit,
-        "U9",
-        "USBLC6-2SC6",
-        "Package_TO_SOT_SMD:SOT-23-6",
-        tuple(PinDefinition(str(index), name) for index, name in enumerate(("D+", "GND", "D-", "D-", "VBUS", "D+"), start=1)),
-        mpn="USBLC6-2SC6",
-        description="Low-capacitance USB ESD protection",
-        unit_cost_eur=0.15,
-    )
-    for pin in ("1", "6"):
-        _connect(nets["USB_D+"], usb_esd, pin)
-    for pin in ("3", "4"):
-        _connect(nets["USB_D-"], usb_esd, pin)
-    _connect(nets["GND"], usb_esd, "2")
-    _connect(nets["USB_VBUS"], usb_esd, "5")
     shield_resistor = _rc(circuit, "R3", "1M", "0603WAF1004T5E")
     shield_capacitor = two_pin(
         circuit, "C12", "4.7n 1kV", "Capacitor_SMD:C_1206_3216Metric",
@@ -205,184 +197,108 @@ def _build_power(circuit: Circuit, nets: dict[str, Net]) -> None:
         _connect(shield, part, "1")
         _connect(nets["GND"], part, "2")
 
-    charger = _charger(circuit)
-    for pin in ("1", "20"):
-        _connect(nets["SYS"], charger, pin)
-    for pin in ("3", "9", "10", "11", "21"):
-        _connect(nets["GND"], charger, pin)
-    for pin in ("14", "15", "16"):
-        _connect(nets["BAT+"], charger, pin)
-    for pin in ("18", "19"):
-        _connect(nets["USB_VBUS"], charger, pin)
-    _connect(nets["USB_500MA"], charger, "4")
-    _connect(nets["3V3"], charger, "17")
-    for pin, name in (("6", "CHG_PG_N"), ("7", "CHG_STAT2"), ("8", "CHG_STAT1_N")):
-        _connect(nets[name], charger, pin)
-    vpcc = _pin_net(circuit, "CHARGER_VPCC", charger, "2")
-    vpcc_top = _rc(circuit, "R4", "330k 1%", "0603WAF3303T5E")
-    vpcc_bottom = _rc(circuit, "R5", "110k 1%", "RC0603FR-07110KL")
-    _connect(nets["USB_VBUS"], vpcc_top, "1")
-    _connect(vpcc, vpcc_top, "2")
-    _connect(vpcc, vpcc_bottom, "1")
-    _connect(nets["GND"], vpcc_bottom, "2")
-    for ref, pin, value, mpn in (
-        ("R6", "12", "24.9k 1%", "0603WAF2492T5E"),
-        ("R7", "13", "2.0k", "0603WAF2001T5E"),
+    # The NTC divider rises when the sensor is cold. Comparator A asserts low
+    # above the 8 C reference; comparator B asserts low below the 35 C reference.
+    # Their wired open-drain output is therefore high only inside the window.
+    comparator = _temperature_comparator(circuit)
+    _connect(nets["THERM_SENSE"], comparator, "2")
+    _connect(nets["THERM_COLD_REF"], comparator, "3")
+    _connect(nets["GND"], comparator, "4")
+    _connect(nets["THERM_SENSE"], comparator, "5")
+    _connect(nets["THERM_HOT_REF"], comparator, "6")
+    for pin in ("1", "7"):
+        _connect(nets["CHARGE_TEMP_OK"], comparator, pin)
+    _connect(nets["USB_VBUS"], comparator, "8")
+
+    therm_pullup = _rc(circuit, "R4", "10k", "0603WAF1002T5E")
+    _connect(nets["USB_VBUS"], therm_pullup, "1")
+    _connect(nets["THERM_SENSE"], therm_pullup, "2")
+    cold_top = _rc(circuit, "R5", "39k 1%", "0603WAF3902T5E")
+    cold_bottom = _rc(circuit, "R6", "100k 1%", "0603WAF1003T5E")
+    _connect(nets["USB_VBUS"], cold_top, "1")
+    _connect(nets["THERM_COLD_REF"], cold_top, "2")
+    _connect(nets["THERM_COLD_REF"], cold_bottom, "1")
+    _connect(nets["GND"], cold_bottom, "2")
+
+    hot_nodes = [Net(f"THERM_HOT_TOP_{index}", circuit=circuit) for index in (1, 2)]
+    hot_top_nets = (nets["USB_VBUS"], *hot_nodes, nets["THERM_HOT_REF"])
+    for hot_index in range(3):
+        resistor = _rc(circuit, f"R{hot_index + 7}", "100k 1%", "0603WAF1003T5E")
+        _connect(hot_top_nets[hot_index], resistor, "1")
+        _connect(hot_top_nets[hot_index + 1], resistor, "2")
+    hot_mid = Net("THERM_HOT_BOTTOM_MID", circuit=circuit)
+    for ref, first, second in (
+        ("R10", nets["THERM_HOT_REF"], hot_mid),
+        ("R11", hot_mid, nets["GND"]),
     ):
-        resistor = _rc(circuit, ref, value, mpn)
-        _connect(_pin_net(circuit, f"CHARGER_PROG{pin}", charger, pin), resistor, "1")
-        _connect(nets["GND"], resistor, "2")
-    for ref, name in (("R8", "CHG_PG_N"), ("R9", "CHG_STAT2"), ("R10", "CHG_STAT1_N")):
-        pullup = _rc(circuit, ref, "10k", "0603WAF1002T5E")
-        _connect(nets["3V3"], pullup, "1")
-        _connect(nets[name], pullup, "2")
-    for ref, name, value, mpn in (
-        ("C13", "USB_VBUS", "4.7u 10V", "CL21A475KAQNNNE"),
-        ("C14", "SYS", "10u 10V", "CL21A106KAYNNNE"),
-        ("C15", "BAT+", "4.7u 10V", "CL21A475KAQNNNE"),
+        resistor = _rc(circuit, ref, "100k 1%", "0603WAF1003T5E")
+        _connect(first, resistor, "1")
+        _connect(second, resistor, "2")
+
+    gate_pullup = _rc(circuit, "R12", "100k", "0603WAF1003T5E")
+    _connect(nets["USB_VBUS"], gate_pullup, "1")
+    _connect(nets["CHARGE_TEMP_OK"], gate_pullup, "2")
+    switch = _charge_input_switch(circuit)
+    _connect(nets["CHARGE_5V"], switch, "1")
+    _connect(nets["GND"], switch, "2")
+    _connect(nets["CHARGE_INPUT_FAULT_N"], switch, "3")
+    _connect(nets["CHARGE_TEMP_OK"], switch, "4")
+    _connect(nets["USB_VBUS"], switch, "5")
+
+    for ref, name, value, footprint, mpn in (
+        ("C13", "USB_VBUS", "1u 10V", "Capacitor_SMD:C_0603_1608Metric", "CL10A105KB8NNNC"),
+        ("C14", "CHARGE_5V", "10u 10V", "Capacitor_SMD:C_0805_2012Metric", "CL21A106KAYNNNE"),
+        ("C15", "CHARGE_5V", "100n", "Capacitor_SMD:C_0402_1005Metric", "CL05B104KO5NNNC"),
+        ("C16", "USB_VBUS", "100n", "Capacitor_SMD:C_0402_1005Metric", "CL05B104KO5NNNC"),
     ):
-        capacitor = two_pin(
-            circuit, ref, value, "Capacitor_SMD:C_0805_2012Metric", mpn=mpn, unit_cost_eur=0.04
-        )
+        capacitor = two_pin(circuit, ref, value, footprint, mpn=mpn, unit_cost_eur=0.04)
         _connect(nets[name], capacitor, "1")
         _connect(nets["GND"], capacitor, "2")
 
-    battery = component(
-        circuit,
-        "J2",
-        "B2B-PH-K-S(LF)(SN)",
-        "Connector_JST:JST_PH_B2B-PH-K_1x02_P2.00mm_Vertical",
-        (PinDefinition("1", "BAT+"), PinDefinition("2", "GND")),
-        mpn="B2B-PH-K-S(LF)(SN)",
-        description="Battery connector with Adafruit polarity",
-        unit_cost_eur=0.15,
-    )
-    _connect(nets["BAT_RAW"], battery, "1")
-    _connect(nets["GND"], battery, "2")
-    battery_protection = component(
-        circuit,
-        "Q1",
-        "DMP2035U-7",
-        "Package_TO_SOT_SMD:SOT-23",
-        (PinDefinition("1", "G"), PinDefinition("2", "S"), PinDefinition("3", "D")),
-        mpn="DMP2035U-7",
-        description="Battery reverse-polarity protection",
-        unit_cost_eur=0.20,
-    )
-    _connect(nets["GND"], battery_protection, "1")
-    _connect(nets["BAT+"], battery_protection, "2")
-    _connect(nets["BAT_RAW"], battery_protection, "3")
-    therm = component(
-        circuit,
-        "J3",
-        "B2B-PH-K-S(LF)(SN)",
-        "Connector_JST:JST_PH_B2B-PH-K_1x02_P2.00mm_Vertical",
-        (PinDefinition("1", "THERM"), PinDefinition("2", "GND")),
-        mpn="B2B-PH-K-S(LF)(SN)",
-        description="External cell thermistor connector",
-        unit_cost_eur=0.15,
-    )
-    therm_net = _pin_net(circuit, "THERM", charger, "5")
-    _connect(therm_net, therm, "1")
-    _connect(nets["GND"], therm, "2")
+    adc_top = _rc(circuit, "R13", "1M", "0603WAF1004T5E")
+    adc_bottom = _rc(circuit, "R14", "1M", "0603WAF1004T5E")
+    _connect(nets["THERM_SENSE"], adc_top, "1")
+    _connect(nets["TEMP_SENSE_ADC"], adc_top, "2")
+    _connect(nets["TEMP_SENSE_ADC"], adc_bottom, "1")
+    _connect(nets["GND"], adc_bottom, "2")
+    adc_cap = _rc(circuit, "C17", "100n", "CL05B104KO5NNNC")
+    _connect(nets["TEMP_SENSE_ADC"], adc_cap, "1")
+    _connect(nets["GND"], adc_cap, "2")
+    fault_pullup = _rc(circuit, "R15", "100k", "0603WAF1003T5E")
+    _connect(nets["3V3"], fault_pullup, "1")
+    _connect(nets["CHARGE_INPUT_FAULT_N"], fault_pullup, "2")
 
-    power_switch = component(
-        circuit,
-        "SW1",
-        "POWER",
-        "Button_Switch_SMD:SW_SPDT_CK_JS102011SAQN",
-        (PinDefinition("1", "POWER_EN"), PinDefinition("2", "SYS"), PinDefinition("3", "OFF")),
-        mpn="JS102011SAQN",
-        description="Battery operation enable switch",
-        unit_cost_eur=0.25,
-    )
-    _connect(nets["POWER_EN"], power_switch, "1")
-    _connect(nets["SYS"], power_switch, "2")
-    _no_connect(circuit, power_switch, NO_CONNECTS["SW1"])
-    power_enable_pull = _rc(circuit, "R11", "1M", "0603WAF1004T5E")
-    _connect(nets["POWER_EN"], power_enable_pull, "1")
-    _connect(nets["GND"], power_enable_pull, "2")
-    usb_override = component(
-        circuit,
-        "D1",
-        "BAT54H",
-        "Diode_SMD:D_SOD-323",
-        (PinDefinition("1", "K"), PinDefinition("2", "A")),
-        mpn="BAT54H",
-        description="USB power-on override",
-        unit_cost_eur=0.05,
-    )
-    _connect(nets["POWER_EN"], usb_override, "1")
-    _connect(nets["USB_VBUS"], usb_override, "2")
-
-    regulator = tps63802(circuit, "U2")
-    for pin in ("2", "3", "8", "11"):
-        _connect(nets["GND"], regulator, pin)
-    _connect(nets["SYS"], regulator, "10")
-    _connect(nets["POWER_EN"], regulator, "1")
-    _connect(nets["3V3"], regulator, "6")
-    buck_pg = _pin_net(circuit, "BUCK_PG_N", regulator, "5")
-    buck_pg_pullup = _rc(circuit, "R12", "100k", "0603WAF1003T5E")
-    _connect(nets["3V3"], buck_pg_pullup, "1")
-    _connect(buck_pg, buck_pg_pullup, "2")
+    regulator = _buck(circuit)
+    _connect(nets["3V3"], regulator, "1")
+    _connect(nets["PISUGAR_5V"], regulator, "2")
+    _connect(nets["PISUGAR_5V"], regulator, "3")
+    _connect(nets["GND"], regulator, "4")
+    buck_sw = _pin_net(circuit, "BUCK_SW", regulator, "5")
+    buck_bst = _pin_net(circuit, "BUCK_BST", regulator, "6")
     inductor = two_pin(
-        circuit, "L1", "0.47uH", "Inductor_SMD:L_Murata_DFE201610P",
-        mpn="DFE201610E-R47M=P2", unit_cost_eur=0.10,
+        circuit, "L1", "4.7uH", "Chessboard:NR6045S",
+        mpn="NR6045S4R7MT", unit_cost_eur=0.06,
     )
-    _connect(_pin_net(circuit, "BUCK_L1", regulator, "9"), inductor, "1")
-    _connect(_pin_net(circuit, "BUCK_L2", regulator, "7"), inductor, "2")
-    fb_top = _rc(circuit, "R13", "511k", "RC0603FR-07511KL")
-    fb_bottom = _rc(circuit, "R14", "91k", "0603WAF9102T5E")
-    buck_fb = _pin_net(circuit, "BUCK_FB", regulator, "4")
-    _connect(nets["3V3"], fb_top, "1")
-    _connect(buck_fb, fb_top, "2")
-    _connect(buck_fb, fb_bottom, "1")
-    _connect(nets["GND"], fb_bottom, "2")
-    for ref, net, value in (("C1", "SYS", "22u"), ("C2", "3V3", "22u"), ("C3", "3V3", "22u")):
+    _connect(buck_sw, inductor, "1")
+    _connect(nets["3V3"], inductor, "2")
+    bootstrap = _rc(circuit, "C1", "100n", "CL05B104KO5NNNC")
+    _connect(buck_bst, bootstrap, "1")
+    _connect(buck_sw, bootstrap, "2")
+    for ref, net, value, mpn in (
+        ("C2", "PISUGAR_5V", "10u 10V", "CL21A106KAYNNNE"),
+        ("C3", "3V3", "22u 10V", "CL21A226MAQNNNE"),
+        ("C4", "3V3", "22u 10V", "CL21A226MAQNNNE"),
+    ):
         capacitor = two_pin(
-            circuit, ref, value, "Capacitor_SMD:C_0805_2012Metric",
-            mpn="CL21A226MAQNNNE", unit_cost_eur=0.05,
+            circuit, ref, value, "Capacitor_SMD:C_0805_2012Metric", mpn=mpn, unit_cost_eur=0.05,
         )
         _connect(nets[net], capacitor, "1")
         _connect(nets["GND"], capacitor, "2")
 
 
 def _build_led_rail(circuit: Circuit, nets: dict[str, Net]) -> Net:
-    led_boost = _led_boost(circuit)
-    _connect(nets["3V3"], led_boost, "1")
-    _connect(nets["LED_EN"], led_boost, "2")
-    _connect(nets["GND"], led_boost, "4")
-    _connect(nets["LED_5V_RAW"], led_boost, "5")
-    led_boost_sw = _pin_net(circuit, "LED_BOOST_SW", led_boost, "6")
-    led_inductor = two_pin(
-        circuit, "L2", "1uH", "Inductor_SMD:L_Wuerth_MAPI-3015",
-        mpn="74438357010", unit_cost_eur=0.15,
-        supplier="DigiKey", order_code="732-11197-1-ND",
-    )
-    _connect(nets["3V3"], led_inductor, "1")
-    _connect(led_boost_sw, led_inductor, "2")
-    led_fb = _pin_net(circuit, "LED_BOOST_FB", led_boost, "3")
-    led_fb_top = _rc(circuit, "R15", "732k", "RC0603FR-07732KL")
-    led_fb_bottom = _rc(circuit, "R16", "100k", "0603WAF1003T5E")
-    _connect(nets["LED_5V_RAW"], led_fb_top, "1")
-    _connect(led_fb, led_fb_top, "2")
-    _connect(led_fb, led_fb_bottom, "1")
-    _connect(nets["GND"], led_fb_bottom, "2")
-    for ref, name, value in (
-        ("C7", "3V3", "10u 10V"),
-        ("C8", "LED_5V_RAW", "22u 10V"),
-        ("C9", "LED_5V_RAW", "22u 10V"),
-    ):
-        mpn = "CL21A106KAYNNNE" if ref == "C7" else "CL21A226MAQNNNE"
-        capacitor = two_pin(
-            circuit, ref, value, "Capacitor_SMD:C_0805_2012Metric",
-            mpn=mpn, unit_cost_eur=0.05,
-        )
-        _connect(nets[name], capacitor, "1")
-        _connect(nets["GND"], capacitor, "2")
-
     led_limiter = _led_limiter(circuit)
-    _connect(nets["LED_5V_RAW"], led_limiter, "1")
+    _connect(nets["PISUGAR_5V"], led_limiter, "1")
     _connect(nets["GND"], led_limiter, "2")
     _connect(nets["LED_EN"], led_limiter, "3")
     led_fault = nets["LED_FAULT_N"]
@@ -394,14 +310,14 @@ def _build_led_rail(circuit: Circuit, nets: dict[str, Net]) -> Net:
     # the 448 mA the two light bars draw (14 pixels x 16 mA x 2 bars), so the
     # rail would have latched off on any bright cue. 39k gives 609/667/734 mA,
     # 1.36x the load at the minimum trip. The worst-case 734 mA fault current
-    # reflects to about 1.24 A on 3V3, inside the TPS63802's 2 A.
+    # is contained on PiSugar's managed 5 V output, away from the 3V3 rail.
     led_limit_resistor = _rc(circuit, "R17", "39k 1%", "0603WAF3902T5E")
     _connect(_pin_net(circuit, "LED_ILIM", led_limiter, "5"), led_limit_resistor, "1")
     _connect(nets["GND"], led_limit_resistor, "2")
     led_fault_pullup = _rc(circuit, "R18", "100k", "0603WAF1003T5E")
     _connect(nets["3V3"], led_fault_pullup, "1")
     _connect(led_fault, led_fault_pullup, "2")
-    for ref, name in (("C10", "LED_5V_RAW"), ("C11", "LED_5V")):
+    for ref, name in (("C10", "PISUGAR_5V"), ("C11", "LED_5V")):
         capacitor = _rc(circuit, ref, "100n", "CL05B104KO5NNNC")
         _connect(nets[name], capacitor, "1")
         _connect(nets["GND"], capacitor, "2")
@@ -447,16 +363,16 @@ def _build_mcu(circuit: Circuit, nets: dict[str, Net]) -> None:
     # and the 4.7k bus pullups are what hold them high for SPI boot (Table 4-3),
     # which also makes IO9 the download-mode recovery pin.
     mcu_connections = {
-        "6": "NFC_BUSY", "12": "LED_DATA", "13": "NFC_IRQ",
-        "17": "USB_D-", "18": "USB_D+", "22": "I2C_SCL", "23": "I2C_SDA",
+        "5": "TEMP_SENSE_ADC", "6": "NFC_BUSY", "12": "LED_DATA", "13": "NFC_IRQ",
+        "22": "I2C_SCL", "23": "I2C_SDA",
         "24": "OLED2_CS_N", "25": "SCLK", "26": "MOSI", "27": "MISO",
         "28": "NFC_CS_N", "29": "OLED1_CS_N", "30": "UART_RX", "31": "UART_TX",
     }
     for pin, name in mcu_connections.items():
         _connect(nets[name], mcu, pin)
-    # Pins 4, 7, 21 and 32 to 35 are datasheet NC; 5, 9, 10, 15, 16, 19 and 20
-    # are real GPIOs this design does not use. IO15 (pin 20) stays unused on
-    # purpose because it is the JTAG-source strapping pin.
+    # Pins 4, 7, 21 and 32 to 35 are datasheet NC. Native USB pins 17 and 18
+    # stay open because J1 is power-only. IO15 (pin 20) stays unused because it
+    # is the JTAG-source strapping pin. IO2 pin 5 is ADC1_CH2 per Table 3-1.
     _no_connect(circuit, mcu, NO_CONNECTS["U4"])
     # Espressif requires bulk plus high-frequency decoupling at the module's
     # 3V3 pin. The regulator's own output caps are centimetres away, and WiFi
@@ -516,8 +432,8 @@ def _build_mcu(circuit: Circuit, nets: dict[str, Net]) -> None:
     _connect(nets["I2C_SDA"], expander, "23")
     expander_signals = {
         "4": "SEL_RCLK", "5": "NFC_RESET_N", "6": "OLED_DC", "7": "OLED_RESET_N",
-        "8": "LED_EN", "9": "USB_500MA", "10": "BUTTON_N", "11": "LED_FAULT_N",
-        "13": "CHG_PG_N", "14": "CHG_STAT2", "15": "CHG_STAT1_N", "16": "SEL_SRCLR_N",
+        "8": "LED_EN", "9": "CHARGE_INPUT_FAULT_N", "10": "BUTTON_N", "11": "LED_FAULT_N",
+        "16": "SEL_SRCLR_N",
         "17": "NFC_GPO1",
     }
     for pin, name in expander_signals.items():
@@ -675,12 +591,13 @@ def _build_reader(circuit: Circuit, nets: dict[str, Net]) -> None:
 def build_hub() -> Circuit:
     circuit = Circuit(name="hub")
     net_names = (
-        "GND", "USB_VBUS_RAW", "USB_VBUS", "USB_D+", "USB_D-", "BAT_RAW", "BAT+", "SYS",
-        "POWER_EN", "3V3", "LED_5V_RAW", "LED_5V", "LED_FAULT_N",
+        "GND", "USB_VBUS", "CHARGE_5V", "PISUGAR_5V", "3V3", "LED_5V", "LED_FAULT_N",
+        "THERM_SENSE", "THERM_COLD_REF", "THERM_HOT_REF", "CHARGE_TEMP_OK",
+        "CHARGE_INPUT_FAULT_N", "TEMP_SENSE_ADC",
         "SCLK", "MOSI", "MISO", "NFC_CS_N", "NFC_IRQ", "NFC_BUSY", "NFC_RESET_N", "NFC_GPO1",
         "I2C_SCL", "I2C_SDA", "OLED1_CS_N", "OLED2_CS_N", "OLED_DC", "OLED_RESET_N",
         "LED_DATA", "LED_RETURN", "SEL_RCLK", "SEL_SRCLR_N", "RF_BUS", "BUTTON_N",
-        "UART_RX", "UART_TX", "CHG_PG_N", "CHG_STAT2", "CHG_STAT1_N", "USB_500MA", "LED_EN",
+        "UART_RX", "UART_TX", "LED_EN",
     )
     nets = {name: Net(name, circuit=circuit) for name in net_names}
     for index, name in enumerate(("GND", "3V3", "LED_5V"), start=1):
@@ -693,6 +610,15 @@ def build_hub() -> Circuit:
     led_data_5v = _build_led_rail(circuit, nets)
     _build_mcu(circuit, nets)
     _build_reader(circuit, nets)
+
+    charge_output = _connector(circuit, "J2", ("CHARGE_5V", "GND"), "SM02B-GHS-TB(LF)(SN)", 0.20)
+    _connect(nets["CHARGE_5V"], charge_output, "1")
+    _connect(nets["GND"], charge_output, "2")
+    pisugar_return = _connector(
+        circuit, "J3", ("PISUGAR_5V", "GND", "I2C_SCL", "I2C_SDA"), "A1257WR-S-4P", 0.14,
+    )
+    for connector_pin, name in enumerate(("PISUGAR_5V", "GND", "I2C_SCL", "I2C_SDA"), start=1):
+        _connect(nets[name], pisugar_return, str(connector_pin))
 
     # Matrix link, mirroring the matrix board's J1. The registers share the
     # SPI wires; SEL_RCLK latches from the expander after a 16-bit shift.
@@ -742,6 +668,10 @@ def build_hub() -> Circuit:
     button = _connector(circuit, "J10", ("BUTTON_N", "GND"), "SM02B-GHS-TB(LF)(SN)", 0.20)
     _connect(nets["BUTTON_N"], button, "1")
     _connect(nets["GND"], button, "2")
+
+    thermistor = _connector(circuit, "J11", ("THERM_SENSE", "GND"), "SM02B-GHS-TB(LF)(SN)", 0.20)
+    _connect(nets["THERM_SENSE"], thermistor, "1")
+    _connect(nets["GND"], thermistor, "2")
 
     # SRCLR_N of the matrix registers is tied high on the matrix board; the
     # expander line reserved for it stays local spare until a respin frees it.

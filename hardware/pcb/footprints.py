@@ -140,11 +140,30 @@ def t37k3rgb_footprint() -> str:
 ''' + "\n".join(pads) + "\n)\n"
 
 
+def nr6045s_footprint() -> str:
+    """Magnetsyc NR6045S land pattern from data sheet page 1."""
+    return '''(footprint "NR6045S"
+  (version 20240108)
+  (generator pcbnew)
+  (layer "F.Cu")
+  (descr "Magnetsyc NR6045S recommended land pattern")
+  (tags "shielded power inductor")
+  (property "Reference" "REF**" (at 0 -4.1 0) (layer "F.SilkS"))
+  (property "Value" "NR6045S" (at 0 4.1 0) (layer "F.Fab"))
+  (attr smd)
+  (fp_rect (start -3 -3) (end 3 3) (stroke (width 0.1) (type default)) (fill none) (layer "F.Fab"))
+  (fp_rect (start -3.3 -3.3) (end 3.3 3.3) (stroke (width 0.05) (type default)) (fill none) (layer "F.CrtYd"))
+  (pad "1" smd roundrect (at -2.25 0) (size 1.7 5.7) (layers "F.Cu" "F.Paste" "F.Mask") (roundrect_rratio 0.15))
+  (pad "2" smd roundrect (at 2.25 0) (size 1.7 5.7) (layers "F.Cu" "F.Paste" "F.Mask") (roundrect_rratio 0.15))
+)\n'''
+
+
 def write_footprints(output: Path = OUTPUT) -> None:
     output.mkdir(parents=True, exist_ok=True)
     (output / "Antenna_Line.kicad_mod").write_text(antenna_line_footprint(), encoding="utf-8")
     (output / "ESP32-C6-MINI-1U.kicad_mod").write_text(esp32_footprint(), encoding="utf-8")
     (output / "T37K3RGB-05C000112U1930.kicad_mod").write_text(t37k3rgb_footprint(), encoding="utf-8")
+    (output / "NR6045S.kicad_mod").write_text(nr6045s_footprint(), encoding="utf-8")
 
 
 if __name__ == "__main__":

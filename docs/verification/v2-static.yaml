@@ -18,27 +18,23 @@ reviewed_erc_warning_classes:
 
 no_connects:
   J1:
-    pins: [A8, B8]
+    pins: [A6, A7, A8, B6, B7, B8]
     datasheet: Vault/Scacchiera/Datasheets/USB4105-GF-A_C3020560.pdf
-    locator: USB Type-C pin assignment, SBU1 and SBU2; unused by a USB 2.0 device.
+    locator: USB Type-C pin assignment; D+, D-, SBU1 and SBU2 are unused by the power-only sink.
   J8:
     pins: ['4']
     datasheet: Vault/Scacchiera/Datasheets/A1257WR-S-4P_C225127.pdf
     locator: Four-position connector pin assignment; DATA_OUT is deliberately open at the final bar.
-  SW1:
-    pins: ['3']
-    datasheet: Vault/Scacchiera/Datasheets/JS102011SAQN_C221660.pdf
-    locator: Circuit diagram; the OFF throw is deliberately left open.
   U3:
     pins: ['2', '11', '14', '20', '23', '24', '31', '32', '33', '34', '35', '40']
     datasheet: Vault/Scacchiera/Datasheets/PN5180A0HN-C3E_C1526287.pdf
     locator: HVQFN40 pin description, pins marked DNC or unused optional interfaces.
   U4:
-    pins: ['4', '5', '7', '9', '10', '15', '16', '19', '20', '21', '32', '33', '34', '35']
+    pins: ['4', '7', '9', '10', '15', '16', '17', '18', '19', '20', '21', '32', '33', '34', '35']
     datasheet: Vault/Scacchiera/Datasheets/ESP32-C6-MINI-1U-N4_C7558096.pdf
-    locator: Table 3-1 pin definitions; reserved pins and deliberately unused GPIOs.
+    locator: Table 3-1 pin definitions; reserved pins, unused GPIOs, and unused native USB pins.
   U6:
-    pins: ['1', '18', '19', '20']
+    pins: ['1', '13', '14', '15', '18', '19', '20']
     datasheet: Vault/Scacchiera/Datasheets/TCA9535PWR_C130204.pdf
     locator: PW package pin functions; interrupt and four unused GPIOs.
 
