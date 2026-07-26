@@ -53,6 +53,11 @@ MODELS: dict[str, SpiceModel] = {
     "BSS84-7-F": SpiceModel(
         name="BSS84", pins=("D", "G", "S"), include="vendor/BSS84.spice.txt"
     ),
+    "TLV7042DGKR": SpiceModel(
+        name="TLV7042",
+        pins=("OUTA", "INA-", "INA+", "GND", "INB+", "INB-", "OUTB", "VCC"),
+        include="tlv7042.lib",
+    ),
 }
 
 # Diodes reference their .model name directly from a D card, so unlike the VDMOS
@@ -109,16 +114,17 @@ def _node_by_name(part: Any, pin_name: str) -> str:
     raise ValueError(f"part {part.ref} has no pin named {pin_name}")
 
 
-def _two_pin_line(prefix: str, part: Any, ref: str) -> str:
+def _two_pin_line(prefix: str, part: Any, ref: str, value: str | None = None) -> str:
     node_1 = _node_by_num(part, "1")
     node_2 = _node_by_num(part, "2")
-    value = value_to_spice(str(part.value))
-    return f"{prefix}{ref} {node_1} {node_2} {value}"
+    token = value if value is not None else value_to_spice(str(part.value))
+    return f"{prefix}{ref} {node_1} {node_2} {token}"
 
 
-def _mosfet_line(part: Any, ref: str, model: SpiceModel) -> str:
+def _mosfet_line(part: Any, ref: str, model: SpiceModel, params: str | None = None) -> str:
     nodes = " ".join(_node_by_name(part, pin_name) for pin_name in model.pins)
-    return f"X{ref} {nodes} {model.name}"
+    suffix = f" {params}" if params else ""
+    return f"X{ref} {nodes} {model.name}{suffix}"
 
 
 def _diode_line(part: Any, ref: str, model: SpiceModel) -> str:
@@ -137,14 +143,34 @@ def _coil_lines(part: Any, ref: str) -> tuple[str, str]:
     return (inductor_line, resistor_line)
 
 
-def emit_subckt(circuit: Circuit, name: str, ports: tuple[Net, ...]) -> str:
+def emit_subckt(
+    circuit: Circuit,
+    name: str,
+    ports: tuple[Net, ...],
+    *,
+    only: frozenset[str] | None = None,
+    values: dict[str, str] | None = None,
+) -> str:
+    """Emit one subckt from the schematic objects.
+
+    `only` keeps a named block of a larger board, so a test bench can drive the
+    temperature gate without needing a model for every regulator on the same
+    sheet. `values` replaces a passive's value token, or appends instance
+    parameters to a modelled device, which is how a tolerance or device corner
+    reaches the deck while the connectivity still comes from SKiDL.
+    """
+    overrides = values or {}
     port_nodes = " ".join(_sanitize_net_name(str(net.name)) for net in ports)
     lines: list[str] = [f".SUBCKT {name} {port_nodes}"]
     parts = sorted(circuit.parts, key=lambda part: _ref_sort_key(str(part.ref)))
+    emitted: set[str] = set()
     for part in parts:
         ref = str(part.ref)
         if ref.startswith("#"):
             continue
+        if only is not None and ref not in only:
+            continue
+        emitted.add(ref)
         if str(getattr(part, "fitted", "yes")) == "DNP":
             continue
         footprint = str(getattr(part, "footprint", ""))
@@ -152,17 +178,23 @@ def emit_subckt(circuit: Circuit, name: str, ports: tuple[Net, ...]) -> str:
         if footprint == COIL_FOOTPRINT:
             lines.extend(_coil_lines(part, ref))
         elif mpn in MODELS:
-            lines.append(_mosfet_line(part, ref, MODELS[mpn]))
+            lines.append(_mosfet_line(part, ref, MODELS[mpn], overrides.get(ref)))
         elif mpn in DIODE_MODELS:
             lines.append(_diode_line(part, ref, DIODE_MODELS[mpn]))
         elif ref[:1] == "R":
-            lines.append(_two_pin_line("R", part, ref))
+            lines.append(_two_pin_line("R", part, ref, overrides.get(ref)))
         elif ref[:1] == "C":
-            lines.append(_two_pin_line("C", part, ref))
+            lines.append(_two_pin_line("C", part, ref, overrides.get(ref)))
         elif ref[:1] == "L":
             # A bare inductor (RF bias choke); the coil footprint is handled above.
             lines.append(_two_pin_line("L", part, ref))
         else:
             raise ValueError(f"unsupported part for spice emission: {ref}")
+    # A stale override would silently simulate the nominal value instead, and a
+    # stale block member would silently drop a part out of the deck.
+    if missing_overrides := sorted(set(overrides) - emitted):
+        raise ValueError(f"value overrides for parts not emitted: {missing_overrides}")
+    if only is not None and (missing_parts := sorted(only - emitted)):
+        raise ValueError(f"requested parts not in the circuit: {missing_parts}")
     lines.append(f".ends {name}")
     return "\n".join(lines) + "\n"

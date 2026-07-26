@@ -1,0 +1,38 @@
+* TLV7042 dual open-drain comparator, substitute model.
+*
+* No distributable vendor ngspice model was identified for this part, which its
+* V1 record already states, so every number below is quoted from the filed data
+* sheet Vault/Scacchiera/Datasheets/TLV7042DGKR_C2760466.pdf, section 5.9
+* Electrical Characteristics (Dual), revision SLVSE13J.
+*
+* Fitted parameters, all from that table:
+*   ron  = VOL(max) / IO = 350 mV / 3 mA = 116.7 ohm. Worst-case pull-down.
+*   roff = VS / ILKG = 5 V / 100 pA = 5e10 ohm. ILKG is typical only; the hub
+*          pulls this output up through 100 kohm, where 100 pA is 10 uV, so a
+*          decade of error in roff cannot move a threshold.
+*   icc  = 750 nA per channel maximum, sunk from VCC.
+*   vos_a, vos_b default to zero and are swept by the test bench over
+*          VIO(max) 8 mV plus VHYS(max) 25 mV, the full published error each
+*          input can carry. Positive is the direction that trips later, so it
+*          widens the permitted window; the bench drives both signs.
+*
+* Deliberately not modelled, with the reason:
+*   IB = 2 pA typical across the 66.7 kohm worst-case divider impedance is
+*     0.13 uV, five orders below the swept offset.
+*   tON = 200 us power-up time and the 1.6 V VCC floor are startup behavior for
+*     a transient check, not for a DC threshold sweep.
+*
+* vslope softens the switch numerically. At 100 uV the transition occupies well
+* under 1 mV of input difference, far inside the millivolts the bench sweeps.
+* tanh saturates instead of overflowing the way exp would.
+*
+.subckt TLV7042 outa ina_n ina_p vee inb_p inb_n outb vcc
++ params: ron=116.7 roff=5e10 icc=750n vslope=100u vos_a=0 vos_b=0
+* Channel A pulls low while its inverting input stands above its noninverting
+* one, so the hub's cold side asserts when the divider rises. Channel B is
+* wired the other way round, which is why its difference is mirrored.
+Ra outa vee R = 'ron + (roff-ron)*(1-tanh((V(ina_n)-V(ina_p)-vos_a)/vslope))/2'
+Rb outb vee R = 'ron + (roff-ron)*(1-tanh((V(inb_n)-V(inb_p)-vos_b)/vslope))/2'
+Icca vcc vee 'icc'
+Iccb vcc vee 'icc'
+.ends TLV7042

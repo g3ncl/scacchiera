@@ -60,7 +60,12 @@ scoped test-article order. V0 through V9 permit a final-board order.
   pulls, recovery pads, enable/reset nets, exposed pads, the hardware temperature gate, and the
   recorded stackup. Evidence: `make check` passed with 47 tests, mypy clean, and all boards at 0
   violations, 0 unconnected, and 0 parity issues on 2026-07-26.
-- [ ] V3 power, analog, timing, and fault simulation
+- [ ] V3 power, analog, timing, and fault simulation: started, not close. The hub's cell-temperature
+  charge gate passes an exhaustive 384-corner sweep with sensor-fault cases (see M3), and the light
+  bar and matrix already had their supply and RF simulations. Open: every switching converter and
+  protection device on the hub, and the transient cases (cold start, brownout, USB insertion, rail
+  handover) that no board has yet. Two of the three regulators have no distributable vendor model,
+  which the workflow allows only with a documented substitute and a full published sweep.
 - [ ] V4 layout-derived electromagnetic validation: the hub extraction must use its four-layer stack,
   because an inner ground plane roughly 0.2 mm below the RF front end changes coupling and the
   hub-side RF feed's impedance against the two-layer geometry the earlier bench assumed.
@@ -134,10 +139,23 @@ evidence is an analytical formula; it needs a passing simulation.
   vendor MOSFET models.
 - [ ] Hub board SPICE validation: the existing RF-only bench still drives the 16-cell bus
   through the PN5180 TX path; the selected loop's field peaks at 13.86 MHz at 60 mA per volt of
-  drive and preserves useful RF evidence, but it does not validate the replacement 5 V-to-3.3 V
-  buck, current limiter, cell-temperature interlock, startup, shutdown, or fault behavior. PiSugar
-  charge and handover behavior is measured at V8 rather than represented by an invented internal
-  model. The 68 pF series match value came from this bench.
+  drive and preserves useful RF evidence. The 68 pF series match value came from this bench.
+  PiSugar charge and handover behavior is measured at V8 rather than represented by an invented
+  internal model.
+
+  The cell-temperature charge gate is now validated: `hardware/tests/test_sim_interlock.py` runs
+  384 corners of the gate emitted from the hub's own SKiDL objects, with the filed Vishay R/T curve
+  as the sensor. Worst case the gate permits charging only from 2.17 to 36.43 degrees Celsius,
+  inside the qualified 0 to 40 range, while its tightest corner still covers the functional 20 to
+  25 degree charge band. The enable pin reaches 4.40 V permitting and 6.3 mV inhibiting against the
+  AP22811 thresholds, and an open or shorted sensor inhibits charging. Evidence: 6 interlock tests
+  inside a `make check` of 53 tests, mypy clean, on 2026-07-26.
+
+  Still open on this board before M3 closes: the AP63203 buck over line, load and temperature
+  corners; the AP22811 current limit, UVLO and fault timing; the TPS2553 LED rail trip against the
+  measured bar load; and the startup, brownout and rail-handover transients. Neither Diodes part
+  has a distributable vendor model, so each needs a documented datasheet-bounded substitute of the
+  kind `hardware/sim/models/tlv7042.lib` now demonstrates.
 
 ### M4: PCB layout, as code (per board)
 

@@ -198,8 +198,9 @@ def _build_power(circuit: Circuit, nets: dict[str, Net]) -> None:
         _connect(nets["GND"], part, "2")
 
     # The NTC divider rises when the sensor is cold. Comparator A asserts low
-    # above the 8 C reference; comparator B asserts low below the 35 C reference.
-    # Their wired open-drain output is therefore high only inside the window.
+    # above the cold reference, comparator B below the hot one, so their wired
+    # open-drain output is high only inside the window. hardware/sim/hub_interlock.py
+    # simulates that window at 4.5 to 34.5 C nominal against the filed R/T curve.
     comparator = _temperature_comparator(circuit)
     _connect(nets["THERM_SENSE"], comparator, "2")
     _connect(nets["THERM_COLD_REF"], comparator, "3")

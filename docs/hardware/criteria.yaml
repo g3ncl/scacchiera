@@ -423,3 +423,53 @@ criteria:
     operating_conditions: Simulated system resonance with one selected line.
     margin: Nominal 60 mA/V is three times the minimum; V4 replaces it with field and receive limits.
     test_ids: [TEST-HUB-RF-002]
+
+  HUB-INTERLOCK-ENABLE-HIGH:
+    description: Charge-switch enable level while the cell-temperature gate permits charging.
+    requirement_ids: [POWER-SAFETY-002]
+    unit: V
+    limits: {minimum: 1.5}
+    evidence: {class: Datasheet, source: Vault/Scacchiera/Datasheets/AP22811AW5-7_C3001660.pdf, locator: "Electrical Characteristics: VIH, EN input logic high voltage, 2.7 to 5.5 V input"}
+    operating_conditions: Cell at 22.5 degrees Celsius, every gate tolerance and comparator-error corner, 4.5 to 5.5 V input, worst-case 1 uA enable leakage loading the pull-up.
+    margin: A gate that asserts too weakly to enable the switch would inhibit charging permanently rather than dangerously, so this criterion protects function, not safety.
+    test_ids: [TEST-HUB-INTERLOCK-ENABLE-001]
+
+  HUB-INTERLOCK-ENABLE-LOW:
+    description: Charge-switch enable level while the cell-temperature gate inhibits charging.
+    requirement_ids: [POWER-SAFETY-002]
+    unit: V
+    limits: {maximum: 0.5}
+    evidence: {class: Datasheet, source: Vault/Scacchiera/Datasheets/AP22811AW5-7_C3001660.pdf, locator: "Electrical Characteristics: VIL, EN input logic low voltage, 2.7 to 5.5 V input"}
+    operating_conditions: Cell at minus 15 degrees Celsius, every gate tolerance and comparator-error corner, 4.5 to 5.5 V input.
+    margin: The comparator has to pull the enable pin below the switch's guaranteed low level against a 100 kohm pull-up for the inhibit to be real rather than nominal.
+    test_ids: [TEST-HUB-INTERLOCK-ENABLE-001]
+
+  HUB-INTERLOCK-FAULT-ENABLE:
+    description: Charge-switch enable level with the cell sensor open or short circuited.
+    requirement_ids: [POWER-SAFETY-002]
+    unit: V
+    limits: {maximum: 0.5}
+    evidence: {class: Datasheet, source: Vault/Scacchiera/Datasheets/AP22811AW5-7_C3001660.pdf, locator: "Electrical Characteristics: VIL, EN input logic low voltage, 2.7 to 5.5 V input"}
+    operating_conditions: Sensor replaced by an open circuit and by a short circuit, nominal gate resistors, 4.5 to 5.5 V input.
+    margin: A lost sensor must read as a cutoff rather than as a plausible temperature, so both failure directions inhibit charging instead of one.
+    test_ids: [TEST-HUB-INTERLOCK-FAULT-001]
+
+  HUB-INTERLOCK-BAND-COLD:
+    description: Coldest cell temperature at which the gate must still permit charging in every corner.
+    requirement_ids: [POWER-CHARGE-001]
+    unit: degC
+    limits: {maximum: 20.0}
+    evidence: {class: Derived, source: docs/functional/power.md, locator: USB-C charging}
+    operating_conditions: Tightest permitted window over every gate tolerance corner and the comparator error direction that narrows it, including sensor accuracy.
+    margin: The functional charge times are specified from 20 degrees Celsius upward, so a gate whose cold edge sat above that would fail the charge requirement it exists to protect.
+    test_ids: [TEST-HUB-INTERLOCK-BAND-001]
+
+  HUB-INTERLOCK-BAND-HOT:
+    description: Hottest cell temperature at which the gate must still permit charging in every corner.
+    requirement_ids: [POWER-CHARGE-001]
+    unit: degC
+    limits: {minimum: 25.0}
+    evidence: {class: Derived, source: docs/functional/power.md, locator: USB-C charging}
+    operating_conditions: Tightest permitted window over every gate tolerance corner and the comparator error direction that narrows it, including sensor accuracy.
+    margin: The functional charge times are specified up to 25 degrees Celsius, and a cell warms while charging, so the hot edge has to clear the stated band rather than sit inside it.
+    test_ids: [TEST-HUB-INTERLOCK-BAND-001]

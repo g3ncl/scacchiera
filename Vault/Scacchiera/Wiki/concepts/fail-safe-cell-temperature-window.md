@@ -1,7 +1,7 @@
 ---
 type: concept
 date_updated: 2026-07-26
-source_count: 4
+source_count: 5
 confidence: high
 tags: [wiki/concept, wiki/safety, wiki/battery]
 ---
@@ -19,5 +19,14 @@ and resistor error while staying inside the manufacturer's 0 to 40 degree operat
 open sensor reads cold and a shorted sensor reads hot, so either wiring fault disables the input.
 
 Firmware receives a divided copy of sensor voltage for status and calibration, but that measurement
-is not in the safety-control path. V3 must sweep component corners, and V8 must verify both trip
-directions and sensor open/short faults on the received hardware.
+is not in the safety-control path.
+
+The corner sweep V3 asked for is done, in [[v3-charge-interlock]]. Simulated against the filed
+[[ntcle317e4103sba-rt-curve|resistance curve]], the window holds between 2.17 and 36.43 degrees
+Celsius at its widest over 384 published tolerance corners, so the claim that the narrower window
+absorbs component error is now measured rather than argued. The two sensor faults were simulated
+as well: both leave the enable pin at 6.3 mV against a 0.5 V guaranteed low, so charging is
+inhibited either way. [permitted_window_worst::2.17 to 36.43 C]
+
+V8 still has to verify both trip directions and both sensor faults on received hardware, because
+the thresholds rest on a curve and a substitute comparator model rather than on a measurement.

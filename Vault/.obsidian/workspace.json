@@ -185,8 +185,19 @@
   },
   "active": "878fd64fc9785e3b",
   "lastOpenFiles": [
-    "Scacchiera/Wiki/log.md.tmp.495541.37339e11b76e",
-    "Scacchiera/Wiki/synthesis/v2-static-connectivity.md.tmp.495541.7fef561a5f24",
+    "Scacchiera/Wiki/log.md.tmp.495541.33b990b3c0c8",
+    "Scacchiera/Wiki/synthesis/v3-charge-interlock.md.tmp.495541.d8b494243cc9",
+    "Scacchiera/Wiki/synthesis/v3-charge-interlock.md.tmp.495541.59c8473d1632",
+    "Scacchiera/Wiki/concepts/fail-safe-cell-temperature-window.md.tmp.495541.b4e34c721c5c",
+    "Scacchiera/Wiki/concepts/fail-safe-cell-temperature-window.md.tmp.495541.e9a05e30985d",
+    "Scacchiera/Wiki/overview.md.tmp.495541.d75c50949301",
+    "Scacchiera/Wiki/log.md.tmp.495541.175a12213a54",
+    "Scacchiera/Wiki/index.md.tmp.495541.f52f4e992c0a",
+    "Scacchiera/Wiki/index.md.tmp.495541.51b435b8f87f",
+    "Scacchiera/Wiki/entities/ntcle317e4103sba.md.tmp.495541.c3436fa96310",
+    "Scacchiera/Wiki/synthesis/v3-charge-interlock.md",
+    "Scacchiera/Wiki/synthesis/v3-charge-interlock.md.tmp.495541.7a2280a22a78",
+    "Scacchiera/Wiki/sources/ntcle317e4103sba-rt-curve.md",
     "Scacchiera/Wiki/entities/tlv7042dgkr.md",
     "Scacchiera/Wiki/sources/tlv7042dgkr-datasheet.md",
     "Scacchiera/Wiki/entities/nr6045s4r7mt.md",
@@ -209,9 +220,6 @@
     "Scacchiera/Wiki/sources/pisugar3-plus-manufacturer-docs.md",
     "Scacchiera/Wiki/synthesis/quick-charge-module-evaluation.md",
     "Scacchiera/Wiki/entities/rbs18634.md",
-    "Scacchiera/Wiki/entities/sw6106.md",
-    "Scacchiera/Wiki/sources/rbs18634-datasheet.md",
-    "Scacchiera/Wiki/sources/sw6106-datasheet.md",
-    "Scacchiera/Clippings/TI-PMP23456-test-report.pdf"
+    "Scacchiera/Wiki/entities/sw6106.md"
   ]
 }

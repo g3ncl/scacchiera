@@ -31,7 +31,8 @@ battery connector, charger, and duplicate conversion stages.
 
 PiSugar shares I2C with the hub and reports source presence, battery voltage, estimated percentage,
 and control state. Its charger-chip temperature remains useful telemetry but is not used as cell
-temperature. The analog cutoff and its open/short fault behavior remain subject to V3 and V8.
+temperature. The analog cutoff now has V3 corner evidence (see Validation); V8 still has to measure
+the built gate against a real cell.
 
 ## MCU and slow control
 
@@ -111,6 +112,25 @@ screws tie the shell to the pours rather than leaving it floating.
 exactly as wired here and checks [criteria.yaml](criteria.yaml): the selected loop's field peaks
 at 13.86 MHz (in band, trim pulls it to the carrier) at 60 mA of coil current per volt of drive.
 The 68 pF match value came from this bench; 220 pF would drag the system to 9 MHz.
+
+`hardware/tests/test_sim_interlock.py` sweeps the charge gate over 384 corners: both extremes of
+every 1% resistor group, 4.5 to 5.5 V input, and the comparator's full published error (8 mV offset
+plus 25 mV hysteresis) in each direction. The sensor is the filed Vishay R/T curve for this bead's
+ceramic, which reproduces both resistances the part data sheet publishes; a single-beta fit would
+have been optimistic by 0.8 K at 0 degrees, most of the cold margin. Results, with the sensor's own
+published accuracy added on top:
+
+| Quantity | Simulated | Limit |
+| --- | --- | --- |
+| Widest permitted window | 2.17 to 36.43 degrees Celsius | inside 0 to 40 |
+| Narrowest permitted window | 6.87 to 32.48 degrees Celsius | covers 20 to 25 |
+| Enable level, gate permitting | 4.40 V | at least 1.5 V |
+| Enable level, gate inhibiting | 6.3 mV | at most 0.5 V |
+| Enable level, sensor open or shorted | 6.3 mV | at most 0.5 V |
+
+The remaining V3 work on this board is the rest of the power path: the AP63203 buck at line, load
+and temperature corners, the AP22811 current limit and fault behavior, the TPS2553 LED rail trip,
+and the startup, brownout and handover transients.
 
 ## Cost
 

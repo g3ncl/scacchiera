@@ -24,7 +24,12 @@ safety requirements after the original 500 mA architecture proved unsuitable.
 uninterrupted 5 V path, and I2C state reporting. This material change keeps the hub portions of V1
 and [[v2-static-connectivity|V2]] tied to the regulated 5 V boundary. Both gates now pass. The
 rebuilt four-layer hub has a reviewed reproducible route with zero DRC, connectivity, or schematic
-parity findings. V3 power and fault simulation is the next open gate.
+parity findings.
+
+V3 power and fault simulation is the open gate. Its first hub result is
+[[v3-charge-interlock]]: the cell-temperature cutoff holds inside the qualified 0 to 40 degree range
+across 384 published tolerance corners and both sensor failure directions. Every switching converter
+on the hub, and every transient case on every board, remains unsimulated.
 
 The earlier [[chessboard-quick-charge-architecture|custom PD architecture]] and
 [[quick-charge-module-evaluation|RBS18634 article]] remain historical evidence rather than active

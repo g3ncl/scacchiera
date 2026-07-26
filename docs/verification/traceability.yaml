@@ -268,8 +268,8 @@ requirements:
   - id: POWER-CHARGE-001
     source: {path: docs/functional/power.md, locator: USB-C charging}
     statement: A compliant 5 V 2 A USB source charges an idle board from 10 to 80 percent in no more than 120 minutes at 20 to 25 degrees Celsius, without requiring USB Power Delivery.
-    criterion_ids: [POWER-CHARGE-10-80]
-    test_ids: [TEST-POWER-CHARGE-001, TEST-V8-CHARGE-001]
+    criterion_ids: [POWER-CHARGE-10-80, HUB-INTERLOCK-BAND-COLD, HUB-INTERLOCK-BAND-HOT]
+    test_ids: [TEST-POWER-CHARGE-001, TEST-HUB-INTERLOCK-BAND-001, TEST-V8-CHARGE-001]
   - id: POWER-CHARGE-002
     source: {path: docs/functional/power.md, locator: USB-C charging}
     statement: A compliant 5 V 2 A USB source charges an idle board from 10 percent to normal full-charge termination in no more than 210 minutes at 20 to 25 degrees Celsius.
@@ -290,8 +290,8 @@ requirements:
   - id: POWER-SAFETY-002
     source: {path: docs/functional/power.md, locator: Battery safety}
     statement: Cell temperature measured by an attached thermistor gates charging to the qualified range.
-    criterion_ids: [POWER-CHARGE-TEMPERATURE-MIN, POWER-CHARGE-TEMPERATURE-MAX]
-    test_ids: [TEST-POWER-SAFETY-002, TEST-V8-CHARGE-TEMPERATURE-001]
+    criterion_ids: [POWER-CHARGE-TEMPERATURE-MIN, POWER-CHARGE-TEMPERATURE-MAX, HUB-INTERLOCK-ENABLE-HIGH, HUB-INTERLOCK-ENABLE-LOW, HUB-INTERLOCK-FAULT-ENABLE]
+    test_ids: [TEST-POWER-SAFETY-002, TEST-HUB-INTERLOCK-ENABLE-001, TEST-HUB-INTERLOCK-FAULT-001, TEST-V8-CHARGE-TEMPERATURE-001]
   - id: POWER-SAFETY-003
     source: {path: docs/functional/power.md, locator: Battery safety}
     statement: Temperature-limited and source-limited charging are reported to the user.

@@ -395,3 +395,35 @@ the generated hub matches the stackup recorded in
 [[v2-static-connectivity]]'s evidence file. Also corrected a stale hub comment claiming flashing runs
 over USB-Serial-JTAG: the inlet is power-only, so recovery is UART0 on J9, as the hub document
 already said. `make check` passes with 47 tests.
+
+## [2026-07-26] ingest | File the cell sensor's resistance curve
+
+The [[ntcle317e4103sba]] data sheet publishes R25, B25/85 and R85 but no R/T table, which left the
+charge cutoff's thresholds resting on a single-beta fit. Filed Vishay's own curve for this bead's
+ceramic as [[ntcle317e4103sba-rt-curve]], extracted from document 29130 with its sheet and row
+recorded. It reproduces both resistances the part data sheet prints and the published B constant, so
+the two sources confirm each other. The fit it replaces was 0.80 K optimistic at 0 degrees Celsius,
+in the unsafe direction, against a cold margin of about 4.5 K.
+
+## [2026-07-26] verification | Simulate the charge interlock over every corner
+
+Built the first V3 power evidence for the hub: [[v3-charge-interlock]]. The gate is emitted from the
+hub's own SKiDL objects, so the deck cannot drift from the netlist, and swept over 384 corners
+covering both extremes of each 1% resistance group, 4.5 to 5.5 V input, and the [[tlv7042dgkr]]
+comparator's full published offset and hysteresis in both directions. Worst case the gate permits
+charging only from 2.17 to 36.43 degrees Celsius, inside the cell's qualified 0 to 40 range, while
+its tightest corner still covers the functional 20 to 25 degree charge band. An open or a shorted
+sensor both inhibit charging.
+
+Two supporting pieces landed with it: `hardware/sim/models/tlv7042.lib`, a datasheet-bounded
+substitute model that records what it omits and why, and a small extension to the SPICE emitter so a
+test bench can take one named block of a board and drive it at a tolerance corner. Five new criteria
+and their traceability links record the enable-level and usable-window limits. `make check` passes
+with 53 tests.
+
+One correction worth recording: the first version of the sweep applied the bead's accuracy in the
+permissive direction for both the safety question and the usability one. That is right for the first
+and backwards for the second, and it reported a usable window two kelvin wider on each side than the
+parts guarantee. The safety result was unaffected.
+
+V3 stays open: every switching converter on the hub and every transient case is still unsimulated.

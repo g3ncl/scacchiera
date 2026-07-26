@@ -65,6 +65,7 @@ One [[wiki/source]] summary per ingested raw source. Factual, no interpretation.
 | [[pisugar3-plus-manufacturer-docs]] | commercial UPS manufacturer documentation | 2026-07-26 |
 | [[955465-un38-3]] | battery UN 38.3 test report | 2026-07-26 |
 | [[ntcle317e4103sba-datasheet]] | component datasheet | 2026-07-26 |
+| [[ntcle317e4103sba-rt-curve]] | manufacturer resistance curve | 2026-07-26 |
 | [[swpa5045s4r7mt-datasheet]] | component datasheet | 2026-07-26 |
 
 ## Entities
@@ -221,6 +222,7 @@ Query answers filed back into the wiki. See [[wiki/synthesis]] pages.
 | [[verification-evidence-model]] | How are requirements, criteria, and tests kept synchronized? | 2026-07-25 |
 | [[v1-component-proof]] | How is every fitted component tied to exact V1 evidence? | 2026-07-25 |
 | [[v2-static-connectivity]] | How are schematic connectivity and the rebuilt four-layer hub proven equivalent? | 2026-07-26 |
+| [[v3-charge-interlock]] | How is the cell-temperature charge cutoff proven over every published tolerance? | 2026-07-26 |
 | [[chessboard-quick-charge-architecture]] | How can recharge time become much shorter than useful play time? | 2026-07-26 |
 | [[quick-charge-module-evaluation]] | Can a cheap purchased board de-risk quick charging? | 2026-07-26 |
 | [[commercial-power-subsystem-selection]] | Which purchased subsystem should own the battery and charging? | 2026-07-26 |
