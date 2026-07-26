@@ -290,3 +290,16 @@ Freerouting candidates require explicit reroute targets. Matrix serial and power
 USB shield and recovery geometry remain deterministic code-owned routes. A clean full gate reports
 zero DRC violations, zero unconnected items, zero schematic-parity issues, mypy clean, and 43 tests
 passing.
+
+## [2026-07-26] design | Replace the slow linear charger
+
+Captured and ingested the current Molicel INR-21700-M65A, TI TPS25730S, TI BQ25638, and TI PMP23456
+primary sources. Filed [[chessboard-quick-charge-architecture]] and
+[[usb-c-pd-fast-charging]]. The resulting product requirements bound representative runtime,
+10-to-80 and full recharge time, PD fallback, power-path behavior, battery protection, and
+temperature gating.
+
+The selected target is a protected 6.5 Ah cell assembly charged at 4 A from a negotiated 9 V/3 A
+source. Because this replaces the MCP73871 and passive Type-C sink, the hub portions of V1 and V2
+are reopened. The exact protected pack source, schematic, footprint, route, simulation, and measured
+charge cycle remain open and are not represented as passing evidence.

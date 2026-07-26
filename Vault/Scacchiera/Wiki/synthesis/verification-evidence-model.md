@@ -25,7 +25,8 @@ review and immutable release hashes. See
 [[../../../docs/simulation-workflow.md|the simulation and verification workflow]] and
 [[../../../docs/verification/README.md|the traceability documentation]].
 
-The first V0 inventory contains 71 atomic functional requirements and 37 numeric criteria. It also
+The first V0 inventory contained 71 atomic functional requirements and 37 numeric criteria. The
+quick-charge revision expands the current inventory to 80 requirements and 42 criteria. It also
 removed a stale 17-pixel WS2812 criterion left behind when the design changed to fourteen
 low-current pixels, illustrating why cross-document checks are release evidence rather than
 housekeeping.

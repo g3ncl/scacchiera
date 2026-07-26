@@ -25,6 +25,7 @@ Fixed by this directory (stable requirements):
 - physical form factor and dimensions;
 - the tag-to-surface read budget;
 - the display, light-bar, and button interface.
+- cordless runtime, USB-C recharge time, and battery safety behavior.
 
 Decided in the implementation docs, not here (may change without touching this directory):
 
@@ -32,6 +33,7 @@ Decided in the implementation docs, not here (may change without touching this d
 - the NFC tag type and the reader;
 - PCB topology and layout;
 - power and thermal budgets.
+- the component and circuit architecture used to meet the fixed power behavior.
 
 ## Contents
 
@@ -39,3 +41,4 @@ Decided in the implementation docs, not here (may change without touching this d
 - [gameplay.md](gameplay.md): game flow, clock, results, faults, provisioning, and the browser client.
 - [physical.md](physical.md): board geometry, the playing surface, and the piece/tag read budget.
 - [interface.md](interface.md): the two displays, the light bars, the button, and feedback semantics.
+- [power.md](power.md): cordless runtime, USB-C charging, and battery safety behavior.

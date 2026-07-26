@@ -34,6 +34,56 @@ criteria:
     margin: Exact standard chess-set count; no tolerance applies.
     test_ids: [TEST-GAME-PROVISION-002]
 
+  POWER-RUNTIME-MINIMUM:
+    description: Minimum cordless duration under the representative clocked-game power profile.
+    requirement_ids: [POWER-RUNTIME-001]
+    unit: hour
+    limits: {minimum: 10.0}
+    evidence: {class: Derived, source: docs/functional/power.md, locator: Cordless runtime}
+    operating_conditions: Full qualified battery at 20 to 25 degrees Celsius, both clocks displayed, browser connected, required sensing cadence, and event-only light-bar use.
+    margin: V3 must predict at least 11 hours so capacity aging and conversion uncertainty do not consume the ten-hour product requirement; V8 measures the exact profile.
+    test_ids: [TEST-POWER-RUNTIME-001, TEST-V8-RUNTIME-001]
+
+  POWER-CHARGE-10-80:
+    description: Maximum time to charge from 10 to 80 percent state of charge.
+    requirement_ids: [POWER-CHARGE-001]
+    unit: minute
+    limits: {maximum: 90.0}
+    evidence: {class: Derived, source: docs/functional/power.md, locator: USB-C charging}
+    operating_conditions: Idle board, qualified battery, compliant 9 V 3 A USB-C PD source and cable, and cell temperature from 20 to 25 degrees Celsius.
+    margin: A 4 A constant-current phase supplies 70 percent of a 6.5 Ah cell in 68.25 minutes, leaving 21.75 minutes for regulation, conversion loss, and control transitions before V8 measurement.
+    test_ids: [TEST-POWER-CHARGE-001, TEST-V8-CHARGE-001]
+
+  POWER-CHARGE-10-FULL:
+    description: Maximum time from 10 percent state of charge to normal full-charge termination.
+    requirement_ids: [POWER-CHARGE-002]
+    unit: minute
+    limits: {maximum: 150.0}
+    evidence: {class: Derived, source: docs/functional/power.md, locator: USB-C charging}
+    operating_conditions: Idle board, qualified battery, compliant 9 V 3 A USB-C PD source and cable, and cell temperature from 20 to 25 degrees Celsius.
+    margin: The limit leaves 81.75 minutes beyond the ideal 10-to-80 constant-current interval for the remaining constant-current and constant-voltage phases; V8 measures termination time.
+    test_ids: [TEST-POWER-CHARGE-002, TEST-V8-CHARGE-001]
+
+  POWER-CHARGE-TEMPERATURE-MIN:
+    description: Lowest cell temperature at which charging may proceed.
+    requirement_ids: [POWER-SAFETY-002]
+    unit: degC
+    limits: {minimum: 0.0}
+    evidence: {class: Datasheet, source: Vault/Scacchiera/Datasheets/INR-21700-M65A_MOLICEL.pdf, locator: Product data sheet charge ambient temperature}
+    operating_conditions: Thermistor bonded to the cell beneath the pack insulation and charger temperature qualification enabled.
+    margin: Charging is inhibited below the published zero-degree boundary rather than extrapolated.
+    test_ids: [TEST-POWER-SAFETY-002, TEST-V8-CHARGE-TEMPERATURE-001]
+
+  POWER-CHARGE-TEMPERATURE-MAX:
+    description: Highest cell temperature at which full-rate charging may proceed.
+    requirement_ids: [POWER-SAFETY-002]
+    unit: degC
+    limits: {maximum: 45.0}
+    evidence: {class: Derived, source: Vault/Scacchiera/Datasheets/INR-21700-M65A_MOLICEL.pdf, locator: Product data sheet charge ambient temperature and surface cutoff}
+    operating_conditions: Thermistor bonded to the cell beneath the pack insulation and charger temperature qualification enabled.
+    margin: The design stops full-rate charging 15 degrees below the cell's published 60 degree charge ambient maximum and far below its 80 degree surface cutoff.
+    test_ids: [TEST-POWER-SAFETY-002, TEST-V8-CHARGE-TEMPERATURE-001]
+
   PHY-SQUARE-PITCH:
     description: Nominal center-to-center pitch of adjacent squares.
     requirement_ids: [PHY-GEO-001]

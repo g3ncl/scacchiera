@@ -29,20 +29,28 @@ No gate is complete until its definition of done in
 [simulation-workflow.md](simulation-workflow.md) has recorded evidence. V0 through V7 permit only a
 scoped test-article order. V0 through V9 permit a final-board order.
 
-- [x] V0 requirement traceability: 71 atomic requirements in
+- [x] V0 requirement traceability: 80 atomic requirements in
   [verification/traceability.yaml](verification/traceability.yaml) map the complete functional
   specification and fitted-part absolute-maximum audit to stable test IDs. The manifest pins the
-  reviewed functional sources by SHA-256. Thirty-seven numeric criteria in
+  reviewed functional sources by SHA-256. Forty-two numeric criteria in
   [hardware/criteria.yaml](hardware/criteria.yaml) record units, evidence, conditions, and margin.
   `hardware/tests/test_traceability.py` enforces source freshness, schema completeness, unique IDs,
-  and bidirectional requirement/criterion links. Evidence: 5 tests passed on 2026-07-25.
-- [x] V1 component and library proof: all 59 purchased fitted MPNs in
+  and bidirectional requirement/criterion links. The 2026-07-26 revision adds runtime, USB-C PD
+  charge-time, fallback, protection, and temperature requirements. Evidence: 5 tests passed on
+  2026-07-26.
+- [ ] V1 component and library proof: the former 59-part proof remains valid for the lightbar and
+  matrix, but the hub portion is reopened by the quick-charge redesign. The TPS25730S, BQ25638,
+  protected battery assembly, high-current connector, and changed support parts require exact
+  sourcing, immutable datasheets, library audit, ratings audit, and model classification before
+  this gate can pass again. Historical evidence follows:
   [verification/v1-components.yaml](verification/v1-components.yaml) have exact supplier and order
   codes, dated availability, immutable manufacturer datasheets, per-part wiki ingestion, complete
   library and rating audits, declared model treatment, and no open document conflict. The audit
   replaced the lightbar LED and both matrix MOSFET selections rather than waiving conflicts.
   Evidence: 6 component-proof tests and 4 matrix vendor-model tests passed on 2026-07-25.
-- [x] V2 connectivity and static electrical checks: clean generation runs full SKiDL and KiCad ERC,
+- [ ] V2 connectivity and static electrical checks: the lightbar and matrix remain valid. The hub
+  schematic and route are superseded by the quick-charge requirements and must be regenerated and
+  re-reviewed. Historical evidence follows: clean generation runs full SKiDL and KiCad ERC,
   imports reviewed deterministic routing sessions, and runs PCB DRC with schematic parity on all
   three boards. [verification/v2-static.yaml](verification/v2-static.yaml) records the four
   reviewed generated-schematic warning classes, every datasheet-traced no-connect, and the zero
@@ -90,7 +98,9 @@ against the functional requirement it serves.
   an iron can reach, and the count dropped 17 to 14 because that package is wider.
 - [x] Matrix board schematic: `hardware/pcb/matrix.py`, ERC clean, BOM 4.80 EUR in parts, spec
   in [hardware/matrix.md](hardware/matrix.md).
-- [x] Hub board schematic: `hardware/pcb/hub.py`, ERC clean, BOM 16.21 EUR in parts, spec in
+- [ ] Hub board schematic: the previous MCP73871 design in `hardware/pcb/hub.py` is superseded. It
+  must be replaced by the TPS25730S and BQ25638 USB-C PD power path and protected 6.5 Ah battery
+  assembly before this milestone closes again. Historical implementation and rationale are in
   [hardware/hub.md](hardware/hub.md). Revised 2026-07-25: U4 to ESP32-C6-MINI-1U-N4 with the C6
   pin map from datasheet Table 3-1 (native USB moves to pins 17/18), Y1 to a stocked 3225
   27.12 MHz crystal with 15 pF loads, plus local module decoupling and IO9/EN recovery pads.
@@ -114,9 +124,10 @@ evidence is an analytical formula; it needs a passing simulation.
   resonates at 13.54 MHz, loaded 16-line bus at 12.93 MHz, off/on suppression 65.6 dB, steering
   bias 10.326 mA, all inside [hardware/criteria.yaml](hardware/criteria.yaml) with exact Diodes
   vendor MOSFET models.
-- [x] Hub board SPICE validation: `hardware/tests/test_sim_hub.py` drives the 16-cell bus
+- [ ] Hub board SPICE validation: the existing RF-only bench still drives the 16-cell bus
   through the PN5180 TX path; the selected loop's field peaks at 13.86 MHz at 60 mA per volt of
-  drive. The 68 pF series match value came from this bench.
+  drive and preserves useful RF evidence, but it does not validate the replacement PD, charger,
+  battery, power path, or fault behavior. The 68 pF series match value came from this bench.
 
 ### M4: PCB layout, as code (per board)
 
@@ -134,7 +145,9 @@ DoD: the layout is generated from code, DRC is clean, and it fits the board's en
   and both-face ground pours. The reviewed route session excludes four deterministic serial nets,
   and the Q24 rail escape is deterministic as well. `make pcb-matrix-drc` is reproducibly clean:
   0 violations, 0 unconnected, and 0 schematic parity issues.
-- [x] Hub board layout: `hardware/pcb/hub_layout.py` generates placement and both-face ground
+- [ ] Hub board layout: the existing `hardware/pcb/hub_layout.py` route belongs to the superseded
+  charger and must be replaced after the quick-charge schematic is complete. Its historical
+  placement and both-face ground
   pours. The reviewed route session is completed by deterministic USB shield, recovery-pad, and
   ground stitching geometry. `make pcb-hub-drc` is reproducibly clean: 0 violations,
   0 unconnected, and 0 schematic parity issues.
@@ -148,12 +161,10 @@ in [simulation-workflow.md](simulation-workflow.md).
 
 ## Status
 
-Revised 2026-07-26. V0, V1, and V2 pass. All three boards regenerate from reviewed route sessions
-and clear ERC, PCB DRC, unconnected-item, and schematic-parity checks. Fresh Freerouting output is
-kept behind the explicit `pcb-*-reroute` targets so an unreviewed route cannot silently replace the
-passing build. The 10 uH matrix choke's ambiguous 15 mA datasheet rating remains a V3 corner and
-fault-model concern, not a waived check. U4 still requires controlled Global Sourcing for factory
-placement because it is not hand solderable.
+Revised 2026-07-26. V0 passes with the quick-charge requirements included. V1 and V2 are reopened
+for the hub because the former MCP73871 design cannot meet them. The lightbar and matrix retain their
+passing component, static, simulation, and layout evidence. The 10 uH matrix choke's ambiguous
+15 mA datasheet rating remains a V3 corner and fault-model concern, not a waived check.
 
 No board is authorized for a test-article order until V3 through V7 pass. Firmware and the companion
 app have not started, so V5 and V6 remain open.

@@ -15,15 +15,14 @@ individual pages.
 ## Verification state
 
 The legacy schematic, nominal simulation, and generated-layout milestones are inputs rather than
-release authority. [[verification-evidence-model]] records the executable V0 structure: 71 atomic
-functional requirements map to stable test IDs, 37 numeric criteria carry evidence and margin, and
-source hashes force traceability review whenever the functional specification changes. V1 now
-binds all 59 purchased fitted MPNs to exact supplier codes, immutable manufacturer datasheets,
-library audits, rating fields and declared simulation treatment. It also replaced the conflicting
-matrix MOSFETs and lightbar LED with exact parts. [[v2-static-connectivity]] records the next gate:
-all three boards regenerate from reviewed route sessions, exact connectors and no-connects are
-tested, and KiCad reports zero DRC, unconnected, and schematic-parity findings. V3 through V9 remain
-responsible for simulation corners, firmware, physical, measured and independent-review evidence.
+release authority. [[verification-evidence-model]] records the executable V0 structure. The new
+functional power specification adds bounded runtime, charge time, source fallback, and battery
+safety requirements after the original 500 mA architecture proved unsuitable.
+
+[[chessboard-quick-charge-architecture]] replaces that hub power input with [[tps25730s]],
+[[bq25638]], and a protected assembly based on [[inr-21700-m65a]]. This material design change has
+reopened the hub portions of V1 and [[v2-static-connectivity|V2]]. The lightbar and matrix evidence
+remains valid. No later gate may treat the former MCP73871 schematic or route as current evidence.
 
 ## NFC Game Board: the reference project
 

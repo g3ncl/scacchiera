@@ -20,6 +20,7 @@ def test_functional_sources_have_reviewed_hashes() -> None:
         "docs/functional/interface.md",
         "docs/functional/overview.md",
         "docs/functional/physical.md",
+        "docs/functional/power.md",
     }
     for path, expected_digest in sources.items():
         assert isinstance(path, str)

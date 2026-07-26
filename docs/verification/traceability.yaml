@@ -3,10 +3,11 @@
 version: 1
 
 sources:
-  docs/functional/overview.md: 657ab698c588dbcc606459dee62486cb9f61e0e5bfeb5f2481f21c8525c0131d
+  docs/functional/overview.md: 7695e7509df6c79868e2286a0b42da37fd1823937f0b8e139d75ce85523bdb62
   docs/functional/gameplay.md: 461a3ce900ad7e2bfe67bc4f424bfa5b899486ad70e7820304bceae711a65097
   docs/functional/interface.md: 9d5aa00b924f575a50c5e1f5020e19c7470c0e618da78e05f585d669c9d59b71
   docs/functional/physical.md: 5f7888874f7e5a848dffe02f8d00c3a26ac5ebeb4aeb0ae89a0bc7ecee5779b3
+  docs/functional/power.md: ca5fc14a3dc27cfbfc0013435473dc0626bc24b55c384f8e0f63150f54955788
 
 requirements:
   - id: PRINCIPLE-001
@@ -254,6 +255,47 @@ requirements:
     source: {path: docs/functional/interface.md, locator: Feedback semantics}
     statement: The owner can configure feedback brightness from the browser.
     test_ids: [TEST-IF-FEEDBACK-003]
+
+  - id: POWER-RUNTIME-001
+    source: {path: docs/functional/power.md, locator: Cordless runtime}
+    statement: A full battery supplies at least ten hours of the defined representative clocked-game profile at 20 to 25 degrees Celsius.
+    criterion_ids: [POWER-RUNTIME-MINIMUM]
+    test_ids: [TEST-POWER-RUNTIME-001, TEST-V8-RUNTIME-001]
+  - id: POWER-RUNTIME-002
+    source: {path: docs/functional/power.md, locator: Cordless runtime}
+    statement: The owner interface reports estimated remaining play time as well as battery level.
+    test_ids: [TEST-POWER-RUNTIME-002]
+  - id: POWER-CHARGE-001
+    source: {path: docs/functional/power.md, locator: USB-C charging}
+    statement: A compliant 9 V 3 A USB-C PD source charges an idle board from 10 to 80 percent in no more than 90 minutes at 20 to 25 degrees Celsius.
+    criterion_ids: [POWER-CHARGE-10-80]
+    test_ids: [TEST-POWER-CHARGE-001, TEST-V8-CHARGE-001]
+  - id: POWER-CHARGE-002
+    source: {path: docs/functional/power.md, locator: USB-C charging}
+    statement: A compliant 9 V 3 A USB-C PD source charges an idle board from 10 percent to normal full-charge termination in no more than 150 minutes at 20 to 25 degrees Celsius.
+    criterion_ids: [POWER-CHARGE-10-FULL]
+    test_ids: [TEST-POWER-CHARGE-002, TEST-V8-CHARGE-001]
+  - id: POWER-CHARGE-003
+    source: {path: docs/functional/power.md, locator: USB-C charging}
+    statement: The board remains usable on USB while power-path management prioritizes the system and safely reduces charge current when needed.
+    test_ids: [TEST-POWER-CHARGE-003, TEST-V8-POWER-PATH-001]
+  - id: POWER-CHARGE-004
+    source: {path: docs/functional/power.md, locator: USB-C charging}
+    statement: The board never loads a USB source beyond its advertised capability and safely falls back to slower charging.
+    test_ids: [TEST-POWER-CHARGE-004, TEST-V8-USB-FALLBACK-001]
+  - id: POWER-SAFETY-001
+    source: {path: docs/functional/power.md, locator: Battery safety}
+    statement: The battery assembly independently protects against overcharge, over-discharge, overcurrent, and short circuit.
+    test_ids: [TEST-POWER-SAFETY-001, TEST-V8-BATTERY-PROTECTION-001]
+  - id: POWER-SAFETY-002
+    source: {path: docs/functional/power.md, locator: Battery safety}
+    statement: Cell temperature measured by an attached thermistor gates charging to the qualified range.
+    criterion_ids: [POWER-CHARGE-TEMPERATURE-MIN, POWER-CHARGE-TEMPERATURE-MAX]
+    test_ids: [TEST-POWER-SAFETY-002, TEST-V8-CHARGE-TEMPERATURE-001]
+  - id: POWER-SAFETY-003
+    source: {path: docs/functional/power.md, locator: Battery safety}
+    statement: Temperature-limited and source-limited charging are reported to the user.
+    test_ids: [TEST-POWER-SAFETY-003]
 
   - id: PHY-GEO-001
     source: {path: docs/functional/physical.md, locator: Fixed geometry}

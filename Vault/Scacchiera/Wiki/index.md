@@ -55,6 +55,10 @@ One [[wiki/source]] summary per ingested raw source. Factual, no interpretation.
 | [[sk68xx-mini-e-led-datasheets]] | component datasheets (two revisions, conflicting) | 2026-07-25 |
 | [[hub-power-tree-datasheets]] | component datasheets (7 parts, power and logic) | 2026-07-25 |
 | [[matrix-discrete-datasheets]] | component datasheets (5 parts, switch cell) | 2026-07-25 |
+| [[inr-21700-m65a-datasheet]] | component datasheet | 2026-07-26 |
+| [[bq25638-datasheet]] | component datasheet | 2026-07-26 |
+| [[tps25730-datasheet]] | component datasheet | 2026-07-26 |
+| [[pmp23456-reference-design]] | TI reference-design test report | 2026-07-26 |
 
 ## Entities
 
@@ -70,6 +74,9 @@ People, tools, orgs, repos. See [[wiki/entity]] pages.
 | [[pn5180]] | 2 | 2026-07-25 |
 | [[txc-7m27100009]] | 2 | 2026-07-25 |
 | [[sk6805mini-e]] | 1 | 2026-07-25 |
+| [[inr-21700-m65a]] | 1 | 2026-07-26 |
+| [[bq25638]] | 2 | 2026-07-26 |
+| [[tps25730s]] | 2 | 2026-07-26 |
 
 <!-- V1-COMPONENT-CATALOG:START -->
 ## V1 component datasheet sources
@@ -215,6 +222,7 @@ Ideas, patterns, techniques. See [[wiki/concept]] pages.
 | [[row-column-antenna-matrix-technique]] | high       | 4            | 2026-07-24 |
 | [[pin-diode-antenna-switching]]         | high       | 1            | 2026-07-24 |
 | [[jlcpcb-basic-part-sourcing]]          | medium     | 3            | 2026-07-25 |
+| [[usb-c-pd-fast-charging]]              | high       | 4            | 2026-07-26 |
 |                                         |            |              |            |
 
 ## Synthesis
@@ -228,3 +236,4 @@ Query answers filed back into the wiki. See [[wiki/synthesis]] pages.
 | [[verification-evidence-model]] | How are requirements, criteria, and tests kept synchronized? | 2026-07-25 |
 | [[v1-component-proof]] | How is every fitted component tied to exact V1 evidence? | 2026-07-25 |
 | [[v2-static-connectivity]] | How are schematic connectivity and routed boards proven equivalent? | 2026-07-26 |
+| [[chessboard-quick-charge-architecture]] | How can recharge time become much shorter than useful play time? | 2026-07-26 |
