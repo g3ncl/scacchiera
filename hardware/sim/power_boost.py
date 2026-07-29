@@ -2,10 +2,13 @@
 
 TI's official transient model is filed beside this bench. It parses under
 ngspice's PSpice mode but does not switch, settling at the body-diode voltage.
-This bench therefore models only the synchronous switching stage. Its switch
-resistances, frequency, inductor tolerance and DCR come from the filed device
-and inductor data sheets. It proves passive stress and ripple, not control-loop
-stability, startup, protection timing, or charger handover.
+This bench therefore models only the synchronous switching stage. Its maximum
+switch resistances cover the TPS61088's published minus 40 to 125 degree
+Celsius electrical range. Frequency, inductor limits, capacitor tolerance and
+temperature shift come from the filed component data sheets. It proves passive
+stress and ripple up to the derived assembled-bank ESR limit, but the fitted
+bank still needs an ESR measurement. It does not prove control-loop stability,
+startup, protection timing, or charger handover.
 """
 
 import re
@@ -22,7 +25,7 @@ GENERATED_DIR = Path(__file__).parent / "generated" / "power" / "boost"
 OUTPUT_V = 5.0
 SWITCHING_HZ = 500e3
 INDUCTOR_H = 1.2e-6
-INDUCTOR_TOLERANCE = 0.20
+INDUCTOR_SCALE = (0.70, 1.0, 1.20)
 INDUCTOR_DCR_OHM = 0.007
 INDUCTOR_SAT_A = 12.2
 INDUCTOR_RMS_A = 12.9
@@ -34,8 +37,19 @@ EFFICIENCY_FLOOR = 0.80
 
 SUPPLY_V = (2.87, 3.6, 4.2)
 LOAD_A = (0.1, 1.0, 2.0)
-CAPACITANCE_F = 45e-6
-CAPACITANCE_DERATING = (1.0, 0.5)
+CAPACITANCE_F = 67e-6
+# Three 22 uF, 20 percent X5R parts plus one 1 uF, 10 percent X5R part.
+# The minimum includes the existing 50 percent DC-bias bound and the published
+# minus 15 percent temperature characteristic. The maximum includes positive
+# initial tolerance and temperature characteristic; DC bias cannot increase C.
+CAPACITANCE_MIN_F = (3 * 22e-6 * 0.5 * 0.8 * 0.85) + (1e-6 * 0.5 * 0.9 * 0.85)
+CAPACITANCE_MAX_F = (3 * 22e-6 * 1.2 * 1.15) + (1e-6 * 1.1 * 1.15)
+CAPACITANCE_SCALE = (
+    CAPACITANCE_MIN_F / CAPACITANCE_F,
+    1.0,
+    CAPACITANCE_MAX_F / CAPACITANCE_F,
+)
+OUTPUT_ESR_OHM = (1e-6, 0.015)
 
 # TPS61088 data sheet equation 5 with the 100 and 51 kohm resistors at +1 percent,
 # and the stated 1.3 A subtraction from the typical threshold.
@@ -50,11 +64,16 @@ class Corner:
     supply_v: float
     inductor_scale: float
     capacitor_scale: float
+    output_esr_ohm: float
     load_a: float
 
     @property
     def inductance_h(self) -> float:
         return INDUCTOR_H * self.inductor_scale
+
+    @property
+    def capacitance_f(self) -> float:
+        return CAPACITANCE_F * self.capacitor_scale
 
     @property
     def duty(self) -> float:
@@ -112,11 +131,10 @@ class BoostResult:
 
 
 def corners() -> Iterator[Corner]:
-    inductance = (1.0 - INDUCTOR_TOLERANCE, 1.0, 1.0 + INDUCTOR_TOLERANCE)
-    for supply, scale_l, scale_c, load in product(
-        SUPPLY_V, inductance, CAPACITANCE_DERATING, LOAD_A
+    for supply, scale_l, scale_c, output_esr, load in product(
+        SUPPLY_V, INDUCTOR_SCALE, CAPACITANCE_SCALE, OUTPUT_ESR_OHM, LOAD_A
     ):
-        yield Corner(supply, scale_l, scale_c, load)
+        yield Corner(supply, scale_l, scale_c, output_esr, load)
 
 
 def deck(corner_list: tuple[Corner, ...]) -> str:
@@ -142,7 +160,8 @@ def deck(corner_list: tuple[Corner, ...]) -> str:
                 f"Voff{index} goff{index} 0 PULSE(1 0 0 1n 1n {on_time:.12g} {period_text})",
                 f"Slow{index} sw{index} 0 gon{index} 0 LOWSW",
                 f"Shigh{index} sw{index} out{index} goff{index} 0 HIGHSW",
-                f"Cout{index} out{index} 0 {CAPACITANCE_F * corner.capacitor_scale:.12g}",
+                f"Cout{index} out{index} cap_return{index} {corner.capacitance_f:.12g}",
+                f"Resr{index} cap_return{index} 0 {corner.output_esr_ohm:.12g}",
                 f"Rload{index} out{index} 0 {OUTPUT_V / corner.load_a:.12g}",
             )
         )

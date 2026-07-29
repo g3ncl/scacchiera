@@ -2097,6 +2097,9 @@ components:
   - board: power
     reference: C19
     value: 22u 25V
+  - board: power
+    reference: C22
+    value: 22u 25V
   library_audit:
     status: passed
     checked: '2026-07-26'
@@ -2118,9 +2121,10 @@ components:
     datasheet_locator: part-number, characteristics and dimensions tables
   simulation_model:
     kind: analytical
-    path: hardware/sim
-    valid_region: lumped model with datasheet tolerance, bias, ESR, DCR and temperature
-      corners
+    path: hardware/sim/power_boost.py
+    valid_region: initial tolerance and X5R temperature change are datasheet-bounded;
+      the 50 percent DC-bias value is a sensitivity bound, and 500 kHz ESR remains
+      open
   conflicts: []
 - mpn: CL21A475KAQNNNE
   manufacturer: Samsung Electro-Mechanics

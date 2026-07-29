@@ -92,6 +92,7 @@ def _placements() -> dict[str, Placement]:
         "C17": Placement(Position(58.0, 23.0)),
         "C18": Placement(Position(62.0, 24.0), rotation=90.0),
         "C19": Placement(Position(66.0, 24.0), rotation=90.0),
+        "C22": Placement(Position(66.0, 28.0), rotation=90.0),
         "R3": Placement(Position(47.0, 17.0)),
         "R4": Placement(Position(44.0, 15.0)),
         "R5": Placement(Position(48.2, 15.5)),

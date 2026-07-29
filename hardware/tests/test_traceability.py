@@ -58,7 +58,9 @@ def test_numeric_criteria_have_sources_conditions_and_margin() -> None:
         assert limits
         assert all(isinstance(value, (int, float)) for value in limits.values())
         evidence = require_mapping(criterion.get("evidence"), f"{identifier} evidence")
-        assert evidence.get("class") in {"Datasheet", "Standard", "Derived", "Measured"}
+        assert evidence.get("class") in {
+            "Datasheet", "Standard", "Derived", "Simulated", "Measured",
+        }
         require_nonempty_string(evidence.get("source"), f"{identifier} evidence source")
         require_nonempty_string(evidence.get("locator"), f"{identifier} evidence locator")
         require_nonempty_string(criterion.get("operating_conditions"), f"{identifier} conditions")

@@ -802,3 +802,20 @@ The ngspice bench covers cold and already-powered insertion at both polarities. 
 cell has 1.14 V of worst comparator margin. A reversed 4.2 V cell leaves the protected charger BAT
 node at minus 5.8 mV with USB absent and positive 4.2 V with USB present. The 4.422 A RMS hot loss
 bound is 0.331 W. A fresh reviewed route and the unchanged 130.1 by 63.0 mm panel reproduce cleanly.
+
+## [2026-07-30] design | Bound the boost capacitance corners
+
+The previous two-capacitor output bank did not preserve its 150 mV ripple margin once the Samsung
+initial tolerance and X5R temperature limit were combined with the existing DC-bias sensitivity
+bound. Added a third [[cl21a226maqnnne]] 22 uF capacitor and routed the 90 by 32 mm power board
+again. The reviewed route, panel, and manufacturing export remain clean.
+
+The expanded 162-corner ngspice bench also applies TI's recommended minus 30 percent inductor
+corner and a derived 15 milliohm assembled-bank ESR acceptance limit. It reaches 138 mV ripple,
+5.325 A switching-model peak, and 3.877 A switching-model RMS.
+The conservative 80 percent efficiency bound reaches 5.871 A peak and 4.442 A RMS. The TPS61088
+maximum switch resistances already cover its minus 40 to 125 degree Celsius electrical range.
+The capacitor sheet supplies no part-specific DC-bias curve or 500 kHz ESR maximum, so those remain
+open measurements instead of being inferred from its 120 Hz dissipation-factor test.
+The complete gate passes with all four boards at zero violations, zero unconnected items, and zero
+parity issues, mypy clean on 76 source files, and 124 tests passing.

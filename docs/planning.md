@@ -63,7 +63,7 @@ scoped test-article order. V0 through V9 permit a final-board order.
   DGK0008A land pattern because the generic KiCad VSSOP footprint does not meet the board's 0.2 mm
   clearance. The rejected SWPA catalog binding remains as contradiction evidence rather than a
   waiver. Evidence: `make check` regenerated all four boards at zero DRC violations, unconnected
-  items and parity issues, mypy passed on 76 source files, and all 123 tests passed on 2026-07-29.
+  items and parity issues, mypy passed on 76 source files, and all 124 tests passed on 2026-07-30.
 - [x] V2 connectivity and static electrical checks: clean generation runs full SKiDL and KiCad ERC,
   imports reviewed deterministic routing sessions, and runs PCB DRC with schematic parity on all
   four boards. [verification/v2-static.yaml](verification/v2-static.yaml) records the four
@@ -84,7 +84,10 @@ scoped test-article order. V0 through V9 permit a final-board order.
   - Line, load and tolerance corners: the buck over 72 corners, the light-bar limiter on TI's
     transient model, the charge gate over 384, the matrix bias against its choke's rating.
     Capacitor bias derating is bounded rather than sourced, since the part's data sheet prints only
-    example curves. **Temperature corners and capacitor ESR are not swept anywhere.**
+    example curves. The power boost now includes the output-capacitor X5R temperature limit and
+    uses TPS61088 switch-resistance maxima specified across minus 40 to 125 degrees Celsius.
+    The power boost also sweeps a derived 15 milliohm assembled-bank ESR acceptance limit.
+    **Other temperature corners remain open, and the fitted bank's ESR still needs V8 measurement.**
   - Startup and transients: soft-start inrush, dropout and hold-up are derived. **Warm reset,
     power-off discharge and repeated brownout are not done.** USB insertion, removal and rail
     handover belong to the power module and are V8 measurements.
@@ -224,14 +227,17 @@ evidence is an analytical formula; it needs a passing simulation.
   has a distributable vendor model, so each needs a documented datasheet-bounded substitute of the
   kind `hardware/sim/models/tlv7042.lib` now demonstrates.
 
-- [ ] Power board SPICE validation: the boost power stage passes 54 ngspice corners with 119 mV
-  worst ripple. Its switching stage reaches 5.012 A peak and 3.755 A RMS; the accepted 80 percent
-  efficiency bound raises those to 5.681 A and 4.422 A. Feedback tolerances produce 4.909 to
+- [ ] Power board SPICE validation: the boost power stage passes 162 ngspice corners with 138 mV
+  worst ripple after adding a third 22 uF output capacitor. The sweep combines initial tolerance,
+  X5R temperature shift, the 50 percent DC-bias sensitivity bound, and TI's recommended minus 30
+  percent inductor corner, plus a derived 15 milliohm assembled-bank ESR limit. Its switching stage
+  reaches 5.325 A peak and 3.877 A RMS; the accepted
+  80 percent efficiency bound raises those to 5.871 A and 4.442 A. Feedback tolerances produce 4.909 to
   5.215 V. The averaged BQ25895 handover cases pass, and a separate polarity bench passes correct
   and reversed insertion with USB absent and already present. A reversed 4.2 V cell produces only
   minus 5.8 mV at the protected BAT node without USB. The datasheet-bounded stages do not close the
-  TPS61088 control loop, temperature corners, other protection timing, or V8 physical fault test,
-  so M3 and V3 remain open.
+  TPS61088 control loop, measured capacitor-bank ESR, remaining temperature corners, other
+  protection timing, or V8 physical fault test, so M3 and V3 remain open.
 
 ### M4: PCB layout, as code (per board)
 

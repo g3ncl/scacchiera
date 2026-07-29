@@ -53,6 +53,11 @@ DESIGN_FACTS = {
         "30 V repetitive reverse voltage, 300 mA average forward current, 0.37 V maximum "
         "forward drop at 20 mA, 5 uA maximum reverse leakage and SOD-323 pin 1 cathode pinout"
     ),
+    "CL21A226MAQNNNE": (
+        "22 uF plus or minus 20 percent, 25 V, X5R from minus 55 to 85 degrees Celsius "
+        "with capacitance change within plus or minus 15 percent, and 0.1 maximum "
+        "dissipation factor measured at 120 Hz"
+    ),
     "CDMC8D28NP-1R2MC": (
         "1.2 uH plus or minus 20 percent, 7 mOhm maximum DCR, 12.2 A saturation current, "
         "12.9 A thermal current and 8.7 by 8.3 by 3.0 mm maximum body"
@@ -105,8 +110,8 @@ ENTITY_NOTES = {
     "CSD25404Q3": (
         "Power Q1 places its drain clip at the external cell positive terminal and its source "
         "clip at the protected `BAT_RAW` node. Its body diode bootstraps only correct polarity, "
-        "after which [[tlv7021dckr]] pulls the gate low. The hot 4.422 A RMS loss bound is "
-        "0.331 W. The routed board uses TI's DQG land pattern and a clearance rule scoped only "
+        "after which [[tlv7021dckr]] pulls the gate low. The hot 4.442 A RMS loss bound is "
+        "0.334 W. The routed board uses TI's DQG land pattern and a clearance rule scoped only "
         "to Q1's 0.15 mm manufacturer pad gaps."
     ),
     "TLV7021DCKR": (
@@ -120,6 +125,12 @@ ENTITY_NOTES = {
         "Power D1 clamps the comparator sense input during reversed-cell insertion. The exact "
         "LCSC C475620 device is SOD-323, with pin 1 cathode on the sense node and pin 2 anode "
         "at ground."
+    ),
+    "CL21A226MAQNNNE": (
+        "The power boost now uses C18, C19, and C22 in parallel. Its minimum-capacitance corner "
+        "combines initial tolerance, the published X5R temperature limit, and a 50 percent "
+        "DC-bias sensitivity bound. The filed sheet gives no part-specific DC-bias curve or "
+        "500 kHz ESR limit, so those remain explicit V8 measurements rather than V3 claims."
     ),
 }
 
@@ -404,6 +415,15 @@ def _limits(category: str) -> tuple[str, str]:
 
 
 def _model(part: BoundPart, category: str) -> dict[str, str]:
+    if part.mpn == "CL21A226MAQNNNE":
+        return {
+            "kind": "analytical",
+            "path": "hardware/sim/power_boost.py",
+            "valid_region": (
+                "initial tolerance and X5R temperature change are datasheet-bounded; the "
+                "50 percent DC-bias value is a sensitivity bound, and 500 kHz ESR remains open"
+            ),
+        }
     if part.mpn in {"TLV7021DCKR", "CSD25404Q3", "BAT54H"}:
         return {
             "kind": "datasheet_bounded",

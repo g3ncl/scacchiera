@@ -371,6 +371,7 @@ def build_power() -> Circuit:
         ("C17", "MODULE_5V", "1u 25V", "CL10A105KB8NNNC"),
         ("C18", "MODULE_5V", "22u 25V", "CL21A226MAQNNNE"),
         ("C19", "MODULE_5V", "22u 25V", "CL21A226MAQNNNE"),
+        ("C22", "MODULE_5V", "22u 25V", "CL21A226MAQNNNE"),
     ):
         capacitor = _passive(circuit, ref, value, mpn, cost=0.05)
         _connect(nets[net], capacitor, "1")

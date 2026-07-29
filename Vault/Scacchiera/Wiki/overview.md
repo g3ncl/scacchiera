@@ -45,7 +45,7 @@ across 384 published tolerance corners and both sensor failure directions.
 short inside its harness rating, on TI's own transient model, replacing a value that had only a
 formula behind it. [[v3-buck-power-stage]]: the 3.3 V rail's ripple and inductor stress over 72
 corners, from a model that deliberately holds no control behaviour, so regulation and stability stay
-data sheet claims for V8. The power-board boost has a 54-corner ngspice stage sweep plus a separate
+data sheet claims for V8. The power-board boost has a 162-corner ngspice stage sweep plus a separate
 80 percent efficiency current bound. Its averaged NVDC model covers adapter priority, battery
 supplement, removal, missing and depleted cells, a shorted cell, and a stuck charge command.
 [[csd25404q3]] and [[tlv7021dckr]] now isolate a reversed cell before the charger BAT node. The
@@ -56,7 +56,10 @@ unsimulated.
 The display evidence raises coincident load from 1.14 A to 1.48 A. The current 2 A interface and
 [[tps61088rhlr]] stage cover the full 10 W stress case. Replacing BQ25619 with [[bq25895rtwr]] raises
 the guaranteed battery path from 5 A to 6 A continuous and 9 A for one second, clearing the
-efficiency-bounded 4.422 A RMS and 5.681 A peak boost currents.
+efficiency-bounded 4.442 A RMS and 5.871 A peak boost currents. Its third 22 uF output capacitor
+keeps ripple to 138 mV after initial tolerance, X5R temperature shift, the 50 percent DC-bias
+sensitivity bound, TI's recommended minus 30 percent inductor corner, and a 15 milliohm
+assembled-bank ESR limit. The fitted bank still needs an ESR measurement.
 
 The earlier [[chessboard-quick-charge-architecture|custom PD architecture]] and
 [[quick-charge-module-evaluation|RBS18634 article]] remain historical evidence rather than active

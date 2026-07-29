@@ -22,7 +22,7 @@ stable 1.5 A or 3.0 A Type-C source advertisement permits more current.
 U1 is BQ25895RTWR, a switch-mode 1S charger with an NVDC power path. It gives the system priority
 while USB is present and uses its BATFET when the battery supplies the system. The filed data sheet
 rates BATFET discharge at 6 A continuous and 9 A for one second, with a 9 A overcurrent threshold.
-The conservative boost bound reaches 4.422 A RMS and 5.681 A peak at the depleted-cell,
+The conservative boost bound reaches 4.442 A RMS and 5.871 A peak at the depleted-cell,
 full-output corner.
 
 Q1, CSD25404Q3, sits between the keyed cell connector and `BAT_RAW`. Its body diode bootstraps
@@ -49,23 +49,27 @@ network gives a 6.502 A guaranteed minimum current-limit corner. The 100 k plus 
 network selects approximately 500 kHz.
 
 The 124.9 k over 39 k feedback divider produces 4.909 to 5.215 V across the TPS61088 reference and
-resistor tolerances. The output uses 45 uF nominal ceramic capacitance. U3, TLV809K33DBVR, removes
+resistor tolerances. The output uses 67 uF nominal ceramic capacitance. U3, TLV809K33DBVR, removes
 boost enable as the system rail falls through its 2.87 to 2.99 V threshold, with a local 100 nF
 bypass. This prevents ordinary operation from following the cell down to its absolute discharge
 cutoff.
 
-`hardware/tests/test_sim_power_boost.py` runs 54 ngspice switching-stage corners: 2.87, 3.6, and
-4.2 V input; 0.1, 1, and 2 A output; inductor nominal and plus or minus 20 percent; output
-capacitance nominal and 50 percent effective. The switching model reaches 119 mV peak-to-peak
-ripple, 5.012 A peak, and 3.755 A RMS. A separate 80 percent efficiency floor raises the accepted
-stress bound to 5.681 A peak and 4.422 A RMS, still below the TPS61088 limit, the inductor ratings,
-and the BQ25895 battery path.
+`hardware/tests/test_sim_power_boost.py` runs 162 ngspice switching-stage corners: 2.87, 3.6, and
+4.2 V input; 0.1, 1, and 2 A output; inductor from minus 30 to plus 20 percent; and output
+capacitance at nominal plus combined initial-tolerance, X5R temperature, and 50 percent DC-bias
+bounds, with assembled-bank ESR from ideal to 15 milliohm. The third 22 uF output capacitor keeps
+the minimum effective bank at 22.8 uF. The switching model reaches 138 mV peak-to-peak ripple,
+5.325 A peak, and 3.877 A RMS. A separate 80
+percent efficiency floor raises the accepted stress bound to 5.871 A peak and 4.442 A RMS, still
+below the TPS61088 limit, the inductor ratings, and the BQ25895 battery path.
 
 TI's official TPS61088 transient model is preserved unchanged in
 `hardware/sim/models/vendor/TPS61088_TRANS.LIB`. A two-expression compatibility copy parses and
 runs with ngspice's PSpice mode but does not switch, settling at the body-diode voltage. The passing
 bench therefore models only the power stage from published limits. It does not claim control-loop
-stability, startup, or protection timing evidence.
+stability, startup, or protection timing evidence. The fitted Samsung capacitor sheet has no 500
+kHz ESR maximum, so V8 must measure the complete bank below 15 milliohm rather than infer it from
+the sheet's 120 Hz dissipation-factor test.
 
 `hardware/tests/test_sim_power_path.py` covers the data-sheet-bounded averaged NVDC states: safe
 default and qualified input limits, adapter priority, battery supplement, adapter removal, missing
@@ -73,8 +77,8 @@ and depleted cells, battery short, the external temperature gate against a stuck
 and the full 10 W battery load. `hardware/tests/test_sim_reverse_battery.py` adds cold and
 already-powered insertion at both polarities. The worst correct-cell comparator margin is 1.14 V
 at 2.87 V. A reversed 4.2 V cell leaves `BAT_RAW` at minus 5.8 mV with USB absent and at positive
-4.2 V with USB already present, inside the BQ25895 minus 0.3 V absolute limit. The 4.422 A RMS hot
-pass-FET loss bound is 0.331 W and remains a V8 temperature and voltage-drop measurement.
+4.2 V with USB already present, inside the BQ25895 minus 0.3 V absolute limit. The 4.442 A RMS hot
+pass-FET loss bound is 0.334 W and remains a V8 temperature and voltage-drop measurement.
 
 ## Interconnect and cell
 
