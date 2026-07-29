@@ -631,3 +631,16 @@ an allowance rather than a value, and it carries about a fifth of the 3.3 V rail
 deliberately generous, so filing the real sheet can only reduce the total, but V1 now lists the
 displays alongside the unbound power module as its second open item. A test asserts the assumed share
 stays under a third, so the budget cannot drift further onto a number nobody has filed.
+
+## [2026-07-29] verification | Settle the matrix choke's rating
+
+The plan had carried the 10 uH bias choke's 15 mA rating as an open V3 concern, because the design's
+own bias band runs to 14 mA and the RF bench only ever ran one nominal point. Sweeping the bias over
+the rail's 3.27 to 3.33 V regulation band and the setting resistor's 1 percent tolerance gives 10.08
+to 10.58 mA, so 29 percent of the component maximum stays unused and the 14 mA end of the band is not
+reachable in practice.
+
+Worth separating the two numbers, since conflating them is what made this look risky. The 7 to 14 mA
+band is a specification of what the design wants the bias to be. The 15 mA is what the part can take.
+A criterion now exists for each, and the second one names the component's own data sheet rather than
+the design's intent.

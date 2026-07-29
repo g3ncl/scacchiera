@@ -225,9 +225,10 @@ in [simulation-workflow.md](simulation-workflow.md).
 Revised 2026-07-26. V0 passes with ordinary 5 V/2 A charging and bounded recharge time included.
 The power subsystem is a purchased module bounded by a written interface, with no product bound yet.
 V1 passes for the rebuilt hub, V2 passes for all three boards. The lightbar and matrix retain their
-passing component, static, simulation, and layout evidence. The 10 uH matrix
-choke's ambiguous 15 mA datasheet rating remains a V3 corner and fault-model concern, not a waived
-check.
+passing component, static, simulation, and layout evidence. The 10 uH matrix choke's 15 mA rating is
+settled: `hardware/tests/test_sim_matrix_bias.py` sweeps the bias over the rail's regulation band and
+the setting resistor's tolerance and reaches 10.58 mA, leaving 29 percent of the component's maximum
+unused.
 
 No board is authorized for a test-article order until V3 through V7 pass. Firmware and the companion
 app have not started, so V5 and V6 remain open.

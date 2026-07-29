@@ -27,7 +27,9 @@ validated in SPICE:
   cells load the bus with about 6 pF total where analog switches would collapse the tank;
 - shunt BSS123-7-F grounding the tank when deselected (the off/on suppression);
 - bias steering from the 3V3 rail: high-side BSS84-7-F, 180 ohm set resistor, isolation BAR64-02V,
-  10 uH choke, with the forward current returning through the loop's own grounded end;
+  10 uH choke, with the forward current returning through the loop's own grounded end. That choke is
+  rated 15 mA, and the swept bias reaches 10.58 mA over the rail and resistor tolerances, so 29
+  percent of its rating stays unused;
 - 100 nF DC block toward the shared bus and a 100 kilohm bleed.
 
 Selection is one-hot active low from two daisy-chained 74HC595 registers; the same line both

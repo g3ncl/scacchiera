@@ -573,3 +573,13 @@ criteria:
     operating_conditions: Radio transmitting at its data sheet peak, reader driving its field at maximum TVDD, both light bars white, matrix biased, and both displays active, all at once.
     margin: The 1.3 A the interface obliges was an estimate until this derivation, which lands at 1.14 A and leaves 12 percent. Roughly a fifth of the 3.3 V side rests on an allowance for the display modules, which have no filed data sheet; that allowance is deliberately generous and filing the real one can only reduce the total.
     test_ids: [TEST-HUB-LOAD-BUDGET-001]
+
+  MATRIX-BIAS-CHOKE-RATING:
+    description: Selected-cell bias current against the bias choke's maximum rated current.
+    requirement_ids: [PHY-RF-001]
+    unit: mA
+    limits: {maximum: 15.0}
+    evidence: {class: Datasheet, source: Vault/Scacchiera/Datasheets/SDFL2012S100KTF_C1046.pdf, locator: "Selection table, SDFL2012S100 row, Max. Rated Ir 15 mA"}
+    operating_conditions: Selected cell, 3.27 to 3.33 V rail from the buck's own regulation band, setting resistor at both extremes of its 1 percent tolerance.
+    margin: This is the component's absolute maximum, distinct from the 7 to 14 mA band the design aims for. The swept worst case is 10.58 mA, leaving 29 percent, which settles the question of whether the 14 mA end of that band could ever be reached in practice.
+    test_ids: [TEST-MATRIX-BIAS-003]

@@ -349,8 +349,8 @@ requirements:
   - id: PHY-RF-001
     source: {path: docs/functional/physical.md, locator: Read budget}
     statement: Worst-case distance from a resting piece tag to the sensing plane is no more than 3.0 mm.
-    criterion_ids: [PHY-TAG-DISTANCE, MATRIX-CELL-RESONANCE, MATRIX-BUS-RESONANCE, MATRIX-BIAS-CURRENT, MATRIX-OFF-BIAS-CURRENT, HUB-SYSTEM-RESONANCE, HUB-COIL-CURRENT-PER-VOLT]
-    test_ids: [TEST-PHY-RF-001, TEST-V8-RF-001, TEST-MATRIX-RF-001, TEST-MATRIX-RF-002, TEST-MATRIX-BIAS-001, TEST-MATRIX-BIAS-002, TEST-HUB-RF-001, TEST-HUB-RF-002]
+    criterion_ids: [PHY-TAG-DISTANCE, MATRIX-CELL-RESONANCE, MATRIX-BUS-RESONANCE, MATRIX-BIAS-CURRENT, MATRIX-OFF-BIAS-CURRENT, HUB-SYSTEM-RESONANCE, HUB-COIL-CURRENT-PER-VOLT, MATRIX-BIAS-CHOKE-RATING]
+    test_ids: [TEST-PHY-RF-001, TEST-V8-RF-001, TEST-MATRIX-RF-001, TEST-MATRIX-RF-002, TEST-MATRIX-BIAS-001, TEST-MATRIX-BIAS-002, TEST-HUB-RF-001, TEST-HUB-RF-002, TEST-MATRIX-BIAS-003]
   - id: PHY-RF-002
     source: {path: docs/functional/physical.md, locator: Read budget}
     statement: Conductive objects remain at least 10 mm behind the sensing plane until measured RF evidence permits less.
