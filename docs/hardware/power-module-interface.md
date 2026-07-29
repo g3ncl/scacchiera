@@ -27,8 +27,8 @@ why it has more supply contacts than J3.
 
 | Pin | Signal | Direction | Required |
 | --- | --- | --- | --- |
-| 1, 2 | MODULE_5V | module to hub | yes, two contacts, 2.0 A capability |
-| 3, 4 | GND | shared | yes |
+| 1, 2 | MODULE_5V | module to hub | yes, two contacts; connector revision required for margin at 2 A |
+| 3, 4 | GND | shared | yes; connector revision required for margin at 2 A |
 | 5 | I2C_SCL | hub to module | no |
 | 6 | I2C_SDA | bidirectional | no |
 | 7 | BAT_RAW | module to hub | yes, the cell terminal |
@@ -37,13 +37,14 @@ why it has more supply contacts than J3.
 
 A candidate module must provide all of these:
 
-- **5 V output at 1.6 A continuous, never sagging below 4.0 V.** The board's coincident worst case
+- **5 V output at 2.0 A continuous, never sagging below 4.0 V.** The board's coincident worst case
   is derived in `hardware/verification/load_budget.py` and comes to 1.48 A: both light bars white
   (448 mA) on the 5 V directly, plus 1.33 A on the 3.3 V rail behind the buck, with the radio at its
   transmit peak, the reader driving its field at maximum, both displays active and the matrix biased. The floor comes from the hub side: its buck holds 3.3 V until its input falls to 3.51 V at
   that load, and 4.0 V keeps half a volt in hand for the cable and connector drops that figure
   excludes. A module that sags further browns out the MCU, and the hub cannot ride it out; its
-  output capacitance is worth about five microseconds.
+  output capacitance is worth about five microseconds. The 2 A rating provides 35 percent current
+  headroom over that presently derived load and is the required 10 W stress capability.
 - **Charging from a 5 V input at 1 A or more**, which meets `POWER-CHARGE-10-80` at 240 minutes.
 - **Uninterrupted output across source insertion and removal.** The board must not reset when the
   adapter is connected or pulled. This is the property the module exists for, and V8 measures it.
@@ -54,7 +55,9 @@ A candidate module must provide all of these:
 - **Cell terminal available** on a pad or pin, for the hub's own battery reading.
 - **Cell protection**: overcharge, over-discharge, overcurrent and short circuit, on the module or
   on the cell's own protection board.
-- **Fits the service volume**: no dimension across the rail above 46 mm, including the cell.
+- **Fits the service volume**: no dimension across the rail above 46 mm, including the cell. A
+  cylindrical cell may run lengthwise along the 310 mm rail, so its diameter rather than its length
+  consumes this cross-rail dimension.
 
 ## Deliberately not required
 
@@ -66,7 +69,8 @@ A candidate module must provide all of these:
 - **A cell thermistor.** The hub carries its own cell-bonded sensor and analog window, so a module
   without an NTC input is acceptable and a module with one is redundant rather than trusted.
 - **USB Power Delivery.** The inlet is power-only and presents passive sink resistors.
-- **A specific cell format.** Any cell meeting the runtime requirement and the 46 mm width fits;
+- **A specific cell format.** Any protected assembly meeting runtime, current, and cross-section
+  requirements fits. A 21700 cell is permitted lengthwise;
   see [the format survey](../../Vault/Scacchiera/Wiki/synthesis/battery-format-and-module-alternatives.md)
   for why a 1S pouch is the current choice.
 

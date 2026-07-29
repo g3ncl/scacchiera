@@ -7,7 +7,7 @@ sources:
   docs/functional/gameplay.md: 461a3ce900ad7e2bfe67bc4f424bfa5b899486ad70e7820304bceae711a65097
   docs/functional/interface.md: 9d5aa00b924f575a50c5e1f5020e19c7470c0e618da78e05f585d669c9d59b71
   docs/functional/physical.md: 5f7888874f7e5a848dffe02f8d00c3a26ac5ebeb4aeb0ae89a0bc7ecee5779b3
-  docs/functional/power.md: 577c3a9da2b3ba41decc149e3381310f274914cf80989029bb498f6537959a84
+  docs/functional/power.md: 55ba1226b000dd60a172dfa987cbedb0f54fdcd1c4ba362f1ff4f584f54b8243
 
 requirements:
   - id: PRINCIPLE-001
@@ -266,6 +266,11 @@ requirements:
     source: {path: docs/functional/power.md, locator: Cordless runtime}
     statement: The owner interface reports estimated remaining play time as well as battery level.
     test_ids: [TEST-POWER-RUNTIME-002]
+  - id: POWER-OUTPUT-001
+    source: {path: docs/functional/power.md, locator: Peak output}
+    statement: The battery subsystem supplies a regulated 5 V at 2 A across the qualified cell-voltage range without USB input power.
+    criterion_ids: [POWER-MODULE-OUTPUT-POWER]
+    test_ids: [TEST-POWER-OUTPUT-001, TEST-V8-POWER-OUTPUT-001]
   - id: POWER-CHARGE-001
     source: {path: docs/functional/power.md, locator: USB-C charging}
     statement: A compliant 5 V 2 A USB source charges an idle board from 10 to 80 percent in no more than 240 minutes at 20 to 25 degrees Celsius, without requiring USB Power Delivery.

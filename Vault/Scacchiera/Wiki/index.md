@@ -68,6 +68,8 @@ One [[wiki/source]] summary per ingested raw source. Factual, no interpretation.
 | [[ntcle317e4103sba-rt-curve]] | manufacturer resistance curve | 2026-07-26 |
 | [[swpa5045s4r7mt-datasheet]] | component datasheet | 2026-07-26 |
 | [[er-oledm3-12-1w-manufacturer-evidence]] | component manufacturer evidence | 2026-07-29 |
+| [[bq25619rtwr-datasheet]] | component datasheet | 2026-07-29 |
+| [[tps61088rhlr-datasheet]] | component datasheet | 2026-07-29 |
 
 ## Entities
 
@@ -93,6 +95,8 @@ People, tools, orgs, repos. See [[wiki/entity]] pages.
 | [[ntcle317e4103sba]] | 1 | 2026-07-26 |
 | [[swpa5045s4r7mt]] | 1 | 2026-07-26 |
 | [[er-oledm3-12-1w]] | 1 | 2026-07-29 |
+| [[bq25619rtwr]] | 1 | 2026-07-29 |
+| [[tps61088rhlr]] | 1 | 2026-07-29 |
 
 <!-- V1-COMPONENT-CATALOG:START -->
 ## V1 component datasheet sources

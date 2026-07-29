@@ -44,6 +44,16 @@ criteria:
     margin: V3 must predict at least 11 hours so capacity aging and conversion uncertainty do not consume the ten-hour product requirement; V8 measures the exact profile.
     test_ids: [TEST-POWER-RUNTIME-001, TEST-V8-RUNTIME-001]
 
+  POWER-MODULE-OUTPUT-POWER:
+    description: Minimum regulated power available from the battery subsystem.
+    requirement_ids: [POWER-OUTPUT-001]
+    unit: W
+    limits: {minimum: 10.0}
+    evidence: {class: Derived, source: docs/functional/power.md, locator: Peak output}
+    operating_conditions: Qualified battery assembly across its permitted discharge-voltage and temperature range, USB absent, regulated module output at 5 V.
+    margin: The 2 A interface rating is 35 percent above the current 1.48 A coincident-load derivation; converter and interconnect corners must still demonstrate the full 10 W rating.
+    test_ids: [TEST-POWER-OUTPUT-001, TEST-V8-POWER-OUTPUT-001]
+
   POWER-CHARGE-10-80:
     description: Maximum time to charge from 10 to 80 percent state of charge.
     requirement_ids: [POWER-CHARGE-001]

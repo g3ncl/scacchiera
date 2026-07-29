@@ -29,15 +29,17 @@ No gate is complete until its definition of done in
 [simulation-workflow.md](simulation-workflow.md) has recorded evidence. V0 through V7 permit only a
 scoped test-article order. V0 through V9 permit a final-board order.
 
-- [x] V0 requirement traceability: 80 atomic requirements in
+- [x] V0 requirement traceability: 82 atomic requirements in
   [verification/traceability.yaml](verification/traceability.yaml) map the complete functional
   specification and fitted-part absolute-maximum audit to stable test IDs. The manifest pins the
-  reviewed functional sources by SHA-256. Forty-two numeric criteria in
+  reviewed functional sources by SHA-256. Sixty-two numeric criteria in
   [hardware/criteria.yaml](hardware/criteria.yaml) record units, evidence, conditions, and margin.
   `hardware/tests/test_traceability.py` enforces source freshness, schema completeness, unique IDs,
   and bidirectional requirement/criterion links. The 2026-07-26 revision specifies runtime,
   5 V/2 A charge-time, fallback, protection, and cell-temperature requirements without requiring
-  USB Power Delivery. Evidence: 5 tests passed on 2026-07-26.
+  USB Power Delivery. The 2026-07-29 revision adds a regulated 5 V at 2 A battery-output stress
+  requirement and permits a cylindrical cell to lie lengthwise in the player rail. Evidence: 5
+  traceability tests passed on 2026-07-29.
 - [ ] V1 component and library proof: fitted-board sourcing is complete, but the external display
   interface remains open. The power inductor is now exact Murata DFE252012F-1R0M=P2, LCSC
   C435392, with its manufacturer land pattern and a reviewed replacement route.
@@ -81,9 +83,10 @@ scoped test-article order. V0 through V9 permit a final-board order.
   - Startup and transients: soft-start inrush, dropout and hold-up are derived. **Warm reset,
     power-off discharge and repeated brownout are not done.** USB insertion, removal and rail
     handover belong to the power module and are V8 measurements.
-  - Coincident loads: the corrected worst case is 1.48 A against a 1.6 A interface obligation.
-    **The fitted TPS61023 fails its guaranteed minimum current-limit corner**, so the power board
-    requires a stronger converter before its V3 simulation can pass.
+  - Coincident loads: the corrected worst case is 1.48 A, while the revised interface must supply
+    5 V at 2 A. **The fitted TPS61023 and MCP73871 both fail the 10 W path**, so the power board
+    requires a stronger charger, power path, converter, battery connector, and output connector
+    before its V3 simulation can pass.
     **Radio and reader current steps as transients are not done**, because the load-transient
     response needs the buck's compensation, which Diodes does not publish.
   - Faults: light-bar short circuit on the vendor model, input-switch limit derived, sensor open and
@@ -151,9 +154,10 @@ against the functional requirement it serves.
   [hardware/hub.md](hardware/hub.md). Revised 2026-07-25: U4 to ESP32-C6-MINI-1U-N4 with the C6
   pin map from datasheet Table 3-1 (native USB moves to pins 17/18), Y1 to a stocked 3225
   27.12 MHz crystal with 15 pF loads, plus local module decoupling and IO9/EN recovery pads.
-- [x] Power board schematic: `hardware/pcb/power.py` implements the existing module interface with
-  MCP73871 charging and power-path management plus a TPS61023 5 V boost. ERC and BOM generation are
-  part of the ordinary build; rationale and open evidence are in [hardware/power.md](hardware/power.md).
+- [ ] Power board schematic: the routed MCP73871 and TPS61023 revision remains reproducible but is
+  superseded by the 5 V at 2 A requirement. The replacement design basis is a switch-mode NVDC
+  charger, a TPS61088-class boost stage, a lengthwise protected 21700-class cell assembly, and
+  interconnects with current margin. Exact replacement passives and connectors remain open.
 
 ### M3: SPICE validation (per board)
 

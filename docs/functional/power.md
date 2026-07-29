@@ -13,6 +13,13 @@ uses the light bars for normal event feedback rather than continuous decorative 
 Maximum-brightness continuous white lighting is a stress condition, not the representative runtime
 profile. The owner interface reports the estimated remaining play time as well as battery level.
 
+## Peak output
+
+The battery subsystem supplies a regulated 5 V at 2 A. This 10 W rating is a stress capability for
+coincident display, radio, reader, and lighting activity, not the representative runtime profile.
+The output remains within regulation across the qualified cell-voltage range without depending on
+USB input power.
+
 ## USB-C charging
 
 With the board idle and connected through a compliant 5 V, 2 A USB source and cable, charging from
@@ -37,3 +44,8 @@ The fitted battery assembly has independent overcharge, over-discharge, overcurr
 circuit protection. Charging is permitted only while the cell temperature is within the qualified
 charge range measured by a thermistor attached to the cell. The board reports temperature-limited
 or source-limited charging instead of presenting it as a fault-free fast-charge cycle.
+
+A single cylindrical cell may lie lengthwise along the player rail. Its length consumes rail length;
+its diameter, holder, insulation, and wiring must fit the rail cross-section. The complete protected
+assembly and every series contact are rated for the worst-case current at the minimum permitted cell
+voltage, not merely for the average current at nominal voltage.

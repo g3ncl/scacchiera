@@ -19,6 +19,19 @@ either.
 
 ## Charging
 
+The original MCP73871 stage is superseded by the 10 W requirement. Its battery-to-system ideal
+diode is specified for at most 2 A, while a 10 W output draws roughly 4 A from a depleted 1S cell
+after conversion loss. The replacement requires a switch-mode 1S charger with an NVDC power path,
+a battery path rated above 5 A, autonomous cold start, and a hardware-safe USB input limit.
+
+The current replacement candidate is BQ25619RTWR. Its 4 x 4 mm WQFN package remains practical on a
+two-layer panel, its BATFET has a 5 A minimum discharge clamp and 30 mOhm maximum resistance, and it
+starts autonomously from either source. PSEL will select the safe 500 mA default until the hub sets
+the qualified source and charge limits over I2C. This candidate is not fitted until its exact part,
+passives, package proof, firmware startup behavior, and simulation are complete.
+
+### Superseded 1 A implementation
+
 MCP73871, at 1 A. The part was rejected from the first design because 500 mA made a recharge take as
 long as a session; the relaxed 240-minute limit in
 [functional/power.md](../functional/power.md) lets it run at its full rate and clear that limit with
@@ -41,6 +54,19 @@ THERM is neutralised on purpose. One bead cannot bias two monitors without them 
 hub's analog window is the one with corner evidence behind it.
 
 ## The 5 V rail
+
+The 10 W replacement candidate is TPS61088RHLR. It is a synchronous boost converter with external
+current limit and compensation. At a 3.0 V minimum working cell voltage, 5 V at 2 A and 85 percent
+conservative efficiency require 3.92 A average input before ripple. The design target is therefore
+a 5.5 A minimum switch limit and an inductor rated for at least that current. The enable divider
+must stop discharge at 3.0 V or above so neither the charger BATFET's 5 A minimum clamp nor the
+cell's deep-discharge boundary becomes normal regulation behavior.
+
+The output and battery connectors must change with the silicon. Two 1 A JST GH contacts provide no
+margin at 2 A, and the JST PH cell connector cannot carry the roughly 4 A depleted-cell current.
+Both connector revisions are release blockers, including the mating harness and wire gauge.
+
+### Superseded converter implementation
 
 TPS61023 boosts the charger's system terminal, not the cell directly, so the rail keeps regulating
 whether an adapter is present or not. A 330 k, 39 k and 5.1 k divider against its 0.6 V reference

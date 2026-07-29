@@ -732,3 +732,14 @@ Ingested [[er-oledm3-12-1w-manufacturer-evidence]]. Its electrical table says 32
 current and 2 mA sleep current, while the product page calls 2 mA the active maximum. The design now
 uses the conservative 320 mA, raising coincident module load to 1.48 A. That exposes TPS61023's
 guaranteed current-limit corner as inadequate, so the converter needs replacement before V3 can pass.
+
+## [2026-07-29] design | Establish the 10 W single-cell power basis
+
+The product now requires regulated 5 V at 2 A from the battery subsystem. A cylindrical cell may
+run lengthwise along the player rail, making the filed [[inr-21700-m65a]] candidate's 21.7 mm
+diameter the relevant cross-section rather than its 70.2 mm length. The exact protected assembly
+remains open.
+
+Filed and ingested [[bq25619rtwr-datasheet]] and [[tps61088rhlr-datasheet]] before using them as
+replacement candidates. The audit also rejected the existing JST PH battery connector and the
+two-contact JST GH output at 10 W because neither has deliberate current margin.

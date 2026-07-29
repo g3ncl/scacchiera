@@ -70,8 +70,9 @@ here only as interfaces, not as boards.
 
 ### 4. Power board
 
-- **Responsibility:** hold the protected cell, charge it at 1 A through an MCP73871 power path,
-  and boost the managed system rail to the regulated 5 V the hub consumes.
+- **Responsibility:** connect a protected 1S cell, charge it from the qualified 5 V input, manage
+  source handover, and deliver a regulated 5 V at 2 A to the hub. The earlier MCP73871 and TPS61023
+  implementation cannot carry the 10 W requirement and is being replaced.
 - **Interfaces:** qualified charge input, regulated 5 V return and raw cell sense through the same
   [power module contract](power-module-interface.md) a purchased replacement would implement.
 - **Envelope:** 46 x 32 mm, 2-layer. It is a snap-off part of the panel carrying both light bars.
@@ -91,7 +92,9 @@ for the same reason the display modules are: an order that forgets them is incom
   antenna PCB was considered and rejected: its radiation pattern is the one thing in this project
   that no ngspice test can validate, and per-attempt iteration costs a fabrication run rather than
   a euro.
-- **One protected cell** for the custom [power board](power.md).
+- **One protected 1S cell assembly** for the custom [power board](power.md). A cylindrical cell may
+  lie lengthwise in the player rail. The filed 21.7 x 70.2 mm Molicel 21700 candidate demonstrates
+  that the geometry and discharge current are feasible, but the protected assembly is not bound.
 - **Superseded option, one purchased power module**, meeting [power-module-interface.md](power-module-interface.md).
   It provides charging, protection, the UPS power path and the regulated 5 V output. No product is
   bound yet; the contract caps it at 46 mm across the rail, cell included, so that it fits the
