@@ -80,7 +80,8 @@ scoped test-article order. V0 through V9 permit a final-board order.
   response and stability rest on a compensation network Diodes does not publish. The hub's V3 work is
   therefore complete to the limit of what a model can honestly say, including the coincident
   worst-case load, which derives the 1.14 A the board actually draws against the 1.3 A its module
-  interface obliges. The gate stays open on those two measured items and on the matrix and light
+  interface obliges, and the waveform integrity of both cabled buses. That last one constrains
+  firmware: the I2C bus is standard mode, since fast mode would need the bus under about 70 pF. The gate stays open on those two measured items and on the matrix and light
   bar's own remaining corners. Also open by construction: the buck's control loop, since Diodes publishes no model
   and its compensation is not in the data sheet, so regulation and stability stay data sheet claims
   for V8 rather than simulated ones.

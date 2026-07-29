@@ -583,3 +583,23 @@ criteria:
     operating_conditions: Selected cell, 3.27 to 3.33 V rail from the buck's own regulation band, setting resistor at both extremes of its 1 percent tolerance.
     margin: This is the component's absolute maximum, distinct from the 7 to 14 mA band the design aims for. The swept worst case is 10.58 mA, leaving 29 percent, which settles the question of whether the 14 mA end of that band could ever be reached in practice.
     test_ids: [TEST-MATRIX-BIAS-003]
+
+  LB-DATA-PULSE-DISTORTION:
+    description: Pulse-width distortion of the light-bar data line between hub buffer and first pixel.
+    requirement_ids: [IF-LIGHTBAR-002]
+    unit: ns
+    limits: {maximum: 50.0}
+    evidence: {class: Datasheet, source: Vault/Scacchiera/Datasheets/T37K3RGB-05C000112U1930_DIGIKEY-3147-T37K3RGB-05C000112U1930CT-ND.pdf, locator: "Data transfer time, T0H zero-code high-level time 250 to 350 ns around a 300 ns nominal"}
+    operating_conditions: Buffer at its data sheet 8 mA drive into the pixel's 30 pF maximum input, board traces, and a cable capacitance bounded at 150 pF.
+    margin: A uniform delay shifts both edges alike and does not threaten a self-clocked line. What does is the buffer sourcing through about three times the impedance it sinks through, and that asymmetry comes to 15 ns at the cable bound, under a third of the symbol tolerance.
+    test_ids: [TEST-LB-SIGNAL-001]
+
+  HUB-I2C-RISE-TIME:
+    description: Rise time of the hub's I2C bus through its pull-ups.
+    requirement_ids: [IF-BUTTON-001]
+    unit: ns
+    limits: {maximum: 1000.0}
+    evidence: {class: Datasheet, source: Vault/Scacchiera/Datasheets/TCA9535PWR_C130204.pdf, locator: "I2C timing, standard-mode rise time 1000 ns maximum"}
+    operating_conditions: 4.7 kohm pull-ups to 3.3 V against a bus capacitance bounded at the I2C specification's own 200 pF ceiling.
+    margin: 796 ns at that ceiling leaves a fifth of standard mode. It does not leave fast mode, which needs under 300 ns and so under about 70 pF of bus, so the bus is a standard-mode bus and firmware must not raise it.
+    test_ids: [TEST-HUB-I2C-001]

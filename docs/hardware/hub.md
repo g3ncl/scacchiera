@@ -210,6 +210,14 @@ start needs no inrush limiting. The rail holds 3.3 V until the module's output f
 1.3 A the interface obliges, which is where that contract's 4.0 V floor comes from. Hold-up is about
 five microseconds, so the rail follows its input and riding out a source change is the module's job.
 
+`hardware/tests/test_signal_integrity.py` covers the two buses that leave the board on a cable. The
+light-bar data line is self-clocked, so a uniform delay costs nothing and only the buffer's asymmetry
+matters: sourcing through about 150 ohm against sinking through 55 ohm distorts the pixel's high time
+by 15 ns at a cable capacitance bounded at 150 pF, against the 50 ns its symbol table allows. The
+I2C bus rises in 796 ns at the specification's own 200 pF ceiling, which fits standard mode with a
+fifth to spare and does not fit fast mode at all. **The bus is a standard-mode bus**, and reaching
+400 kHz would need it under about 70 pF, which a cable to the power module does not leave.
+
 What remains for V3 on this board is not board-side. Uninterrupted handover and source insertion
 belong to the power module and are V8 measurements; transient response and stability belong to a
 compensation network the buck's manufacturer does not publish, so no honest model here can produce

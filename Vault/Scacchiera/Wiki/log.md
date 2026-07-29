@@ -644,3 +644,19 @@ Worth separating the two numbers, since conflating them is what made this look r
 band is a specification of what the design wants the bias to be. The 15 mA is what the part can take.
 A criterion now exists for each, and the second one names the component's own data sheet rather than
 the design's intent.
+
+## [2026-07-29] verification | Waveform integrity on the cabled buses
+
+Last of the V3 bullets that is board-side. Two buses leave the hub on a cable and both are bounded
+rather than measured, since nothing in `docs/` dimensions the harnesses.
+
+The light-bar data line is self-clocked, so the useful metric is not edge speed but pulse-width
+distortion: a uniform delay shifts both edges alike and the pixel never notices. What it does notice
+is the buffer sourcing through about 150 ohm and sinking through 55 ohm, which stretches the high
+time by 15 ns at a 150 pF cable bound against the 50 ns the pixel's symbol table allows.
+
+I2C rises in 796 ns at the specification's own 200 pF ceiling. That fits standard mode with a fifth
+in hand and does not fit fast mode, which would need the bus under about 70 pF. So the bus is a
+standard-mode bus, and that is now a criterion rather than an assumption firmware could quietly
+break. A test asserts the fast-mode failure as well as the standard-mode pass, so the constraint
+cannot be lost by someone strengthening a pull-up and forgetting why it was there.
