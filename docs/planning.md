@@ -46,7 +46,10 @@ scoped test-article order. V0 through V9 permit a final-board order.
   to the contract in [hardware/power-module-interface.md](hardware/power-module-interface.md): V1
   cannot pass for a part nobody has chosen. Binding one closes this gate and needs its manufacturer
   documentation filed, its exact product and revision recorded, and every mandatory property in the
-  contract checked. Every other record has dated availability,
+  contract checked. A second item is open for the same reason: the two ER-OLEDM3.12-1W display
+  modules are fixed by the functional specification but have no filed data sheet and no audit record,
+  and roughly a fifth of the 3.3 V load budget currently rests on an allowance for them. Every other
+  record has dated availability,
   immutable manufacturer sources, wiki ingestion, library or interface proof, ratings, model
   treatment, and no open conflict. The AP63203WU-7, AP22811AW5-7, TLV7042DGKR and NR6045S4R7MT
   records include their exact selected limits and footprints. TLV7042DGKR uses the manufacturer's
@@ -75,8 +78,10 @@ scoped test-article order. V0 through V9 permit a final-board order.
   left is not board-side and cannot be closed by simulation: uninterrupted handover and source
   insertion are the power module's behaviour and are V8 measurements, and the buck's transient
   response and stability rest on a compensation network Diodes does not publish. The hub's V3 work is
-  therefore complete to the limit of what a model can honestly say; the gate stays open on those two
-  measured items and on the matrix and light bar's own remaining corners. Also open by construction: the buck's control loop, since Diodes publishes no model
+  therefore complete to the limit of what a model can honestly say, including the coincident
+  worst-case load, which derives the 1.14 A the board actually draws against the 1.3 A its module
+  interface obliges. The gate stays open on those two measured items and on the matrix and light
+  bar's own remaining corners. Also open by construction: the buck's control loop, since Diodes publishes no model
   and its compensation is not in the data sheet, so regulation and stability stay data sheet claims
   for V8 rather than simulated ones.
 - [ ] V4 layout-derived electromagnetic validation: the hub is two layers again, so the RF front end

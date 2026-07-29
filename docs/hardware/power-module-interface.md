@@ -37,9 +37,10 @@ why it has more supply contacts than J3.
 
 A candidate module must provide all of these:
 
-- **5 V output at 1.3 A continuous, never sagging below 4.0 V.** The board's worst case is both
-  light bars white (448 mA) plus the 3.3 V rail under an ESP32-C6 transmit peak, reader, displays and
-  matrix. The floor comes from the hub side: its buck holds 3.3 V until its input falls to 3.51 V at
+- **5 V output at 1.3 A continuous, never sagging below 4.0 V.** The board's coincident worst case
+  is derived in `hardware/verification/load_budget.py` and comes to 1.14 A: both light bars white
+  (448 mA) on the 5 V directly, plus 891 mA on the 3.3 V rail behind the buck, with the radio at its
+  transmit peak, the reader driving its field at maximum, both displays active and the matrix biased. The floor comes from the hub side: its buck holds 3.3 V until its input falls to 3.51 V at
   that load, and 4.0 V keeps half a volt in hand for the cable and connector drops that figure
   excludes. A module that sags further browns out the MCU, and the hub cannot ride it out; its
   output capacitance is worth about five microseconds.

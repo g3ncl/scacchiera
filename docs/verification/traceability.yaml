@@ -278,8 +278,8 @@ requirements:
   - id: POWER-CHARGE-003
     source: {path: docs/functional/power.md, locator: USB-C charging}
     statement: The board remains usable on USB while power-path management prioritizes the system and safely reduces charge current when needed.
-    criterion_ids: [HUB-3V3-RIPPLE, HUB-3V3-INDUCTOR-PEAK, HUB-3V3-INDUCTOR-RMS, HUB-CHARGE-SWITCH-DROP, HUB-CHARGE-SWITCH-LIMIT-FLOOR, HUB-3V3-DROPOUT-INPUT, HUB-3V3-STARTUP-INRUSH]
-    test_ids: [TEST-POWER-CHARGE-003, TEST-HUB-3V3-001, TEST-HUB-3V3-002, TEST-HUB-CHARGE-PATH-001, TEST-V8-POWER-PATH-001]
+    criterion_ids: [HUB-3V3-RIPPLE, HUB-3V3-INDUCTOR-PEAK, HUB-3V3-INDUCTOR-RMS, HUB-CHARGE-SWITCH-DROP, HUB-CHARGE-SWITCH-LIMIT-FLOOR, HUB-3V3-DROPOUT-INPUT, HUB-3V3-STARTUP-INRUSH, HUB-MODULE-LOAD-BUDGET]
+    test_ids: [TEST-POWER-CHARGE-003, TEST-HUB-3V3-001, TEST-HUB-3V3-002, TEST-HUB-CHARGE-PATH-001, TEST-HUB-LOAD-BUDGET-001, TEST-V8-POWER-PATH-001]
   - id: POWER-CHARGE-004
     source: {path: docs/functional/power.md, locator: USB-C charging}
     statement: The board never loads a USB source beyond its advertised capability and safely falls back to slower charging.

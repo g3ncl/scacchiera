@@ -563,3 +563,13 @@ criteria:
     operating_conditions: Both 22 uF output capacitors charged from zero to 3.3 V over the soft-start period.
     margin: The 4 ms ramp is what makes cold start uneventful. At 36 mA the capacitor charge is a twentieth of the converter's rating and disappears into the load, so startup needs no inrush limiting of its own.
     test_ids: [TEST-HUB-3V3-002]
+
+  HUB-MODULE-LOAD-BUDGET:
+    description: Coincident worst-case current the hub draws from its power module.
+    requirement_ids: [POWER-CHARGE-003]
+    unit: A
+    limits: {maximum: 1.3}
+    evidence: {class: Derived, source: docs/hardware/power-module-interface.md, locator: "Mandatory properties, 5 V output at 1.3 A continuous"}
+    operating_conditions: Radio transmitting at its data sheet peak, reader driving its field at maximum TVDD, both light bars white, matrix biased, and both displays active, all at once.
+    margin: The 1.3 A the interface obliges was an estimate until this derivation, which lands at 1.14 A and leaves 12 percent. Roughly a fifth of the 3.3 V side rests on an allowance for the display modules, which have no filed data sheet; that allowance is deliberately generous and filing the real one can only reduce the total.
+    test_ids: [TEST-HUB-LOAD-BUDGET-001]

@@ -616,3 +616,18 @@ a source change is the module's job, which is exactly what the contract already 
 
 The hub's V3 work is now complete to the limit of what a model can honestly say. The gate stays open
 on two measured items rather than on missing effort.
+
+## [2026-07-29] verification | Derive the coincident worst-case load
+
+The power-module interface obliges a module to supply 1.3 A, and that number was an estimate written
+while defining the contract. `hardware/verification/load_budget.py` now derives it from filed data
+sheets with everything doing its worst at once: the radio at its 382 mA transmit peak, the reader at
+its 250 mA TVDD maximum, both light bars white, the matrix biased, both displays active. The total is
+1.14 A, so the obligation holds with 12 percent in hand.
+
+The derivation exposed a gap it could not close. The two ER-OLEDM3.12-1W display modules are fixed by
+the functional specification, but they have no filed data sheet and no V1 record, so their current is
+an allowance rather than a value, and it carries about a fifth of the 3.3 V rail. The allowance is
+deliberately generous, so filing the real sheet can only reduce the total, but V1 now lists the
+displays alongside the unbound power module as its second open item. A test asserts the assumed share
+stays under a third, so the budget cannot drift further onto a number nobody has filed.
