@@ -660,3 +660,20 @@ in hand and does not fit fast mode, which would need the bus under about 70 pF. 
 standard-mode bus, and that is now a criterion rather than an assumption firmware could quietly
 break. A test asserts the fast-mode failure as well as the standard-mode pass, so the constraint
 cannot be lost by someone strengthening a pull-up and forgetting why it was there.
+
+## [2026-07-29] lint | Reconcile what V3 actually covers
+
+After a run of V3 work it was worth checking the claim rather than the effort. An earlier entry in
+the plan said the hub's V3 was "complete to the limit of what a model can honestly say", and that was
+too strong. Walking the workflow's own six cases instead of the list of things built turns up items
+that are neither module-side nor blocked by unpublished compensation, and simply are not done:
+temperature corners, capacitor ESR, junction-temperature estimates, warm reset, power-off discharge,
+repeated brownout, current-limit latch timing, open load, stuck control signal, and USB and display
+SPI waveform integrity.
+
+The plan now lists V3 case by case with what is covered and what is missing, so the gate reads as
+partly done rather than nearly done. Two things did close in the same pass: the matrix serial link's
+edge rate against the shift registers' own 139 ns/V transition-rate specification, and a note that
+the same edge is a third of a half period at 4 MHz, which a rule of thumb would flag even though the
+sourced limit is met eight times over. Keeping both means raising the clock later is a decision, not
+an accident.

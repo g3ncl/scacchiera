@@ -603,3 +603,13 @@ criteria:
     operating_conditions: 4.7 kohm pull-ups to 3.3 V against a bus capacitance bounded at the I2C specification's own 200 pF ceiling.
     margin: 796 ns at that ceiling leaves a fifth of standard mode. It does not leave fast mode, which needs under 300 ns and so under about 70 pF of bus, so the bus is a standard-mode bus and firmware must not raise it.
     test_ids: [TEST-HUB-I2C-001]
+
+  MATRIX-SERIAL-TRANSITION-RATE:
+    description: Edge rate the matrix shift registers see on the hub's serial link.
+    requirement_ids: [PHY-RF-001]
+    unit: ns/V
+    limits: {maximum: 139.0}
+    evidence: {class: Datasheet, source: Vault/Scacchiera/Datasheets/74HC595D-118_C5947.pdf, locator: "Dynamic characteristics, input transition rise and fall rate, 139 ns/V at VCC 4.5 V"}
+    operating_conditions: MCU driving at its 28 mA sink capability into two register inputs, board traces, and a cable capacitance bounded at 150 pF.
+    margin: 16.4 ns/V leaves more than eight times the limit. The registers run at 3.3 V, where the same table allows a slower edge still, so quoting the 4.5 V row keeps the check conservative.
+    test_ids: [TEST-MATRIX-SERIAL-001]

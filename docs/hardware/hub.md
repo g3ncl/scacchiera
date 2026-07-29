@@ -218,7 +218,18 @@ I2C bus rises in 796 ns at the specification's own 200 pF ceiling, which fits st
 fifth to spare and does not fit fast mode at all. **The bus is a standard-mode bus**, and reaching
 400 kHz would need it under about 70 pF, which a cable to the power module does not leave.
 
-What remains for V3 on this board is not board-side. Uninterrupted handover and source insertion
+The matrix serial link is bounded the same way: at the 150 pF cable bound its edge is 16.4 ns/V
+against the 139 ns/V the shift registers specify, more than eight times over. That edge is also about
+a third of a half period at 4 MHz, which a general rule about edge rates would flag; the register's
+own specification is the limit that applies, and the observation is kept so raising the clock stays a
+decision rather than an accident.
+
+Not everything V3 asks of this board is done, and `docs/planning.md` lists what is not against the
+workflow's own six cases rather than against effort spent. The largest remaining gaps here are
+temperature corners, capacitor ESR, junction-temperature estimates, and the fault cases beyond short
+circuit and a lost sensor.
+
+What cannot be closed here at all is not board-side. Uninterrupted handover and source insertion
 belong to the power module and are V8 measurements; transient response and stability belong to a
 compensation network the buck's manufacturer does not publish, so no honest model here can produce
 them. Both are recorded as such rather than left looking unfinished.

@@ -70,21 +70,26 @@ scoped test-article order. V0 through V9 permit a final-board order.
   short. Seven focused tests cover both ends of every cable, exact USB-C pins, startup pulls,
   recovery pads, enable/reset nets, exposed pads, the hardware temperature gate, the on-board
   battery measurement, and the recorded stackup and envelope.
-- [ ] V3 power, analog, timing, and fault simulation: started, not close. Passing so far: the hub's
-  cell-temperature charge gate over an exhaustive 384-corner sweep with sensor-fault cases, the
-  light-bar rail's current limit on TI's own transient model, the 3.3 V buck's power stage over 72
-  corners, the light bar and matrix supply and RF simulations from earlier, and the input switch's
-  steady state as Derived arithmetic, and the rail's startup, dropout and hold-up likewise. What is
-  left is not board-side and cannot be closed by simulation: uninterrupted handover and source
-  insertion are the power module's behaviour and are V8 measurements, and the buck's transient
-  response and stability rest on a compensation network Diodes does not publish. The hub's V3 work is
-  therefore complete to the limit of what a model can honestly say, including the coincident
-  worst-case load, which derives the 1.14 A the board actually draws against the 1.3 A its module
-  interface obliges, and the waveform integrity of both cabled buses. That last one constrains
-  firmware: the I2C bus is standard mode, since fast mode would need the bus under about 70 pF. The gate stays open on those two measured items and on the matrix and light
-  bar's own remaining corners. Also open by construction: the buck's control loop, since Diodes publishes no model
-  and its compensation is not in the data sheet, so regulation and stability stay data sheet claims
-  for V8 rather than simulated ones.
+- [ ] V3 power, analog, timing, and fault simulation: substantially advanced, not complete. Checked
+  against the six cases the workflow lists, rather than against how much work has been done.
+  - Line, load and tolerance corners: the buck over 72 corners, the light-bar limiter on TI's
+    transient model, the charge gate over 384, the matrix bias against its choke's rating.
+    Capacitor bias derating is bounded rather than sourced, since the part's data sheet prints only
+    example curves. **Temperature corners and capacitor ESR are not swept anywhere.**
+  - Startup and transients: soft-start inrush, dropout and hold-up are derived. **Warm reset,
+    power-off discharge and repeated brownout are not done.** USB insertion, removal and rail
+    handover belong to the power module and are V8 measurements.
+  - Coincident loads: the worst case is derived at 1.14 A against the module's 1.3 A obligation.
+    **Radio and reader current steps as transients are not done**, because the load-transient
+    response needs the buck's compensation, which Diodes does not publish.
+  - Faults: light-bar short circuit on the vendor model, input-switch limit derived, sensor open and
+    short in the charge gate. **Current-limit latch timing, open load, missing battery and stuck
+    control signal are not done.**
+  - Regulator behaviour: ripple, absolute maximums and logic threshold margins are covered.
+    **Stability, overshoot, undershoot, sequencing and junction-temperature estimates are not**, and
+    the first four cannot be, for the same unpublished-compensation reason.
+  - Waveform integrity: I2C, the light-bar data line and the matrix serial link are bounded against
+    their receivers' own specifications. **USB and the display SPI segment are not done.**
 - [ ] V4 layout-derived electromagnetic validation: the hub is two layers again, so the RF front end
   returns through the back copper reserved under it rather than an inner plane. Extraction must use
   that reserved region and confirm the reserve is wide enough, since it is the whole return path.

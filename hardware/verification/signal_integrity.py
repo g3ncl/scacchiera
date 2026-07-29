@@ -103,3 +103,62 @@ class I2cBusBudget:
     @property
     def fits_fast_mode(self) -> bool:
         return self.rise_time_s * 1e9 <= I2C_RISE_LIMIT_FAST_NS
+
+
+# ESP32-C6-MINI-1U-N4 data sheet: 40 mA IOH and 28 mA IOL at the default drive.
+# Output impedance is the worst-case chord from the 3.3 V rail, which is the
+# sink side because it drives less current.
+MCU_V = 3.3
+MCU_OUTPUT_OHM = MCU_V / 28e-3
+
+# 74HC595D-118 data sheet: 3.5 pF per input. Two registers in the chain see the
+# clock, one sees the serial data, and the matrix link carries both.
+REGISTER_INPUT_PF = 3.5
+REGISTER_COUNT = 2
+
+# The serial link runs at a few megahertz through the GPIO matrix, which is the
+# rate the reader and displays need.
+SERIAL_CLOCK_HZ = 4e6
+
+# 74HC595D-118 data sheet: maximum input transition rise and fall rate, 139 ns/V
+# at VCC 4.5 V. The registers run at 3.3 V, where the table allows a slower edge
+# still (625 ns/V at 2.0 V), so the 4.5 V row is the conservative choice.
+REGISTER_TRANSITION_LIMIT_NS_PER_V = 139.0
+
+# Cable to the matrix board, bounded the same way as the light bar's.
+SERIAL_CABLE_BOUND_PF = 150.0
+
+
+@dataclass(frozen=True)
+class SerialLinkBudget:
+    """Clock and data edges on the link to the matrix shift registers."""
+
+    cable_pf: float = SERIAL_CABLE_BOUND_PF
+
+    @property
+    def load_f(self) -> float:
+        return (
+            REGISTER_INPUT_PF * REGISTER_COUNT + TRACE_PF + self.cable_pf
+        ) * 1e-12
+
+    @property
+    def rise_time_s(self) -> float:
+        """Ten to ninety percent, the usual way a logic edge is quoted."""
+        return 2.2 * MCU_OUTPUT_OHM * self.load_f
+
+    @property
+    def half_period_s(self) -> float:
+        return 1.0 / (2.0 * SERIAL_CLOCK_HZ)
+
+    @property
+    def edge_fraction_of_half_period(self) -> float:
+        return self.rise_time_s / self.half_period_s
+
+    @property
+    def transition_rate_ns_per_v(self) -> float:
+        """The edge expressed the way the receiving register specifies it.
+
+        A ten to ninety percent rise covers eight tenths of the supply, which is
+        the swing the quoted rate applies to.
+        """
+        return self.rise_time_s * 1e9 / (0.8 * MCU_V)

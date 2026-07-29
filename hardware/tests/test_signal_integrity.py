@@ -5,6 +5,7 @@ from hardware.verification.signal_integrity import (
     I2C_RISE_LIMIT_FAST_NS,
     I2cBusBudget,
     LedSignalBudget,
+    SerialLinkBudget,
 )
 
 
@@ -43,3 +44,22 @@ def test_fast_mode_does_not_fit_and_is_recorded_as_such() -> None:
     """
     assert not I2cBusBudget().fits_fast_mode
     assert I2cBusBudget(bus_pf=50.0).rise_time_s * 1e9 <= I2C_RISE_LIMIT_FAST_NS
+
+
+def test_shift_registers_see_a_clean_enough_edge() -> None:
+    budget = SerialLinkBudget()
+    limit = load_criterion("MATRIX-SERIAL-TRANSITION-RATE").limits
+    assert budget.transition_rate_ns_per_v <= limit["maximum"]
+
+
+def test_the_serial_edge_is_a_third_of_a_half_period_at_the_cable_bound() -> None:
+    """Recorded because the sourced limit and the rule of thumb disagree here.
+
+    A third of a half period sounds tight, and it is what a general rule about
+    edge rates would flag. The register's own transition-rate specification is
+    the limit that actually applies, and it is met eight times over. The
+    observation stays so that raising the clock is a decision rather than an
+    accident.
+    """
+    budget = SerialLinkBudget()
+    assert 0.3 < budget.edge_fraction_of_half_period < 0.4
