@@ -84,6 +84,26 @@ criteria:
     margin: A 15 milliohm bank produces 0.138 V peak-to-peak against the 0.150 V rail limit. The Samsung sheet specifies dissipation factor only at 120 Hz, so V8 must measure rather than infer this value.
     test_ids: [TEST-POWER-OUTPUT-001, TEST-V8-POWER-OUTPUT-001]
 
+  POWER-BOOST-PHASE-MARGIN:
+    description: Minimum TPS61088 boost-loop phase margin in the preliminary small-signal sensitivity sweep.
+    requirement_ids: [POWER-OUTPUT-001]
+    unit: degree
+    limits: {minimum: 45.0}
+    evidence: {class: Derived, source: hardware/sim/power_loop.py, locator: "TI equations 13 through 17 and all declared tolerance and sensitivity corners"}
+    operating_conditions: Cell at 2.87, 3.6, and 4.2 V; 0.1, 1, and 2 A load; declared inductor, output-capacitance, output-ESR, compensation-resistor, and compensation-capacitor corners; and TPS61088 error-amplifier transconductance at typical plus or minus 30 percent.
+    margin: The 22 nF compensation capacitor clears 45 degrees in the declared sweep. The transconductance range is a sensitivity assumption because TI publishes only a typical value, so V3 remains open for guaranteed model evidence and V8 loop measurement.
+    test_ids: [TEST-POWER-OUTPUT-001, TEST-V8-POWER-OUTPUT-001]
+
+  POWER-BOOST-GAIN-MARGIN:
+    description: Minimum TPS61088 boost-loop gain margin in the preliminary small-signal sensitivity sweep.
+    requirement_ids: [POWER-OUTPUT-001]
+    unit: dB
+    limits: {minimum: 10.0}
+    evidence: {class: Derived, source: hardware/sim/power_loop.py, locator: "TI equations 13 through 17 and all declared tolerance and sensitivity corners"}
+    operating_conditions: The same independent component, line, load, and transconductance sensitivity corners as POWER-BOOST-PHASE-MARGIN.
+    margin: Every declared corner is checked against TI's 10 dB guidance. The result is preliminary because the transconductance range is not guaranteed and the vendor transient model does not switch in ngspice.
+    test_ids: [TEST-POWER-OUTPUT-001, TEST-V8-POWER-OUTPUT-001]
+
   POWER-BOOST-INDUCTOR-PEAK:
     description: Maximum boost-inductor peak current below the guaranteed TPS61088 current-limit floor.
     requirement_ids: [POWER-OUTPUT-001]

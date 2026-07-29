@@ -819,3 +819,18 @@ The capacitor sheet supplies no part-specific DC-bias curve or 500 kHz ESR maxim
 open measurements instead of being inferred from its 120 Hz dissipation-factor test.
 The complete gate passes with all four boards at zero violations, zero unconnected items, and zero
 parity issues, mypy clean on 76 source files, and 124 tests passing.
+
+## [2026-07-30] design | Stabilize the boost compensation
+
+Filed and ingested [[0402b223k500nt-datasheet]], a Basic 22 nF, 50 V, X7R 0402 capacitor for
+power C13. JLCPCB showed more than one million assembly units while LCSC retail showed no stock,
+so the two catalog channels remain explicitly distinct.
+
+Implemented TPS61088 data-sheet equations 13 through 17 as a 4,374-corner small-signal sensitivity
+analysis. The former 4.7 nF compensation value falls below TI's 45 degree phase-margin guidance.
+The fitted 22 nF value reaches 54.64 degrees minimum phase margin, infinite modeled gain margin,
+and a maximum crossover at 80.3 percent of TI's ceiling. The amplifier transconductance is swept
+plus or minus 30 percent, but TI publishes only a typical value, so V3 loop closure remains open.
+A fresh reviewed power route, the 130.1 by 63.0 mm panel, and manufacturing export reproduce with
+zero power-board DRC violations, unconnected items, or parity issues. The complete gate passes all
+four boards at zero findings, mypy on 78 source files, and 129 tests.

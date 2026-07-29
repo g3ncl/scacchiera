@@ -42,7 +42,7 @@ def _passive(
         selected = footprint
     elif ref.startswith("R"):
         selected = "Resistor_SMD:R_0603_1608Metric"
-    elif mpn.startswith("CL05"):
+    elif mpn.startswith(("0402", "CL05")):
         selected = "Capacitor_SMD:C_0402_1005Metric"
     elif mpn.startswith("CL10"):
         selected = "Capacitor_SMD:C_0603_1608Metric"
@@ -359,8 +359,7 @@ def build_power() -> Circuit:
     _connect(nets["BOOST_COMP"], comp_resistor, "1")
     _connect(comp_mid, comp_resistor, "2")
     comp_capacitor = _passive(
-        circuit, "C13", "4.7n 50V", "CC1206KKX7RCBB472",
-        footprint="Capacitor_SMD:C_1206_3216Metric", cost=0.03,
+        circuit, "C13", "22n 50V", "0402B223K500NT", cost=0.02,
     )
     _connect(comp_mid, comp_capacitor, "1")
     _connect(nets["GND"], comp_capacitor, "2")

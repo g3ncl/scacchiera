@@ -20,9 +20,16 @@ WIKI = ROOT / "Vault" / "Scacchiera" / "Wiki"
 AUDIT_PATH = ROOT / "docs" / "verification" / "v1-components.yaml"
 REVIEW_DATE = "2026-07-26"
 WIKI_UPDATE_DATE = "2026-07-29"
+AUDIT_UPDATE_DATE = "2026-07-29"
+PART_REVIEW_DATES = {"0402B223K500NT": "2026-07-29"}
 MODULE_NAME = "hardware.verification.generate_component_audit"
 
 DESIGN_FACTS = {
+    "0402B223K500NT": (
+        "22 nF plus or minus 10 percent, 50 V, X7R with plus or minus 15 percent "
+        "temperature change from minus 55 to 125 degrees Celsius, 0402 package and nickel-barrier "
+        "termination"
+    ),
     "BQ25619RTWR": (
         "3.9 to 13.5 V input operating range, 1.5 A charge-current capability, NVDC power path, "
         "5 A RMS BATFET discharge path, 1.5 MHz switching and RTW WQFN-24 pinout"
@@ -107,6 +114,13 @@ DESIGN_FACTS = {
 }
 
 ENTITY_NOTES = {
+    "0402B223K500NT": (
+        "Power C13 is the series compensation capacitor for [[tps61088rhlr]]. A sensitivity "
+        "analysis based on TI equations 13 through 17 selects 22 nF over the former 4.7 nF "
+        "value. TI specifies the error-amplifier transconductance only typically, so the plus "
+        "or minus 30 percent sweep does not close V3 control-loop evidence. JLC lists C1532 as "
+        "a Basic assembly part while LCSC retail reported no stock on 2026-07-29."
+    ),
     "CSD25404Q3": (
         "Power Q1 places its drain clip at the external cell positive terminal and its source "
         "clip at the protected `BAT_RAW` node. Its body diode bootstraps only correct polarity, "
@@ -243,6 +257,7 @@ BOARD_NAMES = ("lightbar", "matrix", "hub", "power")
 
 MANUFACTURERS = {
     "43045": "Molex",
+    "0402B": "Fenghua Advanced Technology",
     "0402CG": "Fenghua Advanced Technology",
     "0603WAF": "UNI-ROYAL",
     "74438357010": "Würth Elektronik",
@@ -415,6 +430,15 @@ def _limits(category: str) -> tuple[str, str]:
 
 
 def _model(part: BoundPart, category: str) -> dict[str, str]:
+    if part.mpn == "0402B223K500NT":
+        return {
+            "kind": "analytical",
+            "path": "hardware/sim/power_loop.py",
+            "valid_region": (
+                "initial tolerance and X7R temperature change are data-sheet bounded; error-amplifier "
+                "transconductance is a plus or minus 30 percent sensitivity because TI gives no limits"
+            ),
+        }
     if part.mpn == "CL21A226MAQNNNE":
         return {
             "kind": "analytical",
@@ -583,6 +607,7 @@ def _record(part: BoundPart) -> dict[str, Any]:
     limits, locator = _limits(category)
     datasheet = _datasheet(part.mpn)
     slug = _slug(part.mpn)
+    review_date = PART_REVIEW_DATES.get(part.mpn, REVIEW_DATE)
     return {
         "mpn": part.mpn,
         "manufacturer": _manufacturer(part.mpn),
@@ -590,7 +615,7 @@ def _record(part: BoundPart) -> dict[str, Any]:
         "order_code": part.order_code,
         "availability": {
             "status": "available",
-            "checked": REVIEW_DATE,
+            "checked": review_date,
             "source": AVAILABILITY_SOURCES.get(
                 part.order_code,
                 f"https://jlcpcb.com/partdetail?part={part.order_code}",
@@ -604,7 +629,7 @@ def _record(part: BoundPart) -> dict[str, Any]:
         "uses": [use.__dict__ for use in part.uses],
         "library_audit": {
             "status": "passed",
-            "checked": REVIEW_DATE,
+            "checked": review_date,
             "evidence": (
                 "manufacturer pin and package drawing checked against the SKiDL pin numbers, "
                 "KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation"
@@ -760,7 +785,7 @@ def main() -> None:
     document = {
         "version": 1,
         "milestone": "V1",
-        "reviewed": REVIEW_DATE,
+        "reviewed": AUDIT_UPDATE_DATE,
         "policy": (
             "Every purchased fitted component is exact, sourced, backed by an immutable "
             "manufacturer datasheet, library-audited, ratings-audited and model-classified."

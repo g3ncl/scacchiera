@@ -232,6 +232,12 @@ dated V1 availability check. Q1 uses TI's DQG land pattern because its continuou
 not map cleanly to a generic footprint; U4 uses the stock DCK SC70-5 pattern. The Q1-only 0.15 mm
 pad-gap rule matches TI's recommended land geometry without changing the board-wide 0.2 mm rule.
 
+Boost compensation C13 is Fenghua 0402B223K500NT, `C1532`: 22 nF, 50 V, X7R, plus or minus 10
+percent, 0402. JLCPCB listed it as Basic with more than one million assembly units on 2026-07-29.
+The LCSC retail page simultaneously reported no stock, so the JLC assembly inventory is the source
+for this build and the retail result is retained as a catalog-channel contradiction rather than
+silently merged with it.
+
 ## Antenna, a purchased accessory
 
 The ESP32-C6-MINI-1U has an external antenna connector rather than a PCB antenna, which makes the

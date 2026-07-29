@@ -3,7 +3,7 @@ type: source-summary
 tags:
   - wiki/source
   - wiki/component
-date_updated: 2026-07-29
+date_updated: 2026-07-26
 source_file: "Datasheets/CC1206KKX7RCBB472_C107198.pdf"
 source_title: "CC1206KKX7RCBB472 manufacturer datasheet"
 publisher: "Yageo"
@@ -12,7 +12,7 @@ publisher: "Yageo"
 # CC1206KKX7RCBB472 datasheet
 
 This source binds [CC1206KKX7RCBB472](../entities/cc1206kkx7rcbb472.md) to supplier order
-code `C107198`. It is used by hub C12 (4.7n 1kV), power C13 (4.7n 50V).
+code `C107198`. It is used by hub C12 (4.7n 1kV).
 
 [mpn::CC1206KKX7RCBB472] [order_code::C107198]
 [manufacturer::Yageo] [footprint::Capacitor_SMD:C_1206_3216Metric]

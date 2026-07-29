@@ -42,7 +42,7 @@ def test_every_fitted_purchased_mpn_is_audited_or_explicitly_blocked() -> None:
         (part.mpn, part.supplier, part.order_code, part.footprint)
         for part in _bound_parts()
     }
-    assert len(audited) == 57
+    assert len(audited) == 58
     assert audited.isdisjoint(blocked)
     assert audited | blocked == bound
 
@@ -103,7 +103,7 @@ def test_availability_and_simulation_treatment_are_recorded() -> None:
         mpn = str(record["mpn"])
         availability = require_mapping(record.get("availability"), f"{mpn} availability")
         assert availability.get("status") == "available"
-        assert availability.get("checked") == "2026-07-26"
+        assert availability.get("checked") in {"2026-07-26", "2026-07-29"}
         source = require_nonempty_string(availability.get("source"), f"{mpn} availability source")
         assert source.startswith("https://")
         model = require_mapping(record.get("simulation_model"), f"{mpn} model")
@@ -118,6 +118,8 @@ def test_availability_and_simulation_treatment_are_recorded() -> None:
         require_nonempty_string(model.get("valid_region"), f"{mpn} model valid region")
         if model.get("kind") == "vendor":
             assert (ROOT / str(model["path"])).is_file()
+    by_mpn = {str(record["mpn"]): record for record in _components()}
+    assert by_mpn["0402B223K500NT"]["availability"]["checked"] == "2026-07-29"
 
 
 def test_matrix_mosfets_use_exact_vendor_models() -> None:

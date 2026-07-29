@@ -54,6 +54,15 @@ boost enable as the system rail falls through its 2.87 to 2.99 V threshold, with
 bypass. This prevents ordinary operation from following the cell down to its absolute discharge
 cutoff.
 
+R11 and C13 form the series compensation branch. C13 is now the exact 22 nF, 50 V, X7R
+[Fenghua 0402B223K500NT](../../Vault/Scacchiera/Wiki/entities/0402b223k500nt.md), JLCPCB Basic
+`C1532`. A 4,374-corner small-signal sensitivity analysis implements TPS61088 data-sheet equations
+13 through 17. It combines line, load, inductor, output-capacitance, ESR, R11, and C13 corners with
+a plus or minus 30 percent sensitivity on the error-amplifier transconductance. The minimum phase
+margin is 54.64 degrees, every corner has infinite gain margin in the modeled frequency range, and
+the highest crossover is 80.3 percent of TI's recommended ceiling. The former 4.7 nF value falls
+below 45 degrees in the same analysis.
+
 `hardware/tests/test_sim_power_boost.py` runs 162 ngspice switching-stage corners: 2.87, 3.6, and
 4.2 V input; 0.1, 1, and 2 A output; inductor from minus 30 to plus 20 percent; and output
 capacitance at nominal plus combined initial-tolerance, X5R temperature, and 50 percent DC-bias
@@ -67,7 +76,10 @@ TI's official TPS61088 transient model is preserved unchanged in
 `hardware/sim/models/vendor/TPS61088_TRANS.LIB`. A two-expression compatibility copy parses and
 runs with ngspice's PSpice mode but does not switch, settling at the body-diode voltage. The passing
 bench therefore models only the power stage from published limits. It does not claim control-loop
-stability, startup, or protection timing evidence. The fitted Samsung capacitor sheet has no 500
+closure, startup, or protection timing evidence. The compensation analysis selects a robust
+nominal value, but TI publishes only a typical error-amplifier transconductance, so its sensitivity
+band is not a guaranteed production corner. V3 therefore still needs a guaranteed model or
+physical loop evidence, and V8 must measure phase and gain margin. The fitted Samsung capacitor sheet has no 500
 kHz ESR maximum, so V8 must measure the complete bank below 15 milliohm rather than infer it from
 the sheet's 120 Hz dissipation-factor test.
 

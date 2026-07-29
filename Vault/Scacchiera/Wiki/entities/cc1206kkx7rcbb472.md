@@ -3,13 +3,13 @@ type: entity
 tags:
   - wiki/entity
   - wiki/component
-date_updated: 2026-07-29
+date_updated: 2026-07-26
 source_count: 1
 ---
 
 # CC1206KKX7RCBB472
 
-Exact fitted component from Yageo, used by hub C12 (4.7n 1kV), power C13 (4.7n 50V).
+Exact fitted component from Yageo, used by hub C12 (4.7n 1kV).
 
 [mpn::CC1206KKX7RCBB472] [supplier::JLCPCB]
 [order_code::C107198] [category::capacitor]

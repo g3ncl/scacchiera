@@ -1,9 +1,52 @@
 version: 1
 milestone: V1
-reviewed: '2026-07-26'
+reviewed: '2026-07-29'
 policy: Every purchased fitted component is exact, sourced, backed by an immutable
   manufacturer datasheet, library-audited, ratings-audited and model-classified.
 components:
+- mpn: 0402B223K500NT
+  manufacturer: Fenghua Advanced Technology
+  supplier: JLCPCB
+  order_code: C1532
+  availability:
+    status: available
+    checked: '2026-07-29'
+    source: https://jlcpcb.com/partdetail?part=C1532
+  datasheet: Vault/Scacchiera/Datasheets/0402B223K500NT_C1532.pdf
+  wiki_source: Vault/Scacchiera/Wiki/sources/0402b223k500nt-datasheet.md
+  wiki_entity: Vault/Scacchiera/Wiki/entities/0402b223k500nt.md
+  category: capacitor
+  footprint: Capacitor_SMD:C_0402_1005Metric
+  uses:
+  - board: power
+    reference: C13
+    value: 22n 50V
+  library_audit:
+    status: passed
+    checked: '2026-07-29'
+    evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
+      KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
+    checks:
+    - symbol_pin_numbers_and_names
+    - symbol_electrical_types
+    - exposed_and_no_connect_pins
+    - footprint_pad_numbers
+    - package_dimensions
+    - polarity_and_pin_one
+    - assembly_side
+    - cpl_zero_rotation
+  ratings_audit:
+    status: passed
+    fields: capacitance, tolerance, rated voltage, dielectric, temperature range,
+      DC-bias behavior where published and package dimensions
+    datasheet_locator: part-number, characteristics and dimensions tables
+  simulation_model:
+    kind: analytical
+    path: hardware/sim/power_loop.py
+    valid_region: initial tolerance and X7R temperature change are data-sheet bounded;
+      error-amplifier transconductance is a plus or minus 30 percent sensitivity because
+      TI gives no limits
+  conflicts: []
 - mpn: 0402CG101J500NT
   manufacturer: Fenghua Advanced Technology
   supplier: JLCPCB
@@ -1602,9 +1645,6 @@ components:
   - board: hub
     reference: C12
     value: 4.7n 1kV
-  - board: power
-    reference: C13
-    value: 4.7n 50V
   library_audit:
     status: passed
     checked: '2026-07-26'

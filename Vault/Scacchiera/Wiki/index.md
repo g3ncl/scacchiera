@@ -113,6 +113,7 @@ One exact source summary per purchased fitted MPN. The structured audit is
 
 | Page | Manufacturer | Updated |
 | --- | --- | --- |
+| [[0402b223k500nt-datasheet]] | Fenghua Advanced Technology | 2026-07-29 |
 | [[0402cg101j500nt-datasheet]] | Fenghua Advanced Technology | 2026-07-26 |
 | [[0402cg150j500nt-datasheet]] | Fenghua Advanced Technology | 2026-07-26 |
 | [[0603waf1000t5e-datasheet]] | UNI-ROYAL | 2026-07-29 |
@@ -139,7 +140,7 @@ One exact source summary per purchased fitted MPN. The structured audit is
 | [[bss123-7-f-datasheet]] | Diodes Incorporated | 2026-07-26 |
 | [[bss84-7-f-datasheet]] | Diodes Incorporated | 2026-07-26 |
 | [[cc0603frnpo9bn221-datasheet]] | Yageo | 2026-07-26 |
-| [[cc1206kkx7rcbb472-datasheet]] | Yageo | 2026-07-29 |
+| [[cc1206kkx7rcbb472-datasheet]] | Yageo | 2026-07-26 |
 | [[cdmc8d28np-1r2mc-datasheet]] | Sumida | 2026-07-29 |
 | [[cl05a105ka5nqnc-datasheet]] | Samsung Electro-Mechanics | 2026-07-26 |
 | [[cl05b104ko5nnnc-datasheet]] | Samsung Electro-Mechanics | 2026-07-29 |
@@ -175,6 +176,7 @@ One exact source summary per purchased fitted MPN. The structured audit is
 
 | Page | source_count | Updated |
 | --- | ---: | --- |
+| [[0402b223k500nt]] | 1 | 2026-07-29 |
 | [[0402cg101j500nt]] | 1 | 2026-07-26 |
 | [[0402cg150j500nt]] | 1 | 2026-07-26 |
 | [[0603waf1000t5e]] | 1 | 2026-07-29 |
@@ -201,7 +203,7 @@ One exact source summary per purchased fitted MPN. The structured audit is
 | [[bss123-7-f]] | 1 | 2026-07-26 |
 | [[bss84-7-f]] | 1 | 2026-07-26 |
 | [[cc0603frnpo9bn221]] | 1 | 2026-07-26 |
-| [[cc1206kkx7rcbb472]] | 1 | 2026-07-29 |
+| [[cc1206kkx7rcbb472]] | 1 | 2026-07-26 |
 | [[cdmc8d28np-1r2mc]] | 1 | 2026-07-29 |
 | [[cl05a105ka5nqnc]] | 1 | 2026-07-26 |
 | [[cl05b104ko5nnnc]] | 1 | 2026-07-29 |
@@ -260,7 +262,7 @@ Query answers filed back into the wiki. See [[wiki/synthesis]] pages.
 | [[tps2553-current-limit-error]] | Why did the original current-limit calculation fail? | 2026-07-25 |
 | [[jlcpcb-matrix-bom-review]] | How can the matrix BOM be made unambiguous, stocked, and safe? | 2026-07-24 |
 | [[verification-evidence-model]] | How are requirements, criteria, and tests kept synchronized? | 2026-07-25 |
-| [[v1-component-proof]] | How is every fitted component tied to exact V1 evidence? | 2026-07-29 |
+| [[v1-component-proof]] | How is every fitted component tied to exact V1 evidence? | 2026-07-30 |
 | [[v2-static-connectivity]] | How are schematic connectivity and the routed boards proven equivalent? | 2026-07-29 |
 | [[v3-charge-interlock]] | How is the cell-temperature charge cutoff proven over every published tolerance? | 2026-07-29 |
 | [[v3-led-rail-current-limit]] | Does the light-bar limiter pass the real load and clamp a fault? | 2026-07-29 |

@@ -48,6 +48,10 @@ corners, from a model that deliberately holds no control behaviour, so regulatio
 data sheet claims for V8. The power-board boost has a 162-corner ngspice stage sweep plus a separate
 80 percent efficiency current bound. Its averaged NVDC model covers adapter priority, battery
 supplement, removal, missing and depleted cells, a shorted cell, and a stuck charge command.
+Its [[0402b223k500nt]] compensation capacitor is selected by a 4,374-corner small-signal
+sensitivity analysis, which reaches 54.64 degrees minimum phase margin and rejects the former 4.7
+nF value. TI gives no guaranteed error-amplifier transconductance range, so this narrows the design
+without closing V3 loop evidence.
 [[csd25404q3]] and [[tlv7021dckr]] now isolate a reversed cell before the charger BAT node. The
 ngspice bench covers cold and already-powered insertion at both polarities, while physical fault
 insertion remains mandatory at V8. The AP22811 input switch and many transient cases remain
