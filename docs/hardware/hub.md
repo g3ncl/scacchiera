@@ -9,38 +9,46 @@ layout in `hardware/pcb/hub_layout.py`.
 
 ## Power
 
-The hub receives regulated 5 V from the purchased PiSugar 3 Plus described in
-[power-subsystem.md](power-subsystem.md). PiSugar owns the cell, charger, battery protection, 5 V
-conversion, UPS handover, and battery telemetry. The custom hub never connects to the raw cell.
+The hub receives regulated 5 V from a purchased power module. Which module is a separate decision,
+bounded by the contract in [power-module-interface.md](power-module-interface.md) and recorded in
+[power-subsystem.md](power-subsystem.md); the hub is built against the contract, not against a
+product, so the module can be swapped without touching this board. The custom hub never charges the
+cell and never connects to it except through a 2 Mohm divider.
 
 The product's power-only USB-C inlet presents passive Type-C sink resistors and accepts only a
-qualified fixed 5 V/2 A adapter. AP22811AW5-7 gates that input to the PiSugar 5 V pad and adds
-current limiting, short-circuit protection, output discharge, thermal protection, and reverse
-current blocking. Its enable is the wired result of both TLV7042DGKR comparisons around a
-cell-bonded NTCLE317E4103SBA sensor. A 10 kohm sensor bias, a 39k/100k cold reference, and a
-300k/200k hot reference made from existing 100k resistors produce conservative nominal trips near
-5 and 34 degrees Celsius. An open
-sensor trips cold and a shorted sensor trips hot. Firmware receives a divided sensor voltage for
-reporting but has no path that can override the cutoff.
+qualified fixed 5 V/2 A adapter. AP22811AW5-7 gates that input to the module and adds current
+limiting, short-circuit protection, output discharge, thermal protection, and reverse current
+blocking. Its enable is the wired result of both TLV7042DGKR comparisons around a cell-bonded
+NTCLE317E4103SBA sensor. A 10 kohm sensor bias, a 39k/100k cold reference, and a 300k/200k hot
+reference made from existing 100k resistors produce conservative nominal trips near 4.5 and 34.5
+degrees Celsius, simulated at 2.17 to 36.43 over every published tolerance corner (see Validation).
+An open sensor trips cold and a shorted sensor trips hot. Firmware receives a divided sensor voltage
+for reporting but has no path that can override the cutoff.
 
-AP63203WU-7 and a 4.7 uH NR6045S4R7MT make 3.3 V from PiSugar's managed 5 V. The fixed-output
+AP63203WU-7 and a 4.7 uH NR6045S4R7MT make 3.3 V from the module's managed 5 V. The fixed-output
 buck uses the data sheet's 10 uF input, two 22 uF output, and 100 nF bootstrap network. The light
 bars use managed 5 V directly through the TPS2553 latch-off current limiter, with their data driven
-through an AHCT buffer at 5 V logic. This removes the former TPS63802 buck-boost, TPS61023 boost,
-battery connector, charger, and duplicate conversion stages.
+through an AHCT buffer at 5 V logic.
 
-PiSugar shares I2C with the hub and reports source presence, battery voltage, estimated percentage,
-and control state. Its charger-chip temperature remains useful telemetry but is not used as cell
-temperature. The analog cutoff now has V3 corner evidence (see Validation); V8 still has to measure
-the built gate against a real cell.
+Both halves of the module link are seven-way, because every contact in these connector families is
+rated 1.0 A and both halves carry the whole board. J2 spreads the qualified output over three
+contacts, since it carries charge current and system load together while an adapter is connected;
+J3 spreads the return over two.
+
+Battery level is measured here rather than read from the module. R32 and R33 divide the cell
+arriving on J3 pin 7 into IO4 (ADC1_CH4), filtered by C18. A 4.2 V cell reads 2.1 V, below the 2.5 V
+the thermistor tap already presents to the same ADC, and the pair draws 2.1 uA, which is 1.5 mAh over
+a month of storage. This is what lets a module with an undocumented or absent I2C map still satisfy
+the product's battery reporting. Where a module does expose I2C, the hub can use it for source
+presence and charge control, but nothing required by `docs/functional/` depends on it.
 
 ## MCU and slow control
 
 ESP32-C6-MINI-1U-N4: WiFi 6 for the browser client, one SPI bus
 shared by the reader, both displays, and the matrix selection registers. A TCA9535 I2C expander
 carries every slow signal: the matrix latch (SEL_RCLK), reader reset, display DC and reset, LED
-rail enable, LED fault, and the single button (polled, 10 k pullup, 2-pin connector). PiSugar
-telemetry and control remain directly on I2C rather than consuming expander pins.
+rail enable, LED fault, and the single button (polled, 10 k pullup, 2-pin connector). Power module
+telemetry, where a module offers it, stays directly on I2C rather than consuming expander pins.
 
 The pin map comes from datasheet v1.5 Table 3-1, not from the C3 module this replaced. The C6 is
 pin compatible with the C3-MINI series only on power, ground, EN and UART0: most GPIO numbers
@@ -85,21 +93,32 @@ stays balanced. RX taps the bus through 100 pF and 1 k into RXP, with RXN refere
 
 All low-voltage harnesses use locking connectors: the 7-pin matrix link (RF bus between grounds,
 3V3, serial selection), two 7-pin display connectors (3V3 SPI plus DC and reset), two 4-pin light
-bar connectors chained through LED_RETURN, a 2-pin qualified 5 V output to the PiSugar input pad,
-a 4-pin PiSugar 5 V and I2C return, the 2-pin cell thermistor, a 4-pin UART service connector, and
-the 2-pin button. There is no battery connector on the hub.
+bar connectors chained through LED_RETURN, a 7-pin qualified 5 V output to the power module, a
+7-pin module return carrying 5 V, optional I2C and the cell tap, the 2-pin cell thermistor, a 4-pin
+UART service connector, and the 2-pin button. The cell itself never lands on this board.
 
 ## Board
 
-The board is 110 x 46 mm, 1.0 mm thick, with four copper layers. The inner routing capacity leaves
-substantially more ground return around the ESP32 and PN5180 than the attempted two-layer route,
-while the matrix remains the only board functionally constrained to two layers. Placement follows
-the signal path from USB input and temperature gate, through managed rails and control, to the NFC
-front end and edge connectors. The reviewed Specctra session is versioned, with the 2 A USB entry,
-safety-critical VBUS branches, USB shield, SCLK bridge, and ground stitching owned deterministically
-by code. `make pcb-hub-drc` reproduces 0 violations, 0 unconnected items, and 0 schematic-parity
-issues. The fabrication export reads the stack from the board, so the two inner layers reach the
-Gerber set instead of being dropped by a fixed outer-layer list.
+The board is 162 x 46 mm, 1.0 mm thick, two copper layers. Every board in the product is now two
+layers. The length buys the layer count: the service volume is a 310 mm player rail with only the
+hub in it, so 162 mm costs nothing mechanically, while a four-layer panel costs a multiple of a
+two-layer one at every fab. Width stays at 46 mm because that is what fits under a 50 mm rail.
+
+Placement follows the signal path from USB input and temperature gate, through managed rails and
+control, to the NFC front end and edge connectors. Functional zones slide along the board by fixed
+amounts, so the crossings between clusters open while the geometry inside a cluster is untouched:
+decoupling stays beside the pin it serves.
+
+The back copper is reserved under the reader's match and the run to the matrix connector, where the
+13.56 MHz return flows: no tracks, vias allowed, and the routed board has zero signal segments
+inside it. The reserve starts clear of the reader itself, because a QFN-40 in a 6 mm body needs both
+faces to escape its pins. Elsewhere B.Cu carries 256 signal segments against 819 on F.Cu.
+
+The reviewed Specctra session is versioned, with the 2 A USB entry, the safety-window VBUS
+distribution and its reference branch, and the USB shield owned deterministically by code.
+`make pcb-hub-drc` reproduces 0 violations, 0 unconnected items, and 0 schematic-parity issues. The
+fabrication export reads the stack from the board, so a later layer-count change cannot ship a
+Gerber set missing copper.
 
 ## Mounting
 
@@ -134,9 +153,13 @@ and the startup, brownout and handover transients.
 
 ## Cost
 
-The regenerated engineering BOM is 13.402 EUR in estimated custom-board parts. This is not a
-factory quote and excludes assembly fees, the PiSugar 3 Plus, its cell sensor and cable assemblies.
-The purchased subsystem must be included in complete-product cost, not the JLCPCB BOM. Four copper
-layers cost more per panel than two, so the 25 EUR board target in
-[boards.md](boards.md) needs a real quote rather than the previous two-layer assumption. Re-quote the
-four-layer hub with the complete product before ordering.
+The engineering BOM is 13.768 EUR in estimated custom-board parts across 39 fitted lines, up
+0.366 EUR from the four-layer revision: J2 and J3 became seven-way to spread their supply across
+1.0 A contacts, and the cell divider added three passives with values already in the BOM. No new
+part type entered the design, so the four fee-bearing Extended lines and their 10.80 EUR of feeder
+charges are unchanged.
+
+This is not a factory quote and excludes assembly fees, the power module, its cell, sensor and cable
+assemblies. The purchased subsystem belongs in complete-product cost, not the JLCPCB BOM. Two copper
+layers at 162 x 46 mm should quote well under a four-layer panel, but the 25 EUR board target in
+[boards.md](boards.md) still needs a real quote at the final dimensions before ordering.

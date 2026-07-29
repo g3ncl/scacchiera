@@ -50,10 +50,11 @@ here only as interfaces, not as boards.
   5 V input, 3.3 V regulation, the PIN-diode reverse-bias supply, the independent cell-temperature
   interlock, the single button, and the connectors fanning out to every other surface.
 - **Interfaces:** matrix board (RF feed, line select, bias); two display modules (shared bus,
-  I2C or SPI, decided at schematic time); two light bars (few-wire serial); button; PiSugar 5 V and
-  I2C; service-only debug.
-- **Envelope:** fits the service volume under one 50 mm player rail, conductive parts kept out of
-  the play area per the read-budget rule.
+  I2C or SPI, decided at schematic time); two light bars (few-wire serial); button; power module
+  qualified 5 V out and managed 5 V back; service-only debug.
+- **Envelope:** 162 x 46 mm, 2-layer, in the service volume under one 50 mm player rail, conductive
+  parts kept out of the play area per the read-budget rule. Long rather than layered: the rail is
+  310 mm and holds only this board, so length is cheaper than copper layers.
 - **Cost target:** 25 EUR (MCU module, reader IC, buck regulator, safety interlock, connectors).
 
 ### 3. Light bar board (x2, one design)
@@ -81,10 +82,11 @@ for the same reason the display modules are: an order that forgets them is incom
   antenna PCB was considered and rejected: its radiation pattern is the one thing in this project
   that no ngspice test can validate, and per-attempt iteration costs a fabrication run rather than
   a euro.
-- **One PiSugar 3 Plus battery subsystem with its supplied 5000 mAh cell.** It provides the
-  charging inlet, protection, UPS power path, regulated 5 V output, and I2C telemetry. Its filed
-  assembly is about 65 x 57 x 9.22 mm and therefore requires the ventilated rear cassette defined
-  in [power-subsystem.md](power-subsystem.md), not the 50 mm player-rail service volume.
+- **One power module and its cell**, meeting [power-module-interface.md](power-module-interface.md).
+  It provides charging, protection, the UPS power path and the regulated 5 V output. No product is
+  bound yet; the contract caps it at 46 mm across the rail, cell included, so that it fits the
+  player-rail service volume rather than needing a separate cassette. Selection status is in
+  [power-subsystem.md](power-subsystem.md).
 
 ## Why this split
 
@@ -97,8 +99,8 @@ for the same reason the display modules are: an order that forgets them is incom
 - The light bars are separate because they live in a different mechanical position (behind the
   rail diffusers) and are trivially small; folding them into the hub would tie the hub's outline
   to the diffuser geometry.
-- Rough total per unit in custom parts and fab remains to be regenerated, with the PiSugar and two
-  display modules counted as purchased accessories.
+- Rough total per unit in custom parts and fab remains to be regenerated, with the power module,
+  its cell and the two display modules counted as purchased accessories.
 
 ## Build order
 

@@ -180,6 +180,29 @@ class BoardBuilder:
             outline.Append(point.x, point.y)
         self.board.Add(zone)
 
+    def add_keepout(self, layer: int, corners: Iterable[Position]) -> None:
+        """Forbid tracks and vias in a region, leaving the pour there intact.
+
+        On two layers the back copper is both the ground return and the router's
+        second routing layer, and a signal crossing it cuts the return path. This
+        reserves the areas where that matters instead of accepting whatever the
+        router happens to do.
+        """
+        zone = pcbnew.ZONE(self.board)
+        zone.SetLayer(layer)
+        zone.SetIsRuleArea(True)
+        zone.SetDoNotAllowTracks(True)
+        # Vias stay legal: ground stitching between the two pours is wanted here,
+        # and a via is only useful to the router if it can leave on a track.
+        zone.SetDoNotAllowVias(False)
+        zone.SetDoNotAllowZoneFills(False)
+        outline = zone.Outline()
+        outline.NewOutline()
+        for corner in corners:
+            point = _vector(corner)
+            outline.Append(point.x, point.y)
+        self.board.Add(zone)
+
     def save(self, path: Path) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)
         if not pcbnew.SaveBoard(str(path), self.board):

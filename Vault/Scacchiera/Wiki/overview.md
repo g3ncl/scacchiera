@@ -1,6 +1,6 @@
 ---
 type: overview
-date_updated: 2026-07-26
+date_updated: 2026-07-29
 tags:
   - wiki/overview
 ---
@@ -19,12 +19,17 @@ release authority. [[verification-evidence-model]] records the executable V0 str
 functional power specification adds bounded runtime, charge time, source fallback, and battery
 safety requirements after the original 500 mA architecture proved unsuitable.
 
-[[commercial-power-subsystem-selection]] replaces the custom charger and raw-cell plan with
-[[pisugar3-plus]]. The purchased 18.5 Wh subsystem owns the cell, charging, protection,
-uninterrupted 5 V path, and I2C state reporting. This material change keeps the hub portions of V1
-and [[v2-static-connectivity|V2]] tied to the regulated 5 V boundary. Both gates now pass. The
-rebuilt four-layer hub has a reviewed reproducible route with zero DRC, connectivity, or schematic
-parity findings.
+[[commercial-power-subsystem-selection]] replaced the custom charger and raw-cell plan with a
+purchased subsystem owning the cell, charging, protection and the uninterrupted 5 V path. As of
+2026-07-29 that subsystem is a written contract rather than a product: [[pisugar3-plus]] is 57 mm
+across against the 46 mm a player rail allows, and the board now measures cell voltage itself, so no
+module's telemetry is load-bearing and the module can be swapped. See
+[[battery-format-and-module-alternatives]]. V1 is open again as a result, because an unbound part
+cannot have a passing audit; every board part still passes it.
+
+[[v2-static-connectivity|V2]] passes on all three boards, and all three are two copper layers. The
+hub reached that by growing to 162 x 46 mm rather than by adding layers, since the rail it lives in
+has length to spare and a four-layer panel costs a multiple of a two-layer one.
 
 V3 power and fault simulation is the open gate. Its first hub result is
 [[v3-charge-interlock]]: the cell-temperature cutoff holds inside the qualified 0 to 40 degree range
@@ -33,8 +38,8 @@ on the hub, and every transient case on every board, remains unsimulated.
 
 The earlier [[chessboard-quick-charge-architecture|custom PD architecture]] and
 [[quick-charge-module-evaluation|RBS18634 article]] remain historical evidence rather than active
-designs. The current open risks are enclosure ventilation, the module's seven-millimetre rail-width
-conflict, measured recharge time, and representative runtime. The selected
+designs. The current open risks are enclosure ventilation, choosing a power module that fits the
+rail, measured recharge time, and representative runtime. The selected
 [[fail-safe-cell-temperature-window]] uses a wired thermistor and analog comparators so firmware
 cannot override the qualified charge range. Hub L1 is the fully documented [[nr6045s4r7mt]];
 the earlier [[swpa5045s4r7mt]] catalog binding is rejected because its claimed MPN is absent from

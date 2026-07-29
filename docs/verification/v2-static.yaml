@@ -30,7 +30,7 @@ no_connects:
     datasheet: Vault/Scacchiera/Datasheets/PN5180A0HN-C3E_C1526287.pdf
     locator: HVQFN40 pin description, pins marked DNC or unused optional interfaces.
   U4:
-    pins: ['4', '7', '9', '10', '15', '16', '17', '18', '19', '20', '21', '32', '33', '34', '35']
+    pins: ['4', '7', '10', '15', '16', '17', '18', '19', '20', '21', '32', '33', '34', '35']
     datasheet: Vault/Scacchiera/Datasheets/ESP32-C6-MINI-1U-N4_C7558096.pdf
     locator: Table 3-1 pin definitions; reserved pins, unused GPIOs, and unused native USB pins.
   U6:
@@ -50,18 +50,23 @@ board_results:
   hub: {drc_violations: 0, unconnected_items: 0, schematic_parity_issues: 0}
 
 hub_layout:
-  envelope_mm: [110, 46]
-  copper_layers: 4
+  envelope_mm: [162, 46]
+  copper_layers: 2
   board_thickness_mm: 1.0
   reviewed_route: hardware/pcb/routes/hub.ses
-  rationale: Four copper layers preserve useful ground return around the dense MCU and NFC routing; only the matrix is functionally constrained to two layers.
+  rationale: Two copper layers at every board, bought with length rather than layers. The service volume is a 310 mm player rail containing only the hub, so 162 x 46 mm costs nothing mechanically and a four-layer panel costs multiples of a two-layer one.
+  placement_method: Functional zones slide right by fixed amounts so the crossings between clusters open while the geometry inside a cluster is untouched.
   deterministic_routes:
   - USB shield tabs and bleed network
   - 0.5 mm USB VBUS entry, safety-window distribution, and reference branch
-  - USB VBUS comparator and input-capacitor branch
-  - PN5180 to MCU SCLK branch
-  - ground stitching vias
-  fabrication_layers: Read from the board's own layer table by hardware/pcb/fab.py, so In1.Cu and In2.Cu reach the Gerber set rather than being dropped by a fixed outer-layer list.
+  rf_ground_reserve:
+    layer: B.Cu
+    region_mm: {x_min: 122.0, x_max: 156.0, y_min: 10.0, y_max: 40.0}
+    rule: No tracks, vias permitted.
+    reason: The reader's match and the run to the matrix connector return through this copper at 13.56 MHz, so it stays a plane instead of whatever the router leaves between traces. It starts clear of the reader itself, whose QFN-40 needs both faces to escape.
+    measured_signal_segments_inside: 0
+  back_copper_use: 256 non-ground segments on B.Cu outside the reserve, against 819 on F.Cu.
+  fabrication_layers: Read from the board's own layer table by hardware/pcb/fab.py, so a board that changes layer count cannot ship a Gerber set missing copper.
 
 commands:
   static_gate: make check

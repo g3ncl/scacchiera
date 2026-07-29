@@ -12,7 +12,7 @@ publisher: "UNI-ROYAL"
 # 0603WAF1004T5E datasheet
 
 This source binds [0603WAF1004T5E](../entities/0603waf1004t5e.md) to supplier order
-code `C22935`. It is used by hub R3 (1M), hub R13 (1M), hub R14 (1M).
+code `C22935`. It is used by hub R3 (1M), hub R13 (1M), hub R14 (1M), hub R32 (1M), hub R33 (1M).
 
 [mpn::0603WAF1004T5E] [order_code::C22935]
 [manufacturer::UNI-ROYAL] [footprint::Resistor_SMD:R_0603_1608Metric]

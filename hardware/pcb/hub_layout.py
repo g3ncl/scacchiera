@@ -27,8 +27,49 @@ FREEROUTING_PASSES = int(os.environ.get("FREEROUTING_PASSES", "40"))
 # Longest straight bridge the post-route closer may lay. See _close_pad.
 MAX_BRIDGE_MM = 2.5
 
-BOARD_WIDTH = 110.0
+# Two copper layers, at the cost of length. A four-layer version of this board
+# fits in 110 mm, but four layers cost multiples of two at every fab, and the
+# service volume is a 310 mm player rail with only the hub in it: length is the
+# one dimension this design has to spare. Width stays at 46 mm because that is
+# what fits under a 50 mm rail.
+BOARD_WIDTH = 162.0
 BOARD_HEIGHT = 46.0
+
+# Extra length only helps if the parts use it. Each functional zone slides right
+# by a fixed amount, so the crossings between zones open while the geometry
+# inside one is untouched: a decoupling capacitor keeps its distance to the pin
+# it serves. Zones are chosen by x, with the few parts whose cluster straddles a
+# boundary named explicitly.
+ZONE_BOUNDS = (34.0, 56.0, 74.0, 93.0)
+ZONE_SHIFTS = (0.0, 8.0, 20.0, 32.0, 44.0)
+ZONE_OVERRIDES = {"R23": 2, "R31": 2, "C25": 3, "C26": 3}
+
+# Left edge of the reserved back-copper region. It starts clear of the reader:
+# a QFN-40 in 6 mm needs both faces to escape its pins, and covering it stranded
+# its supplies. What the reserve protects is the path after the escape, the EMC
+# filter, the match and the run to the matrix connector.
+RF_KEEPOUT_LEFT = 122.0
+
+
+def _zone_of(reference: str, x: float) -> int:
+    if reference in ZONE_OVERRIDES:
+        return ZONE_OVERRIDES[reference]
+    return sum(1 for bound in ZONE_BOUNDS if x >= bound)
+
+
+def _spread(placements: dict[str, Placement]) -> dict[str, Placement]:
+    return {
+        reference: Placement(
+            Position(
+                placement.position.x + ZONE_SHIFTS[_zone_of(reference, placement.position.x)],
+                placement.position.y,
+            ),
+            rotation=placement.rotation,
+            back=placement.back,
+        )
+        for reference, placement in placements.items()
+    }
+
 
 # M2.5 plated mounting holes bonded to ground, so the enclosure screws tie the
 # shell to the pours rather than leaving it floating. 4.0 mm in from each corner
@@ -66,9 +107,17 @@ def _placements() -> dict[str, Placement]:
         "C12": Placement(Position(12.65, 20.0)),
         "U2": Placement(Position(19.0, 23.0)),
         "U1": Placement(Position(29.0, 23.0)),
-        "J2": Placement(Position(15.0, 42.5)),
-        "J11": Placement(Position(22.0, 42.5)),
-        "J3": Placement(Position(32.0, 42.5)),
+        # Input decoupling under the VBUS spine that runs between the comparator
+        # and the switch. Left in the capacitor block below, these two sat 9 mm
+        # off that spine: poor decoupling, and the one net the router could not
+        # close on two layers.
+        "C13": Placement(Position(26.0, 26.8), rotation=90.0),
+        "C16": Placement(Position(28.6, 26.8), rotation=90.0),
+        # J2 and J3 are seven-way because their supply is spread over several
+        # 1.0 A contacts, so the bottom edge is spaced for two wide shells.
+        "J2": Placement(Position(14.0, 42.5)),
+        "J11": Placement(Position(25.0, 42.5)),
+        "J3": Placement(Position(36.0, 42.5)),
         # Managed 5 V returns through J3. Keep the buck switching loop compact
         # and away from the reader front end at the opposite side of the board.
         "U5": Placement(Position(42.0, 27.0)),
@@ -82,15 +131,18 @@ def _placements() -> dict[str, Placement]:
         "U6": Placement(Position(63.0, 12.0), rotation=90.0),
         # Reader.
         "U3": Placement(Position(84.0, 28.0)),
-        # 38.3, not 37.5: the 3225 crystal's courtyard is 4.20 x 3.50 mm against
-        # the 2016 part's 3.00 x 2.60, which reached into R28 above it.
-        "Y1": Placement(Position(77.5, 38.3)),
+        # Beside the reader's CLK1 and CLK2 pins on its upper left edge, not
+        # below the part: from under it the oscillator loop had to travel around
+        # the package, and it was the one net the two-layer route could not
+        # close. The 3225 courtyard is 4.20 x 3.50 mm, so it keeps 3.5 mm from
+        # the resistors above it and 1.5 mm from the reader.
+        "Y1": Placement(Position(76.0, 24.8)),
         "L3": Placement(Position(92.0, 24.0), rotation=90.0),
         "L4": Placement(Position(92.0, 30.0), rotation=90.0),
         # Edge connectors.
         "J4": Placement(Position(106.5, 23.0), rotation=270.0),
-        "J5": Placement(Position(47.0, 42.5)),
-        "J6": Placement(Position(60.5, 42.5)),
+        "J5": Placement(Position(50.0, 42.5)),
+        "J6": Placement(Position(64.0, 42.5)),
         "J7": Placement(Position(62.0, 3.5), rotation=180.0),
         "J8": Placement(Position(74.0, 3.5), rotation=180.0),
         "J9": Placement(Position(86.0, 3.5), rotation=180.0),
@@ -98,6 +150,11 @@ def _placements() -> dict[str, Placement]:
         "TP1": Placement(Position(59.0, 8.0), back=True),
         "TP2": Placement(Position(56.0, 8.0), back=True),
         "TP3": Placement(Position(49.0, 8.0), back=True),
+        # Cell voltage divider, above the module and clear of its courtyard, so
+        # the high-impedance tap reaches U4 pin 9 without crossing the board.
+        "R32": Placement(Position(67.5, 17.5), rotation=90.0),
+        "R33": Placement(Position(69.7, 17.5), rotation=90.0),
+        "C18": Placement(Position(71.9, 17.5), rotation=90.0),
         "R17": Placement(Position(57.2, 16.0)),
         "R18": Placement(Position(57.0, 18.5), rotation=90.0),
         "R19": Placement(Position(57.0, 22.0), rotation=90.0),
@@ -121,7 +178,9 @@ def _placements() -> dict[str, Placement]:
             (14.0, 8.0), 4, (3.0, 3.4), 90.0,
         )
     )
-    placements.update(_grid(("C13", "C14", "C15", "C16", "C17"), (24.0, 30.0), 3, (3.6, 3.8), 90.0))
+    # C14, C15 and C17 belong to the switch output and the ADC tap. C13 and C16
+    # decouple the switch input and are placed with it above, not here.
+    placements.update(_grid(("C14", "C15", "C17"), (24.0, 30.0), 3, (3.6, 3.8), 90.0))
     # Buck and protected LED rail support.
     placements.update(_grid(("C1", "C2", "C3", "C4"), (39.0, 32.5), 2, (4.0, 3.8), 90.0))
     placements.update(_grid(("C10", "C11", "C6"), (48.0, 10.0), 3, (2.6, 3.4), 90.0))
@@ -133,20 +192,35 @@ def _placements() -> dict[str, Placement]:
     placements.update(
         _grid(("C20", "C21", "C22", "C23", "C24", "C25", "C26"), (76.0, 42.5), 7, (3.4, 2.2))
     )
-    placements.update(_grid(("C31", "C32"), (75.0, 32.5), 2, (3.4, 2.2)))
-    placements.update(_grid(("R27", "R28"), (75.0, 34.8), 2, (3.4, 2.2)))
-    return placements
+    # Crystal loads and series resistors follow the crystal to the reader's
+    # clock pins, keeping the oscillator loop on one side of the package.
+    placements.update(_grid(("C31", "C32"), (74.5, 19.0), 2, (3.4, 2.2)))
+    placements.update(_grid(("R27", "R28"), (74.5, 21.3), 2, (3.4, 2.2)))
+    return _spread(placements)
 
 
 def generate_board(output: Path = OUTPUT / "hub.kicad_pcb") -> None:
     netlist = read_netlist(OUTPUT / "hub.net")
-    builder = BoardBuilder(netlist, copper_layers=4, board_thickness_mm=1.0)
+    builder = BoardBuilder(netlist, board_thickness_mm=1.0)
     builder.board.GetDesignSettings().m_CopperEdgeClearance = pcbnew.FromMM(0.25)
     # The stock GCT USB-C footprint holds 0.19 mm between its own mechanical
     # holes and its shield pads; that geometry is routinely fabricated, so the
     # default 0.25 mm hole clearance is relaxed rather than the footprint edited.
     builder.board.GetDesignSettings().m_HoleClearance = pcbnew.FromMM(0.15)
     builder.add_outline(BOARD_WIDTH, BOARD_HEIGHT)
+    # Keep the back copper solid under the reader, its match and the matrix
+    # connector, so the 13.56 MHz return is a plane rather than whatever the
+    # router leaves between traces. The strip above y=40 and below y=10 stays
+    # routable, which is how the top-edge service connectors still reach the MCU.
+    builder.add_keepout(
+        pcbnew.B_Cu,
+        (
+            Position(RF_KEEPOUT_LEFT, 10.0),
+            Position(BOARD_WIDTH - 6.0, 10.0),
+            Position(BOARD_WIDTH - 6.0, 40.0),
+            Position(RF_KEEPOUT_LEFT, 40.0),
+        ),
+    )
     placements = _placements()
     inset = MOUNTING_HOLE_INSET
     corners = (
@@ -265,40 +339,16 @@ def generate_board(output: Path = OUTPUT / "hub.kicad_pcb") -> None:
         (vbus_reference, builder.pad_position("R5", "1")),
         0.5,
     )
-    vbus_comparator = builder.pad_position("U2", "8")
-    vbus_input_capacitor = builder.pad_position("C13", "1")
-    vbus_comparator_escape = Position(vbus_comparator.x + 2.5, vbus_comparator.y - 1.025)
-    vbus_input_capacitor_escape = Position(
-        vbus_input_capacitor.x + 2.0,
-        vbus_input_capacitor.y + 1.025,
-    )
-    for pad, escape in (
-        (vbus_comparator, vbus_comparator_escape),
-        (vbus_input_capacitor, vbus_input_capacitor_escape),
-    ):
-        builder.add_track("USB_VBUS", (pad, escape), 0.4)
-        builder.add_via("USB_VBUS", escape, diameter=0.8, drill=0.4)
-    sclk_reader = builder.pad_position("U3", "7")
-    sclk_mcu = builder.pad_position("U4", "25")
-    sclk_reader_via = Position(sclk_reader.x - 1.5, sclk_reader.y)
-    sclk_mcu_via = Position(sclk_mcu.x + 1.5, sclk_mcu.y)
-    builder.add_track("SCLK", (sclk_reader, sclk_reader_via), 0.2)
-    builder.add_via("SCLK", sclk_reader_via)
-    builder.add_track(
-        "SCLK",
-        (sclk_reader_via, sclk_mcu_via),
-        0.2,
-        pcbnew.In1_Cu,
-    )
-    builder.add_via("SCLK", sclk_mcu_via)
-    builder.add_track("SCLK", (sclk_mcu_via, sclk_mcu), 0.2)
-    for ground_via in (
-        Position(25.0, 38.0),
-        Position(35.0, 6.0),
-        Position(45.0, 6.0),
-        Position(100.0, 38.0),
-    ):
-        builder.add_via("GND", ground_via)
+    # The comparator supply branch and the reader-to-MCU SCLK bridge used to be
+    # drawn here. Both were workarounds for a four-layer route that could not
+    # close them, and on two layers they would have to run on the back copper,
+    # slotting the ground the RF front end returns through. The board is long
+    # enough now for the router to close them on the front face instead.
+    # No free-standing stitching vias. With four layers a via anywhere landed in
+    # a pour on some layer; with two, the front pour is fragmented by the signals
+    # it carries, so a via in the wrong place connects on one layer only. The two
+    # pours tie together through the ground pads of the parts themselves, which
+    # are spread across the whole board.
     builder.save(output)
 
 
@@ -343,28 +393,11 @@ def _postroute_fixups(board: pcbnew.BOARD) -> None:
     each still-open pad to its net's nearest routed copper. Adaptive, so it
     survives the router's run-to-run variation instead of hard-coding a path."""
     _deduplicate_vias(board)
-    _add_vbus_comparator_branch(board)
     board.BuildConnectivity()
     for footprint in board.GetFootprints():
         for pad in footprint.Pads():
             _close_pad(board, pad)
 
-
-def _add_vbus_comparator_branch(board: pcbnew.BOARD) -> None:
-    """Join the two VBUS regions the router cannot escape around U2."""
-    comparator = _pad_position(board, "U2", "8")
-    input_capacitor = _pad_position(board, "C13", "1")
-    comparator_via = (comparator[0] + 2.5, comparator[1] - 1.025)
-    input_capacitor_via = (input_capacitor[0] + 2.0, input_capacitor[1] + 1.025)
-    _route_waypoints(
-        board,
-        "USB_VBUS",
-        (
-            (comparator_via[0], comparator_via[1], "In2.Cu"),
-            (input_capacitor_via[0], input_capacitor_via[1], "In2.Cu"),
-        ),
-        width=0.4,
-    )
 
 
 def _pad_position(board: pcbnew.BOARD, reference: str, number: str) -> tuple[float, float]:
@@ -508,7 +541,7 @@ def _finalize_ground(board_path: Path) -> None:
     the routed ground into planes and absorb the router's short ground spurs."""
     board = pcbnew.LoadBoard(str(board_path))
     if not board.Zones():
-        for layer in (pcbnew.F_Cu, pcbnew.In1_Cu, pcbnew.In2_Cu, pcbnew.B_Cu):
+        for layer in (pcbnew.F_Cu, pcbnew.B_Cu):
             zone = pcbnew.ZONE(board)
             zone.SetLayer(layer)
             zone.SetNet(board.FindNet("GND"))

@@ -1,62 +1,63 @@
-# Commercial power subsystem
+# Power subsystem selection
 
-The battery, charger, protection, power-path, and 5 V conversion are one purchased and replaceable
-subassembly. This boundary avoids reproducing a lithium charger on the hub while retaining the
-verification evidence required by [the simulation workflow](../simulation-workflow.md).
+Which purchased module and cell fill the boundary defined in
+[power-module-interface.md](power-module-interface.md). That file is the contract; this one records
+what is fitted, what was considered, and what still has to be measured.
 
-## Selected module
+## Status
 
-The selected subsystem is one PiSugar 3 Plus with its supplied 5000 mAh, 3.7 V pouch cell. The
-manufacturer specifies a 5 V input and output, both rated up to 3 A, full UPS behavior during source
-insertion and removal, and an I2C interface at address `0x57`. The hub uses the extension header's
-5 V, ground, SDA, and SCL signals. A two-wire harness from the hub's protected 5 V charge output
-terminates at the documented PiSugar 5 V input pad. The PiSugar USB connectors stay internal and
-unused.
+**No module is bound.** The interface is deliberately written as a contract rather than around one
+product, so the board can be built and verified before the choice is final, and the module can be
+swapped later without touching the hub.
 
-The subsystem is outside the custom hub BOM and is not reproduced from an unpublished schematic.
-Its immutable evidence is the [product documentation](../../Vault/Scacchiera/Datasheets/PISUGAR3_PLUS_product.md),
-[I2C documentation](../../Vault/Scacchiera/Datasheets/PISUGAR3_PLUS_i2c.md),
-[safety instructions](../../Vault/Scacchiera/Datasheets/PISUGAR3_PLUS_safety.md),
-[cell UN 38.3 report](../../Vault/Scacchiera/Datasheets/955465_PISUGAR5000_UN38.3.pdf), and
-[manufacturer STEP assembly](../../Vault/Scacchiera/Datasheets/PISUGAR3_PLUS.step).
+Binding one is a V1 action: file its manufacturer documentation in the vault, record the exact
+product and revision, and check it against every mandatory property in the interface.
 
-## Electrical boundary
+## Candidates
 
-PiSugar supplies the hub with regulated 5 V. The light-bar branch uses that rail through its
-existing latch-off current limiter. An AP63203WU-7 buck generates 3.3 V for the MCU, reader,
-displays, and matrix. PiSugar I2C supplies external-power presence, charge enable, output enable,
-delayed output shutdown, battery voltage, and estimated percentage. Its temperature register is
-the charger IC temperature, not cell temperature.
+| Module | Verdict |
+| --- | --- |
+| PiSugar 3 Plus | Meets the electrical contract, including its own 5000 mAh cell, but is 57 mm across against the 46 mm the rail allows. Its cell alone is 54 mm, so reshaping the electronics would not fix it. |
+| Small UPS or charger-boost modules with a fuel gauge | Fit the width and cost far less, but hand back the evidence a bundled module supplies: handover, cell retention, and the light-load behavior below. |
+| Power-bank controller boards, IP5306 class | Cheapest, and satisfy the electrical contract on paper. Their controllers switch the output off below roughly 45 to 50 mA, which collides with the board's twenty-minute idle sleep unless disabled and proven to stay disabled. |
 
-The product's power-only USB-C inlet feeds an AP22811AW5-7 switch whose enable comes from a
-TLV7042DGKR analog window around a cell-bonded NTCLE317E4103SBA thermistor. Nominal trip points near
-8 and 34 degrees Celsius deliberately stay inside the published 0 to 40 degree boundary. Open or
-short thermistor wiring disables the switch. Firmware reads a divided copy for status, but cannot
-override the hardware cutoff. Debug uses the locking UART service connector.
+The survey behind this table, including cell formats and why a 1S pouch wins here despite costing
+more per watt-hour than cylindrical cells, is in
+[the wiki](../../Vault/Scacchiera/Wiki/synthesis/battery-format-and-module-alternatives.md).
 
-## Mechanical boundary
+## Cell
 
-The manufacturer's PCB is 65 x 56 mm and the filed STEP assembly measures about 65 x 57 x 9.22 mm.
-The included 955465 cell is 65 x 54 x 9.5 mm. This is wider than a 50 mm player rail, so it cannot
-be hidden there without changing the fixed product geometry. V7 must define a ventilated,
-serviceable rear cassette outside the NFC sensing area, with strain relief, impact protection, no
-cell compression, and access to the charging connector.
+Any cell meeting the runtime requirement and the 46 mm width. The reference point is an 18.5 Wh
+1S pouch, around 10 mm thick and 100 to 120 mm long, since rail length is the dimension this
+enclosure has to spare. The cell carries its own protection board; the hub adds the cell-bonded
+thermistor and the analog window, because pouch cells of this class ship without an NTC.
 
-The manufacturer's safety instructions prohibit heat buildup in an enclosed 3D-printed case.
-Ventilation is therefore a safety requirement, not an optional cosmetic feature.
+## Charging
+
+Charging is deliberately slow. `POWER-CHARGE-10-80` allows 240 minutes and `POWER-CHARGE-10-FULL`
+360 minutes, which a 1 A charger meets: 70 percent of a 5 Ah cell is 3.5 Ah, or 210 minutes of
+constant current. This is what admits the cheap module tier, and it is a deliberate trade of
+recharge speed for subsystem cost. The constant-voltage taper does not scale down with current,
+which is why the full-charge limit is not simply double.
 
 ## V8 measurements
 
-The exact received module and firmware revision must be recorded before testing. V8 measures:
+The exact fitted module and its firmware revision must be recorded before testing. V8 measures:
 
 - 10-to-80 and 10-to-full charge time from a compliant 5 V, 2 A source at 20 to 25 degrees Celsius;
 - runtime under the representative gameplay profile;
 - 5 V continuity and minimum voltage during source insertion and removal;
-- input current, output voltage, charger IC temperature, and cell-surface temperature while idle
-  and under a representative active load;
+- that the 5 V output survives twenty minutes of board sleep without switching off;
+- input current, output voltage, and cell-surface temperature while idle and under load;
 - independent charge inhibition below 0 degrees Celsius and at or above 40 degrees Celsius;
-- I2C status accuracy, charge disable, delayed shutdown, and recovery from loss of communication;
 - enclosure ventilation, connector strain relief, and NFC performance with the module installed.
 
-UN 38.3 is transport evidence for the supplied cell. It is not completed-product certification
-and does not waive any V8 or V9 check.
+A transport test report for the cell is transport evidence only. It is not completed-product
+certification and does not waive any V8 or V9 check.
+
+## Mechanical
+
+The module and cell mount in a serviceable rail volume outside the NFC sensing area, with strain
+relief, impact protection, no cell compression, and access for replacement. Lithium cells in an
+enclosed 3D-printed case need ventilation regardless of which module is fitted, so that is a safety
+requirement rather than a cosmetic one.

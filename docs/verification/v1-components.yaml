@@ -381,6 +381,12 @@ components:
   - board: hub
     reference: R14
     value: 1M
+  - board: hub
+    reference: R32
+    value: 1M
+  - board: hub
+    reference: R33
+    value: 1M
   library_audit:
     status: passed
     checked: '2026-07-26'
@@ -734,9 +740,6 @@ components:
   uses:
   - board: lightbar
     reference: J1
-    value: A1257WR-S-4P
-  - board: hub
-    reference: J3
     value: A1257WR-S-4P
   - board: hub
     reference: J7
@@ -1471,6 +1474,9 @@ components:
     reference: C17
     value: 100n
   - board: hub
+    reference: C18
+    value: 100n
+  - board: hub
     reference: C1
     value: 100n
   - board: hub
@@ -2197,9 +2203,6 @@ components:
   footprint: Connector_JST:JST_GH_SM02B-GHS-TB_1x02-1MP_P1.25mm_Horizontal
   uses:
   - board: hub
-    reference: J2
-    value: SM02B-GHS-TB(LF)(SN)
-  - board: hub
     reference: J10
     value: SM02B-GHS-TB(LF)(SN)
   - board: hub
@@ -2247,6 +2250,12 @@ components:
   - board: matrix
     reference: J1
     value: SM07B-GHS-TB
+  - board: hub
+    reference: J2
+    value: SM07B-GHS-TB(LF)(SN)
+  - board: hub
+    reference: J3
+    value: SM07B-GHS-TB(LF)(SN)
   - board: hub
     reference: J4
     value: SM07B-GHS-TB(LF)(SN)
@@ -2585,38 +2594,6 @@ components:
       and routed geometry
   conflicts: []
 external_components:
-- mpn: PiSugar 3 Plus
-  role: Purchased UPS, charger, protected 5 V supply and battery telemetry subsystem
-  supplier: PiSugar Kitchen
-  order_code: PiSugar 3 Plus Portable 5000 mAh UPS
-  availability:
-    status: available
-    checked: '2026-07-26'
-    source: https://www.pisugar.com/products/pisugar-3-series
-  datasheets:
-  - Vault/Scacchiera/Datasheets/PISUGAR3_PLUS_product.md
-  - Vault/Scacchiera/Datasheets/PISUGAR3_PLUS_i2c.md
-  - Vault/Scacchiera/Datasheets/PISUGAR3_PLUS_safety.md
-  - Vault/Scacchiera/Datasheets/955465_PISUGAR5000_UN38.3.pdf
-  wiki_source: Vault/Scacchiera/Wiki/sources/pisugar3-plus-manufacturer-docs.md
-  wiki_entity: Vault/Scacchiera/Wiki/entities/pisugar3-plus.md
-  interface_audit:
-    status: passed
-    evidence: Hub J2 supplies qualified 5 V and ground to the documented PiSugar input
-      pads; hub J3 returns regulated 5 V, ground, 3.3 V I2C SCL and SDA; the raw cell
-      never connects to the custom PCB
-  ratings_audit:
-    status: passed
-    fields: 5 V input, included 5000 mAh 18.5 Wh cell, regulated 5 V output, 3 A maximum
-      discharge statement, 0 to 40 degree Celsius battery operating range, ventilation
-    datasheet_locator: product specification, safety warnings, battery notes and I2C
-      map
-  simulation_model:
-    kind: datasheet_bounded
-    path: hardware/sim
-    valid_region: commercial black-box 5 V boundary and documented I2C state; V3 sweeps
-      published limits and V8 calibrates handover, runtime, recharge and thermal behavior
-  conflicts: []
 - mpn: NTCLE317E4103SBA
   role: Cell-bonded off-board charge-temperature sensor
   supplier: JLCPCB/LCSC

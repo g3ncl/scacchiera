@@ -1,10 +1,12 @@
 """Hub board: protected power input, WiFi MCU, ISO 15693 reader, and interfaces.
 
-The product USB-C input passes through an independent cell-temperature gate to
-the PiSugar 3 Plus. That purchased subsystem owns the lithium cell, charging,
-protection, UPS transfer, and battery telemetry. Its managed 5 V output returns
-to this board, where one fixed-output buck makes 3V3 and a TPS2553 protects the
-light bars.
+The product USB-C input passes through an independent cell-temperature gate to a
+purchased power module. That module owns the lithium cell, charging, protection
+and UPS transfer; its 5 V output returns to this board, where one fixed-output
+buck makes 3V3 and a TPS2553 protects the light bars. The board does not depend
+on the module's own state registers: it measures cell voltage itself, so a
+module with an undocumented or absent I2C map still satisfies the product's
+battery reporting.
 
 What changed with the row-column matrix: the four quadrant harnesses and their
 74HC139 decoder collapse into one 7-pin matrix link (RF bus between grounds,
@@ -33,7 +35,7 @@ NO_CONNECTS: dict[str, tuple[str, ...]] = {
     "J1": ("A6", "A7", "A8", "B6", "B7", "B8"),
     "J8": ("4",),
     "U3": ("2", "11", "14", "20", "23", "24", "31", "32", "33", "34", "35", "40"),
-    "U4": ("4", "7", "9", "10", "15", "16", "17", "18", "19", "20", "21", "32", "33", "34", "35"),
+    "U4": ("4", "7", "10", "15", "16", "17", "18", "19", "20", "21", "32", "33", "34", "35"),
     "U6": ("1", "13", "14", "15", "18", "19", "20"),
 }
 
@@ -85,7 +87,7 @@ def _charge_input_switch(circuit: Circuit) -> Part:
             for index, name in enumerate(("OUT", "GND", "FLG_N", "EN", "IN"), start=1)
         ),
         mpn="AP22811AW5-7",
-        description="Temperature-gated, current-limited PiSugar input switch",
+        description="Temperature-gated, current-limited power module input switch",
         unit_cost_eur=0.20,
     )
 
@@ -265,14 +267,29 @@ def _build_power(circuit: Circuit, nets: dict[str, Net]) -> None:
     adc_cap = _rc(circuit, "C17", "100n", "CL05B104KO5NNNC")
     _connect(nets["TEMP_SENSE_ADC"], adc_cap, "1")
     _connect(nets["GND"], adc_cap, "2")
+
+    # Cell voltage for the product's battery reading. The same 1M/1M ratio as
+    # the sensor tap above, so a 4.2 V cell arrives at 2.1 V, below the 2.5 V
+    # that tap already presents when its sensor opens, and no new resistor value
+    # enters the BOM. It costs 2.1 uA of permanent cell drain, which is 1.5 mAh
+    # over a month of storage against a 5000 mAh cell.
+    battery_top = _rc(circuit, "R32", "1M", "0603WAF1004T5E")
+    battery_bottom = _rc(circuit, "R33", "1M", "0603WAF1004T5E")
+    _connect(nets["BAT_RAW"], battery_top, "1")
+    _connect(nets["BAT_SENSE_ADC"], battery_top, "2")
+    _connect(nets["BAT_SENSE_ADC"], battery_bottom, "1")
+    _connect(nets["GND"], battery_bottom, "2")
+    battery_cap = _rc(circuit, "C18", "100n", "CL05B104KO5NNNC")
+    _connect(nets["BAT_SENSE_ADC"], battery_cap, "1")
+    _connect(nets["GND"], battery_cap, "2")
     fault_pullup = _rc(circuit, "R15", "100k", "0603WAF1003T5E")
     _connect(nets["3V3"], fault_pullup, "1")
     _connect(nets["CHARGE_INPUT_FAULT_N"], fault_pullup, "2")
 
     regulator = _buck(circuit)
     _connect(nets["3V3"], regulator, "1")
-    _connect(nets["PISUGAR_5V"], regulator, "2")
-    _connect(nets["PISUGAR_5V"], regulator, "3")
+    _connect(nets["MODULE_5V"], regulator, "2")
+    _connect(nets["MODULE_5V"], regulator, "3")
     _connect(nets["GND"], regulator, "4")
     buck_sw = _pin_net(circuit, "BUCK_SW", regulator, "5")
     buck_bst = _pin_net(circuit, "BUCK_BST", regulator, "6")
@@ -286,7 +303,7 @@ def _build_power(circuit: Circuit, nets: dict[str, Net]) -> None:
     _connect(buck_bst, bootstrap, "1")
     _connect(buck_sw, bootstrap, "2")
     for ref, net, value, mpn in (
-        ("C2", "PISUGAR_5V", "10u 10V", "CL21A106KAYNNNE"),
+        ("C2", "MODULE_5V", "10u 10V", "CL21A106KAYNNNE"),
         ("C3", "3V3", "22u 10V", "CL21A226MAQNNNE"),
         ("C4", "3V3", "22u 10V", "CL21A226MAQNNNE"),
     ):
@@ -299,7 +316,7 @@ def _build_power(circuit: Circuit, nets: dict[str, Net]) -> None:
 
 def _build_led_rail(circuit: Circuit, nets: dict[str, Net]) -> Net:
     led_limiter = _led_limiter(circuit)
-    _connect(nets["PISUGAR_5V"], led_limiter, "1")
+    _connect(nets["MODULE_5V"], led_limiter, "1")
     _connect(nets["GND"], led_limiter, "2")
     _connect(nets["LED_EN"], led_limiter, "3")
     led_fault = nets["LED_FAULT_N"]
@@ -318,7 +335,7 @@ def _build_led_rail(circuit: Circuit, nets: dict[str, Net]) -> Net:
     led_fault_pullup = _rc(circuit, "R18", "100k", "0603WAF1003T5E")
     _connect(nets["3V3"], led_fault_pullup, "1")
     _connect(led_fault, led_fault_pullup, "2")
-    for ref, name in (("C10", "PISUGAR_5V"), ("C11", "LED_5V")):
+    for ref, name in (("C10", "MODULE_5V"), ("C11", "LED_5V")):
         capacitor = _rc(circuit, ref, "100n", "CL05B104KO5NNNC")
         _connect(nets[name], capacitor, "1")
         _connect(nets["GND"], capacitor, "2")
@@ -364,7 +381,8 @@ def _build_mcu(circuit: Circuit, nets: dict[str, Net]) -> None:
     # and the 4.7k bus pullups are what hold them high for SPI boot (Table 4-3),
     # which also makes IO9 the download-mode recovery pin.
     mcu_connections = {
-        "5": "TEMP_SENSE_ADC", "6": "NFC_BUSY", "12": "LED_DATA", "13": "NFC_IRQ",
+        "5": "TEMP_SENSE_ADC", "6": "NFC_BUSY", "9": "BAT_SENSE_ADC",
+        "12": "LED_DATA", "13": "NFC_IRQ",
         "22": "I2C_SCL", "23": "I2C_SDA",
         "24": "OLED2_CS_N", "25": "SCLK", "26": "MOSI", "27": "MISO",
         "28": "NFC_CS_N", "29": "OLED1_CS_N", "30": "UART_RX", "31": "UART_TX",
@@ -373,7 +391,9 @@ def _build_mcu(circuit: Circuit, nets: dict[str, Net]) -> None:
         _connect(nets[name], mcu, pin)
     # Pins 4, 7, 21 and 32 to 35 are datasheet NC. Native USB pins 17 and 18
     # stay open because J1 is power-only. IO15 (pin 20) stays unused because it
-    # is the JTAG-source strapping pin. IO2 pin 5 is ADC1_CH2 per Table 3-1.
+    # is the JTAG-source strapping pin. Table 3-1 puts ADC1 on IO0 to IO6, so
+    # the two analog taps take IO2 (pin 5, CH2) and IO4 (pin 9, CH4); neither is
+    # a strapping pin, and IO5 and IO6 stay free as the remaining ADC channels.
     _no_connect(circuit, mcu, NO_CONNECTS["U4"])
     # Espressif requires bulk plus high-frequency decoupling at the module's
     # 3V3 pin. The regulator's own output caps are centimetres away, and WiFi
@@ -592,9 +612,9 @@ def _build_reader(circuit: Circuit, nets: dict[str, Net]) -> None:
 def build_hub() -> Circuit:
     circuit = Circuit(name="hub")
     net_names = (
-        "GND", "USB_VBUS", "CHARGE_5V", "PISUGAR_5V", "3V3", "LED_5V", "LED_FAULT_N",
+        "GND", "USB_VBUS", "CHARGE_5V", "MODULE_5V", "3V3", "LED_5V", "LED_FAULT_N",
         "THERM_SENSE", "THERM_COLD_REF", "THERM_HOT_REF", "CHARGE_TEMP_OK",
-        "CHARGE_INPUT_FAULT_N", "TEMP_SENSE_ADC",
+        "CHARGE_INPUT_FAULT_N", "TEMP_SENSE_ADC", "BAT_RAW", "BAT_SENSE_ADC",
         "SCLK", "MOSI", "MISO", "NFC_CS_N", "NFC_IRQ", "NFC_BUSY", "NFC_RESET_N", "NFC_GPO1",
         "I2C_SCL", "I2C_SDA", "OLED1_CS_N", "OLED2_CS_N", "OLED_DC", "OLED_RESET_N",
         "LED_DATA", "LED_RETURN", "SEL_RCLK", "SEL_SRCLR_N", "RF_BUS", "BUTTON_N",
@@ -612,14 +632,23 @@ def build_hub() -> Circuit:
     _build_mcu(circuit, nets)
     _build_reader(circuit, nets)
 
-    charge_output = _connector(circuit, "J2", ("CHARGE_5V", "GND"), "SM02B-GHS-TB(LF)(SN)", 0.20)
-    _connect(nets["CHARGE_5V"], charge_output, "1")
-    _connect(nets["GND"], charge_output, "2")
-    pisugar_return = _connector(
-        circuit, "J3", ("PISUGAR_5V", "GND", "I2C_SCL", "I2C_SDA"), "A1257WR-S-4P", 0.14,
+    # Every GH and 1.25 mm wafer contact in this design is rated 1.0 A, and both
+    # halves of the module link carry the whole board on it. J2 additionally
+    # carries charge current on top of the system load while an adapter is
+    # connected, so its supply is spread over three contacts and J3's over two.
+    charge_pins = ("CHARGE_5V", "CHARGE_5V", "CHARGE_5V", "GND", "GND", "GND", "GND")
+    charge_output = _connector(circuit, "J2", charge_pins, "SM07B-GHS-TB(LF)(SN)", 0.35)
+    for connector_pin, name in enumerate(charge_pins, start=1):
+        _connect(nets[name], charge_output, str(connector_pin))
+    # BAT_RAW is the cell terminal brought back for the ADC divider below. The
+    # module's own state registers are undocumented, so the level the product
+    # reports comes from a voltage this board measures itself.
+    module_pins = (
+        "MODULE_5V", "MODULE_5V", "GND", "GND", "I2C_SCL", "I2C_SDA", "BAT_RAW",
     )
-    for connector_pin, name in enumerate(("PISUGAR_5V", "GND", "I2C_SCL", "I2C_SDA"), start=1):
-        _connect(nets[name], pisugar_return, str(connector_pin))
+    module_return = _connector(circuit, "J3", module_pins, "SM07B-GHS-TB(LF)(SN)", 0.35)
+    for connector_pin, name in enumerate(module_pins, start=1):
+        _connect(nets[name], module_return, str(connector_pin))
 
     # Matrix link, mirroring the matrix board's J1. The registers share the
     # SPI wires; SEL_RCLK latches from the expander after a 16-bit shift.

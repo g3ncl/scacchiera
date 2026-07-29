@@ -9,7 +9,7 @@ source_count: 1
 
 # SM02B-GHS-TB(LF)(SN)
 
-Exact fitted component from JST, used by hub J2 (SM02B-GHS-TB(LF)(SN)), hub J10 (SM02B-GHS-TB(LF)(SN)), hub J11 (SM02B-GHS-TB(LF)(SN)).
+Exact fitted component from JST, used by hub J10 (SM02B-GHS-TB(LF)(SN)), hub J11 (SM02B-GHS-TB(LF)(SN)).
 
 [mpn::SM02B-GHS-TB(LF)(SN)] [supplier::JLCPCB]
 [order_code::C189893] [category::connector]

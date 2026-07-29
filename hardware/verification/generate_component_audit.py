@@ -53,51 +53,11 @@ DESIGN_FACTS = {
     ),
 }
 
+# Purchased items outside the custom boards that the design still depends on
+# electrically. The power module is deliberately absent: it is bounded by
+# docs/hardware/power-module-interface.md rather than bound to a product, and an
+# unbound part cannot have a passing V1 audit.
 EXTERNAL_COMPONENTS: tuple[dict[str, Any], ...] = (
-    {
-        "mpn": "PiSugar 3 Plus",
-        "role": "Purchased UPS, charger, protected 5 V supply and battery telemetry subsystem",
-        "supplier": "PiSugar Kitchen",
-        "order_code": "PiSugar 3 Plus Portable 5000 mAh UPS",
-        "availability": {
-            "status": "available",
-            "checked": REVIEW_DATE,
-            "source": "https://www.pisugar.com/products/pisugar-3-series",
-        },
-        "datasheets": [
-            "Vault/Scacchiera/Datasheets/PISUGAR3_PLUS_product.md",
-            "Vault/Scacchiera/Datasheets/PISUGAR3_PLUS_i2c.md",
-            "Vault/Scacchiera/Datasheets/PISUGAR3_PLUS_safety.md",
-            "Vault/Scacchiera/Datasheets/955465_PISUGAR5000_UN38.3.pdf",
-        ],
-        "wiki_source": "Vault/Scacchiera/Wiki/sources/pisugar3-plus-manufacturer-docs.md",
-        "wiki_entity": "Vault/Scacchiera/Wiki/entities/pisugar3-plus.md",
-        "interface_audit": {
-            "status": "passed",
-            "evidence": (
-                "Hub J2 supplies qualified 5 V and ground to the documented PiSugar input pads; "
-                "hub J3 returns regulated 5 V, ground, 3.3 V I2C SCL and SDA; the raw cell never "
-                "connects to the custom PCB"
-            ),
-        },
-        "ratings_audit": {
-            "status": "passed",
-            "fields": (
-                "5 V input, included 5000 mAh 18.5 Wh cell, regulated 5 V output, 3 A maximum "
-                "discharge statement, 0 to 40 degree Celsius battery operating range, ventilation"
-            ),
-            "datasheet_locator": "product specification, safety warnings, battery notes and I2C map",
-        },
-        "simulation_model": {
-            "kind": "datasheet_bounded",
-            "path": "hardware/sim",
-            "valid_region": (
-                "commercial black-box 5 V boundary and documented I2C state; V3 sweeps published "
-                "limits and V8 calibrates handover, runtime, recharge and thermal behavior"
-            ),
-        },
-        "conflicts": [],
-    },
     {
         "mpn": "NTCLE317E4103SBA",
         "role": "Cell-bonded off-board charge-temperature sensor",

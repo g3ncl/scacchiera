@@ -112,9 +112,10 @@ def test_external_power_components_are_exact_sourced_and_modelled() -> None:
         require_mapping(raw, "external component")
         for raw in require_list(document.get("external_components"), "external components")
     ]
-    assert {record.get("mpn") for record in records} == {
-        "PiSugar 3 Plus", "NTCLE317E4103SBA"
-    }
+    # The power module is not here on purpose. It is bounded by a written
+    # interface rather than bound to a product, and V1 cannot pass an audit of a
+    # part nobody has chosen yet.
+    assert {record.get("mpn") for record in records} == {"NTCLE317E4103SBA"}
     for record in records:
         mpn = require_nonempty_string(record.get("mpn"), "external MPN")
         require_nonempty_string(record.get("supplier"), f"{mpn} supplier")

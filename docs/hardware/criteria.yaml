@@ -48,20 +48,20 @@ criteria:
     description: Maximum time to charge from 10 to 80 percent state of charge.
     requirement_ids: [POWER-CHARGE-001]
     unit: minute
-    limits: {maximum: 120.0}
+    limits: {maximum: 240.0}
     evidence: {class: Derived, source: docs/functional/power.md, locator: USB-C charging}
-    operating_conditions: Idle board, PiSugar 3 Plus subsystem with its supplied 5 Ah cell, compliant 5 V 2 A USB source and cable, and cell temperature from 20 to 25 degrees Celsius.
-    margin: A 2 A constant-current phase supplies 70 percent of a 5 Ah cell in 105 minutes, leaving 15 minutes for the documented measurement pauses and control transitions before V8 measurement.
+    operating_conditions: Idle board, any power module meeting the interface in docs/hardware/power-module-interface.md with a 5 Ah cell, compliant 5 V 2 A USB source and cable, and cell temperature from 20 to 25 degrees Celsius.
+    margin: A 1 A constant-current phase supplies 70 percent of a 5 Ah cell in 210 minutes, leaving 30 minutes for control transitions and the module's own charge profile before V8 measurement.
     test_ids: [TEST-POWER-CHARGE-001, TEST-V8-CHARGE-001]
 
   POWER-CHARGE-10-FULL:
     description: Maximum time from 10 percent state of charge to normal full-charge termination.
     requirement_ids: [POWER-CHARGE-002]
     unit: minute
-    limits: {maximum: 210.0}
+    limits: {maximum: 360.0}
     evidence: {class: Derived, source: docs/functional/power.md, locator: USB-C charging}
-    operating_conditions: Idle board, PiSugar 3 Plus subsystem with its supplied 5 Ah cell, compliant 5 V 2 A USB source and cable, and cell temperature from 20 to 25 degrees Celsius.
-    margin: The limit leaves 105 minutes beyond the ideal 10-to-80 constant-current interval for the remaining constant-current and constant-voltage phases; V8 measures termination time.
+    operating_conditions: Idle board, any power module meeting the interface in docs/hardware/power-module-interface.md with a 5 Ah cell, compliant 5 V 2 A USB source and cable, and cell temperature from 20 to 25 degrees Celsius.
+    margin: The limit leaves 120 minutes beyond the ideal 210-minute constant-current interval for the constant-voltage taper, which does not scale down with charge current; V8 measures termination time.
     test_ids: [TEST-POWER-CHARGE-002, TEST-V8-CHARGE-001]
 
   POWER-CHARGE-TEMPERATURE-MIN:

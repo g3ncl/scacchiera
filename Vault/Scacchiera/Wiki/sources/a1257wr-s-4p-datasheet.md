@@ -12,7 +12,7 @@ publisher: "CJT"
 # A1257WR-S-4P datasheet
 
 This source binds [A1257WR-S-4P](../entities/a1257wr-s-4p.md) to supplier order
-code `C225127`. It is used by lightbar J1 (A1257WR-S-4P), hub J3 (A1257WR-S-4P), hub J7 (A1257WR-S-4P), hub J8 (A1257WR-S-4P), hub J9 (A1257WR-S-4P).
+code `C225127`. It is used by lightbar J1 (A1257WR-S-4P), hub J7 (A1257WR-S-4P), hub J8 (A1257WR-S-4P), hub J9 (A1257WR-S-4P).
 
 [mpn::A1257WR-S-4P] [order_code::C225127]
 [manufacturer::CJT] [footprint::Connector_JST:JST_GH_SM04B-GHS-TB_1x04-1MP_P1.25mm_Horizontal]

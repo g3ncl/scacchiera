@@ -119,9 +119,15 @@ def test_hub_connectors_and_usb_use_the_reviewed_pin_order() -> None:
     )
     assert _pin_map(hub, "J9", 4) == ("3V3", "GND", "UART_TX", "UART_RX")
     assert _pin_map(hub, "J10", 2) == ("BUTTON_N", "GND")
-    assert _pin_map(hub, "J2", 2) == ("CHARGE_5V", "GND")
-    assert _pin_map(hub, "J3", 4) == ("PISUGAR_5V", "GND", "I2C_SCL", "I2C_SDA")
     assert _pin_map(hub, "J11", 2) == ("THERM_SENSE", "GND")
+    # Both halves of the power-module link carry the whole board across 1.0 A
+    # contacts, so the supply is spread over several of them by design.
+    assert _pin_map(hub, "J2", 7) == (
+        "CHARGE_5V", "CHARGE_5V", "CHARGE_5V", "GND", "GND", "GND", "GND"
+    )
+    assert _pin_map(hub, "J3", 7) == (
+        "MODULE_5V", "MODULE_5V", "GND", "GND", "I2C_SCL", "I2C_SDA", "BAT_RAW"
+    )
 
     expected_usb = {
         "A1": "GND", "A12": "GND", "B1": "GND", "B12": "GND",
@@ -172,7 +178,7 @@ def test_power_boundary_and_temperature_gate_are_hardware_defined() -> None:
         "THERM_SENSE", "THERM_HOT_REF", "CHARGE_TEMP_OK", "USB_VBUS",
     )
     assert _pin_map(hub, "U5", 6) == (
-        "3V3", "PISUGAR_5V", "PISUGAR_5V", "GND", "BUCK_SW", "BUCK_BST"
+        "3V3", "MODULE_5V", "MODULE_5V", "GND", "BUCK_SW", "BUCK_BST"
     )
     assert _pin_map(hub, "L1", 2) == ("BUCK_SW", "3V3")
     assert _net(hub, "U4", "5") == "TEMP_SENSE_ADC"
@@ -180,19 +186,40 @@ def test_power_boundary_and_temperature_gate_are_hardware_defined() -> None:
     assert _net(hub, "U4", "18") == "__NOCONNECT"
 
 
-def test_hub_board_matches_its_recorded_stackup() -> None:
-    """The four-layer decision has to reach the board and its Gerber export.
+def test_battery_level_is_measured_on_board_not_read_from_the_module() -> None:
+    """The product reports battery level, and no purchased module has to be
+    trusted for it: the cell arrives on J3 and is divided into the MCU's ADC."""
+    hub = build_hub()
+    for reference, nets in (
+        ("R32", {"BAT_RAW", "BAT_SENSE_ADC"}),
+        ("R33", {"BAT_SENSE_ADC", "GND"}),
+        ("C18", {"BAT_SENSE_ADC", "GND"}),
+    ):
+        assert {_net(hub, reference, "1"), _net(hub, reference, "2")} == nets
+    # Equal halves keep a 4.2 V cell at 2.1 V, under the 2.5 V the sensor tap
+    # already presents to the same ADC when its thermistor opens.
+    assert str(_part(hub, "R32").value) == str(_part(hub, "R33").value) == "1M"
+    assert _net(hub, "U4", "9") == "BAT_SENSE_ADC"
 
-    The fixed VBUS branch and the SCLK bridge both run on inner copper, so a
-    stackup the fabrication layer list does not cover would ship a board
-    missing routed connections."""
+
+def test_hub_board_matches_its_recorded_stackup() -> None:
+    """Every board is two layers, and the Gerber export has to carry them all.
+
+    The layer count is a cost decision as much as an electrical one, so it is
+    asserted against the board rather than described only in prose."""
     recorded = _evidence()["hub_layout"]
     assert (ROOT / str(recorded["reviewed_route"])).is_file()
     board = _hub_board()
     layers = copper_layers(board)
-    assert layers == ("F.Cu", "In1.Cu", "In2.Cu", "B.Cu")
+    assert layers == ("F.Cu", "B.Cu")
     assert len(layers) == recorded["copper_layers"]
     assert set(layers).issubset(gerber_layers(board).split(","))
     thickness = re.search(r"\(thickness ([\d.]+)\)", board.read_text(encoding="utf-8"))
     assert thickness is not None
     assert float(thickness.group(1)) == recorded["board_thickness_mm"]
+    # The envelope is what buys two layers, so it is read off the board outline
+    # rather than trusted to the record it is checked against.
+    corners = re.findall(r"\(gr_line\s+\(start ([-\d.]+) ([-\d.]+)\)", board.read_text(encoding="utf-8"))
+    assert corners
+    extent = [max(float(x) for x, _ in corners), max(float(y) for _, y in corners)]
+    assert extent == [float(value) for value in recorded["envelope_mm"]]

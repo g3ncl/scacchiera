@@ -427,3 +427,50 @@ and backwards for the second, and it reported a usable window two kelvin wider o
 parts guarantee. The safety result was unaffected.
 
 V3 stays open: every switching converter on the hub and every transient case is still unsimulated.
+
+## [2026-07-29] design | Two-layer hub and a swappable power boundary
+
+Cost work, driven by the power subsystem being the most expensive line in the product. Two changes.
+
+The hub is two layers again, so every board in the product is. Four layers had been chosen because a
+110 x 46 mm two-layer route would not converge; the answer was to buy length instead of copper,
+since the service volume is a 310 mm rail holding only this board. At 162 x 46 mm, with the
+functional zones slid apart so the crossings open while clusters stay intact, the route closes at
+0 violations, 0 unconnected and 0 schematic-parity issues. Three things had to go with the layers:
+the SCLK bridge and comparator branch, which were workarounds for the four-layer failure and would
+have slotted the ground return, and the free-standing stitching vias, which only worked because four
+pours meant a via anywhere landed in copper.
+
+The back copper under the reader's match and the run to the matrix connector is now a reserved
+plane, no tracks, vias allowed. The routed board has zero signal segments inside it. The reserve
+starts clear of the reader itself: covering the QFN-40 stranded nine of its own pins, since a 6 mm
+package needs both faces to escape.
+
+Two placement faults surfaced as routing failures and were fixed as placement: the crystal sat below
+the reader while its clock pins are on the upper left edge, so the oscillator loop wrapped the
+package, and the switch's input capacitors sat 9 mm off the rail they decouple. Both are better
+placements independent of whether a router can close them.
+
+Second change: the power module is no longer [[pisugar3-plus]], or any product. `J3` carries a
+generic module's 5 V, optional I2C and the cell terminal, and the board divides that terminal into
+its own ADC, so battery reporting does not rest on any module's register map. Both halves of the
+link went seven-way after the connector data sheets showed 1.0 A per contact against a board that
+draws about that much. Charge speed relaxed to 240 minutes for 10 to 80 percent at 1 A, which is
+what admits the cheap module tier.
+
+That withdrew V1's audit of the PiSugar boundary, so **V1 is open again**: a part nobody has chosen
+cannot have a passing audit. Every board part still passes.
+
+## [2026-07-26] query | Cell format and module alternatives against the rail
+
+Asked whether a flat cell would fit the player rail, which lithium format is cheapest, and whether a
+better shaped alternative to [[pisugar3-plus]] exists. Filed as
+[[battery-format-and-module-alternatives]]. The finding that matters: the seven-millimetre overhang
+is mostly the cell, not the board, since the LP955465 pouch is 54 mm wide on its own, so any fix has
+to reshape the cell. Height is not scarce, width is.
+
+Cylindrical 18650 and 21700 remain the cheapest per watt-hour, but on a single 18 Wh pack the saving
+is a few euro against a holder, a separate protection board and a centimetre of height, so a 1S pouch
+is the right choice here despite costing more per watt-hour. Two of the reasons
+[[commercial-power-subsystem-selection]] rejected the smaller DFRobot module have weakened, which
+reopens an unbundled module-plus-chosen-cell option at roughly 35 to 40 EUR.

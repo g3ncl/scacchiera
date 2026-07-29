@@ -9,7 +9,7 @@ source_count: 1
 
 # SM07B-GHS-TB(LF)(SN)
 
-Exact fitted component from JST, used by matrix J1 (SM07B-GHS-TB), hub J4 (SM07B-GHS-TB(LF)(SN)), hub J5 (SM07B-GHS-TB(LF)(SN)), hub J6 (SM07B-GHS-TB(LF)(SN)).
+Exact fitted component from JST, used by matrix J1 (SM07B-GHS-TB), hub J2 (SM07B-GHS-TB(LF)(SN)), hub J3 (SM07B-GHS-TB(LF)(SN)), hub J4 (SM07B-GHS-TB(LF)(SN)), hub J5 (SM07B-GHS-TB(LF)(SN)), hub J6 (SM07B-GHS-TB(LF)(SN)).
 
 [mpn::SM07B-GHS-TB(LF)(SN)] [supplier::JLCPCB]
 [order_code::C495552] [category::connector]

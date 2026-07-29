@@ -12,7 +12,7 @@ publisher: "JST"
 # SM02B-GHS-TB(LF)(SN) datasheet
 
 This source binds [SM02B-GHS-TB(LF)(SN)](../entities/sm02b-ghs-tb-lf-sn.md) to supplier order
-code `C189893`. It is used by hub J2 (SM02B-GHS-TB(LF)(SN)), hub J10 (SM02B-GHS-TB(LF)(SN)), hub J11 (SM02B-GHS-TB(LF)(SN)).
+code `C189893`. It is used by hub J10 (SM02B-GHS-TB(LF)(SN)), hub J11 (SM02B-GHS-TB(LF)(SN)).
 
 [mpn::SM02B-GHS-TB(LF)(SN)] [order_code::C189893]
 [manufacturer::JST] [footprint::Connector_JST:JST_GH_SM02B-GHS-TB_1x02-1MP_P1.25mm_Horizontal]
