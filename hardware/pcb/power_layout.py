@@ -25,6 +25,12 @@ REVIEWED_SESSION = Path(__file__).parent / "routes" / "power.ses"
 FREEROUTING_JAR = os.environ.get("FREEROUTING_JAR", "/tmp/freerouting-2.2.4.jar")
 FREEROUTING_PASSES = int(os.environ.get("FREEROUTING_PASSES", "40"))
 
+POWER_DRC_RULES = '''(version 1)
+(rule "CSD25404Q3 manufacturer pad gap"
+  (condition "A.Reference == 'Q1' && B.Reference == 'Q1'")
+  (constraint clearance (min 0.15mm)))
+'''
+
 # Sized to sit under one light bar on the shared panel: the bars are 120 mm
 # long, so anything up to that width costs the panel nothing in either
 # dimension it does not already spend.
@@ -42,6 +48,15 @@ def _placements() -> dict[str, Placement]:
         "J2": Placement(Position(81.0, 22.0), rotation=180.0),
         # Cell lead on the long edge, away from both harness connectors.
         "J3": Placement(Position(8.0, 4.0), rotation=180.0),
+        "Q1": Placement(Position(14.5, 3.2), rotation=90.0),
+        "U4": Placement(Position(21.0, 5.0)),
+        "D1": Placement(Position(25.0, 5.0)),
+        "C21": Placement(Position(21.0, 8.0)),
+        "R15": Placement(Position(17.5, 5.0), back=True),
+        "R16": Placement(Position(18.0, 1.5)),
+        "R17": Placement(Position(21.0, 1.5)),
+        "R18": Placement(Position(24.0, 1.5)),
+        "R19": Placement(Position(27.0, 1.5)),
         # Charger with its programming resistors around it and the input and
         # system bulk capacitors either side.
         "U1": Placement(Position(15.0, 17.0)),
@@ -54,7 +69,7 @@ def _placements() -> dict[str, Placement]:
         "C14": Placement(Position(11.0, 18.5), rotation=90.0),
         "C6": Placement(Position(18.0, 22.0), rotation=90.0),
         "C7": Placement(Position(24.5, 20.0), rotation=90.0),
-        "C8": Placement(Position(15.0, 7.0), rotation=90.0),
+        "C8": Placement(Position(15.0, 8.5), rotation=90.0),
         "R1": Placement(Position(16.5, 27.0)),
         "R2": Placement(Position(19.6, 27.0)),
         "R12": Placement(Position(22.7, 27.0)),
@@ -106,6 +121,7 @@ def generate_board(output: Path = OUTPUT / "power.kicad_pcb") -> None:
             raise ValueError(f"no placement for {component.reference}")
         builder.add_component(component, placement)
     builder.save(output)
+    output.with_suffix(".kicad_dru").write_text(POWER_DRC_RULES, encoding="utf-8")
 
 
 def route_board(

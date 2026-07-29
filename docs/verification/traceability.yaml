@@ -7,7 +7,7 @@ sources:
   docs/functional/gameplay.md: 461a3ce900ad7e2bfe67bc4f424bfa5b899486ad70e7820304bceae711a65097
   docs/functional/interface.md: 9d5aa00b924f575a50c5e1f5020e19c7470c0e618da78e05f585d669c9d59b71
   docs/functional/physical.md: 5f7888874f7e5a848dffe02f8d00c3a26ac5ebeb4aeb0ae89a0bc7ecee5779b3
-  docs/functional/power.md: 55ba1226b000dd60a172dfa987cbedb0f54fdcd1c4ba362f1ff4f584f54b8243
+  docs/functional/power.md: 15a40f177a8d88a1ce695016e9dfad6e1ab36f219f879ed70e1e580129727162
 
 requirements:
   - id: PRINCIPLE-001
@@ -269,7 +269,7 @@ requirements:
   - id: POWER-OUTPUT-001
     source: {path: docs/functional/power.md, locator: Peak output}
     statement: The battery subsystem supplies a regulated 5 V at 2 A across the qualified cell-voltage range without USB input power.
-    criterion_ids: [POWER-MODULE-OUTPUT-POWER, POWER-BOOST-OUTPUT-VOLTAGE, POWER-BOOST-RIPPLE, POWER-BOOST-INDUCTOR-PEAK, POWER-BOOST-INDUCTOR-RMS]
+    criterion_ids: [POWER-MODULE-OUTPUT-POWER, POWER-BOOST-OUTPUT-VOLTAGE, POWER-BOOST-RIPPLE, POWER-BOOST-INDUCTOR-PEAK, POWER-BOOST-INDUCTOR-RMS, POWER-CELL-PASS-FET-LOSS]
     test_ids: [TEST-POWER-OUTPUT-001, TEST-V8-POWER-OUTPUT-001]
   - id: POWER-CHARGE-001
     source: {path: docs/functional/power.md, locator: USB-C charging}
@@ -309,6 +309,11 @@ requirements:
     source: {path: docs/functional/power.md, locator: Battery safety}
     statement: Temperature-limited and source-limited charging are reported to the user.
     test_ids: [TEST-POWER-SAFETY-003]
+  - id: POWER-SAFETY-004
+    source: {path: docs/functional/power.md, locator: Battery safety}
+    statement: The keyed cell input electrically isolates reversed polarity with USB absent or already present.
+    criterion_ids: [POWER-CELL-REVERSE-ISOLATION]
+    test_ids: [TEST-POWER-REVERSE-001, TEST-V8-BATTERY-PROTECTION-001]
 
   - id: PHY-GEO-001
     source: {path: docs/functional/physical.md, locator: Fixed geometry}

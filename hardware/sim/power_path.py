@@ -2,8 +2,8 @@
 
 The BQ25895 has no public transistor-level model. This model covers its NVDC
 source priority, external input-current ceiling, charge-current setting,
-BATFET current limits and the independent hub temperature gate. It does not
-claim switching-loop stability or safe behavior with a reversed cell.
+BATFET current limits, reverse-cell isolation and the independent hub
+temperature gate. It does not claim switching-loop stability.
 """
 
 from dataclasses import dataclass
@@ -56,9 +56,14 @@ class PowerPathResult:
 
 def evaluate(case: PowerPathCase) -> PowerPathResult:
     if case.battery_reversed:
-        return PowerPathResult(
-            SourceMode.FAULT, 0.0, 0.0, 0.0, False, False,
-            "reversed cell exceeds the charger's negative BAT rating",
+        # Q1 is off for reversed polarity, so the charger sees a missing cell.
+        return evaluate(
+            PowerPathCase(
+                case.adapter_v, None, case.output_w,
+                source_qualified=case.source_qualified,
+                temperature_ok=case.temperature_ok,
+                charge_commanded=False,
+            )
         )
     if case.battery_short:
         return PowerPathResult(

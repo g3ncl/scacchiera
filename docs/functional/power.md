@@ -45,6 +45,10 @@ circuit protection. Charging is permitted only while the cell temperature is wit
 charge range measured by a thermistor attached to the cell. The board reports temperature-limited
 or source-limited charging instead of presenting it as a fault-free fast-charge cycle.
 
+The cell connector is keyed, and the power electronics isolate a cell inserted with reversed
+polarity. Reversed insertion remains safe when USB is absent and when USB is already powering the
+charger side of the circuit.
+
 A single cylindrical cell may lie lengthwise along the player rail. Its length consumes rail length;
 its diameter, holder, insulation, and wiring must fit the rail cross-section. The complete protected
 assembly and every series contact are rated for the worst-case current at the minimum permitted cell

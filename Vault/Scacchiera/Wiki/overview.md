@@ -30,7 +30,7 @@ The inlet remains a 5 V-only passive sink. [[usb-type-c-5v-current-advertisement
 CC ADC readings, so ordinary Type-C and laptop PD chargers can be distinguished as default, 1.5 A,
 or 3.0 A sources without a PD contract. Invalid or changing readings retain the lower input limit.
 
-[[v1-component-proof|V1]] audits 54 exact fitted tuples with no fitted-part sourcing blocker. The
+[[v1-component-proof|V1]] audits the exact fitted tuples with no fitted-part sourcing blocker. The
 power inductor is now exact [[dfe252012f-1r0m-p2]]. V1 remains open on the
 [[er-oledm3-12-1w]] documentation conflict and its cable definition; a purchased power module is
 only an optional replacement, not a fitted dependency. [[v2-static-connectivity|V2]] passes on all four board designs, and all
@@ -47,9 +47,11 @@ formula behind it. [[v3-buck-power-stage]]: the 3.3 V rail's ripple and inductor
 corners, from a model that deliberately holds no control behaviour, so regulation and stability stay
 data sheet claims for V8. The power-board boost has a 54-corner ngspice stage sweep plus a separate
 80 percent efficiency current bound. Its averaged NVDC model covers adapter priority, battery
-supplement, removal, missing and depleted cells, a shorted cell, and a stuck charge command. The
-reversed-cell case fails until the complete protected keyed assembly is bound. The AP22811 input
-switch and many transient cases remain unsimulated.
+supplement, removal, missing and depleted cells, a shorted cell, and a stuck charge command.
+[[csd25404q3]] and [[tlv7021dckr]] now isolate a reversed cell before the charger BAT node. The
+ngspice bench covers cold and already-powered insertion at both polarities, while physical fault
+insertion remains mandatory at V8. The AP22811 input switch and many transient cases remain
+unsimulated.
 
 The display evidence raises coincident load from 1.14 A to 1.48 A. The current 2 A interface and
 [[tps61088rhlr]] stage cover the full 10 W stress case. Replacing BQ25619 with [[bq25895rtwr]] raises
@@ -58,7 +60,7 @@ efficiency-bounded 4.422 A RMS and 5.681 A peak boost currents.
 
 The earlier [[chessboard-quick-charge-architecture|custom PD architecture]] and
 [[quick-charge-module-evaluation|RBS18634 article]] remain historical evidence rather than active
-designs. The current open risks are the protected cell assembly, reversed-cell response, switching
+designs. The current open risks are the protected cell assembly, physical reversed-cell response, switching
 loop evidence, enclosure ventilation, measured recharge time, and representative runtime. The selected
 [[fail-safe-cell-temperature-window]] uses a wired thermistor and analog comparators so firmware
 cannot override the qualified charge range. Hub L1 is the fully documented [[nr6045s4r7mt]];

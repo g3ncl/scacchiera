@@ -154,7 +154,17 @@ def test_board_to_board_connectors_match_at_both_ends() -> None:
     assert _pin_map(hub, "J3", 8) == (
         "MODULE_5V", "MODULE_5V", "GND", "GND", "I2C_SCL", "I2C_SDA", "BAT_RAW", "__NOCONNECT"
     )
-    assert tuple(power_connectors["J3"]) == ("BAT_RAW", "GND")
+    assert tuple(power_connectors["J3"]) == ("CELL_POS", "GND")
+
+    reverse = _power_connectivity()["reverse_protection"]
+    assert tuple(reverse["Q1"]) == (
+        "CELL_POS", "CELL_POS", "CELL_POS", "BAT_REVERSE_GATE",
+        "BAT_RAW", "BAT_RAW", "BAT_RAW", "BAT_RAW",
+    )
+    assert tuple(reverse["U4"]) == (
+        "BAT_REVERSE_GATE", "GND", "BAT_REVERSE_REF", "BAT_REVERSE_SENSE", "BAT_RAW",
+    )
+    assert tuple(reverse["D1"]) == ("BAT_REVERSE_SENSE", "GND")
 
 
 def test_hub_connectors_and_usb_use_the_reviewed_pin_order() -> None:

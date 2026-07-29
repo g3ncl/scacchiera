@@ -119,7 +119,7 @@ One exact source summary per purchased fitted MPN. The structured audit is
 | [[0603waf1001t5e-datasheet]] | UNI-ROYAL | 2026-07-26 |
 | [[0603waf1002t5e-datasheet]] | UNI-ROYAL | 2026-07-29 |
 | [[0603waf1003t5e-datasheet]] | UNI-ROYAL | 2026-07-29 |
-| [[0603waf1004t5e-datasheet]] | UNI-ROYAL | 2026-07-26 |
+| [[0603waf1004t5e-datasheet]] | UNI-ROYAL | 2026-07-29 |
 | [[0603waf150kt5e-datasheet]] | UNI-ROYAL | 2026-07-26 |
 | [[0603waf2492t5e-datasheet]] | UNI-ROYAL | 2026-07-29 |
 | [[0603waf3902t5e-datasheet]] | UNI-ROYAL | 2026-07-29 |
@@ -134,6 +134,7 @@ One exact source summary per purchased fitted MPN. The structured audit is
 | [[ap22811aw5-7-datasheet]] | Diodes Incorporated | 2026-07-26 |
 | [[ap63203wu-7-datasheet]] | Diodes Incorporated | 2026-07-26 |
 | [[bar64-02v-datasheet]] | Jiangsu Changjing Electronics Technology | 2026-07-26 |
+| [[bat54h-datasheet]] | Jiangsu Changjing Electronics Technology | 2026-07-29 |
 | [[bq25895rtwr-datasheet]] | Texas Instruments | 2026-07-29 |
 | [[bss123-7-f-datasheet]] | Diodes Incorporated | 2026-07-26 |
 | [[bss84-7-f-datasheet]] | Diodes Incorporated | 2026-07-26 |
@@ -148,6 +149,7 @@ One exact source summary per purchased fitted MPN. The structured audit is
 | [[cl21a226maqnnne-datasheet]] | Samsung Electro-Mechanics | 2026-07-29 |
 | [[cl21a475kaqnnne-datasheet]] | Samsung Electro-Mechanics | 2026-07-29 |
 | [[cl32a107mqvnnne-datasheet]] | Samsung Electro-Mechanics | 2026-07-26 |
+| [[csd25404q3-datasheet]] | Texas Instruments | 2026-07-29 |
 | [[dfe252012f-1r0m-p2-datasheet]] | Murata | 2026-07-29 |
 | [[esp32-c6-mini-1u-n4-datasheet]] | Espressif Systems | 2026-07-26 |
 | [[grm1555c1h221ja01d-datasheet]] | Murata | 2026-07-26 |
@@ -162,6 +164,7 @@ One exact source summary per purchased fitted MPN. The structured audit is
 | [[sn74ahct1g125dbvr-datasheet]] | Texas Instruments | 2026-07-26 |
 | [[t37k3rgb-05c000112u1930-datasheet]] | Harvatek | 2026-07-26 |
 | [[tca9535pwr-datasheet]] | Texas Instruments | 2026-07-26 |
+| [[tlv7021dckr-datasheet]] | Texas Instruments | 2026-07-29 |
 | [[tlv7042dgkr-datasheet]] | Texas Instruments | 2026-07-26 |
 | [[tlv809k33dbvr-datasheet]] | Texas Instruments | 2026-07-29 |
 | [[tps2553dbvr-1-datasheet]] | Texas Instruments | 2026-07-26 |
@@ -178,7 +181,7 @@ One exact source summary per purchased fitted MPN. The structured audit is
 | [[0603waf1001t5e]] | 1 | 2026-07-26 |
 | [[0603waf1002t5e]] | 1 | 2026-07-29 |
 | [[0603waf1003t5e]] | 1 | 2026-07-29 |
-| [[0603waf1004t5e]] | 1 | 2026-07-26 |
+| [[0603waf1004t5e]] | 1 | 2026-07-29 |
 | [[0603waf150kt5e]] | 1 | 2026-07-26 |
 | [[0603waf2492t5e]] | 1 | 2026-07-29 |
 | [[0603waf3902t5e]] | 1 | 2026-07-29 |
@@ -193,6 +196,7 @@ One exact source summary per purchased fitted MPN. The structured audit is
 | [[ap22811aw5-7]] | 1 | 2026-07-26 |
 | [[ap63203wu-7]] | 1 | 2026-07-26 |
 | [[bar64-02v]] | 1 | 2026-07-26 |
+| [[bat54h]] | 1 | 2026-07-29 |
 | [[bq25895rtwr]] | 1 | 2026-07-29 |
 | [[bss123-7-f]] | 1 | 2026-07-26 |
 | [[bss84-7-f]] | 1 | 2026-07-26 |
@@ -207,6 +211,7 @@ One exact source summary per purchased fitted MPN. The structured audit is
 | [[cl21a226maqnnne]] | 1 | 2026-07-29 |
 | [[cl21a475kaqnnne]] | 1 | 2026-07-29 |
 | [[cl32a107mqvnnne]] | 1 | 2026-07-26 |
+| [[csd25404q3]] | 1 | 2026-07-29 |
 | [[dfe252012f-1r0m-p2]] | 1 | 2026-07-29 |
 | [[esp32-c6-mini-1u-n4]] | 1 | 2026-07-26 |
 | [[grm1555c1h221ja01d]] | 1 | 2026-07-26 |
@@ -221,6 +226,7 @@ One exact source summary per purchased fitted MPN. The structured audit is
 | [[sn74ahct1g125dbvr]] | 1 | 2026-07-26 |
 | [[t37k3rgb-05c000112u1930]] | 1 | 2026-07-26 |
 | [[tca9535pwr]] | 1 | 2026-07-26 |
+| [[tlv7021dckr]] | 1 | 2026-07-29 |
 | [[tlv7042dgkr]] | 1 | 2026-07-26 |
 | [[tlv809k33dbvr]] | 1 | 2026-07-29 |
 | [[tps2553dbvr-1]] | 1 | 2026-07-26 |

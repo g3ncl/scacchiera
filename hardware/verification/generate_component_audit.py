@@ -40,6 +40,19 @@ DESIGN_FACTS = {
         "2.87 to 2.99 V falling reset threshold, 40 mV typical hysteresis, push-pull active-low "
         "output and 0.1 uF local bypass recommendation"
     ),
+    "TLV7021DCKR": (
+        "1.6 to 5.5 V supply, open-drain output, high-impedance power-on reset, 8 mV maximum "
+        "input offset, 14 mV maximum internal hysteresis, 20 us power-up time and DCK SC70-5 pinout"
+    ),
+    "CSD25404Q3": (
+        "minus 20 V drain-to-source, plus or minus 12 V gate-to-source, 12.1 mOhm maximum "
+        "on-resistance at minus 2.5 V gate drive, 1 V maximum body-diode drop at 10 A and "
+        "DQG VSON-CLIP-8 pinout"
+    ),
+    "BAT54H": (
+        "30 V repetitive reverse voltage, 300 mA average forward current, 0.37 V maximum "
+        "forward drop at 20 mA, 5 uA maximum reverse leakage and SOD-323 pin 1 cathode pinout"
+    ),
     "CDMC8D28NP-1R2MC": (
         "1.2 uH plus or minus 20 percent, 7 mOhm maximum DCR, 12.2 A saturation current, "
         "12.9 A thermal current and 8.7 by 8.3 by 3.0 mm maximum body"
@@ -85,6 +98,28 @@ DESIGN_FACTS = {
         "1.6 to 6.5 V supply, rail-to-rail fail-safe inputs, open-drain outputs, internal "
         "hysteresis and power-on reset, 8 mV maximum input offset at 25 degrees Celsius, "
         "DGK VSSOP-8 pinout"
+    ),
+}
+
+ENTITY_NOTES = {
+    "CSD25404Q3": (
+        "Power Q1 places its drain clip at the external cell positive terminal and its source "
+        "clip at the protected `BAT_RAW` node. Its body diode bootstraps only correct polarity, "
+        "after which [[tlv7021dckr]] pulls the gate low. The hot 4.422 A RMS loss bound is "
+        "0.331 W. The routed board uses TI's DQG land pattern and a clearance rule scoped only "
+        "to Q1's 0.15 mm manufacturer pad gaps."
+    ),
+    "TLV7021DCKR": (
+        "Power U4 compares a divided cell-connector voltage with a low `BAT_RAW` reference. "
+        "Its open-drain output and high-impedance power-on reset leave [[csd25404q3]] off until "
+        "correct polarity is proven. The reverse-cell bench includes the 8 mV maximum offset, "
+        "14 mV maximum hysteresis, 20 us power-up time, cold insertion, and insertion while the "
+        "charger side is already powered."
+    ),
+    "BAT54H": (
+        "Power D1 clamps the comparator sense input during reversed-cell insertion. The exact "
+        "LCSC C475620 device is SOD-323, with pin 1 cathode on the sense node and pin 2 anode "
+        "at ground."
     ),
 }
 
@@ -214,6 +249,7 @@ MANUFACTURERS = {
     "CC0603": "Yageo",
     "CC1206": "Yageo",
     "CDMC": "Sumida",
+    "CSD": "Texas Instruments",
     "CL": "Samsung Electro-Mechanics",
     "DFE": "Murata",
     "DMP2035U-7": "Diodes Incorporated",
@@ -368,6 +404,16 @@ def _limits(category: str) -> tuple[str, str]:
 
 
 def _model(part: BoundPart, category: str) -> dict[str, str]:
+    if part.mpn in {"TLV7021DCKR", "CSD25404Q3", "BAT54H"}:
+        return {
+            "kind": "datasheet_bounded",
+            "path": "hardware/sim/reverse_battery.py",
+            "valid_region": (
+                "ngspice functional polarity model sweeps cold and already-powered insertion; "
+                "comparator offset, hysteresis, power-on reset, MOSFET body diode and hot "
+                "on-resistance are bounded from the filed component data sheets"
+            ),
+        }
     if part.mpn == "TPS61088RHLR":
         return {
             "kind": "vendor",
@@ -583,6 +629,8 @@ def _write_wiki_page(record: dict[str, Any]) -> None:
         f"{use['board']} {use['reference']} ({use['value']})" for use in uses
     )
     design_fact = DESIGN_FACTS.get(str(record["mpn"]), "See the filed data sheet and structured audit.")
+    entity_note = ENTITY_NOTES.get(str(record["mpn"]), "")
+    entity_note_text = f"\n\n{entity_note}" if entity_note else ""
     source_text = f"""---
 type: source-summary
 tags:
@@ -630,7 +678,7 @@ Exact fitted component from {record['manufacturer']}, used by {use_text}.
 
 The immutable source is summarized in [[{_slug(str(record['mpn']))}-datasheet]]. The complete
 library, rating, availability, and model audit is machine checked from
-`docs/verification/v1-components.yaml`.
+`docs/verification/v1-components.yaml`.{entity_note_text}
 """
     source_path.write_text(source_text, encoding="utf-8")
     entity_path.write_text(entity_text, encoding="utf-8")

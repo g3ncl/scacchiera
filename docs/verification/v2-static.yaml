@@ -68,6 +68,13 @@ board_results:
   hub: {drc_violations: 0, unconnected_items: 0, schematic_parity_issues: 0}
   power: {drc_violations: 0, unconnected_items: 0, schematic_parity_issues: 0}
 
+power_layout:
+  envelope_mm: [90, 32]
+  copper_layers: 2
+  reviewed_route: hardware/pcb/routes/power.ses
+  reverse_cell_stage: J3 CELL_POS reaches only Q1 drains and the divided comparator sense; Q1 sources feed protected BAT_RAW, and U4 plus D1 have exact pin-level connectivity assertions.
+  custom_rule: The 0.15 mm clearance applies only between Q1 pads, matching TI's DQG manufacturer land pattern; every other copper pair retains the board-wide 0.2 mm rule.
+
 hub_layout:
   envelope_mm: [162, 46]
   copper_layers: 2
@@ -95,4 +102,4 @@ commands:
   fresh_autoroute_power: make pcb-power-reroute
 evidence:
   hub_drc_command: make pcb-hub-drc
-  static_tests: 18 focused connectivity and Type-C tests passed on 2026-07-29, including both CC orientations, the on-board battery measurement, and the recorded two-layer stackup and envelope
+  static_tests: 18 focused connectivity and Type-C tests passed on 2026-07-29, including both CC orientations, the on-board battery measurement, exact reverse-cell pin maps, and the recorded two-layer stackup and envelope

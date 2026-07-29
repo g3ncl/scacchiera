@@ -355,6 +355,12 @@ components:
     reference: R26
     value: 100k
   - board: power
+    reference: R15
+    value: 100k 1%
+  - board: power
+    reference: R17
+    value: 100k 1%
+  - board: power
     reference: R3
     value: 100k 1%
   - board: power
@@ -417,6 +423,15 @@ components:
   - board: hub
     reference: R33
     value: 1M
+  - board: power
+    reference: R16
+    value: 1M 1%
+  - board: power
+    reference: R18
+    value: 1M 1%
+  - board: power
+    reference: R19
+    value: 1M 1%
   library_audit:
     status: passed
     checked: '2026-07-26'
@@ -1215,6 +1230,51 @@ components:
     valid_region: 2.5 ohm maximum at 10 mA and 100 MHz; 0.55 pF maximum at 1 V and
       0.35 pF maximum at 5 V; V3 sweeps those published maxima
   conflicts: []
+- mpn: BAT54H
+  manufacturer: Jiangsu Changjing Electronics Technology
+  supplier: JLCPCB
+  order_code: C475620
+  availability:
+    status: available
+    checked: '2026-07-26'
+    source: https://jlcpcb.com/partdetail?part=C475620
+  datasheet: Vault/Scacchiera/Datasheets/BAT54H_C475620.pdf
+  wiki_source: Vault/Scacchiera/Wiki/sources/bat54h-datasheet.md
+  wiki_entity: Vault/Scacchiera/Wiki/entities/bat54h.md
+  category: semiconductor
+  footprint: Diode_SMD:D_SOD-323
+  uses:
+  - board: power
+    reference: D1
+    value: BAT54H
+  library_audit:
+    status: passed
+    checked: '2026-07-26'
+    evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
+      KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
+    checks:
+    - symbol_pin_numbers_and_names
+    - symbol_electrical_types
+    - exposed_and_no_connect_pins
+    - footprint_pad_numbers
+    - package_dimensions
+    - polarity_and_pin_one
+    - assembly_side
+    - cpl_zero_rotation
+  ratings_audit:
+    status: passed
+    fields: pinout, no-connect and exposed-pad treatment, recommended operating range,
+      absolute maximum voltage, current, power and temperature, startup state, thermal
+      data and package
+    datasheet_locator: pin description, absolute maximum, recommended operation, electrical,
+      thermal and package tables
+  simulation_model:
+    kind: datasheet_bounded
+    path: hardware/sim/reverse_battery.py
+    valid_region: ngspice functional polarity model sweeps cold and already-powered
+      insertion; comparator offset, hysteresis, power-on reset, MOSFET body diode
+      and hot on-resistance are bounded from the filed component data sheets
+  conflicts: []
 - mpn: BQ25895RTWR
   manufacturer: Texas Instruments
   supplier: JLCPCB
@@ -1810,6 +1870,9 @@ components:
     reference: C26
     value: 100n
   - board: power
+    reference: C21
+    value: 100n 16V
+  - board: power
     reference: C1
     value: 100n 16V
   - board: power
@@ -2151,6 +2214,51 @@ components:
     path: hardware/sim
     valid_region: lumped model with datasheet tolerance, bias, ESR, DCR and temperature
       corners
+  conflicts: []
+- mpn: CSD25404Q3
+  manufacturer: Texas Instruments
+  supplier: JLCPCB
+  order_code: C2865523
+  availability:
+    status: available
+    checked: '2026-07-26'
+    source: https://jlcpcb.com/partdetail?part=C2865523
+  datasheet: Vault/Scacchiera/Datasheets/CSD25404Q3_C2865523.pdf
+  wiki_source: Vault/Scacchiera/Wiki/sources/csd25404q3-datasheet.md
+  wiki_entity: Vault/Scacchiera/Wiki/entities/csd25404q3.md
+  category: semiconductor
+  footprint: Chessboard:CSD25404Q3_DQG
+  uses:
+  - board: power
+    reference: Q1
+    value: CSD25404Q3
+  library_audit:
+    status: passed
+    checked: '2026-07-26'
+    evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
+      KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
+    checks:
+    - symbol_pin_numbers_and_names
+    - symbol_electrical_types
+    - exposed_and_no_connect_pins
+    - footprint_pad_numbers
+    - package_dimensions
+    - polarity_and_pin_one
+    - assembly_side
+    - cpl_zero_rotation
+  ratings_audit:
+    status: passed
+    fields: pinout, no-connect and exposed-pad treatment, recommended operating range,
+      absolute maximum voltage, current, power and temperature, startup state, thermal
+      data and package
+    datasheet_locator: pin description, absolute maximum, recommended operation, electrical,
+      thermal and package tables
+  simulation_model:
+    kind: datasheet_bounded
+    path: hardware/sim/reverse_battery.py
+    valid_region: ngspice functional polarity model sweeps cold and already-powered
+      insertion; comparator offset, hysteresis, power-on reset, MOSFET body diode
+      and hot on-resistance are bounded from the filed component data sheets
   conflicts: []
 - mpn: DFE252012F-1R0M=P2
   manufacturer: Murata
@@ -2905,6 +3013,51 @@ components:
     valid_region: no distributable vendor ngspice model was identified; V3 may use
       only parameters enumerated in this part's filed datasheet and must sweep their
       full published limits; digital protocol behavior belongs to V6
+  conflicts: []
+- mpn: TLV7021DCKR
+  manufacturer: Texas Instruments
+  supplier: JLCPCB
+  order_code: C702120
+  availability:
+    status: available
+    checked: '2026-07-26'
+    source: https://jlcpcb.com/partdetail?part=C702120
+  datasheet: Vault/Scacchiera/Datasheets/TLV7021DCKR_C702120.pdf
+  wiki_source: Vault/Scacchiera/Wiki/sources/tlv7021dckr-datasheet.md
+  wiki_entity: Vault/Scacchiera/Wiki/entities/tlv7021dckr.md
+  category: semiconductor
+  footprint: Package_TO_SOT_SMD:SOT-353_SC-70-5
+  uses:
+  - board: power
+    reference: U4
+    value: TLV7021DCKR
+  library_audit:
+    status: passed
+    checked: '2026-07-26'
+    evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
+      KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
+    checks:
+    - symbol_pin_numbers_and_names
+    - symbol_electrical_types
+    - exposed_and_no_connect_pins
+    - footprint_pad_numbers
+    - package_dimensions
+    - polarity_and_pin_one
+    - assembly_side
+    - cpl_zero_rotation
+  ratings_audit:
+    status: passed
+    fields: pinout, no-connect and exposed-pad treatment, recommended operating range,
+      absolute maximum voltage, current, power and temperature, startup state, thermal
+      data and package
+    datasheet_locator: pin description, absolute maximum, recommended operation, electrical,
+      thermal and package tables
+  simulation_model:
+    kind: datasheet_bounded
+    path: hardware/sim/reverse_battery.py
+    valid_region: ngspice functional polarity model sweeps cold and already-powered
+      insertion; comparator offset, hysteresis, power-on reset, MOSFET body diode
+      and hot on-resistance are bounded from the filed component data sheets
   conflicts: []
 - mpn: TLV7042DGKR
   manufacturer: Texas Instruments

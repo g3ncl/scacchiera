@@ -123,8 +123,9 @@ def build_power() -> Circuit:
     circuit = Circuit(name="power")
     names = (
         "GND", "CHARGE_5V", "PMID", "CHARGER_SW", "SYS", "BAT_RAW", "REGN",
-        "MODULE_5V", "BOOST_SW", "BOOST_FB", "BOOST_COMP", "BOOST_EN",
+        "MODULE_5V", "BOOST_SW", "BOOST_FB", "BOOST_COMP", "BOOST_EN", "CELL_POS",
         "I2C_SCL", "I2C_SDA", "CHARGER_DSEL", "CHARGER_ILIM_MID",
+        "BAT_REVERSE_GATE", "BAT_REVERSE_REF", "BAT_REVERSE_SENSE",
     )
     nets = {name: Net(name, circuit=circuit) for name in names}
     flag = Part("power", "PWR_FLAG", tool="kicad9", circuit=circuit, ref="#FLG01", tag="GND_FLAG")
@@ -146,9 +147,63 @@ def build_power() -> Circuit:
         _connect(nets[name], outlet, str(pin_index))
     _no_connect(circuit, outlet, NO_CONNECTS["J2"])
 
-    cell = _microfit(circuit, "J3", ("BAT_RAW", "GND"), "430450200", "0200")
-    _connect(nets["BAT_RAW"], cell, "1")
+    cell = _microfit(circuit, "J3", ("CELL_POS", "GND"), "430450200", "0200")
+    _connect(nets["CELL_POS"], cell, "1")
     _connect(nets["GND"], cell, "2")
+
+    reverse_fet = component(
+        circuit, "Q1", "CSD25404Q3", "Chessboard:CSD25404Q3_DQG",
+        (
+            PinDefinition("1", "D"), PinDefinition("2", "D"), PinDefinition("3", "D"),
+            PinDefinition("4", "G"), PinDefinition("5", "S"), PinDefinition("6", "S"),
+            PinDefinition("7", "S"), PinDefinition("8", "S"),
+        ),
+        mpn="CSD25404Q3", description="20 V P-channel reverse-cell pass MOSFET",
+        unit_cost_eur=0.48,
+    )
+    for fet_pin in ("1", "2", "3"):
+        _connect(nets["CELL_POS"], reverse_fet, fet_pin)
+    _connect(nets["BAT_REVERSE_GATE"], reverse_fet, "4")
+    for fet_pin in ("5", "6", "7", "8"):
+        _connect(nets["BAT_RAW"], reverse_fet, fet_pin)
+
+    reverse_comparator = component(
+        circuit, "U4", "TLV7021DCKR", "Package_TO_SOT_SMD:SOT-353_SC-70-5",
+        (
+            PinDefinition("1", "OUT"), PinDefinition("2", "GND"),
+            PinDefinition("3", "IN+"), PinDefinition("4", "IN-"),
+            PinDefinition("5", "VCC"),
+        ),
+        mpn="TLV7021DCKR", description="Open-drain reverse-cell comparator",
+        unit_cost_eur=0.20,
+    )
+    _connect(nets["BAT_REVERSE_GATE"], reverse_comparator, "1")
+    _connect(nets["GND"], reverse_comparator, "2")
+    _connect(nets["BAT_REVERSE_REF"], reverse_comparator, "3")
+    _connect(nets["BAT_REVERSE_SENSE"], reverse_comparator, "4")
+    _connect(nets["BAT_RAW"], reverse_comparator, "5")
+
+    for ref, value, mpn, first, second in (
+        ("R15", "100k 1%", "0603WAF1003T5E", nets["BAT_RAW"], nets["BAT_REVERSE_GATE"]),
+        ("R16", "1M 1%", "0603WAF1004T5E", nets["BAT_RAW"], nets["BAT_REVERSE_REF"]),
+        ("R17", "100k 1%", "0603WAF1003T5E", nets["BAT_REVERSE_REF"], nets["GND"]),
+        ("R18", "1M 1%", "0603WAF1004T5E", nets["CELL_POS"], nets["BAT_REVERSE_SENSE"]),
+        ("R19", "1M 1%", "0603WAF1004T5E", nets["BAT_REVERSE_SENSE"], nets["GND"]),
+    ):
+        resistor = _passive(circuit, ref, value, mpn)
+        _connect(first, resistor, "1")
+        _connect(second, resistor, "2")
+    reverse_clamp = component(
+        circuit, "D1", "BAT54H", "Diode_SMD:D_SOD-323",
+        (PinDefinition("1", "K"), PinDefinition("2", "A")),
+        mpn="BAT54H", description="Schottky clamp for reversed-cell sense input",
+        unit_cost_eur=0.02,
+    )
+    _connect(nets["BAT_REVERSE_SENSE"], reverse_clamp, "1")
+    _connect(nets["GND"], reverse_clamp, "2")
+    reverse_bypass = _passive(circuit, "C21", "100n 16V", "CL05B104KO5NNNC")
+    _connect(nets["BAT_RAW"], reverse_bypass, "1")
+    _connect(nets["GND"], reverse_bypass, "2")
 
     charger = _charger(circuit)
     _connect(nets["CHARGE_5V"], charger, "1")

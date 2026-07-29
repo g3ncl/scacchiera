@@ -4,24 +4,24 @@ tags:
   - wiki/source
   - wiki/component
 date_updated: 2026-07-29
-source_file: "Datasheets/BAT54H_C475620.pdf"
-source_title: "BAT54H manufacturer datasheet"
-publisher: "Jiangsu Changjing Electronics Technology"
+source_file: "Datasheets/TLV7021DCKR_C702120.pdf"
+source_title: "TLV7021DCKR manufacturer datasheet"
+publisher: "Texas Instruments"
 ---
 
-# BAT54H datasheet
+# TLV7021DCKR datasheet
 
-This source binds [BAT54H](../entities/bat54h.md) to supplier order
-code `C475620`. It is used by power D1 (BAT54H).
+This source binds [TLV7021DCKR](../entities/tlv7021dckr.md) to supplier order
+code `C702120`. It is used by power U4 (TLV7021DCKR).
 
-[mpn::BAT54H] [order_code::C475620]
-[manufacturer::Jiangsu Changjing Electronics Technology] [footprint::Diode_SMD:D_SOD-323]
+[mpn::TLV7021DCKR] [order_code::C702120]
+[manufacturer::Texas Instruments] [footprint::Package_TO_SOT_SMD:SOT-353_SC-70-5]
 
 ## Design facts reviewed
 
 - Library proof: manufacturer pin and package drawing checked against the SKiDL pin numbers, KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation.
 - Ratings used by the design: pinout, no-connect and exposed-pad treatment, recommended operating range, absolute maximum voltage, current, power and temperature, startup state, thermal data and package.
-- Exact selected limits: 30 V repetitive reverse voltage, 300 mA average forward current, 0.37 V maximum forward drop at 20 mA, 5 uA maximum reverse leakage and SOD-323 pin 1 cathode pinout.
+- Exact selected limits: 1.6 to 5.5 V supply, open-drain output, high-impedance power-on reset, 8 mV maximum input offset, 14 mV maximum internal hysteresis, 20 us power-up time and DCK SC70-5 pinout.
 - Datasheet locator: pin description, absolute maximum, recommended operation, electrical, thermal and package tables.
 - Simulation treatment: datasheet_bounded, valid only for
   ngspice functional polarity model sweeps cold and already-powered insertion; comparator offset, hysteresis, power-on reset, MOSFET body diode and hot on-resistance are bounded from the filed component data sheets.

@@ -224,6 +224,14 @@ Resolved:
   pull, spending most of the ± 100 ppm budget on load error before the crystal's own tolerance.
   Basic, so the correction was free.
 
+### Power board
+
+The power board is factory reflowed as part of the light-bar panel. Its reverse-cell stage adds two
+exact Extended parts: CSD25404Q3 is LCSC `C2865523`, and TLV7021DCKR is `C702120`. Both passed the
+dated V1 availability check. Q1 uses TI's DQG land pattern because its continuous source clip does
+not map cleanly to a generic footprint; U4 uses the stock DCK SC70-5 pattern. The Q1-only 0.15 mm
+pad-gap rule matches TI's recommended land geometry without changing the board-wide 0.2 mm rule.
+
 ## Antenna, a purchased accessory
 
 The ESP32-C6-MINI-1U has an external antenna connector rather than a PCB antenna, which makes the

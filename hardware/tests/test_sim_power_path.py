@@ -79,7 +79,14 @@ def test_battery_short_is_a_latched_fault_case() -> None:
     assert result.critical_fault == "battery short"
 
 
-def test_reverse_battery_remains_a_release_blocker() -> None:
+def test_reverse_battery_is_isolated_like_a_missing_cell() -> None:
     result = evaluate(PowerPathCase(None, 3.6, 0.0, battery_reversed=True))
-    assert result.mode is SourceMode.FAULT
-    assert result.critical_fault is not None
+    assert result.mode is SourceMode.OFF
+    assert result.critical_fault is None
+
+
+def test_reverse_battery_does_not_prevent_adapter_only_operation() -> None:
+    result = evaluate(PowerPathCase(5.0, 3.6, 5.0, battery_reversed=True))
+    assert result.mode is SourceMode.ADAPTER
+    assert result.output_supported
+    assert result.charge_a == 0.0

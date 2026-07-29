@@ -39,6 +39,7 @@ REFLOW_ONLY_FOOTPRINT_MARKERS = (
     "USB_C_Receptacle",
     "ESP32-C6-MINI-1U",
     "Crystal_SMD_3225",
+    "CSD25404Q3_DQG",
 )
 
 # Boards populated entirely by hand, so JLCPCB fabricates bare copper only.

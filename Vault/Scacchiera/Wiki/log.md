@@ -790,3 +790,15 @@ a stable 1.5 A or 3.0 A advertisement is measured, with invalid and gap voltages
 Moved NFC IRQ and LED data to IO7 and IO14, then generated a fresh reviewed hub route. Reproduction
 from that session passes with zero DRC violations, unconnected items, and schematic parity issues.
 The path never negotiates PD and never requests or accepts more than 5 V.
+
+## [2026-07-29] design | Isolate reversed cell insertion
+
+Filed and ingested [[csd25404q3-datasheet]] and [[tlv7021dckr-datasheet]]. Power Q1 uses the TI
+DQG land pattern as a bidirectional high-side pass FET, while U4's open-drain, high-impedance POR
+output holds it off until the cell connector proves positive. A BAT54H clamps the reversed sense
+input and a 100 kohm gate-source pullup makes the unpowered state safe.
+
+The ngspice bench covers cold and already-powered insertion at both polarities. A correct 2.87 V
+cell has 1.14 V of worst comparator margin. A reversed 4.2 V cell leaves the protected charger BAT
+node at minus 5.8 mV with USB absent and positive 4.2 V with USB present. The 4.422 A RMS hot loss
+bound is 0.331 W. A fresh reviewed route and the unchanged 130.1 by 63.0 mm panel reproduce cleanly.

@@ -255,6 +255,58 @@ def sot563_drl_footprint() -> str:
 ''' + "\n".join(pads) + "\n)\n"
 
 
+def csd25404q3_footprint() -> str:
+    """TI DQG land pattern from the CSD25404Q3 data sheet page 9."""
+    drain_and_gate_pads = []
+    for number, x in ((1, -0.975), (2, -0.325), (3, 0.325), (4, 0.975)):
+        drain_and_gate_pads.append(
+            f'  (pad "{number}" smd roundrect (at {x} 1.435) (size 0.5 0.63) '
+            '(layers "F.Cu" "F.Mask") (roundrect_rratio 0.1))'
+        )
+    # Pins 5 to 8 are one source clip. Pad 5 carries the exact continuous land;
+    # the three tiny coincident pads preserve the physical pin map in KiCad.
+    source_land = '''  (pad "5" smd custom (at 0 0) (size 0.5 0.5)
+    (layers "F.Cu" "F.Mask")
+    (options (clearance outline) (anchor rect))
+    (primitives
+      (gr_poly (pts
+        (xy -1.225 -1.750) (xy -0.725 -1.750) (xy -0.725 -1.340)
+        (xy -0.575 -1.340) (xy -0.575 -1.750) (xy -0.075 -1.750)
+        (xy -0.075 -1.340) (xy 0.075 -1.340) (xy 0.075 -1.750)
+        (xy 0.575 -1.750) (xy 0.575 -1.340) (xy 0.725 -1.340)
+        (xy 0.725 -1.750) (xy 1.225 -1.750) (xy 1.225 0.560)
+        (xy -1.225 0.560)) (width 0) (fill yes))
+    ))'''
+    source_aliases = [
+        f'  (pad "{number}" smd rect (at {x} 0) (size 0.05 0.05) '
+        '(layers "F.Cu" "F.Mask"))'
+        for number, x in ((6, -0.5), (7, 0.0), (8, 0.5))
+    ]
+    paste_apertures = [
+        f'  (pad "" smd rect (at {x} {y}) (size {width} {height}) (layers "F.Paste"))'
+        for x, y, width, height in (
+            (-0.975, 1.435, 0.31, 0.45), (-0.325, 1.435, 0.31, 0.45),
+            (0.325, 1.435, 0.31, 0.45), (0.975, 1.435, 0.31, 0.45),
+            (-0.975, -1.435, 0.34, 0.45), (-0.325, -1.435, 0.34, 0.45),
+            (0.325, -1.435, 0.34, 0.45), (0.975, -1.435, 0.34, 0.45),
+            (-0.635, -0.2625, 1.02, 1.445), (0.635, -0.2625, 1.02, 1.445),
+        )
+    ]
+    return '''(footprint "CSD25404Q3_DQG"
+  (version 20240108)
+  (generator pcbnew)
+  (layer "F.Cu")
+  (descr "Texas Instruments DQG CSD25404Q3 manufacturer land pattern")
+  (tags "VSON-CLIP-8 DQG P-channel MOSFET")
+  (property "Reference" "REF**" (at 0 -2.6 0) (layer "F.SilkS"))
+  (property "Value" "CSD25404Q3" (at 0 2.6 0) (layer "F.Fab"))
+  (attr smd)
+  (fp_rect (start -1.7 -1.7) (end 1.7 1.7) (stroke (width 0.1) (type default)) (fill none) (layer "F.Fab"))
+  (fp_rect (start -1.75 -2.0) (end 1.75 2.0) (stroke (width 0.05) (type default)) (fill none) (layer "F.CrtYd"))
+  (fp_circle (center -1.5 1.75) (end -1.35 1.75) (stroke (width 0.15) (type default)) (fill none) (layer "F.SilkS"))
+''' + "\n".join(drain_and_gate_pads) + "\n" + source_land + "\n" + "\n".join(source_aliases + paste_apertures) + "\n)\n"
+
+
 def write_footprints(output: Path = OUTPUT) -> None:
     output.mkdir(parents=True, exist_ok=True)
     (output / "Antenna_Line.kicad_mod").write_text(antenna_line_footprint(), encoding="utf-8")
@@ -265,6 +317,7 @@ def write_footprints(output: Path = OUTPUT) -> None:
     (output / "CDMC8D28.kicad_mod").write_text(cdmc8d28_footprint(), encoding="utf-8")
     (output / "TLV7042_DGK.kicad_mod").write_text(tlv7042_dgk_footprint(), encoding="utf-8")
     (output / "SOT-563_DRL.kicad_mod").write_text(sot563_drl_footprint(), encoding="utf-8")
+    (output / "CSD25404Q3_DQG.kicad_mod").write_text(csd25404q3_footprint(), encoding="utf-8")
 
 
 if __name__ == "__main__":

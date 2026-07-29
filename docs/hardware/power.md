@@ -25,6 +25,13 @@ rates BATFET discharge at 6 A continuous and 9 A for one second, with a 9 A over
 The conservative boost bound reaches 4.422 A RMS and 5.681 A peak at the depleted-cell,
 full-output corner.
 
+Q1, CSD25404Q3, sits between the keyed cell connector and `BAT_RAW`. Its body diode bootstraps
+`BAT_RAW` only from a correctly oriented cell. U4, the open-drain TLV7021, then pulls the gate low
+only after a divided connector voltage is positive. A 100 kohm gate-to-source resistor holds Q1 off
+while the comparator is unpowered and during its high-impedance power-on reset. A BAT54H clamps
+the sense input during reversed insertion. Once enabled, Q1 conducts in both directions for normal
+charge and discharge.
+
 With D+ and D- deliberately absent at this module boundary, the charger starts from its safe 500 mA
 unknown-source default. The hub may configure a qualified source and a 1.472 A charge setting over
 I2C. A 1.5 A advertisement caps total input at 1.5 A and may reduce charging behind system priority;
@@ -63,9 +70,11 @@ stability, startup, or protection timing evidence.
 `hardware/tests/test_sim_power_path.py` covers the data-sheet-bounded averaged NVDC states: safe
 default and qualified input limits, adapter priority, battery supplement, adapter removal, missing
 and depleted cells, battery short, the external temperature gate against a stuck charge command,
-and the full 10 W battery load. It deliberately fails the reversed-cell case as a release blocker:
-the bare board has no bidirectional reverse-polarity stage, so V1 must bind a protected keyed cell
-assembly whose own evidence closes that fault before V3 can close.
+and the full 10 W battery load. `hardware/tests/test_sim_reverse_battery.py` adds cold and
+already-powered insertion at both polarities. The worst correct-cell comparator margin is 1.14 V
+at 2.87 V. A reversed 4.2 V cell leaves `BAT_RAW` at minus 5.8 mV with USB absent and at positive
+4.2 V with USB already present, inside the BQ25895 minus 0.3 V absolute limit. The 4.422 A RMS hot
+pass-FET loss bound is 0.331 W and remains a V8 temperature and voltage-drop measurement.
 
 ## Interconnect and cell
 
@@ -87,8 +96,9 @@ violations, zero unconnected items, and zero schematic-parity issues from the re
 five-hole mouse-bite tabs. Individual routed boards are the DRC authority; the duplicated,
 netlist-less manufacturing panel is not treated as an electrical schematic.
 
-The schematic, layout, sourcing records, static connectivity, boost power-stage sweep, and averaged
-power-path fault model exist. V1 remains open on the complete battery and cable assemblies. V3
-remains open on reversed-cell protection, temperature and ESR corners, switching-loop evidence,
-and transient protection timing. V8 and V9 remain mandatory, so no fabrication or assembly order
-is released by these results.
+The schematic, layout, sourcing records, static connectivity, boost power-stage sweep, averaged
+power-path model, and reverse-cell fault bench exist. V1 remains open on the complete battery and
+cable assemblies. V3 remains open on temperature and ESR corners, switching-loop evidence, and
+other transient protection timing. V8 still must physically test reversed insertion and pass-FET
+temperature. V8 and V9 remain mandatory, so no fabrication or assembly order is released by these
+results.

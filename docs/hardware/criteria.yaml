@@ -94,6 +94,26 @@ criteria:
     margin: The 80 percent efficiency bound reaches less than 4.5 A RMS, clearing the 6 A continuous BATFET path rating and the inductor's 12.9 A thermal rating.
     test_ids: [TEST-POWER-OUTPUT-001]
 
+  POWER-CELL-PASS-FET-LOSS:
+    description: Maximum hot reverse-protection pass-FET loss at the conservative full-load RMS current.
+    requirement_ids: [POWER-OUTPUT-001]
+    unit: W
+    limits: {maximum: 0.35}
+    evidence: {class: Datasheet, source: Vault/Scacchiera/Datasheets/CSD25404Q3_C2865523.pdf, locator: "Electrical Characteristics, RDS(on); Figure 8, normalized on-state resistance versus temperature"}
+    operating_conditions: 4.422 A RMS battery-path current, 12.1 milliohm maximum at minus 2.5 V gate drive, and a 1.4 hot-resistance multiplier read conservatively from the published temperature curve.
+    margin: The bound is 0.331 W. V8 measures case temperature and voltage drop because the temperature multiplier is a typical curve rather than a guaranteed maximum.
+    test_ids: [TEST-POWER-OUTPUT-001, TEST-V8-POWER-OUTPUT-001]
+
+  POWER-CELL-REVERSE-ISOLATION:
+    description: Minimum protected BAT_RAW voltage during reversed-cell insertion.
+    requirement_ids: [POWER-SAFETY-004]
+    unit: V
+    limits: {minimum: -0.3}
+    evidence: {class: Datasheet, source: Vault/Scacchiera/Datasheets/BQ25895RTWR_C80200.pdf, locator: "Absolute Maximum Ratings, BAT and SYS with converter not switching"}
+    operating_conditions: A reversed 4.2 V cell, both with USB absent and with the charger-side BAT node already held at 4.2 V; TLV7021 offset, hysteresis, 20 us power-on reset and the CSD25404Q3 body diode are bounded in ngspice.
+    margin: The USB-absent simulation reaches only minus 5.8 mV at BAT_RAW, and the already-powered case stays at positive 4.2 V. Both remain clear of the charger's minus 0.3 V absolute limit.
+    test_ids: [TEST-POWER-REVERSE-001, TEST-V8-BATTERY-PROTECTION-001]
+
   POWER-CHARGE-10-80:
     description: Maximum time to charge from 10 to 80 percent state of charge.
     requirement_ids: [POWER-CHARGE-001]

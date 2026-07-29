@@ -42,7 +42,7 @@ def test_every_fitted_purchased_mpn_is_audited_or_explicitly_blocked() -> None:
         (part.mpn, part.supplier, part.order_code, part.footprint)
         for part in _bound_parts()
     }
-    assert len(audited) == 54
+    assert len(audited) == 57
     assert audited.isdisjoint(blocked)
     assert audited | blocked == bound
 

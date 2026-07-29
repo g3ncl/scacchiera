@@ -34,6 +34,15 @@ def test_hidden_pad_module_stays_with_jlcpcb() -> None:
     assert plan.hand_method == "Reflow only"
 
 
+def test_clipped_power_mosfet_stays_with_jlcpcb() -> None:
+    plan = assembly_plan(
+        _key(footprint="Chessboard:CSD25404Q3_DQG", library="Extended"),
+        1,
+    )
+    assert plan.route == "JLCPCB"
+    assert plan.hand_method == "Reflow only"
+
+
 def test_small_but_reachable_packages_are_hand_fitted() -> None:
     """0402, SOD-523 and 0.65 mm TSSOP are tedious, not unreachable."""
     for footprint in (

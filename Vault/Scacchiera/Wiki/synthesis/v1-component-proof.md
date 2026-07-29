@@ -11,7 +11,7 @@ date_updated: 2026-07-29
 How is every fitted component tied to an exact purchasable part, authoritative source, library
 audit and simulation treatment?
 
-The four authoritative schematics generate 49 unique purchased fitted MPN, supplier, order-code and
+The four authoritative schematics generate 57 unique purchased fitted MPN, supplier, order-code and
 footprint tuples with no fitted sourcing blocker.
 `docs/verification/v1-components.yaml` records each exact tuple, and the generated
 catalogs in [[index]] link one source summary and one entity page per exact MPN. The test suite
@@ -22,9 +22,9 @@ The same evidence separately binds the external [[ntcle317e4103sba]] cell sensor
 ratings, immutable sources, availability and simulation treatment are checked without pretending an
 off-board item has a PCB footprint.
 
-**V1 remains open on the display interface as of 2026-07-29.** The custom power board restores
-[[mcp73871t-2cci-ml]], [[tps61023drlr]] and the PH cell connector to the exact audit, and its
-inductor is now exact [[dfe252012f-1r0m-p2]], LCSC C435392. The
+**V1 remains open on the display and battery assemblies as of 2026-07-29.** The custom power board
+binds [[bq25895rtwr]], [[tps61088rhlr]], [[csd25404q3]], [[tlv7021dckr]], both Micro-Fit headers,
+and exact [[dfe252012f-1r0m-p2]], LCSC C435392. The
 [[er-oledm3-12-1w-manufacturer-evidence]] capture records a conflict between 320 mA active current
 in the datasheet and 2 mA on the product page, while the original PDF and exact 16-to-7-pin cable
 remain unfiled. A purchased power-module replacement is optional and therefore not a fitted V1 item.
@@ -48,7 +48,7 @@ The rebuilt hub removed the charger and duplicate conversion stages from the hub
 the catalog MPN. The comparator uses a code-generated DGK0008A manufacturer land pattern after PCB
 DRC showed the generic KiCad VSSOP footprint could not maintain the board's 0.2 mm clearance.
 
-[component_count::49] [blocked_fitted_component_count::0] [external_component_count::2]
+[component_count::57] [blocked_fitted_component_count::0] [external_component_count::2]
 [gate_state::open, display documentation conflict and interconnect]
 [vendor_model_count::3]
 
