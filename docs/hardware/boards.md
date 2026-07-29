@@ -71,11 +71,10 @@ here only as interfaces, not as boards.
 ### 4. Power board
 
 - **Responsibility:** connect a protected 1S cell, charge it from the qualified 5 V input, manage
-  source handover, and deliver a regulated 5 V at 2 A to the hub. The earlier MCP73871 and TPS61023
-  implementation cannot carry the 10 W requirement and is being replaced.
+  source handover, and deliver a regulated 5 V at 2 A to the hub using BQ25619 and TPS61088.
 - **Interfaces:** qualified charge input, regulated 5 V return and raw cell sense through the same
   [power module contract](power-module-interface.md) a purchased replacement would implement.
-- **Envelope:** 46 x 32 mm, 2-layer. It is a snap-off part of the panel carrying both light bars.
+- **Envelope:** 90 x 32 mm, 2-layer. It is a snap-off part of the panel carrying both light bars.
 - **Cost target:** fabrication rides on the light-bar panel; component cost remains to be quoted.
 
 ### Purchased accessories (not boards)
@@ -95,6 +94,10 @@ for the same reason the display modules are: an order that forgets them is incom
 - **One protected 1S cell assembly** for the custom [power board](power.md). A cylindrical cell may
   lie lengthwise in the player rail. The filed 21.7 x 70.2 mm Molicel 21700 candidate demonstrates
   that the geometry and discharge current are feasible, but the protected assembly is not bound.
+- **Micro-Fit mating hardware:** two Molex 430250800 eight-circuit receptacle housings for the
+  hub-to-power harness, one 430250200 two-circuit housing for the battery, and 430300038 female
+  terminals for 18 AWG wire. Exact wire, pre-crimped leads or qualified crimp process, color coding,
+  and strain relief remain open.
 - **Superseded option, one purchased power module**, meeting [power-module-interface.md](power-module-interface.md).
   It provides charging, protection, the UPS power path and the regulated 5 V output. No product is
   bound yet; the contract caps it at 46 mm across the rail, cell included, so that it fits the

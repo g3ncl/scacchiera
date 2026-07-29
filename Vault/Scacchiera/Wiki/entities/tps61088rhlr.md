@@ -1,17 +1,19 @@
 ---
 type: entity
+tags:
+  - wiki/entity
+  - wiki/component
 date_updated: 2026-07-29
 source_count: 1
-tags: [wiki/entity, wiki/power]
 ---
 
 # TPS61088RHLR
 
-Texas Instruments synchronous boost converter considered for the custom power board's regulated
-5 V at 2 A output. Its [[tps61088rhlr-datasheet|manufacturer data sheet]] provides programmable
-current limit and external compensation.
+Exact fitted component from Texas Instruments, used by power U2 (TPS61088RHLR).
 
-[mpn::TPS61088RHLR] [manufacturer::Texas Instruments] [order_code::C87357]
+[mpn::TPS61088RHLR] [supplier::JLCPCB]
+[order_code::C87357] [category::semiconductor]
 
-It is a candidate, not a fitted binding. Exact compensation, frequency, inductor, capacitors,
-undervoltage cutoff, layout, and simulation remain open.
+The immutable source is summarized in [[tps61088rhlr-datasheet]]. The complete
+library, rating, availability, and model audit is machine checked from
+`docs/verification/v1-components.yaml`.

@@ -1,6 +1,6 @@
 ---
 type: source-summary
-date_updated: 2026-07-26
+date_updated: 2026-07-29
 tags:
   - wiki/source
   - wiki/battery
@@ -9,7 +9,7 @@ tags:
 # INR-21700-M65A product data sheet
 
 Manufacturer product data sheet for the [[inr-21700-m65a]] cylindrical lithium-ion cell considered
-for the chessboard's [[usb-c-pd-fast-charging|fast-charge power system]]. The immutable source is
+for the chessboard's 5 V, 10 W power system. The immutable source is
 [[../../Datasheets/INR-21700-M65A_MOLICEL.pdf]].
 
 ## Design-dependent values

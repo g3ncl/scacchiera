@@ -23,6 +23,30 @@ WIKI_UPDATE_DATE = "2026-07-29"
 MODULE_NAME = "hardware.verification.generate_component_audit"
 
 DESIGN_FACTS = {
+    "BQ25619RTWR": (
+        "3.9 to 13.5 V input operating range, 1.5 A charge-current capability, NVDC power path, "
+        "5 A RMS BATFET discharge path, 1.5 MHz switching and RTW WQFN-24 pinout"
+    ),
+    "TPS61088RHLR": (
+        "2.7 to 12 V input, 4.5 to 12.6 V output, programmable 200 kHz to 2.2 MHz switching, "
+        "11 A switch capability, 1.204 V feedback reference and RHL VQFN-20 pinout"
+    ),
+    "TLV809K33DBVR": (
+        "2.87 to 2.99 V falling reset threshold, 40 mV typical hysteresis, push-pull active-low "
+        "output and 0.1 uF local bypass recommendation"
+    ),
+    "CDMC8D28NP-1R2MC": (
+        "1.2 uH plus or minus 20 percent, 7 mOhm maximum DCR, 12.2 A saturation current, "
+        "12.9 A thermal current and 8.7 by 8.3 by 3.0 mm maximum body"
+    ),
+    "430450800": (
+        "eight circuits, 8.5 A maximum per contact, 600 V, minus 40 to 105 degrees Celsius, "
+        "right-angle through-hole Micro-Fit 3.0 header"
+    ),
+    "430450200": (
+        "two circuits, 8.5 A maximum per contact, 600 V, minus 40 to 105 degrees Celsius, "
+        "right-angle through-hole Micro-Fit 3.0 header"
+    ),
     "MCP73871T-2CCI/ML": (
         "900 to 1100 mA fast charge with PROG1 at 1 kohm and SEL high, 75 to 125 mA "
         "termination with PROG3 at 10 kohm, 1.5 to 1.8 A adapter input limit, 1.23 V VPCC "
@@ -167,6 +191,7 @@ class BoundPart:
 BOARD_NAMES = ("lightbar", "matrix", "hub", "power")
 
 MANUFACTURERS = {
+    "43045": "Molex",
     "0402CG": "Fenghua Advanced Technology",
     "0603WAF": "UNI-ROYAL",
     "74438357010": "Würth Elektronik",
@@ -180,8 +205,10 @@ MANUFACTURERS = {
     "BAT54H": "Jiangsu Changjing Electronics Technology",
     "BSS123-7-F": "Diodes Incorporated",
     "BSS84-7-F": "Diodes Incorporated",
+    "BQ": "Texas Instruments",
     "CC0603": "Yageo",
     "CC1206": "Yageo",
+    "CDMC": "Sumida",
     "CL": "Samsung Electro-Mechanics",
     "DFE": "Murata",
     "DMP2035U-7": "Diodes Incorporated",
@@ -201,13 +228,15 @@ MANUFACTURERS = {
     "SN74": "Texas Instruments",
     "T37K3RGB": "Harvatek",
     "TCA9535": "Texas Instruments",
-    "TLV7042": "Texas Instruments",
+    "TLV": "Texas Instruments",
     "TPS": "Texas Instruments",
     "USB4105": "GCT",
     "USBLC6": "UMW (UTD Semiconductor)",
 }
 
 DATASHEET_OVERRIDES = {
+    "430450200": "430450200_C122431.md",
+    "430450800": "430450800_C122422.md",
     "B2B-PH-K-S(LF)(SN)": "B2B-PH-K-S-LF-SN_C131337.pdf",
     "BSS123-7-F": "BSS123-7-F_C85107.pdf",
     "BSS84-7-F": "BSS84-7-F_C85202.pdf",
@@ -267,7 +296,7 @@ def _category(part: BoundPart) -> str:
         return "resistor"
     if footprint.startswith("Capacitor_SMD"):
         return "capacitor"
-    if footprint.startswith("Inductor_SMD") or part.mpn.startswith(("DFE", "NR6045")):
+    if footprint.startswith("Inductor_SMD") or part.mpn.startswith(("CDMC", "DFE", "NR6045")):
         return "inductor"
     if footprint.startswith("Connector_"):
         return "connector"
@@ -334,6 +363,16 @@ def _limits(category: str) -> tuple[str, str]:
 
 
 def _model(part: BoundPart, category: str) -> dict[str, str]:
+    if part.mpn == "TPS61088RHLR":
+        return {
+            "kind": "vendor",
+            "path": "hardware/sim/models/vendor/TPS61088_TRANS.LIB",
+            "valid_region": (
+                "official TI transient model is filed; its two-expression ngspice compatibility "
+                "copy parses but does not switch, so V3 uses a datasheet-bounded switching stage "
+                "and leaves control-loop evidence open"
+            ),
+        }
     ti_vendor_models = {
         "TPS2553DBVR-1": "hardware/sim/models/vendor/TPS2553_SLVM425B.zip",
         "TPS61023DRLR": "hardware/sim/models/vendor/TPS61023_SLVMD68A.zip",

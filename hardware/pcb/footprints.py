@@ -176,6 +176,24 @@ def dfe252012f_footprint() -> str:
 )\n'''
 
 
+def cdmc8d28_footprint() -> str:
+    """Sumida CDMC8D28 land pattern from the manufacturer series sheet."""
+    return '''(footprint "CDMC8D28"
+  (version 20240108)
+  (generator pcbnew)
+  (layer "F.Cu")
+  (descr "Sumida CDMC8D28 recommended land pattern")
+  (tags "shielded molded power inductor")
+  (property "Reference" "REF**" (at 0 -5.1 0) (layer "F.SilkS"))
+  (property "Value" "CDMC8D28" (at 0 5.1 0) (layer "F.Fab"))
+  (attr smd)
+  (fp_rect (start -4.75 -4.25) (end 4.75 4.25) (stroke (width 0.1) (type default)) (fill none) (layer "F.Fab"))
+  (fp_rect (start -5.35 -4.55) (end 5.35 4.55) (stroke (width 0.05) (type default)) (fill none) (layer "F.CrtYd"))
+  (pad "1" smd roundrect (at -3.875 0) (size 2.75 4.0) (layers "F.Cu" "F.Paste" "F.Mask") (roundrect_rratio 0.1))
+  (pad "2" smd roundrect (at 3.875 0) (size 2.75 4.0) (layers "F.Cu" "F.Paste" "F.Mask") (roundrect_rratio 0.1))
+)\n'''
+
+
 def tlv7042_dgk_footprint() -> str:
     """TI DGK0008A land pattern from the TLV7042 data sheet."""
     pads = []
@@ -244,6 +262,7 @@ def write_footprints(output: Path = OUTPUT) -> None:
     (output / "T37K3RGB-05C000112U1930.kicad_mod").write_text(t37k3rgb_footprint(), encoding="utf-8")
     (output / "NR6045S.kicad_mod").write_text(nr6045s_footprint(), encoding="utf-8")
     (output / "DFE252012F.kicad_mod").write_text(dfe252012f_footprint(), encoding="utf-8")
+    (output / "CDMC8D28.kicad_mod").write_text(cdmc8d28_footprint(), encoding="utf-8")
     (output / "TLV7042_DGK.kicad_mod").write_text(tlv7042_dgk_footprint(), encoding="utf-8")
     (output / "SOT-563_DRL.kicad_mod").write_text(sot563_drl_footprint(), encoding="utf-8")
 

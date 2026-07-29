@@ -1,6 +1,6 @@
 """Coincident worst-case load the hub presents to its power module.
 
-The power-module interface obliges a module to supply 1.6 A. This is the
+The power-module interface obliges a module to supply 2.0 A. This is the
 derivation, from filed manufacturer evidence,
 with every part assumed to be doing its worst at the same moment: the radio
 transmitting, the reader driving its field, both light bars white, and the

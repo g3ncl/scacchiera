@@ -1,30 +1,28 @@
 ---
 type: source-summary
+tags:
+  - wiki/source
+  - wiki/component
 date_updated: 2026-07-29
-tags: [wiki/source, wiki/power, wiki/battery]
+source_file: "Datasheets/BQ25619RTWR_C2864534.pdf"
+source_title: "BQ25619RTWR manufacturer datasheet"
+publisher: "Texas Instruments"
 ---
 
-# BQ25619RTWR data sheet
+# BQ25619RTWR datasheet
 
-Texas Instruments data sheet revision F, February 2025, for the [[bq25619rtwr]] 1S switch-mode
-charger and NVDC power path. The immutable source is
-[[../../Datasheets/BQ25619RTWR_C2864534.pdf]].
+This source binds [BQ25619RTWR](../entities/bq25619rtwr.md) to supplier order
+code `C2864534`. It is used by power U1 (BQ25619RTWR).
 
-## Design-dependent values
+[mpn::BQ25619RTWR] [order_code::C2864534]
+[manufacturer::Texas Instruments] [footprint::Package_DFN_QFN:Texas_RTW_WQFN-24-1EP_4x4mm_P0.5mm_EP2.7x2.7mm]
 
-| Parameter | Published value | Locator |
-| --- | ---: | --- |
-| Package | 24-pin 4 x 4 mm WQFN, RTW | Sections 3 and 5 |
-| Maximum charge current | 1.5 A | Section 7.3.6 |
-| Autonomous default charge current | 340 mA | Table 7-2 |
-| PSEL high or low input limit | 500 mA or 2.4 A | Table 7-1 |
-| Programmable input-current range | 0.1 to 3.2 A | Electrical Characteristics |
-| BATFET resistance | 19.5 mOhm typical, 30 mOhm maximum | Electrical Characteristics |
-| BATFET discharge clamp | 5 A minimum, 6 A typical | Electrical Characteristics, ISYS_OCP_Q4 |
-| Default input-voltage regulation | 4.5 V | Section 7.3.3.4 |
+## Design facts reviewed
 
-The device starts autonomously from a battery or input source. Its 500 mA PSEL state is the safe
-cold-start choice before a host programs the qualified source and charge limits. The 5 A minimum
-battery clamp requires the downstream boost to stop before depleted-cell current reaches it.
-
-[mpn::BQ25619RTWR] [order_code::C2864534] [package::RTW-WQFN-24]
+- Library proof: manufacturer pin and package drawing checked against the SKiDL pin numbers, KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation.
+- Ratings used by the design: pinout, no-connect and exposed-pad treatment, recommended operating range, absolute maximum voltage, current, power and temperature, startup state, thermal data and package.
+- Exact selected limits: 3.9 to 13.5 V input operating range, 1.5 A charge-current capability, NVDC power path, 5 A RMS BATFET discharge path, 1.5 MHz switching and RTW WQFN-24 pinout.
+- Datasheet locator: pin description, absolute maximum, recommended operation, electrical, thermal and package tables.
+- Simulation treatment: datasheet_bounded, valid only for
+  no distributable vendor ngspice model was identified; V3 may use only parameters enumerated in this part's filed datasheet and must sweep their full published limits; digital protocol behavior belongs to V6.
+- Conflicts: none open. Any later catalog or document mismatch reopens V1.

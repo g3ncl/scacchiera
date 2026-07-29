@@ -9,7 +9,7 @@ layout in `hardware/pcb/hub_layout.py`.
 
 ## Power
 
-The hub receives regulated 5 V from a purchased power module. Which module is a separate decision,
+The hub receives regulated 5 V from the custom power board or an optional purchased replacement,
 bounded by the contract in [power-module-interface.md](power-module-interface.md) and recorded in
 [power-subsystem.md](power-subsystem.md); the hub is built against the contract, not against a
 product, so the module can be swapped without touching this board. The custom hub never charges the
@@ -32,10 +32,9 @@ buck uses the data sheet's 10 uF input, two 22 uF output, and 100 nF bootstrap n
 bars use managed 5 V directly through the TPS2553 latch-off current limiter, with their data driven
 through an AHCT buffer at 5 V logic.
 
-Both halves of the module link are seven-way, because every contact in these connector families is
-rated 1.0 A and both halves carry the whole board. J2 spreads the qualified output over three
-contacts, since it carries charge current and system load together while an adapter is connected;
-J3 spreads the return over two.
+J2 is seven-way JST GH and spreads the qualified USB input over three supply contacts. J3 is
+eight-way Molex Micro-Fit and uses two contacts each for regulated 5 V and ground, followed by I2C,
+raw cell voltage, and one reserved no-connect.
 
 Battery level is measured here rather than read from the module. R32 and R33 divide the cell
 arriving on J3 pin 7 into IO4 (ADC1_CH4), filtered by C18. A 4.2 V cell reads 2.1 V, below the 2.5 V
@@ -239,7 +238,8 @@ them. Both are recorded as such rather than left looking unfinished.
 ## Cost
 
 The engineering BOM is 13.768 EUR in estimated custom-board parts across 39 fitted lines, up
-0.366 EUR from the four-layer revision: J2 and J3 became seven-way to spread their supply across
+0.366 EUR from the four-layer revision: J2 became seven-way and J3 later became eight-way Micro-Fit
+to spread their supply across
 1.0 A contacts, and the cell divider added three passives with values already in the BOM. No new
 part type entered the design, so the four fee-bearing Extended lines and their 10.80 EUR of feeder
 charges are unchanged.

@@ -743,3 +743,24 @@ remains open.
 Filed and ingested [[bq25619rtwr-datasheet]] and [[tps61088rhlr-datasheet]] before using them as
 replacement candidates. The audit also rejected the existing JST PH battery connector and the
 two-contact JST GH output at 10 W because neither has deliberate current margin.
+
+## [2026-07-29] design | Implement and bound the 10 W custom power board
+
+Replaced the superseded charger and boost with [[bq25619rtwr]], [[tps61088rhlr]],
+[[tlv809k33dbvr]], and [[cdmc8d28np-1r2mc]]. Bound [[430450800]] and [[430450200]] Micro-Fit
+headers for the output and cell paths. Regenerated the complete V1 component catalog and its source
+and entity pages from all four authoritative schematics.
+
+The routed 90 by 32 mm board and the matching eight-pin hub boundary reproduce zero DRC violations,
+unconnected items, and parity issues. A 54-corner datasheet-bounded ngspice switching-stage sweep
+passes the 10 W ripple and current-stress criteria. TI's official transient model is preserved, but
+its ngspice compatibility copy does not switch, so control-loop and charger fault evidence remain
+open rather than being waived. The filed [[inr-21700-m65a]] proves one-cell geometry and discharge
+capability, while the complete protected assembly and mating harnesses remain V1 blockers.
+
+## [2026-07-29] audit | Bind the Micro-Fit mating interface
+
+Corrected the mating-side family from plug series 43020 to receptacle series 43025 using Molex's
+own Micro-Fit product specification. Selected [[430250800]] and [[430250200]] housings with
+[[430300038]] 18 AWG female terminals. The exact wire, qualified crimp or pre-crimped leads, color
+coding, strain relief, and complete harness remain open rather than being implied by the connector.

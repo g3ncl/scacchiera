@@ -1,14 +1,15 @@
 # Power subsystem selection
 
-Which purchased module and cell fill the boundary defined in
+Which fitted power implementation and cell fill the boundary defined in
 [power-module-interface.md](power-module-interface.md). That file is the contract; this one records
 what is fitted, what was considered, and what still has to be measured.
 
 ## Status
 
-**No module is bound.** The interface is deliberately written as a contract rather than around one
-product, so the board can be built and verified before the choice is final, and the module can be
-swapped later without touching the hub.
+**The custom power board is fitted.** It uses BQ25619, TPS61088, and TLV809K33 while preserving the
+same contract an optional purchased module would implement. The mating housings and 18 AWG terminals
+are exact; the wire, qualified crimp or pre-crimped leads, complete harnesses, and protected battery
+assembly are not bound, so V1 remains open.
 
 Binding one is a V1 action: file its manufacturer documentation in the vault, record the exact
 product and revision, and check it against every mandatory property in the interface.
@@ -27,18 +28,17 @@ more per watt-hour than cylindrical cells, is in
 
 ## Cell
 
-Any cell meeting the runtime requirement and the 46 mm width. The reference point is an 18.5 Wh
-1S pouch, around 10 mm thick and 100 to 120 mm long, since rail length is the dimension this
-enclosure has to spare. The cell carries its own protection board; the hub adds the cell-bonded
-thermistor and the analog window, because pouch cells of this class ship without an NTC.
+The filed Molicel INR-21700-M65A is the cell candidate: 23.4 Wh typical, 26 A continuous discharge,
+and 21.7 by 70.2 mm. It lies lengthwise in the rail and easily supports the roughly 4 A electrical
+load. It is a bare cell. A qualified assembler must still bind the protection circuit, welded tabs,
+insulation, thermistor, lead wire, connector, and transport evidence.
 
 ## Charging
 
-Charging is deliberately slow. `POWER-CHARGE-10-80` allows 240 minutes and `POWER-CHARGE-10-FULL`
-360 minutes, which a 1 A charger meets: 70 percent of a 5 Ah cell is 3.5 Ah, or 210 minutes of
-constant current. This is what admits the cheap module tier, and it is a deliberate trade of
-recharge speed for subsystem cost. The constant-voltage taper does not scale down with current,
-which is why the full-charge limit is not simply double.
+Charging remains moderate. `POWER-CHARGE-10-80` allows 240 minutes and `POWER-CHARGE-10-FULL`
+360 minutes. At the fitted 1.5 A target, 70 percent of the 6.5 Ah candidate is 4.55 Ah, or 182 ideal
+minutes of constant current. Charging 90 percent takes 234 ideal minutes, leaving 126 minutes for
+the constant-voltage taper and control transitions before the full-charge limit. V8 measures both.
 
 ## V8 measurements
 

@@ -10,8 +10,8 @@ a module that misbehaves cannot charge a cell outside the window proven in
 
 ## Signals
 
-Two harnesses, both JST GH 1.25 mm, both seven-way. Every contact in this family is rated 1.0 A, so
-the supply is spread across contacts rather than trusted to one.
+The input harness is seven-way JST GH 1.25 mm. The output harness is eight-way Molex Micro-Fit 3.0.
+Power and ground use multiple contacts so no single terminal carries the whole interface current.
 
 **J2, hub to module input.** Qualified 5 V, gated by cell temperature.
 
@@ -32,6 +32,7 @@ why it has more supply contacts than J3.
 | 5 | I2C_SCL | hub to module | no |
 | 6 | I2C_SDA | bidirectional | no |
 | 7 | BAT_RAW | module to hub | yes, the cell terminal |
+| 8 | NC | none | reserved, deliberately unconnected |
 
 ## Mandatory properties
 
@@ -45,7 +46,8 @@ A candidate module must provide all of these:
   excludes. A module that sags further browns out the MCU, and the hub cannot ride it out; its
   output capacitance is worth about five microseconds. The 2 A rating provides 35 percent current
   headroom over that presently derived load and is the required 10 W stress capability.
-- **Charging from a 5 V input at 1 A or more**, which meets `POWER-CHARGE-10-80` at 240 minutes.
+- **Charging from a 5 V input at 1.5 A or more**, which gives the 6.5 Ah cell candidate enough
+  constant-current time to meet `POWER-CHARGE-10-80` at 240 minutes.
 - **Uninterrupted output across source insertion and removal.** The board must not reset when the
   adapter is connected or pulled. This is the property the module exists for, and V8 measures it.
 - **Output that stays up at a few milliamps indefinitely.** The board sleeps after twenty idle
@@ -70,9 +72,8 @@ A candidate module must provide all of these:
   without an NTC input is acceptable and a module with one is redundant rather than trusted.
 - **USB Power Delivery.** The inlet is power-only and presents passive sink resistors.
 - **A specific cell format.** Any protected assembly meeting runtime, current, and cross-section
-  requirements fits. A 21700 cell is permitted lengthwise;
-  see [the format survey](../../Vault/Scacchiera/Wiki/synthesis/battery-format-and-module-alternatives.md)
-  for why a 1S pouch is the current choice.
+  requirements fits. The filed 21700 candidate is permitted lengthwise, but it is not yet a bound
+  protected assembly.
 
 ## Fitted implementation
 
@@ -83,8 +84,8 @@ interface remains a contract rather than being written around that product.
 ## Verification
 
 - V2 checks both connector pin maps against this table from the schematic.
-- V3 proves the temperature gate holds for any module, since the gate is on the hub, and derives the
-  4.0 V output floor above from the hub's own dropout.
+- V3 proves the temperature gate holds for any module, derives the 4.0 V output floor from the hub,
+  and sweeps the fitted custom board's boost power stage at the full 2 A obligation.
 - V8 measures, on the fitted module: charge time against `POWER-CHARGE-10-80` and
   `POWER-CHARGE-10-FULL`, output continuity across source insertion and removal, output held during
   sleep, and cell-surface temperature under charge.

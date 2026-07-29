@@ -33,6 +33,7 @@ from hardware.pcb.parts import (
 
 NO_CONNECTS: dict[str, tuple[str, ...]] = {
     "J1": ("A6", "A7", "A8", "B6", "B7", "B8"),
+    "J3": ("8",),
     "J8": ("4",),
     "U3": ("2", "11", "14", "20", "23", "24", "31", "32", "33", "34", "35", "40"),
     "U4": ("4", "7", "10", "15", "16", "17", "18", "19", "20", "21", "32", "33", "34", "35"),
@@ -66,6 +67,19 @@ def _connector(circuit: Circuit, ref: str, names: tuple[str, ...], mpn: str, cos
         mpn=mpn,
         description="Keyed service connector",
         unit_cost_eur=cost,
+    )
+
+
+def _microfit8(circuit: Circuit, ref: str, names: tuple[str, ...]) -> Part:
+    return component(
+        circuit,
+        ref,
+        "430450800",
+        "Connector_Molex:Molex_Micro-Fit_3.0_43045-0800_2x04_P3.00mm_Horizontal",
+        tuple(PinDefinition(str(index), name) for index, name in enumerate(names, start=1)),
+        mpn="430450800",
+        description="8.5 A per-contact locking power connector",
+        unit_cost_eur=0.66,
     )
 
 
@@ -632,10 +646,10 @@ def build_hub() -> Circuit:
     _build_mcu(circuit, nets)
     _build_reader(circuit, nets)
 
-    # Every GH and 1.25 mm wafer contact in this design is rated 1.0 A, and both
-    # halves of the module link carry the whole board on it. J2 additionally
-    # carries charge current on top of the system load while an adapter is
-    # connected, so its supply is spread over three contacts and J3's over two.
+    # J2 carries charge current on top of the system load while an adapter is
+    # connected, so its 1.0 A GH contacts are paralleled. J3 uses Micro-Fit
+    # contacts rated above the complete 10 W load, with paired power contacts
+    # retained for lower harness loss and compatibility with the power board.
     charge_pins = ("CHARGE_5V", "CHARGE_5V", "CHARGE_5V", "GND", "GND", "GND", "GND")
     charge_output = _connector(circuit, "J2", charge_pins, "SM07B-GHS-TB(LF)(SN)", 0.35)
     for connector_pin, name in enumerate(charge_pins, start=1):
@@ -644,11 +658,12 @@ def build_hub() -> Circuit:
     # module's own state registers are undocumented, so the level the product
     # reports comes from a voltage this board measures itself.
     module_pins = (
-        "MODULE_5V", "MODULE_5V", "GND", "GND", "I2C_SCL", "I2C_SDA", "BAT_RAW",
+        "MODULE_5V", "MODULE_5V", "GND", "GND", "I2C_SCL", "I2C_SDA", "BAT_RAW", "NC",
     )
-    module_return = _connector(circuit, "J3", module_pins, "SM07B-GHS-TB(LF)(SN)", 0.35)
-    for connector_pin, name in enumerate(module_pins, start=1):
+    module_return = _microfit8(circuit, "J3", module_pins)
+    for connector_pin, name in enumerate(module_pins[:-1], start=1):
         _connect(nets[name], module_return, str(connector_pin))
+    _no_connect(circuit, module_return, NO_CONNECTS["J3"])
 
     # Matrix link, mirroring the matrix board's J1. The registers share the
     # SPI wires; SEL_RCLK latches from the expander after a 16-bit shift.

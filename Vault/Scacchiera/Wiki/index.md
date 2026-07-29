@@ -22,7 +22,7 @@ Raw sources that have been captured but not yet ingested into the wiki. Move a
 row into the Sources table below once its summary page exists.
 
 Component datasheets live in [Datasheets/](../Datasheets) and are immutable in the same way
-`Clippings/` is. V1 filed and ingested all 49 purchased fitted MPNs plus two external electrical
+`Clippings/` is. V1 filed and ingested all 54 purchased fitted MPNs plus two external electrical
 components. The generated catalogs below list one `source-summary` and one component `entity` per
 exact fitted part. Historical family summaries
 remain because they explain rejected selections and contradictions that must not be forgotten.
@@ -56,7 +56,7 @@ One [[wiki/source]] summary per ingested raw source. Factual, no interpretation.
 | [[sk68xx-mini-e-led-datasheets]] | component datasheets (two revisions, conflicting) | 2026-07-25 |
 | [[hub-power-tree-datasheets]] | component datasheets (7 parts, power and logic) | 2026-07-25 |
 | [[matrix-discrete-datasheets]] | component datasheets (5 parts, switch cell) | 2026-07-25 |
-| [[inr-21700-m65a-datasheet]] | component datasheet | 2026-07-26 |
+| [[inr-21700-m65a-datasheet]] | component datasheet | 2026-07-29 |
 | [[bq25638-datasheet]] | component datasheet | 2026-07-26 |
 | [[tps25730-datasheet]] | component datasheet | 2026-07-26 |
 | [[pmp23456-reference-design]] | TI reference-design test report | 2026-07-26 |
@@ -70,6 +70,7 @@ One [[wiki/source]] summary per ingested raw source. Factual, no interpretation.
 | [[er-oledm3-12-1w-manufacturer-evidence]] | component manufacturer evidence | 2026-07-29 |
 | [[bq25619rtwr-datasheet]] | component datasheet | 2026-07-29 |
 | [[tps61088rhlr-datasheet]] | component datasheet | 2026-07-29 |
+| [[micro-fit-3-0-mating-evidence]] | connector manufacturer evidence | 2026-07-29 |
 
 ## Entities
 
@@ -85,7 +86,7 @@ People, tools, orgs, repos. See [[wiki/entity]] pages.
 | [[pn5180]] | 2 | 2026-07-25 |
 | [[txc-7m27100009]] | 2 | 2026-07-25 |
 | [[sk6805mini-e]] | 1 | 2026-07-25 |
-| [[inr-21700-m65a]] | 1 | 2026-07-26 |
+| [[inr-21700-m65a]] | 1 | 2026-07-29 |
 | [[bq25638]] | 2 | 2026-07-26 |
 | [[tps25730s]] | 2 | 2026-07-26 |
 | [[sw6106]] | 2 | 2026-07-26 |
@@ -97,6 +98,9 @@ People, tools, orgs, repos. See [[wiki/entity]] pages.
 | [[er-oledm3-12-1w]] | 1 | 2026-07-29 |
 | [[bq25619rtwr]] | 1 | 2026-07-29 |
 | [[tps61088rhlr]] | 1 | 2026-07-29 |
+| [[430250800]] | 1 | 2026-07-29 |
+| [[430250200]] | 1 | 2026-07-29 |
+| [[430300038]] | 1 | 2026-07-29 |
 
 <!-- V1-COMPONENT-CATALOG:START -->
 ## V1 component datasheet sources
@@ -109,39 +113,43 @@ One exact source summary per purchased fitted MPN. The structured audit is
 | [[0402cg101j500nt-datasheet]] | Fenghua Advanced Technology | 2026-07-26 |
 | [[0402cg150j500nt-datasheet]] | Fenghua Advanced Technology | 2026-07-26 |
 | [[0603waf1000t5e-datasheet]] | UNI-ROYAL | 2026-07-26 |
-| [[0603waf1001t5e-datasheet]] | UNI-ROYAL | 2026-07-29 |
+| [[0603waf1001t5e-datasheet]] | UNI-ROYAL | 2026-07-26 |
 | [[0603waf1002t5e-datasheet]] | UNI-ROYAL | 2026-07-29 |
 | [[0603waf1003t5e-datasheet]] | UNI-ROYAL | 2026-07-29 |
 | [[0603waf1004t5e-datasheet]] | UNI-ROYAL | 2026-07-26 |
 | [[0603waf150kt5e-datasheet]] | UNI-ROYAL | 2026-07-26 |
-| [[0603waf3303t5e-datasheet]] | UNI-ROYAL | 2026-07-29 |
+| [[0603waf2492t5e-datasheet]] | UNI-ROYAL | 2026-07-29 |
 | [[0603waf3902t5e-datasheet]] | UNI-ROYAL | 2026-07-29 |
 | [[0603waf4701t5e-datasheet]] | UNI-ROYAL | 2026-07-26 |
 | [[0603waf5101t5e-datasheet]] | UNI-ROYAL | 2026-07-29 |
+| [[0603waf9102t5e-datasheet]] | UNI-ROYAL | 2026-07-29 |
+| [[430450200-datasheet]] | Molex | 2026-07-29 |
+| [[430450800-datasheet]] | Molex | 2026-07-29 |
 | [[74hc595d-118-datasheet]] | Nexperia | 2026-07-26 |
 | [[7m27100009-datasheet]] | TXC | 2026-07-26 |
 | [[a1257wr-s-4p-datasheet]] | CJT | 2026-07-26 |
 | [[ap22811aw5-7-datasheet]] | Diodes Incorporated | 2026-07-26 |
 | [[ap63203wu-7-datasheet]] | Diodes Incorporated | 2026-07-26 |
-| [[b2b-ph-k-s-lf-sn-datasheet]] | JST | 2026-07-29 |
 | [[bar64-02v-datasheet]] | Jiangsu Changjing Electronics Technology | 2026-07-26 |
+| [[bq25619rtwr-datasheet]] | Texas Instruments | 2026-07-29 |
 | [[bss123-7-f-datasheet]] | Diodes Incorporated | 2026-07-26 |
 | [[bss84-7-f-datasheet]] | Diodes Incorporated | 2026-07-26 |
 | [[cc0603frnpo9bn221-datasheet]] | Yageo | 2026-07-26 |
-| [[cc1206kkx7rcbb472-datasheet]] | Yageo | 2026-07-26 |
+| [[cc1206kkx7rcbb472-datasheet]] | Yageo | 2026-07-29 |
+| [[cdmc8d28np-1r2mc-datasheet]] | Sumida | 2026-07-29 |
 | [[cl05a105ka5nqnc-datasheet]] | Samsung Electro-Mechanics | 2026-07-26 |
-| [[cl05b104ko5nnnc-datasheet]] | Samsung Electro-Mechanics | 2026-07-26 |
-| [[cl10a105kb8nnnc-datasheet]] | Samsung Electro-Mechanics | 2026-07-26 |
-| [[cl10a225ko8nnnc-datasheet]] | Samsung Electro-Mechanics | 2026-07-26 |
+| [[cl05b104ko5nnnc-datasheet]] | Samsung Electro-Mechanics | 2026-07-29 |
+| [[cl10a105kb8nnnc-datasheet]] | Samsung Electro-Mechanics | 2026-07-29 |
+| [[cl10a225ko8nnnc-datasheet]] | Samsung Electro-Mechanics | 2026-07-29 |
 | [[cl21a106kaynnne-datasheet]] | Samsung Electro-Mechanics | 2026-07-29 |
 | [[cl21a226maqnnne-datasheet]] | Samsung Electro-Mechanics | 2026-07-29 |
+| [[cl21a475kaqnnne-datasheet]] | Samsung Electro-Mechanics | 2026-07-29 |
 | [[cl32a107mqvnnne-datasheet]] | Samsung Electro-Mechanics | 2026-07-26 |
 | [[dfe252012f-1r0m-p2-datasheet]] | Murata | 2026-07-29 |
 | [[esp32-c6-mini-1u-n4-datasheet]] | Espressif Systems | 2026-07-26 |
 | [[grm1555c1h221ja01d-datasheet]] | Murata | 2026-07-26 |
 | [[grm1555c1h680ja01d-datasheet]] | Murata | 2026-07-26 |
 | [[lqw2basr47j00l-datasheet]] | Murata | 2026-07-26 |
-| [[mcp73871t-2cci-ml-datasheet]] | Microchip Technology | 2026-07-29 |
 | [[nr6045s4r7mt-datasheet]] | Magnetsyc | 2026-07-29 |
 | [[pn5180a0hn-c3e-datasheet]] | NXP Semiconductors | 2026-07-26 |
 | [[rs-03k1800ft-datasheet]] | Fenghua Advanced Technology | 2026-07-26 |
@@ -152,8 +160,9 @@ One exact source summary per purchased fitted MPN. The structured audit is
 | [[t37k3rgb-05c000112u1930-datasheet]] | Harvatek | 2026-07-26 |
 | [[tca9535pwr-datasheet]] | Texas Instruments | 2026-07-26 |
 | [[tlv7042dgkr-datasheet]] | Texas Instruments | 2026-07-26 |
+| [[tlv809k33dbvr-datasheet]] | Texas Instruments | 2026-07-29 |
 | [[tps2553dbvr-1-datasheet]] | Texas Instruments | 2026-07-26 |
-| [[tps61023drlr-datasheet]] | Texas Instruments | 2026-07-29 |
+| [[tps61088rhlr-datasheet]] | Texas Instruments | 2026-07-29 |
 | [[usb4105-gf-a-datasheet]] | GCT | 2026-07-26 |
 
 ## V1 component entities
@@ -163,39 +172,43 @@ One exact source summary per purchased fitted MPN. The structured audit is
 | [[0402cg101j500nt]] | 1 | 2026-07-26 |
 | [[0402cg150j500nt]] | 1 | 2026-07-26 |
 | [[0603waf1000t5e]] | 1 | 2026-07-26 |
-| [[0603waf1001t5e]] | 1 | 2026-07-29 |
+| [[0603waf1001t5e]] | 1 | 2026-07-26 |
 | [[0603waf1002t5e]] | 1 | 2026-07-29 |
 | [[0603waf1003t5e]] | 1 | 2026-07-29 |
 | [[0603waf1004t5e]] | 1 | 2026-07-26 |
 | [[0603waf150kt5e]] | 1 | 2026-07-26 |
-| [[0603waf3303t5e]] | 1 | 2026-07-29 |
+| [[0603waf2492t5e]] | 1 | 2026-07-29 |
 | [[0603waf3902t5e]] | 1 | 2026-07-29 |
 | [[0603waf4701t5e]] | 1 | 2026-07-26 |
 | [[0603waf5101t5e]] | 1 | 2026-07-29 |
+| [[0603waf9102t5e]] | 1 | 2026-07-29 |
+| [[430450200]] | 1 | 2026-07-29 |
+| [[430450800]] | 1 | 2026-07-29 |
 | [[74hc595d-118]] | 1 | 2026-07-26 |
 | [[7m27100009]] | 1 | 2026-07-26 |
 | [[a1257wr-s-4p]] | 1 | 2026-07-26 |
 | [[ap22811aw5-7]] | 1 | 2026-07-26 |
 | [[ap63203wu-7]] | 1 | 2026-07-26 |
-| [[b2b-ph-k-s-lf-sn]] | 1 | 2026-07-29 |
 | [[bar64-02v]] | 1 | 2026-07-26 |
+| [[bq25619rtwr]] | 1 | 2026-07-29 |
 | [[bss123-7-f]] | 1 | 2026-07-26 |
 | [[bss84-7-f]] | 1 | 2026-07-26 |
 | [[cc0603frnpo9bn221]] | 1 | 2026-07-26 |
-| [[cc1206kkx7rcbb472]] | 1 | 2026-07-26 |
+| [[cc1206kkx7rcbb472]] | 1 | 2026-07-29 |
+| [[cdmc8d28np-1r2mc]] | 1 | 2026-07-29 |
 | [[cl05a105ka5nqnc]] | 1 | 2026-07-26 |
-| [[cl05b104ko5nnnc]] | 1 | 2026-07-26 |
-| [[cl10a105kb8nnnc]] | 1 | 2026-07-26 |
-| [[cl10a225ko8nnnc]] | 1 | 2026-07-26 |
+| [[cl05b104ko5nnnc]] | 1 | 2026-07-29 |
+| [[cl10a105kb8nnnc]] | 1 | 2026-07-29 |
+| [[cl10a225ko8nnnc]] | 1 | 2026-07-29 |
 | [[cl21a106kaynnne]] | 1 | 2026-07-29 |
 | [[cl21a226maqnnne]] | 1 | 2026-07-29 |
+| [[cl21a475kaqnnne]] | 1 | 2026-07-29 |
 | [[cl32a107mqvnnne]] | 1 | 2026-07-26 |
 | [[dfe252012f-1r0m-p2]] | 1 | 2026-07-29 |
 | [[esp32-c6-mini-1u-n4]] | 1 | 2026-07-26 |
 | [[grm1555c1h221ja01d]] | 1 | 2026-07-26 |
 | [[grm1555c1h680ja01d]] | 1 | 2026-07-26 |
 | [[lqw2basr47j00l]] | 1 | 2026-07-26 |
-| [[mcp73871t-2cci-ml]] | 1 | 2026-07-29 |
 | [[nr6045s4r7mt]] | 1 | 2026-07-29 |
 | [[pn5180a0hn-c3e]] | 1 | 2026-07-26 |
 | [[rs-03k1800ft]] | 1 | 2026-07-26 |
@@ -206,8 +219,9 @@ One exact source summary per purchased fitted MPN. The structured audit is
 | [[t37k3rgb-05c000112u1930]] | 1 | 2026-07-26 |
 | [[tca9535pwr]] | 1 | 2026-07-26 |
 | [[tlv7042dgkr]] | 1 | 2026-07-26 |
+| [[tlv809k33dbvr]] | 1 | 2026-07-29 |
 | [[tps2553dbvr-1]] | 1 | 2026-07-26 |
-| [[tps61023drlr]] | 1 | 2026-07-29 |
+| [[tps61088rhlr]] | 1 | 2026-07-29 |
 | [[usb4105-gf-a]] | 1 | 2026-07-26 |
 <!-- V1-COMPONENT-CATALOG:END -->
 ## Concepts

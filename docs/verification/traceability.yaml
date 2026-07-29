@@ -269,7 +269,7 @@ requirements:
   - id: POWER-OUTPUT-001
     source: {path: docs/functional/power.md, locator: Peak output}
     statement: The battery subsystem supplies a regulated 5 V at 2 A across the qualified cell-voltage range without USB input power.
-    criterion_ids: [POWER-MODULE-OUTPUT-POWER]
+    criterion_ids: [POWER-MODULE-OUTPUT-POWER, POWER-BOOST-OUTPUT-VOLTAGE, POWER-BOOST-RIPPLE, POWER-BOOST-INDUCTOR-PEAK, POWER-BOOST-INDUCTOR-RMS]
     test_ids: [TEST-POWER-OUTPUT-001, TEST-V8-POWER-OUTPUT-001]
   - id: POWER-CHARGE-001
     source: {path: docs/functional/power.md, locator: USB-C charging}

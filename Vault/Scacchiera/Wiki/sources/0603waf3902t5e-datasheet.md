@@ -12,7 +12,7 @@ publisher: "UNI-ROYAL"
 # 0603WAF3902T5E datasheet
 
 This source binds [0603WAF3902T5E](../entities/0603waf3902t5e.md) to supplier order
-code `C23153`. It is used by hub R5 (39k 1%), hub R17 (39k 1%), power R5 (39k 1%), power R7 (39k 1%).
+code `C23153`. It is used by hub R5 (39k 1%), hub R17 (39k 1%), power R10 (39k 1%).
 
 [mpn::0603WAF3902T5E] [order_code::C23153]
 [manufacturer::UNI-ROYAL] [footprint::Resistor_SMD:R_0603_1608Metric]

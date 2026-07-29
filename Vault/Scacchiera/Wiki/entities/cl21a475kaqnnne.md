@@ -3,13 +3,13 @@ type: entity
 tags:
   - wiki/entity
   - wiki/component
-date_updated: 2026-07-25
+date_updated: 2026-07-29
 source_count: 1
 ---
 
 # CL21A475KAQNNNE
 
-Exact fitted component from Samsung Electro-Mechanics, used by hub C13 (4.7u 10V), hub C15 (4.7u 10V).
+Exact fitted component from Samsung Electro-Mechanics, used by power C4 (4.7u 25V), power C5 (4.7u 25V), power C6 (4.7u 25V).
 
 [mpn::CL21A475KAQNNNE] [supplier::JLCPCB]
 [order_code::C1779] [category::capacitor]

@@ -23,7 +23,7 @@ def power_connectivity() -> dict[str, dict[str, list[str]]]:
                 _pin_net(circuit, reference, str(pin))
                 for pin in range(1, pin_count + 1)
             ]
-            for reference, pin_count in {"J1": 7, "J2": 7, "J3": 2}.items()
+            for reference, pin_count in {"J1": 7, "J2": 8, "J3": 2}.items()
         },
         "no_connects": {
             reference: [_pin_net(circuit, reference, pin) for pin in pins]

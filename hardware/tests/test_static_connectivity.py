@@ -52,6 +52,15 @@ def _pin_map(circuit: Circuit, reference: str, count: int) -> tuple[str, ...]:
     return tuple(_net(circuit, reference, str(pin)) for pin in range(1, count + 1))
 
 
+def _assert_filed_source(path: Path) -> None:
+    assert path.is_file()
+    if path.suffix == ".pdf":
+        assert path.read_bytes().startswith(b"%PDF")
+    else:
+        assert path.suffix == ".md"
+        assert path.read_text(encoding="utf-8").strip()
+
+
 def _evidence() -> dict[str, Any]:
     document = yaml.safe_load(EVIDENCE.read_text(encoding="utf-8"))
     assert isinstance(document, dict)
@@ -94,8 +103,7 @@ def test_reviewed_no_connects_are_exact_traced_and_applied() -> None:
         for pin in pins:
             assert _net(circuit, reference, pin) == "__NOCONNECT"
         datasheet = ROOT / str(records[reference]["datasheet"])
-        assert datasheet.is_file()
-        assert datasheet.read_bytes().startswith(b"%PDF")
+        _assert_filed_source(datasheet)
         assert str(records[reference]["locator"]).strip()
 
     matrix_records = evidence["matrix_no_connects"]
@@ -103,11 +111,10 @@ def test_reviewed_no_connects_are_exact_traced_and_applied() -> None:
     assert SCHEMATIC_NO_CONNECTS["matrix"] == frozenset({"U2:9"})
     assert _part(matrix, "U2")["9"].net is None
     matrix_datasheet = ROOT / str(matrix_records["U2"]["datasheet"])
-    assert matrix_datasheet.is_file()
-    assert matrix_datasheet.read_bytes().startswith(b"%PDF")
+    _assert_filed_source(matrix_datasheet)
 
     power_records = evidence["power_no_connects"]
-    power_no_connects = {"U1": ("6", "7", "8"), "J2": ("5", "6")}
+    power_no_connects = {"U1": ("3", "4", "7", "8", "12"), "U2": ("13",), "J2": ("8",)}
     assert SCHEMATIC_NO_CONNECTS["power"] == frozenset(
         f"{reference}:{pin}"
         for reference, pins in power_no_connects.items()
@@ -117,8 +124,7 @@ def test_reviewed_no_connects_are_exact_traced_and_applied() -> None:
     for reference, pins in power_no_connects.items():
         assert snapshot[reference] == ["__NOCONNECT"] * len(pins)
         datasheet = ROOT / str(power_records[reference]["datasheet"])
-        assert datasheet.is_file()
-        assert datasheet.read_bytes().startswith(b"%PDF")
+        _assert_filed_source(datasheet)
         assert str(power_records[reference]["locator"]).strip()
     assert str(matrix_records["U2"]["locator"]).strip()
 
@@ -143,10 +149,10 @@ def test_board_to_board_connectors_match_at_both_ends() -> None:
     power_connectors = _power_connectivity()["connectors"]
     assert tuple(power_connectors["J1"]) == _pin_map(hub, "J2", 7)
     assert tuple(power_connectors["J2"]) == (
-        "MODULE_5V", "MODULE_5V", "GND", "GND", "__NOCONNECT", "__NOCONNECT", "BAT_RAW"
+        "MODULE_5V", "MODULE_5V", "GND", "GND", "I2C_SCL", "I2C_SDA", "BAT_RAW", "__NOCONNECT"
     )
-    assert _pin_map(hub, "J3", 7) == (
-        "MODULE_5V", "MODULE_5V", "GND", "GND", "I2C_SCL", "I2C_SDA", "BAT_RAW"
+    assert _pin_map(hub, "J3", 8) == (
+        "MODULE_5V", "MODULE_5V", "GND", "GND", "I2C_SCL", "I2C_SDA", "BAT_RAW", "__NOCONNECT"
     )
     assert tuple(power_connectors["J3"]) == ("BAT_RAW", "GND")
 
@@ -162,13 +168,13 @@ def test_hub_connectors_and_usb_use_the_reviewed_pin_order() -> None:
     assert _pin_map(hub, "J9", 4) == ("3V3", "GND", "UART_TX", "UART_RX")
     assert _pin_map(hub, "J10", 2) == ("BUTTON_N", "GND")
     assert _pin_map(hub, "J11", 2) == ("THERM_SENSE", "GND")
-    # Both halves of the power-module link carry the whole board across 1.0 A
-    # contacts, so the supply is spread over several of them by design.
+    # The GH charge-input contacts are paralleled. The return uses Micro-Fit
+    # contacts sized for the complete 10 W load.
     assert _pin_map(hub, "J2", 7) == (
         "CHARGE_5V", "CHARGE_5V", "CHARGE_5V", "GND", "GND", "GND", "GND"
     )
-    assert _pin_map(hub, "J3", 7) == (
-        "MODULE_5V", "MODULE_5V", "GND", "GND", "I2C_SCL", "I2C_SDA", "BAT_RAW"
+    assert _pin_map(hub, "J3", 8) == (
+        "MODULE_5V", "MODULE_5V", "GND", "GND", "I2C_SCL", "I2C_SDA", "BAT_RAW", "__NOCONNECT"
     )
 
     expected_usb = {

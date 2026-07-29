@@ -54,14 +54,54 @@ criteria:
     margin: The 2 A interface rating is 35 percent above the current 1.48 A coincident-load derivation; converter and interconnect corners must still demonstrate the full 10 W rating.
     test_ids: [TEST-POWER-OUTPUT-001, TEST-V8-POWER-OUTPUT-001]
 
+  POWER-BOOST-OUTPUT-VOLTAGE:
+    description: Regulated output range set by the TPS61088 reference and feedback-divider corners.
+    requirement_ids: [POWER-OUTPUT-001]
+    unit: V
+    limits: {minimum: 4.75, maximum: 5.25}
+    evidence: {class: Datasheet, source: Vault/Scacchiera/Datasheets/TPS61088RHLR_C87357.pdf, locator: "Electrical Characteristics, VREF; section 9.2.2.2, output-voltage equation"}
+    operating_conditions: Both 1 percent feedback resistors and the feedback-reference voltage at their independent worst-case limits.
+    margin: The calculated 4.909 to 5.215 V range remains inside the 5 V rail's 4.75 to 5.25 V acceptance band before V8 load and thermal measurements.
+    test_ids: [TEST-POWER-OUTPUT-001]
+
+  POWER-BOOST-RIPPLE:
+    description: Maximum peak-to-peak ripple on the power board's regulated 5 V output.
+    requirement_ids: [POWER-OUTPUT-001]
+    unit: V
+    limits: {maximum: 0.15}
+    evidence: {class: Datasheet, source: Vault/Scacchiera/Datasheets/TPS61088RHLR_C87357.pdf, locator: "Section 9.2.2, switching frequency and output-capacitor selection"}
+    operating_conditions: Cell at 2.87, 3.6, and 4.2 V; 0.1, 1, and 2 A load; inductor at plus or minus 20 percent; and output capacitance at nominal and 50 percent effective value.
+    margin: The datasheet-bounded switching-stage sweep reaches 0.119 V. V8 measures the assembled rail because ceramic-capacitor bias and layout parasitics are bounded rather than claimed exact at V3.
+    test_ids: [TEST-POWER-OUTPUT-001]
+
+  POWER-BOOST-INDUCTOR-PEAK:
+    description: Maximum boost-inductor peak current below the guaranteed TPS61088 current-limit floor.
+    requirement_ids: [POWER-OUTPUT-001]
+    unit: A
+    limits: {maximum: 6.502}
+    evidence: {class: Datasheet, source: Vault/Scacchiera/Datasheets/TPS61088RHLR_C87357.pdf, locator: "Section 8.3.10 and equation 5, switch current limit"}
+    operating_conditions: Full power-stage corner sweep with the 100 and 51 kohm ILIM resistors at plus 1 percent, which produces the lowest threshold.
+    margin: The simulated 5.02 A maximum remains below the 6.502 A guaranteed threshold and far below the inductor's 12.2 A saturation rating.
+    test_ids: [TEST-POWER-OUTPUT-001]
+
+  POWER-BOOST-INDUCTOR-RMS:
+    description: Maximum boost-inductor RMS current, also bounded against the charger's BATFET discharge rating.
+    requirement_ids: [POWER-OUTPUT-001]
+    unit: A
+    limits: {maximum: 5.0}
+    evidence: {class: Datasheet, source: Vault/Scacchiera/Datasheets/BQ25619RTWR_C2864534.pdf, locator: "Recommended Operating Conditions, BATFET discharge current 5 A RMS"}
+    operating_conditions: Full power-stage corner sweep, including 2 A output at the 2.87 V supervisor floor and minimum effective inductance and capacitance.
+    margin: The simulated 3.76 A maximum clears the 5 A BATFET path rating and the inductor's 12.9 A thermal rating.
+    test_ids: [TEST-POWER-OUTPUT-001]
+
   POWER-CHARGE-10-80:
     description: Maximum time to charge from 10 to 80 percent state of charge.
     requirement_ids: [POWER-CHARGE-001]
     unit: minute
     limits: {maximum: 240.0}
     evidence: {class: Derived, source: docs/functional/power.md, locator: USB-C charging}
-    operating_conditions: Idle board, any power module meeting the interface in docs/hardware/power-module-interface.md with a 5 Ah cell, compliant 5 V 2 A USB source and cable, and cell temperature from 20 to 25 degrees Celsius.
-    margin: A 1 A constant-current phase supplies 70 percent of a 5 Ah cell in 210 minutes, leaving 30 minutes for control transitions and the module's own charge profile before V8 measurement.
+    operating_conditions: Idle board with the 6.5 Ah Molicel candidate in its qualified protected assembly, compliant 5 V 2 A USB source and cable, and cell temperature from 20 to 25 degrees Celsius.
+    margin: A 1.5 A constant-current phase supplies 70 percent of 6.5 Ah in 182 minutes, leaving 58 minutes for control transitions and the constant-voltage profile before V8 measurement.
     test_ids: [TEST-POWER-CHARGE-001, TEST-V8-CHARGE-001]
 
   POWER-CHARGE-10-FULL:
@@ -70,8 +110,8 @@ criteria:
     unit: minute
     limits: {maximum: 360.0}
     evidence: {class: Derived, source: docs/functional/power.md, locator: USB-C charging}
-    operating_conditions: Idle board, any power module meeting the interface in docs/hardware/power-module-interface.md with a 5 Ah cell, compliant 5 V 2 A USB source and cable, and cell temperature from 20 to 25 degrees Celsius.
-    margin: The limit leaves 120 minutes beyond the ideal 210-minute constant-current interval for the constant-voltage taper, which does not scale down with charge current; V8 measures termination time.
+    operating_conditions: Idle board with the 6.5 Ah Molicel candidate in its qualified protected assembly, compliant 5 V 2 A USB source and cable, and cell temperature from 20 to 25 degrees Celsius.
+    margin: Charging 90 percent of 6.5 Ah at 1.5 A takes 234 ideal minutes, leaving 126 minutes for the constant-voltage taper and control transitions; V8 measures termination time.
     test_ids: [TEST-POWER-CHARGE-002, TEST-V8-CHARGE-001]
 
   POWER-CHARGE-TEMPERATURE-MIN:
@@ -578,10 +618,10 @@ criteria:
     description: Coincident worst-case current the hub draws from its power module.
     requirement_ids: [POWER-CHARGE-003]
     unit: A
-    limits: {maximum: 1.6}
-    evidence: {class: Derived, source: docs/hardware/power-module-interface.md, locator: "Mandatory properties, 5 V output at 1.6 A continuous"}
+    limits: {maximum: 2.0}
+    evidence: {class: Derived, source: docs/hardware/power-module-interface.md, locator: "Mandatory properties, 5 V output at 2.0 A continuous"}
     operating_conditions: Radio transmitting at its data sheet peak, reader driving its field at maximum TVDD, both light bars white, matrix biased, and both displays active, all at once.
-    margin: The manufacturer display table raises the coincident load to 1.48 A. The 1.6 A interface obligation leaves 8 percent, but the fitted TPS61023 cannot prove that load at its guaranteed minimum current limit, so the custom power board remains blocked pending a converter change.
+    margin: The manufacturer display table raises the coincident load to 1.48 A. The 2 A interface obligation leaves 35 percent and the TPS61088 stage is separately swept at the complete 2 A obligation.
     test_ids: [TEST-HUB-LOAD-BUDGET-001]
 
   MATRIX-BIAS-CHOKE-RATING:

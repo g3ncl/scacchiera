@@ -42,7 +42,7 @@ def test_every_fitted_purchased_mpn_is_audited_or_explicitly_blocked() -> None:
         (part.mpn, part.supplier, part.order_code, part.footprint)
         for part in _bound_parts()
     }
-    assert len(audited) == 49
+    assert len(audited) == 54
     assert audited.isdisjoint(blocked)
     assert audited | blocked == bound
 
@@ -68,7 +68,10 @@ def test_every_exact_part_has_an_immutable_manufacturer_source_and_wiki_ingest()
             assert path.is_file(), path
             assert path.stat().st_size > 100, path
         datasheet = ROOT / str(record["datasheet"])
-        assert datasheet.read_bytes().startswith(b"%PDF"), datasheet
+        assert (
+            datasheet.read_bytes().startswith(b"%PDF")
+            or datasheet.suffix == ".md"
+        ), datasheet
 
 
 def test_library_and_rating_audits_are_complete_and_conflict_free() -> None:

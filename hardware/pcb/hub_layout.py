@@ -113,11 +113,11 @@ def _placements() -> dict[str, Placement]:
         # close on two layers.
         "C13": Placement(Position(26.0, 26.8), rotation=90.0),
         "C16": Placement(Position(28.6, 26.8), rotation=90.0),
-        # J2 and J3 are seven-way because their supply is spread over several
-        # 1.0 A contacts, so the bottom edge is spaced for two wide shells.
+        # The module return uses an 8-pin Micro-Fit shell sized for the 10 W
+        # path. Keep both power harnesses accessible along the bottom edge.
         "J2": Placement(Position(14.0, 42.5)),
-        "J11": Placement(Position(25.0, 42.5)),
-        "J3": Placement(Position(36.0, 42.5)),
+        "J11": Placement(Position(37.0, 42.5)),
+        "J3": Placement(Position(33.9, 36.0), rotation=180.0),
         # Managed 5 V returns through J3. Keep the buck switching loop compact
         # and away from the reader front end at the opposite side of the board.
         "U5": Placement(Position(42.0, 27.0)),
@@ -316,6 +316,16 @@ def generate_board(output: Path = OUTPUT / "hub.kicad_pcb") -> None:
     )
     builder.add_via("USB_VBUS", vbus_window_via, diameter=0.8, drill=0.4)
     builder.add_track("USB_VBUS", (vbus_window_via, vbus_pullup), 0.5)
+    comparator_supply = builder.pad_position("U2", "8")
+    comparator_supply_via = Position(comparator_supply.x + 1.0, comparator_supply.y)
+    builder.add_track("USB_VBUS", (comparator_supply, comparator_supply_via), 0.25)
+    builder.add_via("USB_VBUS", comparator_supply_via, diameter=0.6, drill=0.3)
+    builder.add_track(
+        "USB_VBUS",
+        (comparator_supply_via, vbus_window_via),
+        0.25,
+        pcbnew.B_Cu,
+    )
     vbus_reference = builder.pad_position("R4", "1")
     vbus_reference_via = Position(15.5, 7.0)
     builder.add_track(
@@ -337,6 +347,32 @@ def generate_board(output: Path = OUTPUT / "hub.kicad_pcb") -> None:
     builder.add_track(
         "USB_VBUS",
         (vbus_reference, builder.pad_position("R5", "1")),
+        0.5,
+    )
+    # U1's input capacitors sit below its right edge. Escape pin 5 outside the
+    # package before turning down, then join both capacitors with one short
+    # branch. This is the power switch input loop, not a router-dependent
+    # signal route.
+    switch_input = builder.pad_position("U1", "5")
+    input_capacitor = builder.pad_position("C16", "1")
+    bulk_input = builder.pad_position("C13", "1")
+    builder.add_via("USB_VBUS", bulk_input, diameter=0.6, drill=0.3)
+    builder.add_track(
+        "USB_VBUS",
+        (comparator_supply_via, bulk_input),
+        0.25,
+        pcbnew.B_Cu,
+    )
+    input_escape_x = switch_input.x + 1.2
+    builder.add_track(
+        "USB_VBUS",
+        (
+            switch_input,
+            Position(input_escape_x, switch_input.y),
+            Position(input_escape_x, input_capacitor.y),
+            input_capacitor,
+            bulk_input,
+        ),
         0.5,
     )
     # The comparator supply branch and the reader-to-MCU SCLK bridge used to be

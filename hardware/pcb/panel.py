@@ -53,7 +53,7 @@ def _board_extent(board: pcbnew.BOARD) -> tuple[float, float]:
 def placements() -> tuple[Placement, ...]:
     """Two bars stacked above the power board, all left-aligned.
 
-    The bars are 120 mm long and the power board 46 mm, so stacking rather than
+    The bars are 120 mm long and the power board 90 mm, so stacking rather than
     tiling keeps the panel at the bars' length instead of three times it.
     """
     lightbar_height = 8.5

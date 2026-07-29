@@ -21,6 +21,10 @@ no_connects:
     pins: [A6, A7, A8, B6, B7, B8]
     datasheet: Vault/Scacchiera/Datasheets/USB4105-GF-A_C3020560.pdf
     locator: USB Type-C pin assignment; D+, D-, SBU1 and SBU2 are unused by the power-only sink.
+  J3:
+    pins: ['8']
+    datasheet: Vault/Scacchiera/Datasheets/430450800_C122422.md
+    locator: Eight-position header pin numbering; pin 8 is the reserved module-contract position.
   J8:
     pins: ['4']
     datasheet: Vault/Scacchiera/Datasheets/A1257WR-S-4P_C225127.pdf
@@ -46,13 +50,17 @@ matrix_no_connects:
 
 power_no_connects:
   U1:
-    pins: ['6', '7', '8']
-    datasheet: Vault/Scacchiera/Datasheets/MCP73871T-2CCI-ML_C511310.pdf
-    locator: QFN-20 pin description; PG, STAT2 and STAT1 are unused status outputs.
+    pins: ['3', '4', '7', '8', '12']
+    datasheet: Vault/Scacchiera/Datasheets/BQ25619RTWR_C2864534.pdf
+    locator: RTW pin table; PMID_GOOD, STAT and INT are unused status outputs, pin 8 is NC, and QON may remain at its internal pullup.
+  U2:
+    pins: ['13']
+    datasheet: Vault/Scacchiera/Datasheets/TPS61088RHLR_C87357.pdf
+    locator: RHL pin table; floating MODE selects PFM operation at light load.
   J2:
-    pins: ['5', '6']
-    datasheet: Vault/Scacchiera/Datasheets/SM07B-GHS-TB-LF-SN_C495552.pdf
-    locator: Seven-position connector pin numbering; the module contract makes I2C optional and this implementation omits it.
+    pins: ['8']
+    datasheet: Vault/Scacchiera/Datasheets/430450800_C122422.md
+    locator: Eight-position header pin numbering; pin 8 is reserved by the module contract.
 
 board_results:
   lightbar: {drc_violations: 0, unconnected_items: 0, schematic_parity_issues: 0}
