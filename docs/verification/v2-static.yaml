@@ -34,9 +34,9 @@ no_connects:
     datasheet: Vault/Scacchiera/Datasheets/PN5180A0HN-C3E_C1526287.pdf
     locator: HVQFN40 pin description, pins marked DNC or unused optional interfaces.
   U4:
-    pins: ['4', '7', '10', '15', '16', '17', '18', '19', '20', '21', '32', '33', '34', '35']
+    pins: ['4', '7', '10', '15', '17', '18', '20', '21', '32', '33', '34', '35']
     datasheet: Vault/Scacchiera/Datasheets/ESP32-C6-MINI-1U-N4_C7558096.pdf
-    locator: Table 3-1 pin definitions; reserved pins, unused GPIOs, and unused native USB pins.
+    locator: Table 3-1 pin definitions; reserved pins, two unused GPIOs, and unused native USB pins. IO0 and IO1 are fitted as the CC voltage ADC inputs, with IO7 and IO14 carrying the displaced digital signals.
   U6:
     pins: ['1', '13', '14', '15', '18', '19', '20']
     datasheet: Vault/Scacchiera/Datasheets/TCA9535PWR_C130204.pdf
@@ -50,9 +50,9 @@ matrix_no_connects:
 
 power_no_connects:
   U1:
-    pins: ['3', '4', '7', '8', '12']
-    datasheet: Vault/Scacchiera/Datasheets/BQ25619RTWR_C2864534.pdf
-    locator: RTW pin table; PMID_GOOD, STAT and INT are unused status outputs, pin 8 is NC, and QON may remain at its internal pullup.
+    pins: ['2', '3', '4', '7', '12']
+    datasheet: Vault/Scacchiera/Datasheets/BQ25895RTWR_C80200.pdf
+    locator: RTW pin table; D+ and D- are absent at the module boundary, STAT and INT are unused status outputs, and QON may remain at its internal pullup.
   U2:
     pins: ['13']
     datasheet: Vault/Scacchiera/Datasheets/TPS61088RHLR_C87357.pdf
@@ -77,6 +77,7 @@ hub_layout:
   placement_method: Functional zones slide right by fixed amounts so the crossings between clusters open while the geometry inside a cluster is untouched.
   deterministic_routes:
   - USB shield tabs and bleed network
+  - filtered CC1 and CC2 source-current sensing
   - 0.5 mm USB VBUS entry, safety-window distribution, and reference branch
   rf_ground_reserve:
     layer: B.Cu
@@ -84,7 +85,7 @@ hub_layout:
     rule: No tracks, vias permitted.
     reason: The reader's match and the run to the matrix connector return through this copper at 13.56 MHz, so it stays a plane instead of whatever the router leaves between traces. It starts clear of the reader itself, whose QFN-40 needs both faces to escape.
     measured_signal_segments_inside: 0
-  back_copper_use: 256 non-ground segments on B.Cu outside the reserve, against 819 on F.Cu.
+  back_copper_use: 307 non-ground segments on B.Cu outside the reserve, against 557 on F.Cu.
   fabrication_layers: Read from the board's own layer table by hardware/pcb/fab.py, so a board that changes layer count cannot ship a Gerber set missing copper.
 
 commands:
@@ -94,4 +95,4 @@ commands:
   fresh_autoroute_power: make pcb-power-reroute
 evidence:
   hub_drc_command: make pcb-hub-drc
-  static_tests: 7 passed on 2026-07-29, including the on-board battery measurement and the recorded two-layer stackup and envelope
+  static_tests: 18 focused connectivity and Type-C tests passed on 2026-07-29, including both CC orientations, the on-board battery measurement, and the recorded two-layer stackup and envelope

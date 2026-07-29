@@ -6,7 +6,7 @@ what is fitted, what was considered, and what still has to be measured.
 
 ## Status
 
-**The custom power board is fitted.** It uses BQ25619, TPS61088, and TLV809K33 while preserving the
+**The custom power board is fitted.** It uses BQ25895, TPS61088, and TLV809K33 while preserving the
 same contract an optional purchased module would implement. The mating housings and 18 AWG terminals
 are exact; the wire, qualified crimp or pre-crimped leads, complete harnesses, and protected battery
 assembly are not bound, so V1 remains open.

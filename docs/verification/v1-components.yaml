@@ -111,6 +111,12 @@ components:
   - board: hub
     reference: R28
     value: 100R
+  - board: power
+    reference: R12
+    value: 100R 1%
+  - board: power
+    reference: R13
+    value: 100R 1%
   library_audit:
     status: passed
     checked: '2026-07-26'
@@ -196,6 +202,12 @@ components:
   footprint: Resistor_SMD:R_0603_1608Metric
   uses:
   - board: hub
+    reference: R34
+    value: 10k
+  - board: hub
+    reference: R35
+    value: 10k
+  - board: hub
     reference: R4
     value: 10k
   - board: hub
@@ -210,6 +222,9 @@ components:
   - board: hub
     reference: R31
     value: 10k
+  - board: power
+    reference: R14
+    value: 10k 1%
   - board: power
     reference: R1
     value: 10k 1%
@@ -1200,23 +1215,23 @@ components:
     valid_region: 2.5 ohm maximum at 10 mA and 100 MHz; 0.55 pF maximum at 1 V and
       0.35 pF maximum at 5 V; V3 sweeps those published maxima
   conflicts: []
-- mpn: BQ25619RTWR
+- mpn: BQ25895RTWR
   manufacturer: Texas Instruments
   supplier: JLCPCB
-  order_code: C2864534
+  order_code: C80200
   availability:
     status: available
     checked: '2026-07-26'
-    source: https://jlcpcb.com/partdetail?part=C2864534
-  datasheet: Vault/Scacchiera/Datasheets/BQ25619RTWR_C2864534.pdf
-  wiki_source: Vault/Scacchiera/Wiki/sources/bq25619rtwr-datasheet.md
-  wiki_entity: Vault/Scacchiera/Wiki/entities/bq25619rtwr.md
+    source: https://jlcpcb.com/partdetail?part=C80200
+  datasheet: Vault/Scacchiera/Datasheets/BQ25895RTWR_C80200.pdf
+  wiki_source: Vault/Scacchiera/Wiki/sources/bq25895rtwr-datasheet.md
+  wiki_entity: Vault/Scacchiera/Wiki/entities/bq25895rtwr.md
   category: semiconductor
   footprint: Package_DFN_QFN:Texas_RTW_WQFN-24-1EP_4x4mm_P0.5mm_EP2.7x2.7mm
   uses:
   - board: power
     reference: U1
-    value: BQ25619RTWR
+    value: BQ25895RTWR
   library_audit:
     status: passed
     checked: '2026-07-26'
@@ -1753,6 +1768,12 @@ components:
     reference: C61
     value: 100n X7R 10%
   - board: hub
+    reference: C38
+    value: 100n
+  - board: hub
+    reference: C39
+    value: 100n
+  - board: hub
     reference: C15
     value: 100n
   - board: hub
@@ -1954,13 +1975,7 @@ components:
     reference: C27
     value: 10u 25V
   - board: power
-    reference: C7
-    value: 10u 25V
-  - board: power
     reference: C8
-    value: 10u 25V
-  - board: power
-    reference: C15
     value: 10u 25V
   library_audit:
     status: passed
@@ -2006,6 +2021,12 @@ components:
     value: 22u 25V
   - board: hub
     reference: C4
+    value: 22u 25V
+  - board: power
+    reference: C7
+    value: 22u 25V
+  - board: power
+    reference: C15
     value: 22u 25V
   - board: power
     reference: C18
@@ -2057,6 +2078,9 @@ components:
     value: 4.7u 25V
   - board: power
     reference: C5
+    value: 4.7u 25V
+  - board: power
+    reference: C14
     value: 4.7u 25V
   - board: power
     reference: C6

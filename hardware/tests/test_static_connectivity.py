@@ -114,7 +114,7 @@ def test_reviewed_no_connects_are_exact_traced_and_applied() -> None:
     _assert_filed_source(matrix_datasheet)
 
     power_records = evidence["power_no_connects"]
-    power_no_connects = {"U1": ("3", "4", "7", "8", "12"), "U2": ("13",), "J2": ("8",)}
+    power_no_connects = {"U1": ("2", "3", "4", "7", "12"), "U2": ("13",), "J2": ("8",)}
     assert SCHEMATIC_NO_CONNECTS["power"] == frozenset(
         f"{reference}:{pin}"
         for reference, pins in power_no_connects.items()
@@ -194,6 +194,8 @@ def test_startup_defaults_exposed_pads_and_recovery_are_defined() -> None:
     expected_resistors = {
         "R1": ({"USB_CC1", "GND"}, "5.1k"),
         "R2": ({"USB_CC2", "GND"}, "5.1k"),
+        "R34": ({"USB_CC1", "USB_CC1_ADC"}, "10k"),
+        "R35": ({"USB_CC2", "USB_CC2_ADC"}, "10k"),
         "R12": ({"CHARGE_TEMP_OK", "USB_VBUS"}, "100k"),
         "R15": ({"CHARGE_INPUT_FAULT_N", "3V3"}, "100k"),
         "R19": ({"LED_DATA", "GND"}, "100k"),
@@ -212,6 +214,10 @@ def test_startup_defaults_exposed_pads_and_recovery_are_defined() -> None:
         assert str(part.value) == value
 
     assert _net(hub, "U4", "8") == "MCU_EN"
+    assert _net(hub, "U4", "12") == "USB_CC1_ADC"
+    assert _net(hub, "U4", "13") == "USB_CC2_ADC"
+    assert _net(hub, "U4", "16") == "NFC_IRQ"
+    assert _net(hub, "U4", "19") == "LED_DATA"
     assert _net(hub, "U3", "41") == "GND"
     assert (_net(hub, "TP1", "1"), _net(hub, "TP2", "1"), _net(hub, "TP3", "1")) == (
         "I2C_SDA", "MCU_EN", "GND"

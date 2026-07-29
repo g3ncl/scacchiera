@@ -70,7 +70,9 @@ A candidate module must provide all of these:
   interface be fitted.
 - **A cell thermistor.** The hub carries its own cell-bonded sensor and analog window, so a module
   without an NTC input is acceptable and a module with one is redundant rather than trusted.
-- **USB Power Delivery.** The inlet is power-only and presents passive sink resistors.
+- **USB Power Delivery negotiation.** The inlet is power-only and presents passive sink resistors.
+  The hub does measure the ordinary Type-C 5 V current advertisement so it can distinguish default,
+  1.5 A, and 3.0 A sources without requesting a PD contract or a higher voltage.
 - **A specific cell format.** Any protected assembly meeting runtime, current, and cross-section
   requirements fits. The filed 21700 candidate is permitted lengthwise, but it is not yet a bound
   protected assembly.

@@ -36,7 +36,7 @@ NO_CONNECTS: dict[str, tuple[str, ...]] = {
     "J3": ("8",),
     "J8": ("4",),
     "U3": ("2", "11", "14", "20", "23", "24", "31", "32", "33", "34", "35", "40"),
-    "U4": ("4", "7", "10", "15", "16", "17", "18", "19", "20", "21", "32", "33", "34", "35"),
+    "U4": ("4", "7", "10", "15", "17", "18", "20", "21", "32", "33", "34", "35"),
     "U6": ("1", "13", "14", "15", "18", "19", "20"),
 }
 
@@ -198,10 +198,22 @@ def _build_power(circuit: Circuit, nets: dict[str, Net]) -> None:
     for pin in ("A4", "A9", "B4", "B9"):
         _connect(nets["USB_VBUS"], usb, pin)
     _no_connect(circuit, usb, NO_CONNECTS["J1"])
-    for index, pin in (("1", "A5"), ("2", "B5")):
+    for index, pin in ((1, "A5"), (2, "B5")):
         rd = _rc(circuit, f"R{index}", "5.1k", "0603WAF5101T5E")
-        _connect(_pin_net(circuit, f"USB_CC{index}", usb, pin), rd, "1")
+        cc = _pin_net(circuit, f"USB_CC{index}", usb, pin)
+        _connect(cc, rd, "1")
         _connect(nets["GND"], rd, "2")
+        # A 10k and 100 nF low-pass presents the CC advertisement to the MCU
+        # without changing the mandatory 5.1k Rd termination. USB Type-C R2.0
+        # Table 4-36 puts the highest valid sink-side level at 2.04 V, below
+        # the 3.3 V ADC supply. Firmware treats any ambiguous reading as the
+        # default-current case and raises the charger limit only after debounce.
+        sense_resistor = _rc(circuit, f"R{index + 33}", "10k", "0603WAF1002T5E")
+        _connect(cc, sense_resistor, "1")
+        _connect(nets[f"USB_CC{index}_ADC"], sense_resistor, "2")
+        sense_capacitor = _rc(circuit, f"C{index + 37}", "100n", "CL05B104KO5NNNC")
+        _connect(nets[f"USB_CC{index}_ADC"], sense_capacitor, "1")
+        _connect(nets["GND"], sense_capacitor, "2")
 
     shield_resistor = _rc(circuit, "R3", "1M", "0603WAF1004T5E")
     shield_capacitor = two_pin(
@@ -396,7 +408,7 @@ def _build_mcu(circuit: Circuit, nets: dict[str, Net]) -> None:
     # which also makes IO9 the download-mode recovery pin.
     mcu_connections = {
         "5": "TEMP_SENSE_ADC", "6": "NFC_BUSY", "9": "BAT_SENSE_ADC",
-        "12": "LED_DATA", "13": "NFC_IRQ",
+        "12": "USB_CC1_ADC", "13": "USB_CC2_ADC", "16": "NFC_IRQ", "19": "LED_DATA",
         "22": "I2C_SCL", "23": "I2C_SDA",
         "24": "OLED2_CS_N", "25": "SCLK", "26": "MOSI", "27": "MISO",
         "28": "NFC_CS_N", "29": "OLED1_CS_N", "30": "UART_RX", "31": "UART_TX",
@@ -405,9 +417,9 @@ def _build_mcu(circuit: Circuit, nets: dict[str, Net]) -> None:
         _connect(nets[name], mcu, pin)
     # Pins 4, 7, 21 and 32 to 35 are datasheet NC. Native USB pins 17 and 18
     # stay open because J1 is power-only. IO15 (pin 20) stays unused because it
-    # is the JTAG-source strapping pin. Table 3-1 puts ADC1 on IO0 to IO6, so
-    # the two analog taps take IO2 (pin 5, CH2) and IO4 (pin 9, CH4); neither is
-    # a strapping pin, and IO5 and IO6 stay free as the remaining ADC channels.
+    # is the JTAG-source strapping pin. IO0 and IO1 are ADC1_CH0 and ADC1_CH1
+    # and have no boot-strapping role, so they read CC1 and CC2. The LED and
+    # reader interrupt move to IO14 and IO7 to free those two analog channels.
     _no_connect(circuit, mcu, NO_CONNECTS["U4"])
     # Espressif requires bulk plus high-frequency decoupling at the module's
     # 3V3 pin. The regulator's own output caps are centimetres away, and WiFi
@@ -629,6 +641,7 @@ def build_hub() -> Circuit:
         "GND", "USB_VBUS", "CHARGE_5V", "MODULE_5V", "3V3", "LED_5V", "LED_FAULT_N",
         "THERM_SENSE", "THERM_COLD_REF", "THERM_HOT_REF", "CHARGE_TEMP_OK",
         "CHARGE_INPUT_FAULT_N", "TEMP_SENSE_ADC", "BAT_RAW", "BAT_SENSE_ADC",
+        "USB_CC1_ADC", "USB_CC2_ADC",
         "SCLK", "MOSI", "MISO", "NFC_CS_N", "NFC_IRQ", "NFC_BUSY", "NFC_RESET_N", "NFC_GPO1",
         "I2C_SCL", "I2C_SDA", "OLED1_CS_N", "OLED2_CS_N", "OLED_DC", "OLED_RESET_N",
         "LED_DATA", "LED_RETURN", "SEL_RCLK", "SEL_SRCLR_N", "RF_BUS", "BUTTON_N",

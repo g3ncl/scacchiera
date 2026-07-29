@@ -51,19 +51,23 @@ def _placements() -> dict[str, Placement]:
         "C3": Placement(Position(8.0, 21.0), rotation=90.0),
         "C4": Placement(Position(11.0, 22.0), rotation=90.0),
         "C5": Placement(Position(14.0, 22.0), rotation=90.0),
+        "C14": Placement(Position(11.0, 18.5), rotation=90.0),
         "C6": Placement(Position(18.0, 22.0), rotation=90.0),
         "C7": Placement(Position(24.5, 20.0), rotation=90.0),
         "C8": Placement(Position(15.0, 7.0), rotation=90.0),
-        "R1": Placement(Position(17.5, 9.5)),
-        "R2": Placement(Position(14.5, 9.5)),
+        "R1": Placement(Position(16.5, 27.0)),
+        "R2": Placement(Position(19.6, 27.0)),
+        "R12": Placement(Position(22.7, 27.0)),
+        "R13": Placement(Position(25.8, 27.0)),
+        "R14": Placement(Position(17.5, 24.5)),
         # Boost: inductor beside the switch pin, output capacitor beside the
         # output pin, feedback divider behind them so the sense node stays short
         # and away from the switching node.
         "U2": Placement(Position(52.0, 17.0)),
         "L2": Placement(Position(58.0, 7.0), rotation=180.0),
-        "U3": Placement(Position(28.0, 5.0)),
-        "C20": Placement(Position(31.0, 5.0)),
-        "C9": Placement(Position(50.0, 13.0), rotation=180.0),
+        "U3": Placement(Position(43.0, 7.0)),
+        "C20": Placement(Position(40.0, 7.0)),
+        "C9": Placement(Position(51.25, 12.5), rotation=90.0),
         "C10": Placement(Position(47.0, 20.5)),
         "C11": Placement(Position(51.0, 21.0)),
         "C12": Placement(Position(51.0, 24.0)),
@@ -82,7 +86,7 @@ def _placements() -> dict[str, Placement]:
         "R9": Placement(Position(68.0, 8.0)),
         "R10": Placement(Position(68.0, 6.0)),
         "R11": Placement(Position(58.0, 18.0)),
-        "H1": Placement(Position(30.0, 28.0)),
+        "H1": Placement(Position(33.0, 28.0)),
         "H2": Placement(Position(BOARD_WIDTH - 3.5, 4.0)),
     }
 

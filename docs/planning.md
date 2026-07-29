@@ -32,16 +32,17 @@ scoped test-article order. V0 through V9 permit a final-board order.
 - [x] V0 requirement traceability: 82 atomic requirements in
   [verification/traceability.yaml](verification/traceability.yaml) map the complete functional
   specification and fitted-part absolute-maximum audit to stable test IDs. The manifest pins the
-  reviewed functional sources by SHA-256. Sixty-six numeric criteria in
+  reviewed functional sources by SHA-256. Sixty-seven numeric criteria in
   [hardware/criteria.yaml](hardware/criteria.yaml) record units, evidence, conditions, and margin.
   `hardware/tests/test_traceability.py` enforces source freshness, schema completeness, unique IDs,
   and bidirectional requirement/criterion links. The 2026-07-26 revision specifies runtime,
   5 V/2 A charge-time, fallback, protection, and cell-temperature requirements without requiring
   USB Power Delivery. The 2026-07-29 revision adds a regulated 5 V at 2 A battery-output stress
-  requirement and permits a cylindrical cell to lie lengthwise in the player rail. Evidence: 5
-  traceability tests passed on 2026-07-29.
+  requirement, permits a cylindrical cell to lie lengthwise in the player rail, and files the USB
+  Type-C CC advertisement thresholds as Standard evidence. Evidence: 5 traceability tests passed
+  on 2026-07-29.
 - [ ] V1 component and library proof: fitted-board sourcing is complete, but the external display
-  interface remains open. The 10 W power board now binds BQ25619RTWR, TPS61088RHLR,
+  interface remains open. The 10 W power board now binds BQ25895RTWR, TPS61088RHLR,
   TLV809K33DBVR, CDMC8D28NP-1R2MC, and both Micro-Fit headers with manufacturer sources and a
   reviewed route.
   [verification/v1-components.yaml](verification/v1-components.yaml) exactly matches 54 unique
@@ -62,7 +63,7 @@ scoped test-article order. V0 through V9 permit a final-board order.
   DGK0008A land pattern because the generic KiCad VSSOP footprint does not meet the board's 0.2 mm
   clearance. The rejected SWPA catalog binding remains as contradiction evidence rather than a
   waiver. Evidence: `make check` regenerated all four boards at zero DRC violations, unconnected
-  items and parity issues, mypy passed on 70 source files, and all 90 tests passed on 2026-07-29.
+  items and parity issues, mypy passed on 74 source files, and all 113 tests passed on 2026-07-29.
 - [x] V2 connectivity and static electrical checks: clean generation runs full SKiDL and KiCad ERC,
   imports reviewed deterministic routing sessions, and runs PCB DRC with schematic parity on all
   four boards. [verification/v2-static.yaml](verification/v2-static.yaml) records the four
@@ -74,7 +75,8 @@ scoped test-article order. V0 through V9 permit a final-board order.
   branches are gone with the layers that needed them. The back copper under the reader's match and
   the matrix run is a reserved plane with zero signal segments in it. The Gerber export reads the
   stack from the board rather than a fixed layer list, so a later layer change cannot ship copper
-  short. Seven focused tests cover both ends of every cable, exact USB-C pins, startup pulls,
+  short. Eighteen focused connectivity and Type-C tests cover both ends of every cable, exact USB-C
+  pins and current-advertisement thresholds, startup pulls,
   recovery pads, enable/reset nets, exposed pads, the hardware temperature gate, the on-board
   battery measurement, and the recorded stackup and envelope.
 - [ ] V3 power, analog, timing, and fault simulation: substantially advanced, not complete. Checked
@@ -87,22 +89,28 @@ scoped test-article order. V0 through V9 permit a final-board order.
     power-off discharge and repeated brownout are not done.** USB insertion, removal and rail
     handover belong to the power module and are V8 measurements.
   - Coincident loads: the corrected worst case is 1.48 A, while the revised interface supplies
-    5 V at 2 A. The fitted BQ25619 and TPS61088 path is swept at the full 10 W obligation.
+    5 V at 2 A. The fitted BQ25895 and TPS61088 path is swept at the full 10 W obligation.
     **Radio and reader current steps as transients are not done**, because the load-transient
     response needs the buck's compensation, which Diodes does not publish.
   - Faults: light-bar short circuit on the vendor model, input-switch limit derived, sensor open and
-    short in the charge gate. **Current-limit latch timing, open load, missing battery and stuck
-    control signal are not done.**
+    short in the charge gate, plus averaged power-board missing, depleted, shorted and reversed
+    cell cases and a stuck charge command. **The reversed-cell result is a failure until the complete
+    protected keyed assembly is bound. Current-limit latch timing and open load are not done.**
   - Regulator behaviour: ripple, absolute maximums and logic threshold margins are covered.
     **Stability, overshoot, undershoot, sequencing and junction-temperature estimates are not**, and
     the first four cannot be, for the same unpublished-compensation reason.
-  - Waveform integrity: I2C, the light-bar data line and the matrix serial link are bounded against
-    their receivers' own specifications. **USB and the display SPI segment are not done.**
+  - Waveform integrity: I2C, the light-bar data line, the matrix serial link, and the filtered
+    Type-C CC current advertisement are bounded against their sources. **The display SPI segment is
+    not done.**
 - [ ] V3 power-board addition: `hardware/tests/test_sim_power_boost.py` sweeps 54 switching-stage
-  corners and passes ripple, peak-current, RMS-current, and feedback limits at the full 10 W
-  obligation. TI's official transient model is filed, but its ngspice compatibility copy does not
-  switch, so control-loop stability, startup, protection timing, charger faults, and source handover
-  remain open. Panelising removes fabrication cost, not those evidence gates.
+  corners and passes ripple, feedback and an 80 percent efficiency current bound at the full 10 W
+  obligation. `hardware/tests/test_sim_power_path.py` covers eleven averaged NVDC states and faults,
+  including adapter priority, supplement, removal, missing and depleted cells, short circuit, and
+  external temperature gating against a stuck command. TI's official TPS61088 transient model is
+  filed, but its ngspice compatibility copy does not switch. Control-loop stability, startup,
+  protection timing, temperature and ESR corners remain open, and reversed-cell protection fails
+  until V1 binds the complete protected keyed assembly. Panelising removes fabrication cost, not
+  those evidence gates.
 - [ ] V4 layout-derived electromagnetic validation: the hub is two layers again, so the RF front end
   returns through the back copper reserved under it rather than an inner plane. Extraction must use
   that reserved region and confirm the reserve is wide enough, since it is the whole return path.
@@ -158,7 +166,7 @@ against the functional requirement it serves.
   pin map from datasheet Table 3-1 (native USB moves to pins 17/18), Y1 to a stocked 3225
   27.12 MHz crystal with 15 pF loads, plus local module decoupling and IO9/EN recovery pads.
 - [x] Power board schematic: `hardware/pcb/power.py` implements the 5 V at 2 A contract with a
-  BQ25619 NVDC charger, TPS61088 boost stage, TLV809 undervoltage supervisor, Sumida 1.2 uH
+  BQ25895 NVDC charger, TPS61088 boost stage, TLV809 undervoltage supervisor, Sumida 1.2 uH
   inductor, and Micro-Fit power connectors. The matching housings and 18 AWG terminals are exact;
   the protected 21700 assembly and qualified complete harnesses remain V1 accessory blockers.
 
@@ -216,9 +224,11 @@ evidence is an analytical formula; it needs a passing simulation.
   kind `hardware/sim/models/tlv7042.lib` now demonstrates.
 
 - [ ] Power board SPICE validation: the boost power stage passes 54 ngspice corners with 119 mV
-  worst ripple, 5.02 A peak, and 3.76 A RMS. Feedback tolerances produce 4.909 to 5.215 V. The
-  datasheet-bounded stage does not close the TPS61088 control loop or the BQ25619 charger and
-  handover faults, so M3 and V3 remain open.
+  worst ripple. Its switching stage reaches 5.012 A peak and 3.755 A RMS; the accepted 80 percent
+  efficiency bound raises those to 5.681 A and 4.422 A. Feedback tolerances produce 4.909 to
+  5.215 V. Eleven averaged BQ25895 handover and fault cases pass except reversed-cell protection,
+  which is recorded as a V1 assembly blocker. The datasheet-bounded stage does not close the
+  TPS61088 control loop, temperature corners, or protection timing, so M3 and V3 remain open.
 
 ### M4: PCB layout, as code (per board)
 

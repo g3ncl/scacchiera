@@ -9,7 +9,7 @@ source_count: 1
 
 # CL21A475KAQNNNE
 
-Exact fitted component from Samsung Electro-Mechanics, used by power C4 (4.7u 25V), power C5 (4.7u 25V), power C6 (4.7u 25V).
+Exact fitted component from Samsung Electro-Mechanics, used by power C4 (4.7u 25V), power C5 (4.7u 25V), power C14 (4.7u 25V), power C6 (4.7u 25V).
 
 [mpn::CL21A475KAQNNNE] [supplier::JLCPCB]
 [order_code::C1779] [category::capacitor]

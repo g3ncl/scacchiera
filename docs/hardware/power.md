@@ -14,20 +14,25 @@ telemetry mechanism.
 
 The USB-C inlet is on the hub. Its passive sink resistors make ordinary USB-C and laptop Power
 Delivery chargers provide their mandatory 5 V output. Nothing requests or accepts a higher PD
-voltage.
+voltage. The hub measures both CC pins and leaves the BQ25895 at its 500 mA startup limit until a
+stable 1.5 A or 3.0 A Type-C source advertisement permits more current.
 
 ## Charger and power path
 
-U1 is BQ25619RTWR, a switch-mode 1S charger with an NVDC power path. It gives the system priority
+U1 is BQ25895RTWR, a switch-mode 1S charger with an NVDC power path. It gives the system priority
 while USB is present and uses its BATFET when the battery supplies the system. The filed data sheet
-rates BATFET discharge at 5 A RMS. The boost sweep reaches 3.76 A RMS at the depleted-cell,
+rates BATFET discharge at 6 A continuous and 9 A for one second, with a 9 A overcurrent threshold.
+The conservative boost bound reaches 4.422 A RMS and 5.681 A peak at the depleted-cell,
 full-output corner.
 
-The charger starts from a safe 500 mA input default and is configured by the hub over I2C for a
-qualified 2 A source and 1.5 A cell charge. That target supplies 70 percent of 6.5 Ah in 182 ideal
-minutes, leaving 58 minutes inside the functional 10-to-80 limit. Source insertion, removal,
-charge taper, thermals, missing-cell behavior, and the exact protected assembly remain V8 physical
-measurements rather than claims inferred from the IC alone.
+With D+ and D- deliberately absent at this module boundary, the charger starts from its safe 500 mA
+unknown-source default. The hub may configure a qualified source and a 1.472 A charge setting over
+I2C. A 1.5 A advertisement caps total input at 1.5 A and may reduce charging behind system priority;
+a 3.0 A advertisement permits the board's full 10 W input. Two 100 ohm resistors on ILIM
+independently cap input at 1.970 A at the published KILIM and
+resistor corners. That charge setting supplies 70 percent of 6.5 Ah in 185.5 ideal minutes, leaving
+54.5 minutes inside the functional 10-to-80 limit. Source insertion, removal, charge taper,
+thermals, and the exact protected assembly remain V8 physical measurements.
 
 ## Regulated output
 
@@ -44,14 +49,23 @@ cutoff.
 
 `hardware/tests/test_sim_power_boost.py` runs 54 ngspice switching-stage corners: 2.87, 3.6, and
 4.2 V input; 0.1, 1, and 2 A output; inductor nominal and plus or minus 20 percent; output
-capacitance nominal and 50 percent effective. It reaches 119 mV peak-to-peak ripple, 5.02 A peak,
-and 3.76 A RMS, all within the recorded criteria.
+capacitance nominal and 50 percent effective. The switching model reaches 119 mV peak-to-peak
+ripple, 5.012 A peak, and 3.755 A RMS. A separate 80 percent efficiency floor raises the accepted
+stress bound to 5.681 A peak and 4.422 A RMS, still below the TPS61088 limit, the inductor ratings,
+and the BQ25895 battery path.
 
 TI's official TPS61088 transient model is preserved unchanged in
 `hardware/sim/models/vendor/TPS61088_TRANS.LIB`. A two-expression compatibility copy parses and
 runs with ngspice's PSpice mode but does not switch, settling at the body-diode voltage. The passing
 bench therefore models only the power stage from published limits. It does not claim control-loop
-stability, startup, protection timing, or handover evidence.
+stability, startup, or protection timing evidence.
+
+`hardware/tests/test_sim_power_path.py` covers the data-sheet-bounded averaged NVDC states: safe
+default and qualified input limits, adapter priority, battery supplement, adapter removal, missing
+and depleted cells, battery short, the external temperature gate against a stuck charge command,
+and the full 10 W battery load. It deliberately fails the reversed-cell case as a release blocker:
+the bare board has no bidirectional reverse-polarity stage, so V1 must bind a protected keyed cell
+assembly whose own evidence closes that fault before V3 can close.
 
 ## Interconnect and cell
 
@@ -73,7 +87,8 @@ violations, zero unconnected items, and zero schematic-parity issues from the re
 five-hole mouse-bite tabs. Individual routed boards are the DRC authority; the duplicated,
 netlist-less manufacturing panel is not treated as an electrical schematic.
 
-The schematic, layout, sourcing records, static connectivity, and bounded boost power-stage sweep
-exist. V1 remains open on the complete battery and cable assemblies. V3 remains open on the charger
-and power-path faults and on vendor-model control-loop evidence. V8 and V9 remain mandatory, so no
-fabrication or assembly order is released by these results.
+The schematic, layout, sourcing records, static connectivity, boost power-stage sweep, and averaged
+power-path fault model exist. V1 remains open on the complete battery and cable assemblies. V3
+remains open on reversed-cell protection, temperature and ESR corners, switching-loop evidence,
+and transient protection timing. V8 and V9 remain mandatory, so no fabrication or assembly order
+is released by these results.

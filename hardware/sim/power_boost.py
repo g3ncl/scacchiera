@@ -10,6 +10,7 @@ stability, startup, protection timing, or charger handover.
 
 import re
 import subprocess
+from math import sqrt
 from dataclasses import dataclass
 from itertools import product
 from pathlib import Path
@@ -27,7 +28,9 @@ INDUCTOR_SAT_A = 12.2
 INDUCTOR_RMS_A = 12.9
 HIGH_SIDE_RDS_OHM = 0.018
 LOW_SIDE_RDS_OHM = 0.0165
-BATFET_RMS_A = 5.0
+BATFET_RMS_A = 6.0
+BATFET_OCP_A = 9.0
+EFFICIENCY_FLOOR = 0.80
 
 SUPPLY_V = (2.87, 3.6, 4.2)
 LOAD_A = (0.1, 1.0, 2.0)
@@ -84,6 +87,8 @@ class BoostResult:
     output_v: tuple[float, ...]
     peak_a: tuple[float, ...]
     rms_a: tuple[float, ...]
+    conservative_peak_a: tuple[float, ...]
+    conservative_rms_a: tuple[float, ...]
 
     @property
     def worst_ripple_v(self) -> float:
@@ -91,10 +96,18 @@ class BoostResult:
 
     @property
     def worst_peak_a(self) -> float:
-        return max(self.peak_a)
+        return max(self.conservative_peak_a)
 
     @property
     def worst_rms_a(self) -> float:
+        return max(self.conservative_rms_a)
+
+    @property
+    def simulated_peak_a(self) -> float:
+        return max(self.peak_a)
+
+    @property
+    def simulated_rms_a(self) -> float:
         return max(self.rms_a)
 
 
@@ -168,7 +181,25 @@ def run() -> BoostResult:
     def values(prefix: str) -> tuple[float, ...]:
         return tuple(measured[f"{prefix}{index}"] for index in range(len(corner_list)))
 
-    return BoostResult(corner_list, values("ripple"), values("vout"), values("ipk"), values("irms"))
+    conservative_peak: list[float] = []
+    conservative_rms: list[float] = []
+    for corner in corner_list:
+        average = corner.load_a * OUTPUT_V / (corner.supply_v * EFFICIENCY_FLOOR)
+        ripple = (
+            corner.supply_v * corner.duty
+            / (corner.inductance_h * SWITCHING_HZ)
+        )
+        conservative_peak.append(average + ripple / 2.0)
+        conservative_rms.append(sqrt(average * average + ripple * ripple / 12.0))
+    return BoostResult(
+        corner_list,
+        values("ripple"),
+        values("vout"),
+        values("ipk"),
+        values("irms"),
+        tuple(conservative_peak),
+        tuple(conservative_rms),
+    )
 
 
 if __name__ == "__main__":
@@ -177,3 +208,5 @@ if __name__ == "__main__":
     print(f"worst ripple: {result.worst_ripple_v * 1e3:.1f} mV pk-pk")
     print(f"worst peak: {result.worst_peak_a:.3f} A")
     print(f"worst RMS: {result.worst_rms_a:.3f} A")
+    print(f"switching-model peak: {result.simulated_peak_a:.3f} A")
+    print(f"switching-model RMS: {result.simulated_rms_a:.3f} A")

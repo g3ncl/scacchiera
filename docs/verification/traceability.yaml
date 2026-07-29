@@ -289,10 +289,12 @@ requirements:
   - id: POWER-CHARGE-004
     source: {path: docs/functional/power.md, locator: USB-C charging}
     statement: The board never loads a USB source beyond its advertised capability and safely falls back to slower charging.
+    criterion_ids: [HUB-TYPEC-CURRENT-ADVERTISEMENT]
     test_ids: [TEST-POWER-CHARGE-004, TEST-V8-USB-FALLBACK-001]
   - id: POWER-CHARGE-005
     source: {path: docs/functional/power.md, locator: USB-C charging}
     statement: USB-C Power Delivery chargers operate through their 5 V output without PD negotiation, and the board never requests or accepts a higher PD voltage.
+    criterion_ids: [HUB-TYPEC-CURRENT-ADVERTISEMENT]
     test_ids: [TEST-HUB-USB-C-SINK-001, TEST-V8-USB-PD-5V-001]
   - id: POWER-SAFETY-001
     source: {path: docs/functional/power.md, locator: Battery safety}

@@ -27,6 +27,11 @@ DESIGN_FACTS = {
         "3.9 to 13.5 V input operating range, 1.5 A charge-current capability, NVDC power path, "
         "5 A RMS BATFET discharge path, 1.5 MHz switching and RTW WQFN-24 pinout"
     ),
+    "BQ25895RTWR": (
+        "3.9 to 14 V input operating range, 5 A charge-current capability, NVDC power path, "
+        "6 A continuous and 9 A one-second battery discharge path, 19 mOhm maximum BATFET "
+        "resistance over temperature, 9 A overcurrent threshold and RTW WQFN-24 pinout"
+    ),
     "TPS61088RHLR": (
         "2.7 to 12 V input, 4.5 to 12.6 V output, programmable 200 kHz to 2.2 MHz switching, "
         "11 A switch capability, 1.204 V feedback reference and RHL VQFN-20 pinout"

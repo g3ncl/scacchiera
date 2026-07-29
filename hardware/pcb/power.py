@@ -7,7 +7,7 @@ from hardware.pcb.parts import PinDefinition, component, mounting_hole, two_pin
 
 
 NO_CONNECTS: dict[str, tuple[str, ...]] = {
-    "U1": ("3", "4", "7", "8", "12"),
+    "U1": ("2", "3", "4", "7", "12"),
     "U2": ("13",),
     "J2": ("8",),
 }
@@ -86,19 +86,19 @@ def _microfit(circuit: Circuit, ref: str, names: tuple[str, ...], mpn: str, code
 
 def _charger(circuit: Circuit) -> Part:
     names = (
-        "VAC", "PSEL", "PMID_GOOD", "STAT", "SCL", "SDA", "INT", "NC", "CE",
-        "BATSNS", "TS", "QON", "BAT", "BAT", "SYS", "SYS", "PGND", "PGND",
-        "SW", "SW", "BTST", "REGN", "PMID", "VBUS", "EP_GND",
+        "VBUS", "D+", "D-", "STAT", "SCL", "SDA", "INT", "OTG", "CE", "ILIM",
+        "TS", "QON", "BAT", "BAT", "SYS", "SYS", "PGND", "PGND", "SW", "SW",
+        "BTST", "REGN", "PMID", "DSEL", "EP_GND",
     )
     return component(
         circuit,
         "U1",
-        "BQ25619RTWR",
+        "BQ25895RTWR",
         "Package_DFN_QFN:Texas_RTW_WQFN-24-1EP_4x4mm_P0.5mm_EP2.7x2.7mm",
         tuple(PinDefinition(str(index), name) for index, name in enumerate(names, start=1)),
-        mpn="BQ25619RTWR",
-        description="1.5 A switch-mode 1S charger with NVDC power path",
-        unit_cost_eur=0.75,
+        mpn="BQ25895RTWR",
+        description="5 A switch-mode 1S charger with 6 A continuous NVDC battery path",
+        unit_cost_eur=1.20,
     )
 
 
@@ -124,7 +124,7 @@ def build_power() -> Circuit:
     names = (
         "GND", "CHARGE_5V", "PMID", "CHARGER_SW", "SYS", "BAT_RAW", "REGN",
         "MODULE_5V", "BOOST_SW", "BOOST_FB", "BOOST_COMP", "BOOST_EN",
-        "I2C_SCL", "I2C_SDA",
+        "I2C_SCL", "I2C_SDA", "CHARGER_DSEL", "CHARGER_ILIM_MID",
     )
     nets = {name: Net(name, circuit=circuit) for name in names}
     flag = Part("power", "PWR_FLAG", tool="kicad9", circuit=circuit, ref="#FLG01", tag="GND_FLAG")
@@ -151,13 +151,11 @@ def build_power() -> Circuit:
     _connect(nets["GND"], cell, "2")
 
     charger = _charger(circuit)
-    for charger_pin in ("1", "24"):
-        _connect(nets["CHARGE_5V"], charger, charger_pin)
-    _connect(nets["REGN"], charger, "2")  # 500 mA safe default until I2C configures 2 A.
+    _connect(nets["CHARGE_5V"], charger, "1")
     _connect(nets["I2C_SCL"], charger, "5")
     _connect(nets["I2C_SDA"], charger, "6")
+    _connect(nets["GND"], charger, "8")
     _connect(nets["GND"], charger, "9")
-    _connect(nets["BAT_RAW"], charger, "10")
     for charger_pin in ("13", "14"):
         _connect(nets["BAT_RAW"], charger, charger_pin)
     for charger_pin in ("15", "16"):
@@ -168,7 +166,23 @@ def build_power() -> Circuit:
         _connect(nets["CHARGER_SW"], charger, charger_pin)
     _connect(nets["REGN"], charger, "22")
     _connect(nets["PMID"], charger, "23")
+    _connect(nets["CHARGER_DSEL"], charger, "24")
     _no_connect(circuit, charger, NO_CONNECTS["U1"])
+
+    # D+/D- are deliberately absent at this module boundary, so the charger
+    # starts at its 500 mA unknown-source default. Firmware may raise IINLIM
+    # only after the hub has qualified the Type-C source. The independent ILIM
+    # ceiling remains below 2 A even at the data-sheet KILIM maximum.
+    for ref, first, second in (
+        ("R12", _pin_net(circuit, "CHARGER_ILIM", charger, "10"), nets["CHARGER_ILIM_MID"]),
+        ("R13", nets["CHARGER_ILIM_MID"], nets["GND"]),
+    ):
+        resistor = _passive(circuit, ref, "100R 1%", "0603WAF1000T5E")
+        _connect(first, resistor, "1")
+        _connect(second, resistor, "2")
+    dsel_pullup = _passive(circuit, "R14", "10k 1%", "0603WAF1002T5E")
+    _connect(nets["REGN"], dsel_pullup, "1")
+    _connect(nets["CHARGER_DSEL"], dsel_pullup, "2")
 
     ts = _pin_net(circuit, "CHARGER_TS", charger, "11")
     for ref, first, second in (("R1", nets["REGN"], ts), ("R2", ts, nets["GND"])):
@@ -195,8 +209,9 @@ def build_power() -> Circuit:
         ("C3", "CHARGE_5V", "1u 25V", "CL10A105KB8NNNC"),
         ("C4", "PMID", "4.7u 25V", "CL21A475KAQNNNE"),
         ("C5", "PMID", "4.7u 25V", "CL21A475KAQNNNE"),
+        ("C14", "PMID", "4.7u 25V", "CL21A475KAQNNNE"),
         ("C6", "REGN", "4.7u 25V", "CL21A475KAQNNNE"),
-        ("C7", "SYS", "10u 25V", "CL21A106KAYNNNE"),
+        ("C7", "SYS", "22u 25V", "CL21A226MAQNNNE"),
         ("C8", "BAT_RAW", "10u 25V", "CL21A106KAYNNNE"),
     )
     for ref, net, value, mpn in capacitor_specs:
@@ -296,7 +311,7 @@ def build_power() -> Circuit:
     _connect(nets["GND"], comp_capacitor, "2")
 
     for ref, net, value, mpn in (
-        ("C15", "SYS", "10u 25V", "CL21A106KAYNNNE"),
+        ("C15", "SYS", "22u 25V", "CL21A226MAQNNNE"),
         ("C16", "SYS", "100n 16V", "CL05B104KO5NNNC"),
         ("C17", "MODULE_5V", "1u 25V", "CL10A105KB8NNNC"),
         ("C18", "MODULE_5V", "22u 25V", "CL21A226MAQNNNE"),

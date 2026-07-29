@@ -105,6 +105,8 @@ def _placements() -> dict[str, Placement]:
         "J1": Placement(Position(6.0, 23.0), rotation=90.0),
         "R3": Placement(Position(12.0, 17.5)),
         "C12": Placement(Position(12.65, 20.0)),
+        "R34": Placement(Position(10.0, 6.5), rotation=90.0),
+        "R35": Placement(Position(12.4, 6.5), rotation=90.0),
         "U2": Placement(Position(19.0, 23.0)),
         "U1": Placement(Position(29.0, 23.0)),
         # Input decoupling under the VBUS spine that runs between the comparator
@@ -128,6 +130,8 @@ def _placements() -> dict[str, Placement]:
         "U4": Placement(Position(65.0, 29.5)),
         "C28": Placement(Position(56.0, 32.0)),
         "C27": Placement(Position(56.0, 28.5), rotation=90.0),
+        "C38": Placement(Position(59.0, 26.0), rotation=90.0, back=True),
+        "C39": Placement(Position(61.2, 26.0), rotation=90.0, back=True),
         "U6": Placement(Position(63.0, 12.0), rotation=90.0),
         # Reader.
         "U3": Placement(Position(84.0, 28.0)),
@@ -415,7 +419,9 @@ def route_board(
     apply_session(
         board,
         session_path.read_text(encoding="utf-8"),
-        net_aliases={"NFC_VMID_TAP": "NFC_VMID"},
+        # The reviewed route predates the explicit tap name. Fresh sessions
+        # already use NFC_VMID_TAP, while the historical one uses NFC_VMID.
+        net_aliases={"NFC_VMID": "NFC_VMID_TAP"},
     )
     _postroute_fixups(board)
     if not pcbnew.SaveBoard(str(board_path), board):

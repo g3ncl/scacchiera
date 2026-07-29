@@ -9,11 +9,11 @@ source_count: 1
 
 # BQ25619RTWR
 
-Exact fitted component from Texas Instruments, used by power U1 (BQ25619RTWR).
+Superseded Texas Instruments charger previously used by power U1. [[bq25895rtwr]] replaces it
+because the 5 A battery path was too close to the efficiency-bounded 10 W boost current.
 
 [mpn::BQ25619RTWR] [supplier::JLCPCB]
 [order_code::C2864534] [category::semiconductor]
 
-The immutable source is summarized in [[bq25619rtwr-datasheet]]. The complete
-library, rating, availability, and model audit is machine checked from
-`docs/verification/v1-components.yaml`.
+The immutable source is summarized in [[bq25619rtwr-datasheet]]. It remains historical design
+evidence and is no longer in the fitted-component audit.

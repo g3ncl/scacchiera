@@ -81,17 +81,17 @@ criteria:
     limits: {maximum: 6.502}
     evidence: {class: Datasheet, source: Vault/Scacchiera/Datasheets/TPS61088RHLR_C87357.pdf, locator: "Section 8.3.10 and equation 5, switch current limit"}
     operating_conditions: Full power-stage corner sweep with the 100 and 51 kohm ILIM resistors at plus 1 percent, which produces the lowest threshold.
-    margin: The simulated 5.02 A maximum remains below the 6.502 A guaranteed threshold and far below the inductor's 12.2 A saturation rating.
+    margin: The 80 percent efficiency bound reaches 5.681 A, below the 6.502 A guaranteed threshold, the BQ25895 9 A overcurrent threshold, and the inductor's 12.2 A saturation rating.
     test_ids: [TEST-POWER-OUTPUT-001]
 
   POWER-BOOST-INDUCTOR-RMS:
     description: Maximum boost-inductor RMS current, also bounded against the charger's BATFET discharge rating.
     requirement_ids: [POWER-OUTPUT-001]
     unit: A
-    limits: {maximum: 5.0}
-    evidence: {class: Datasheet, source: Vault/Scacchiera/Datasheets/BQ25619RTWR_C2864534.pdf, locator: "Recommended Operating Conditions, BATFET discharge current 5 A RMS"}
+    limits: {maximum: 6.0}
+    evidence: {class: Datasheet, source: Vault/Scacchiera/Datasheets/BQ25895RTWR_C80200.pdf, locator: "Recommended Operating Conditions, discharging current with internal MOSFET up to 6 A continuous"}
     operating_conditions: Full power-stage corner sweep, including 2 A output at the 2.87 V supervisor floor and minimum effective inductance and capacitance.
-    margin: The simulated 3.76 A maximum clears the 5 A BATFET path rating and the inductor's 12.9 A thermal rating.
+    margin: The 80 percent efficiency bound reaches less than 4.5 A RMS, clearing the 6 A continuous BATFET path rating and the inductor's 12.9 A thermal rating.
     test_ids: [TEST-POWER-OUTPUT-001]
 
   POWER-CHARGE-10-80:
@@ -113,6 +113,16 @@ criteria:
     operating_conditions: Idle board with the 6.5 Ah Molicel candidate in its qualified protected assembly, compliant 5 V 2 A USB source and cable, and cell temperature from 20 to 25 degrees Celsius.
     margin: Charging 90 percent of 6.5 Ah at 1.5 A takes 234 ideal minutes, leaving 126 minutes for the constant-voltage taper and control transitions; V8 measures termination time.
     test_ids: [TEST-POWER-CHARGE-002, TEST-V8-CHARGE-001]
+
+  HUB-TYPEC-CURRENT-ADVERTISEMENT:
+    description: Sink-side CC voltage thresholds used to limit input current without a USB Power Delivery contract.
+    requirement_ids: [POWER-CHARGE-004, POWER-CHARGE-005]
+    unit: V
+    limits: {connect_minimum: 0.25, default_maximum: 0.66, current_1_5_maximum: 1.23, connected_maximum: 2.04}
+    evidence: {class: Standard, source: Vault/Scacchiera/Clippings/usb-type-c-r2-current-advertisement-extract.pdf, locator: "USB Type-C Cable and Connector Specification Release 2.0, Table 4-36"}
+    operating_conditions: Both CC pins retain independent 5.1 kohm Rd terminations and are sampled after the 10 kohm, 100 nF filters; a classification change is debounced before the charger input limit changes.
+    margin: The 1 ms analog filter settles inside the standard's 10 to 20 ms tRpValueChange debounce. Undefined voltage gaps resolve to the lower current class, and invalid readings never authorize an increase.
+    test_ids: [TEST-POWER-CHARGE-004, TEST-HUB-USB-C-SINK-001]
 
   POWER-CHARGE-TEMPERATURE-MIN:
     description: Lowest cell temperature at which charging may proceed.

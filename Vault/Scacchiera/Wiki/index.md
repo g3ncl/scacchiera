@@ -69,8 +69,10 @@ One [[wiki/source]] summary per ingested raw source. Factual, no interpretation.
 | [[swpa5045s4r7mt-datasheet]] | component datasheet | 2026-07-26 |
 | [[er-oledm3-12-1w-manufacturer-evidence]] | component manufacturer evidence | 2026-07-29 |
 | [[bq25619rtwr-datasheet]] | component datasheet | 2026-07-29 |
+| [[bq25895rtwr-datasheet]] | component datasheet | 2026-07-29 |
 | [[tps61088rhlr-datasheet]] | component datasheet | 2026-07-29 |
 | [[micro-fit-3-0-mating-evidence]] | connector manufacturer evidence | 2026-07-29 |
+| [[usb-type-c-r2-current-advertisement]] | USB Type-C specification scoped extract | 2026-07-29 |
 
 ## Entities
 
@@ -97,6 +99,7 @@ People, tools, orgs, repos. See [[wiki/entity]] pages.
 | [[swpa5045s4r7mt]] | 1 | 2026-07-26 |
 | [[er-oledm3-12-1w]] | 1 | 2026-07-29 |
 | [[bq25619rtwr]] | 1 | 2026-07-29 |
+| [[bq25895rtwr]] | 1 | 2026-07-29 |
 | [[tps61088rhlr]] | 1 | 2026-07-29 |
 | [[430250800]] | 1 | 2026-07-29 |
 | [[430250200]] | 1 | 2026-07-29 |
@@ -112,7 +115,7 @@ One exact source summary per purchased fitted MPN. The structured audit is
 | --- | --- | --- |
 | [[0402cg101j500nt-datasheet]] | Fenghua Advanced Technology | 2026-07-26 |
 | [[0402cg150j500nt-datasheet]] | Fenghua Advanced Technology | 2026-07-26 |
-| [[0603waf1000t5e-datasheet]] | UNI-ROYAL | 2026-07-26 |
+| [[0603waf1000t5e-datasheet]] | UNI-ROYAL | 2026-07-29 |
 | [[0603waf1001t5e-datasheet]] | UNI-ROYAL | 2026-07-26 |
 | [[0603waf1002t5e-datasheet]] | UNI-ROYAL | 2026-07-29 |
 | [[0603waf1003t5e-datasheet]] | UNI-ROYAL | 2026-07-29 |
@@ -131,7 +134,7 @@ One exact source summary per purchased fitted MPN. The structured audit is
 | [[ap22811aw5-7-datasheet]] | Diodes Incorporated | 2026-07-26 |
 | [[ap63203wu-7-datasheet]] | Diodes Incorporated | 2026-07-26 |
 | [[bar64-02v-datasheet]] | Jiangsu Changjing Electronics Technology | 2026-07-26 |
-| [[bq25619rtwr-datasheet]] | Texas Instruments | 2026-07-29 |
+| [[bq25895rtwr-datasheet]] | Texas Instruments | 2026-07-29 |
 | [[bss123-7-f-datasheet]] | Diodes Incorporated | 2026-07-26 |
 | [[bss84-7-f-datasheet]] | Diodes Incorporated | 2026-07-26 |
 | [[cc0603frnpo9bn221-datasheet]] | Yageo | 2026-07-26 |
@@ -171,7 +174,7 @@ One exact source summary per purchased fitted MPN. The structured audit is
 | --- | ---: | --- |
 | [[0402cg101j500nt]] | 1 | 2026-07-26 |
 | [[0402cg150j500nt]] | 1 | 2026-07-26 |
-| [[0603waf1000t5e]] | 1 | 2026-07-26 |
+| [[0603waf1000t5e]] | 1 | 2026-07-29 |
 | [[0603waf1001t5e]] | 1 | 2026-07-26 |
 | [[0603waf1002t5e]] | 1 | 2026-07-29 |
 | [[0603waf1003t5e]] | 1 | 2026-07-29 |
@@ -190,7 +193,7 @@ One exact source summary per purchased fitted MPN. The structured audit is
 | [[ap22811aw5-7]] | 1 | 2026-07-26 |
 | [[ap63203wu-7]] | 1 | 2026-07-26 |
 | [[bar64-02v]] | 1 | 2026-07-26 |
-| [[bq25619rtwr]] | 1 | 2026-07-29 |
+| [[bq25895rtwr]] | 1 | 2026-07-29 |
 | [[bss123-7-f]] | 1 | 2026-07-26 |
 | [[bss84-7-f]] | 1 | 2026-07-26 |
 | [[cc0603frnpo9bn221]] | 1 | 2026-07-26 |
@@ -237,6 +240,7 @@ Ideas, patterns, techniques. See [[wiki/concept]] pages.
 | [[pin-diode-antenna-switching]]         | high       | 1            | 2026-07-24 |
 | [[jlcpcb-basic-part-sourcing]]          | medium     | 3            | 2026-07-25 |
 | [[usb-c-pd-fast-charging]]              | high       | 6            | 2026-07-26 |
+| [[usb-type-c-5v-current-advertisement]] | high       | 2            | 2026-07-29 |
 | [[commercial-battery-subsystem]]        | high       | 4            | 2026-07-26 |
 | [[fail-safe-cell-temperature-window]]   | high       | 4            | 2026-07-26 |
 |                                         |            |              |            |

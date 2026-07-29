@@ -12,7 +12,7 @@ publisher: "UNI-ROYAL"
 # 0603WAF1002T5E datasheet
 
 This source binds [0603WAF1002T5E](../entities/0603waf1002t5e.md) to supplier order
-code `C25804`. It is used by hub R4 (10k), hub R20 (10k), hub R23 (10k), hub R25 (10k), hub R31 (10k), power R1 (10k 1%), power R2 (10k 1%).
+code `C25804`. It is used by hub R34 (10k), hub R35 (10k), hub R4 (10k), hub R20 (10k), hub R23 (10k), hub R25 (10k), hub R31 (10k), power R14 (10k 1%), power R1 (10k 1%), power R2 (10k 1%).
 
 [mpn::0603WAF1002T5E] [order_code::C25804]
 [manufacturer::UNI-ROYAL] [footprint::Resistor_SMD:R_0603_1608Metric]

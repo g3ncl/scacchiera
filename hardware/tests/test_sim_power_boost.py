@@ -3,6 +3,7 @@
 import pytest
 
 from hardware.sim.power_boost import (
+    BATFET_OCP_A,
     BATFET_RMS_A,
     CURRENT_LIMIT_FLOOR_A,
     INDUCTOR_RMS_A,
@@ -25,6 +26,7 @@ def test_full_power_stays_below_the_guaranteed_current_limit(result: BoostResult
     assert result.worst_peak_a <= limit["maximum"]
     assert result.worst_peak_a < CURRENT_LIMIT_FLOOR_A
     assert result.worst_peak_a < INDUCTOR_SAT_A
+    assert result.worst_peak_a < BATFET_OCP_A
 
 
 def test_rms_current_fits_the_inductor_and_charger_path(result: BoostResult) -> None:
@@ -58,3 +60,10 @@ def test_every_published_power_stage_corner_is_swept(result: BoostResult) -> Non
 def test_simulation_holds_the_intended_operating_point(result: BoostResult) -> None:
     assert min(result.output_v) >= 4.90
     assert max(result.output_v) <= 5.10
+
+
+def test_efficiency_bound_is_more_conservative_than_the_switching_stage(
+    result: BoostResult,
+) -> None:
+    assert result.worst_peak_a > result.simulated_peak_a
+    assert result.worst_rms_a > result.simulated_rms_a

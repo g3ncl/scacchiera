@@ -71,7 +71,7 @@ here only as interfaces, not as boards.
 ### 4. Power board
 
 - **Responsibility:** connect a protected 1S cell, charge it from the qualified 5 V input, manage
-  source handover, and deliver a regulated 5 V at 2 A to the hub using BQ25619 and TPS61088.
+  source handover, and deliver a regulated 5 V at 2 A to the hub using BQ25895 and TPS61088.
 - **Interfaces:** qualified charge input, regulated 5 V return and raw cell sense through the same
   [power module contract](power-module-interface.md) a purchased replacement would implement.
 - **Envelope:** 90 x 32 mm, 2-layer. It is a snap-off part of the panel carrying both light bars.

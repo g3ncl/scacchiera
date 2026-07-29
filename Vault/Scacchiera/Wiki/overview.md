@@ -20,13 +20,17 @@ functional power specification adds bounded runtime, charge time, source fallbac
 safety requirements after the original 500 mA architecture proved unsuitable.
 
 The power boundary remains a written contract, but the default implementation is now a custom
-46 x 32 mm board panelized with the light bars. [[mcp73871t-2cci-ml]] owns charging and power-path
-management, while [[tps61023drlr]] produces the regulated 5 V return. The hub still measures cell
+90 x 32 mm board panelized with the light bars. [[bq25895rtwr]] owns charging and power-path
+management, while [[tps61088rhlr]] produces the regulated 5 V return. The hub still measures cell
 voltage and gates charging from its independent temperature window, so the implementation can be
 replaced without moving safety or telemetry across the boundary. See
 [[battery-format-and-module-alternatives]].
 
-[[v1-component-proof|V1]] audits 49 exact fitted tuples with no fitted-part sourcing blocker. The
+The inlet remains a 5 V-only passive sink. [[usb-type-c-5v-current-advertisement]] adds two filtered
+CC ADC readings, so ordinary Type-C and laptop PD chargers can be distinguished as default, 1.5 A,
+or 3.0 A sources without a PD contract. Invalid or changing readings retain the lower input limit.
+
+[[v1-component-proof|V1]] audits 54 exact fitted tuples with no fitted-part sourcing blocker. The
 power inductor is now exact [[dfe252012f-1r0m-p2]]. V1 remains open on the
 [[er-oledm3-12-1w]] documentation conflict and its cable definition; a purchased power module is
 only an optional replacement, not a fitted dependency. [[v2-static-connectivity|V2]] passes on all four board designs, and all
@@ -34,24 +38,28 @@ four are two copper layers. The
 hub reached that by growing to 162 x 46 mm rather than by adding layers, since the rail it lives in
 has length to spare and a four-layer panel costs a multiple of a two-layer one.
 
-V3 power and fault simulation is the open gate, with three hub results so far.
+V3 power and fault simulation is the open gate. Three hub results and two power-board benches exist.
 [[v3-charge-interlock]]: the cell-temperature cutoff holds inside the qualified 0 to 40 degree range
 across 384 published tolerance corners and both sensor failure directions.
 [[v3-led-rail-current-limit]]: the light-bar limiter carries both bars at full white and clamps a
 short inside its harness rating, on TI's own transient model, replacing a value that had only a
 formula behind it. [[v3-buck-power-stage]]: the 3.3 V rail's ripple and inductor stress over 72
 corners, from a model that deliberately holds no control behaviour, so regulation and stability stay
-data sheet claims for V8. The custom power board has no simulation yet. The AP22811 input switch and
-many transient and fault cases remain unsimulated.
+data sheet claims for V8. The power-board boost has a 54-corner ngspice stage sweep plus a separate
+80 percent efficiency current bound. Its averaged NVDC model covers adapter priority, battery
+supplement, removal, missing and depleted cells, a shorted cell, and a stuck charge command. The
+reversed-cell case fails until the complete protected keyed assembly is bound. The AP22811 input
+switch and many transient cases remain unsimulated.
 
-The display evidence raises coincident load from 1.14 A to 1.48 A. TI's guaranteed minimum current
-limit shows that [[tps61023drlr]] cannot support that load at the depleted-cell corner, so the custom
-power board needs a stronger converter before its V3 work can proceed.
+The display evidence raises coincident load from 1.14 A to 1.48 A. The current 2 A interface and
+[[tps61088rhlr]] stage cover the full 10 W stress case. Replacing BQ25619 with [[bq25895rtwr]] raises
+the guaranteed battery path from 5 A to 6 A continuous and 9 A for one second, clearing the
+efficiency-bounded 4.422 A RMS and 5.681 A peak boost currents.
 
 The earlier [[chessboard-quick-charge-architecture|custom PD architecture]] and
 [[quick-charge-module-evaluation|RBS18634 article]] remain historical evidence rather than active
-designs. The current open risks are the boost redesign, complete charger and boost
-simulation, enclosure ventilation, measured recharge time, and representative runtime. The selected
+designs. The current open risks are the protected cell assembly, reversed-cell response, switching
+loop evidence, enclosure ventilation, measured recharge time, and representative runtime. The selected
 [[fail-safe-cell-temperature-window]] uses a wired thermistor and analog comparators so firmware
 cannot override the qualified charge range. Hub L1 is the fully documented [[nr6045s4r7mt]];
 the earlier [[swpa5045s4r7mt]] catalog binding is rejected because its claimed MPN is absent from

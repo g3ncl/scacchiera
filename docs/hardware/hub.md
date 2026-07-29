@@ -18,6 +18,12 @@ cell and never connects to it except through a 2 Mohm divider.
 The product's power-only USB-C inlet presents one 5.1 kohm Rd sink resistor on each CC pin. A USB-C
 Power Delivery charger therefore enables its ordinary 5 V output without a PD contract. The board
 has no mechanism to request a higher voltage and every downstream input remains specified for 5 V.
+Each CC pin also reaches a separate MCU ADC through a 10 kohm and 100 nF low-pass. The Rd
+terminations remain directly on CC, so sensing does not alter attachment. Firmware measures both
+plug orientations and applies the USB Type-C sink thresholds: default current at or below 0.66 V,
+1.5 A above 0.66 V, and 3.0 A above 1.23 V. A reading outside the valid 0.25 to 2.04 V connected
+range is not permission to raise the BQ25895 input limit. This lets a laptop PD charger advertise
+enough current for the 10 W input while the connection itself stays at 5 V.
 AP22811AW5-7 gates that input to the module and adds current
 limiting, short-circuit protection, output discharge, thermal protection, and reverse current
 blocking. Its enable is the wired result of both TLV7042DGKR comparisons around a cell-bonded
@@ -58,7 +64,9 @@ IO2 provides ADC1_CH2 for independent cell-temperature telemetry. SPI uses nearb
 through the GPIO matrix to keep the reader route short. I2C stays on pins 22 and 23 because IO8 and
 IO9 are the C6 boot strapping pins and the
 4.7 k bus pullups hold them high for SPI boot, which also makes IO9 the download-mode recovery pin.
-IO15 is left unused because it is the JTAG-source strapping pin.
+IO0 and IO1 read CC1 and CC2 on ADC1_CH0 and ADC1_CH1. The displaced reader interrupt and LED data
+signals use IO7 and IO14, neither of which is a boot strap. IO15 is left unused because it is the
+JTAG-source strapping pin.
 
 C27 (10 uF) and C28 (100 nF) decouple the module locally at pin 3: WiFi TX peaks at 382 mA
 (Table 6-4) and the regulator's own output capacitors are centimetres away. TP1, TP2 and TP3 expose
@@ -113,10 +121,10 @@ decoupling stays beside the pin it serves.
 The back copper is reserved under the reader's match and the run to the matrix connector, where the
 13.56 MHz return flows: no tracks, vias allowed, and the routed board has zero signal segments
 inside it. The reserve starts clear of the reader itself, because a QFN-40 in a 6 mm body needs both
-faces to escape its pins. Elsewhere B.Cu carries 256 signal segments against 819 on F.Cu.
+faces to escape its pins. Elsewhere B.Cu carries 307 signal segments against 557 on F.Cu.
 
-The reviewed Specctra session is versioned, with the 2 A USB entry, the safety-window VBUS
-distribution and its reference branch, and the USB shield owned deterministically by code.
+The reviewed Specctra session is versioned, with both CC sense paths, the 2 A USB entry, the
+safety-window VBUS distribution and its reference branch, and the USB shield owned deterministically by code.
 `make pcb-hub-drc` reproduces 0 violations, 0 unconnected items, and 0 schematic-parity issues. The
 fabrication export reads the stack from the board, so a later layer-count change cannot ship a
 Gerber set missing copper.

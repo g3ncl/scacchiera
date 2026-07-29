@@ -764,3 +764,29 @@ Corrected the mating-side family from plug series 43020 to receptacle series 430
 own Micro-Fit product specification. Selected [[430250800]] and [[430250200]] housings with
 [[430300038]] 18 AWG female terminals. The exact wire, qualified crimp or pre-crimped leads, color
 coding, strain relief, and complete harness remain open rather than being implied by the connector.
+
+## [2026-07-29] design | Raise the 10 W battery-path margin
+
+Replaced the 5 A BQ25619 battery path with [[bq25895rtwr]], LCSC `C80200`, in the same RTW
+WQFN-24 package. The filed manufacturer data sheet rates the new path at 6 A continuous, 9 A for
+one second, and a 9 A overcurrent threshold. The 200 ohm ILIM network independently caps input at
+1.970 A while unconnected D+ and D- preserve the 500 mA unknown-source startup default.
+
+The reviewed 90 by 32 mm route and 130.1 by 63.0 mm panel remain clean. The 54-corner boost stage
+now separates its switching result from an 80 percent efficiency current bound, which reaches
+5.681 A peak and 4.422 A RMS. An eleven-case averaged NVDC model covers source priority,
+supplement, removal, missing and depleted cells, short circuit, and the temperature gate against a
+stuck command. Reversed-cell protection is explicitly failing until V1 binds a complete protected
+keyed battery assembly.
+
+## [2026-07-29] design | Recognize 5 V Type-C source current
+
+Filed and ingested [[usb-type-c-r2-current-advertisement]], a five-page official specification
+extract covering sink power states, debounce, and the exact CC voltage thresholds. The hub retains
+its two passive Rd terminations and adds independent 10 kohm, 100 nF filtered ADC paths on IO0 and
+IO1. [[usb-type-c-5v-current-advertisement]] records the conservative policy: default current until
+a stable 1.5 A or 3.0 A advertisement is measured, with invalid and gap voltages resolving down.
+
+Moved NFC IRQ and LED data to IO7 and IO14, then generated a fresh reviewed hub route. Reproduction
+from that session passes with zero DRC violations, unconnected items, and schematic parity issues.
+The path never negotiates PD and never requests or accepts more than 5 V.
