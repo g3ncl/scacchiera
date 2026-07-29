@@ -186,6 +186,8 @@ def test_hub_connectors_and_usb_use_the_reviewed_pin_order() -> None:
 def test_startup_defaults_exposed_pads_and_recovery_are_defined() -> None:
     hub = build_hub()
     expected_resistors = {
+        "R1": ({"USB_CC1", "GND"}, "5.1k"),
+        "R2": ({"USB_CC2", "GND"}, "5.1k"),
         "R12": ({"CHARGE_TEMP_OK", "USB_VBUS"}, "100k"),
         "R15": ({"CHARGE_INPUT_FAULT_N", "3V3"}, "100k"),
         "R19": ({"LED_DATA", "GND"}, "100k"),

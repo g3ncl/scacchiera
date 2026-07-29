@@ -7,7 +7,7 @@ sources:
   docs/functional/gameplay.md: 461a3ce900ad7e2bfe67bc4f424bfa5b899486ad70e7820304bceae711a65097
   docs/functional/interface.md: 9d5aa00b924f575a50c5e1f5020e19c7470c0e618da78e05f585d669c9d59b71
   docs/functional/physical.md: 5f7888874f7e5a848dffe02f8d00c3a26ac5ebeb4aeb0ae89a0bc7ecee5779b3
-  docs/functional/power.md: 8dafdec29c9eeb707c39178b281cbc570d31f18c946cd494df8381e27f20bc74
+  docs/functional/power.md: 577c3a9da2b3ba41decc149e3381310f274914cf80989029bb498f6537959a84
 
 requirements:
   - id: PRINCIPLE-001
@@ -285,6 +285,10 @@ requirements:
     source: {path: docs/functional/power.md, locator: USB-C charging}
     statement: The board never loads a USB source beyond its advertised capability and safely falls back to slower charging.
     test_ids: [TEST-POWER-CHARGE-004, TEST-V8-USB-FALLBACK-001]
+  - id: POWER-CHARGE-005
+    source: {path: docs/functional/power.md, locator: USB-C charging}
+    statement: USB-C Power Delivery chargers operate through their 5 V output without PD negotiation, and the board never requests or accepts a higher PD voltage.
+    test_ids: [TEST-HUB-USB-C-SINK-001, TEST-V8-USB-PD-5V-001]
   - id: POWER-SAFETY-001
     source: {path: docs/functional/power.md, locator: Battery safety}
     statement: The battery assembly independently protects against overcharge, over-discharge, overcurrent, and short circuit.

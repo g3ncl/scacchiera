@@ -15,8 +15,10 @@ bounded by the contract in [power-module-interface.md](power-module-interface.md
 product, so the module can be swapped without touching this board. The custom hub never charges the
 cell and never connects to it except through a 2 Mohm divider.
 
-The product's power-only USB-C inlet presents passive Type-C sink resistors and accepts only a
-qualified fixed 5 V/2 A adapter. AP22811AW5-7 gates that input to the module and adds current
+The product's power-only USB-C inlet presents one 5.1 kohm Rd sink resistor on each CC pin. A USB-C
+Power Delivery charger therefore enables its ordinary 5 V output without a PD contract. The board
+has no mechanism to request a higher voltage and every downstream input remains specified for 5 V.
+AP22811AW5-7 gates that input to the module and adds current
 limiting, short-circuit protection, output discharge, thermal protection, and reverse current
 blocking. Its enable is the wired result of both TLV7042DGKR comparisons around a cell-bonded
 NTCLE317E4103SBA sensor. A 10 kohm sensor bias, a 39k/100k cold reference, and a 300k/200k hot
