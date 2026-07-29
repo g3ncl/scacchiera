@@ -24,7 +24,7 @@ Inventory, 12 ms ReadSingleBlock) against community Github libraries.
 
 Not the reader our own design uses. An earlier generation used an ST25R200 (ISO/IEC 14443-A, a
 different protocol family); the from-scratch rebuild tracked in
-[[../../../docs/planning.md|docs/planning.md]] settled on the **PN5180**, the same successor this
+[[../../../../docs/planning.md|docs/planning.md]] settled on the **PN5180**, the same successor this
 project's author validated against the CLRC632 (matching Inventory and ReadSingleBlock timings),
 because ISO/IEC 15693 is where [[bitwiseid-method|BitwiseID]] is proven. See
 `docs/hardware/hub.md` for the hub design that carries it.

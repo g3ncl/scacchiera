@@ -51,7 +51,7 @@ Go scan in ~760 ms worst case.
 ## Relation to our design
 
 This is the concept that most directly de-risks the scan-loop cost of our own 8x8 row+column
-antenna matrix design (see [[../../../docs/planning.md|docs/planning.md]] for the current rebuild
+antenna matrix design (see [[../../../../docs/planning.md|docs/planning.md]] for the current rebuild
 plan), since every line scan under that architecture returns multiple tags per read. Whether
 unaddressed block reads and OR-collision behavior hold the same way on whichever reader protocol we
 end up choosing (ISO/IEC 14443-A versus the paper's ISO/IEC 15693) is an open bench question, not

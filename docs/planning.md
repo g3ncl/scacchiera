@@ -67,12 +67,13 @@ scoped test-article order. V0 through V9 permit a final-board order.
   short. Seven focused tests cover both ends of every cable, exact USB-C pins, startup pulls,
   recovery pads, enable/reset nets, exposed pads, the hardware temperature gate, the on-board
   battery measurement, and the recorded stackup and envelope.
-- [ ] V3 power, analog, timing, and fault simulation: started, not close. The hub's cell-temperature
-  charge gate passes an exhaustive 384-corner sweep with sensor-fault cases (see M3), and the light
-  bar and matrix already had their supply and RF simulations. Open: every switching converter and
-  protection device on the hub, and the transient cases (cold start, brownout, USB insertion, rail
-  handover) that no board has yet. Two of the three regulators have no distributable vendor model,
-  which the workflow allows only with a documented substitute and a full published sweep.
+- [ ] V3 power, analog, timing, and fault simulation: started, not close. Passing so far: the hub's
+  cell-temperature charge gate over an exhaustive 384-corner sweep with sensor-fault cases, the
+  light-bar rail's current limit on TI's own transient model over resistor and supply corners, and
+  the light bar and matrix supply and RF simulations from earlier. Open: the AP63203 buck and the
+  AP22811 input switch, and the transient cases (cold start, brownout, USB insertion, rail handover)
+  that no board has yet. Both Diodes parts lack a distributable vendor model, which the workflow
+  allows only with a documented substitute and a full published sweep.
 - [ ] V4 layout-derived electromagnetic validation: the hub is two layers again, so the RF front end
   returns through the back copper reserved under it rather than an inner plane. Extraction must use
   that reserved region and confirm the reserve is wide enough, since it is the whole return path.
@@ -152,6 +153,13 @@ evidence is an analytical formula; it needs a passing simulation.
   drive and preserves useful RF evidence. The 68 pF series match value came from this bench.
   The power module's charge and handover behavior is measured at V8 rather than represented by an
   invented internal model.
+
+  The light-bar rail is validated: `hardware/tests/test_sim_led_rail.py` drives TI's transient model
+  for the TPS2553 from the rail's own connectivity, over both extremes of the 1% programming resistor
+  and a 4.5 to 5.5 V module output. It carries both bars at full white (444 mA at 4.459 V) without
+  tripping and clamps a short at 657 to 670 mA, inside the 1.0 A its harness contacts are rated for.
+  This replaces a value that had only the data sheet's IOS formula behind it. Evidence: 4 tests
+  passed on 2026-07-29.
 
   The cell-temperature charge gate is now validated: `hardware/tests/test_sim_interlock.py` runs
   384 corners of the gate emitted from the hub's own SKiDL objects, with the filed Vishay R/T curve

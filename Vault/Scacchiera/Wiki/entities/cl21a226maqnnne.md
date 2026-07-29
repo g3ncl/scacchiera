@@ -9,7 +9,7 @@ source_count: 1
 
 # CL21A226MAQNNNE
 
-Exact fitted component from Samsung Electro-Mechanics, used by hub C3 (22u 10V), hub C4 (22u 10V).
+Exact fitted component from Samsung Electro-Mechanics, used by hub C3 (22u 25V), hub C4 (22u 25V).
 
 [mpn::CL21A226MAQNNNE] [supplier::JLCPCB]
 [order_code::C45783] [category::capacitor]

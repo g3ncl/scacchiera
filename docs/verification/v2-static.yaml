@@ -1,5 +1,5 @@
 version: 1
-reviewed_on: 2026-07-26
+reviewed_on: 2026-07-29
 gate: V2
 
 reviewed_erc_warning_classes:
@@ -74,4 +74,4 @@ commands:
   fresh_autoroute_hub: make pcb-hub-reroute
 evidence:
   hub_drc_command: make pcb-hub-drc
-  static_tests: 6 passed on 2026-07-26, including the recorded four-layer stackup
+  static_tests: 7 passed on 2026-07-29, including the on-board battery measurement and the recorded two-layer stackup and envelope

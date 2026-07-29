@@ -232,8 +232,8 @@ requirements:
   - id: IF-LIGHTBAR-002
     source: {path: docs/functional/interface.md, locator: Light bars}
     statement: Each light bar has exactly 14 low-current LEDs with every component on the front side.
-    criterion_ids: [IF-LIGHTBAR-COUNT, LB-SUPPLY-DROOP]
-    test_ids: [TEST-IF-LIGHTBAR-002, TEST-LB-PWR-001]
+    criterion_ids: [IF-LIGHTBAR-COUNT, LB-SUPPLY-DROOP, HUB-LED-RAIL-TRIP-FLOOR, HUB-LED-RAIL-FAULT-CEILING]
+    test_ids: [TEST-IF-LIGHTBAR-002, TEST-LB-PWR-001, TEST-HUB-LED-RAIL-001]
   - id: IF-LIGHTBAR-003
     source: {path: docs/functional/interface.md, locator: Light bars}
     statement: Diffuser standoff is designed around half the 7.30 mm LED pitch so the output reads as a continuous bar.

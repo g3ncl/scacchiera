@@ -147,9 +147,30 @@ published accuracy added on top:
 | Enable level, gate inhibiting | 6.3 mV | at most 0.5 V |
 | Enable level, sensor open or shorted | 6.3 mV | at most 0.5 V |
 
+`hardware/tests/test_sim_led_rail.py` measures the light-bar rail's current limit on TI's own
+transient model for the TPS2553, over both extremes of the 1% programming resistor and the module's
+4.5 to 5.5 V output. The 39 k value had only the data sheet's IOS formula behind it, which is not
+release evidence:
+
+| Quantity | Simulated | Limit |
+| --- | --- | --- |
+| Both bars at full white | 444 mA at 4.459 V | must not trip; bars draw 448 mA |
+| Clamp into a short | 657 to 670 mA | at most 1.0 A, the harness contact rating |
+
+The model agrees with the formula it replaces to within one percent (668 mA computed, 664 mA
+simulated at nominal), and the spread it shows is resistor tolerance only. The data sheet's own
+609 to 734 mA process spread stays the worst case, and both criteria are written against that
+rather than against the model.
+
+Filing that model turned up a contradiction worth recording: TI's PSpice model enables on EN low,
+while TI's data sheet for this part states EN is active high and that the -1 suffix selects latch-off,
+not an inverted enable. The data sheet governs; the schematic follows it, with a 100 k pull-down that
+leaves the rail dark until firmware asserts it. `hardware/sim/models/tps2553.lib` inverts in one
+place and says why.
+
 The remaining V3 work on this board is the rest of the power path: the AP63203 buck at line, load
-and temperature corners, the AP22811 current limit and fault behavior, the TPS2553 LED rail trip,
-and the startup, brownout and handover transients.
+and temperature corners, the AP22811 current limit and fault behavior, and the startup, brownout and
+handover transients.
 
 ## Cost
 

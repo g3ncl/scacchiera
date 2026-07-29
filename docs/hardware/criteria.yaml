@@ -70,8 +70,8 @@ criteria:
     unit: degC
     limits: {minimum: 0.0}
     evidence: {class: Datasheet, source: Vault/Scacchiera/Datasheets/PISUGAR3_PLUS_safety.md, locator: "Usage Precautions: Temperature Limits"}
-    operating_conditions: Independent temperature sensor bonded to the supplied cell and charge interlock enabled.
-    margin: Charging is inhibited below the manufacturer's published zero-degree operating boundary rather than extrapolated.
+    operating_conditions: Independent temperature sensor bonded to the fitted cell and charge interlock enabled.
+    margin: Charging is inhibited below the published zero-degree operating boundary rather than extrapolated. The source is a candidate cell's safety document, filed while that module was still bound; the fitted cell's own document must confirm or tighten this bound when one is chosen, and the gate's simulated 2.17 degree worst case leaves room for a tighter limit.
     test_ids: [TEST-POWER-SAFETY-002, TEST-V8-CHARGE-TEMPERATURE-001]
 
   POWER-CHARGE-TEMPERATURE-MAX:
@@ -80,8 +80,8 @@ criteria:
     unit: degC
     limits: {maximum: 40.0}
     evidence: {class: Datasheet, source: Vault/Scacchiera/Datasheets/PISUGAR3_PLUS_safety.md, locator: "Usage Precautions: Temperature Limits"}
-    operating_conditions: Independent temperature sensor bonded to the supplied cell and charge interlock enabled.
-    margin: Charging is inhibited at the manufacturer's published 40-degree operating boundary rather than relying on the PiSugar charger-chip temperature register as a proxy for cell temperature.
+    operating_conditions: Independent temperature sensor bonded to the fitted cell and charge interlock enabled.
+    margin: Charging is inhibited at the published 40-degree operating boundary rather than relying on any module's charger-chip temperature register as a proxy for cell temperature. The source is a candidate cell's safety document, filed while that module was still bound; the fitted cell's own document must confirm or tighten this bound when one is chosen, and the gate's simulated 36.43 degree worst case leaves room for a tighter limit.
     test_ids: [TEST-POWER-SAFETY-002, TEST-V8-CHARGE-TEMPERATURE-001]
 
   PHY-SQUARE-PITCH:
@@ -473,3 +473,23 @@ criteria:
     operating_conditions: Tightest permitted window over every gate tolerance corner and the comparator error direction that narrows it, including sensor accuracy.
     margin: The functional charge times are specified up to 25 degrees Celsius, and a cell warms while charging, so the hot edge has to clear the stated band rather than sit inside it.
     test_ids: [TEST-HUB-INTERLOCK-BAND-001]
+
+  HUB-LED-RAIL-TRIP-FLOOR:
+    description: Guaranteed minimum current limit on the light-bar rail.
+    requirement_ids: [IF-LIGHTBAR-002]
+    unit: A
+    limits: {minimum: 0.5}
+    evidence: {class: Datasheet, source: Vault/Scacchiera/Datasheets/TPS2553DBVR-1_C111738.pdf, locator: "Section 9.5.1, IOS programming: IOSmin = 25230 / R^1.016 with R in kohm, valid 15 k to 232 k"}
+    operating_conditions: Both light bars at full white, 4.5 to 5.5 V module output, 39 kohm 1% programming resistor at both tolerance extremes.
+    margin: The bars draw 448 mA, so the limiter must not trip on a legitimate bright cue. The data sheet's 609 mA minimum at 39 kohm is 1.36 times that load, and TI's transient model clamps at 657 mA in the worst simulated corner.
+    test_ids: [TEST-HUB-LED-RAIL-001]
+
+  HUB-LED-RAIL-FAULT-CEILING:
+    description: Maximum current the light-bar rail can deliver into a short circuit.
+    requirement_ids: [IF-LIGHTBAR-002]
+    unit: A
+    limits: {maximum: 1.0}
+    evidence: {class: Datasheet, source: Vault/Scacchiera/Datasheets/A1257WR-S-4P_C225127.pdf, locator: "Current rating: 1 A AC, DC"}
+    operating_conditions: Output short circuit, 4.5 to 5.5 V module output, 39 kohm 1% programming resistor at both tolerance extremes.
+    margin: A shorted bar harness must not exceed the contact rating of the connector carrying it. The data sheet's 734 mA maximum at 39 kohm leaves 27 percent, and TI's transient model clamps at 670 mA in the worst simulated corner.
+    test_ids: [TEST-HUB-LED-RAIL-001]

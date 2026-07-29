@@ -31,10 +31,13 @@ cannot have a passing audit; every board part still passes it.
 hub reached that by growing to 162 x 46 mm rather than by adding layers, since the rail it lives in
 has length to spare and a four-layer panel costs a multiple of a two-layer one.
 
-V3 power and fault simulation is the open gate. Its first hub result is
+V3 power and fault simulation is the open gate, with two hub results so far.
 [[v3-charge-interlock]]: the cell-temperature cutoff holds inside the qualified 0 to 40 degree range
-across 384 published tolerance corners and both sensor failure directions. Every switching converter
-on the hub, and every transient case on every board, remains unsimulated.
+across 384 published tolerance corners and both sensor failure directions.
+[[v3-led-rail-current-limit]]: the light-bar limiter carries both bars at full white and clamps a
+short inside its harness rating, on TI's own transient model, replacing a value that had only a
+formula behind it. The AP63203 buck, the AP22811 input switch, and every transient case on every
+board remain unsimulated.
 
 The earlier [[chessboard-quick-charge-architecture|custom PD architecture]] and
 [[quick-charge-module-evaluation|RBS18634 article]] remain historical evidence rather than active

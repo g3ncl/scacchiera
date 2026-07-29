@@ -9,7 +9,7 @@ source_count: 1
 
 # CL05A105KA5NQNC
 
-Exact fitted component from Samsung Electro-Mechanics, used by hub C20 (1u 10V), hub C24 (1u 10V).
+Exact fitted component from Samsung Electro-Mechanics, used by hub C20 (1u 25V), hub C24 (1u 25V).
 
 [mpn::CL05A105KA5NQNC] [supplier::JLCPCB]
 [order_code::C52923] [category::capacitor]

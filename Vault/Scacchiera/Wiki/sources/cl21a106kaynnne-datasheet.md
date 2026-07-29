@@ -12,7 +12,7 @@ publisher: "Samsung Electro-Mechanics"
 # CL21A106KAYNNNE datasheet
 
 This source binds [CL21A106KAYNNNE](../entities/cl21a106kaynnne.md) to supplier order
-code `C15850`. It is used by hub C14 (10u 10V), hub C2 (10u 10V), hub C27 (10u 10V).
+code `C15850`. It is used by hub C14 (10u 25V), hub C2 (10u 25V), hub C27 (10u 25V).
 
 [mpn::CL21A106KAYNNNE] [order_code::C15850]
 [manufacturer::Samsung Electro-Mechanics] [footprint::Capacitor_SMD:C_0805_2012Metric]

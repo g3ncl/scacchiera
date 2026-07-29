@@ -9,7 +9,7 @@ tags:
 
 # JLCPCB Basic-part sourcing
 
-[applies_to::[[jlcpcb]]] [project_record::[[../../../docs/hardware/jlcpcb-sourcing.md|JLCPCB assembly sourcing]]]
+[applies_to::[[jlcpcb]]] [project_record::[[../../../../docs/hardware/jlcpcb-sourcing.md|JLCPCB assembly sourcing]]]
 
 Select a JLCPCB Basic part only when it preserves the circuit's required value, package, electrical
 limits, and function. A catalog match on package or nominal value alone is insufficient for RF

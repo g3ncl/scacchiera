@@ -22,8 +22,8 @@ This structure does not treat a planned test ID as passing evidence. Later gates
 those tests. V1 owns the generated fitted-part inventory and absolute-maximum records, V2 through V7
 own design and system evidence, V8 owns measurements and model calibration, and V9 owns independent
 review and immutable release hashes. See
-[[../../../docs/simulation-workflow.md|the simulation and verification workflow]] and
-[[../../../docs/verification/README.md|the traceability documentation]].
+[[../../../../docs/simulation-workflow.md|the simulation and verification workflow]] and
+[[../../../../docs/verification/README.md|the traceability documentation]].
 
 The first V0 inventory contained 71 atomic functional requirements and 37 numeric criteria. The
 quick-charge revision expands the current inventory to 80 requirements and 42 criteria. It also

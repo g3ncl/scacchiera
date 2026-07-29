@@ -1,6 +1,6 @@
 ---
 type: synthesis
-date_updated: 2026-07-26
+date_updated: 2026-07-29
 tags:
   - wiki/synthesis
   - wiki/power
@@ -10,22 +10,28 @@ tags:
 # Battery format and power module alternatives
 
 Would a flat cell fit the player rail, which lithium format is cheapest, and is there a cheaper or
-better shaped alternative to [[pisugar3-plus]]? Asked because the selected module overhangs the rail
-by seven millimetres, which [[commercial-power-subsystem-selection]] left as an open V7 risk.
+better shaped alternative to [[pisugar3-plus]]? Asked because that module overhangs the rail by
+seven millimetres, which [[commercial-power-subsystem-selection]] left as an open V7 risk.
+
+**Outcome, 2026-07-29.** No module is bound any more. The hub is built against
+[[../../../../docs/hardware/power-module-interface.md|a written contract]] instead, so the answers below
+are selection input rather than a decision, and the width limit the survey found became a mandatory
+property of that contract.
 
 ## What the enclosure actually allows
 
 The binding constraint is width, not thickness. From
-[[../../../docs/functional/physical.md|the physical spec]]: player rails are 50 mm, body height
+[[../../../../docs/functional/physical.md|the physical spec]]: player rails are 50 mm, body height
 32 mm before feet, top stack at most 1.75 mm, and the sensing PCB is 1.0 mm. Subtracting the top
 stack, the air gap, the sensing board and an enclosure floor leaves roughly 24 to 26 mm of usable
-height under a rail, against about 46 mm of usable width, which is what the 110 x 46 mm hub already
-occupies. Rail length is not scarce: each player rail is 310 mm long and the hub uses 110 mm of one.
+height under a rail, against about 46 mm of usable width, which is what the hub itself occupies.
+Rail length is not scarce: each player rail is 310 mm long and the hub, at 162 mm, is the only thing
+in one of them.
 
 So height rules nothing out. An 18650 at 18.4 mm diameter fits, a 21700 at 21.2 mm fits only if the
 holder walls are thin, and any pouch under about 12 mm is comfortable.
 
-[usable_rail_width_mm::46] [usable_rail_height_mm::24] [free_rail_length_mm::200]
+[usable_rail_width_mm::46] [usable_rail_height_mm::24] [free_rail_length_mm::148]
 
 ## The overhang is the cell, not only the board
 

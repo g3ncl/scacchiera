@@ -1,0 +1,39 @@
+* TPS2553 current limiter: six-pin wrapper around TI's transient model.
+*
+* The vendor model is vendor/tps2553_trans.lib, extracted unmodified from
+* vendor/TPS2553_SLVM425B.zip (TI SLVM425A, model version Final 1.00, dated
+* 2011-10-19). It is a PSpice model and needs ngspice's PSpice compatibility
+* mode, which the bench sets through a .spiceinit beside the deck.
+*
+* Two differences from the schematic part, both deliberate:
+*
+*   PWPD. The vendor subckt exposes the package's power pad as a seventh node.
+*   The hub's symbol has six pins, so the wrapper ties the pad to ground, which
+*   is what the layout does.
+*
+*   EN polarity. The vendor model turns ON with EN low and OFF with EN high,
+*   measured both ways. The filed data sheet
+*   (Vault/Scacchiera/Datasheets/TPS2553DBVR-1_C111738.pdf, Pin Functions)
+*   states the opposite for this part: "EN = Active High for the TPS2553",
+*   "logic high turns on power switch", and the -1 suffix selects latch-off
+*   rather than a polarity variant. The data sheet governs the fitted part, and
+*   the hub follows it: EN is pin 3 with a 100 k pull-down, so the rail is dark
+*   until firmware asserts it. The wrapper inverts, so a bench drives EN with
+*   the polarity the product uses and the discrepancy stays in one place instead
+*   of leaking into every deck.
+*
+* The inversion is a wiring convenience, not a claim about silicon. It changes
+* which logic level enables the part and nothing else, so the current limit
+* measured through it is the vendor model's own behaviour.
+*
+* One consequence to state plainly: because this wrapper decides on and off, it
+* replaces the model's own input thresholds, so a bench built on it proves
+* nothing about VIH and VIL. Those are data sheet numbers checked as logic
+* margins at V2, not here. The 1.5 V split below only has to sit between a
+* 3.3 V expander high and its low.
+*
+.include vendor/tps2553_trans.lib
+.subckt TPS2553 in gnd en fault_n ilim out
+Ben_low en_low gnd V = 'V(en,gnd) > 1.5 ? 0 : 5'
+XLIMIT in gnd en_low gnd fault_n ilim out TPS2553_TRANS
+.ends TPS2553

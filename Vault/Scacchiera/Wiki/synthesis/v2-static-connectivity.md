@@ -9,7 +9,7 @@ tags:
 
 V2 closes the gap between an electrically plausible schematic and a reproducible routed board.
 The authoritative evidence is
-[[../../../docs/verification/v2-static.yaml|docs/verification/v2-static.yaml]], backed by the exact
+[[../../../../docs/verification/v2-static.yaml|docs/verification/v2-static.yaml]], backed by the exact
 component sources already cataloged in [[index]].
 
 The repair found real connectivity defects. The hub's earlier generic USB symbol did not model the
@@ -52,6 +52,6 @@ rather than declaring it. The recorded stackup and envelope are asserted against
 rather than described only in prose. [layer-count::2] [envelope_mm::162 x 46]
 [gerber_layers::derived from the board]
 
-This result advances [[../../../docs/planning.md|the hardware plan]] through V2 only. Power and
+This result advances [[../../../../docs/planning.md|the hardware plan]] through V2 only. Power and
 fault corners, electromagnetic validation, firmware, fabrication preflight, measurements, and
 independent review remain sequential gates.

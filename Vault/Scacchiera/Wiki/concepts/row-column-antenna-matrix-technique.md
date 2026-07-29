@@ -40,8 +40,8 @@ single-tag become multi-tag inventories, which is the throughput problem
 This is the reference architecture behind our own chessboard sensing design: same row+column,
 one-reader idea, applied to an 8x8 chessboard (16 antennas) instead of a 15x15 Scrabble board
 (30 antennas). Our own hardware is being rebuilt from scratch on the functional spec in
-[[../../../docs/functional/overview.md|docs/functional/]], tracked in
-[[../../../docs/planning.md|docs/planning.md]]. Three coupled risks carry over from the source
+[[../../../../docs/functional/overview.md|docs/functional/]], tracked in
+[[../../../../docs/planning.md|docs/planning.md]]. Three coupled risks carry over from the source
 project's experience: long antenna geometry/tuning (low risk, per this page), multi-tag
 anticollision per scan (solved by BitwiseID/BitwiseXY, our own firmware work still to do), and
 overlap tuning between adjacent lines (physics understood via an ST community thread, not yet

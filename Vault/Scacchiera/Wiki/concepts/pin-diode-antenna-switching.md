@@ -27,7 +27,7 @@ simulation of a 64-antenna shared bus: a pure-MOSFET switch (BSS123, ~5 pF off-c
 collapses the selected resonance from ~13.8 MHz (1 cell) to an extrapolated ~4.8 MHz (64 cells),
 while PIN diodes (BAP64-02, ~0.3 pF) keep the bus in the 12.5-15 MHz acceptance band even fully
 loaded (measured 13.7 MHz at 64 cells). That implementation has since been discarded for a
-from-scratch rebuild (see [[../../../docs/planning.md|docs/planning.md]]); the rebuilt matrix
+from-scratch rebuild (see [[../../../../docs/planning.md|docs/planning.md]]); the rebuilt matrix
 board re-adopted the technique, as a single-ended half of the old hybrid cell (one series
 BAP64-02 plus a shunt BSS123 per line, validated again in ngspice, see `docs/hardware/matrix.md`).
 The simulation result is kept here as reference data: PIN-diode RF

@@ -27,7 +27,7 @@ The fee review also replaced the Extended TI TSSOP shift registers with Basic Ne
 logic function, and active-low controls while removing one unique Extended BOM line.
 
 The final sourcing table, stock evidence, cost comparison, and exact part numbers live in
-[[../../../docs/hardware/jlcpcb-sourcing.md|the JLCPCB sourcing register]]. The general rule remains
+[[../../../../docs/hardware/jlcpcb-sourcing.md|the JLCPCB sourcing register]]. The general rule remains
 [[jlcpcb-basic-part-sourcing]]: the JLC code and exact MPN must identify the same device, while the
 engineering value stays in the internal BOM.
 

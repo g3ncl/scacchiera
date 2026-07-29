@@ -1,6 +1,6 @@
 ---
 type: synthesis
-date_updated: 2026-07-26
+date_updated: 2026-07-29
 tags:
   - wiki/synthesis
   - wiki/safety
@@ -14,12 +14,11 @@ vendor simulation model and the sensor's data sheet prints no resistance curve?
 
 ## What the gate is
 
-An [[ntcle317e4103sba]] bead taped to the PiSugar pouch cell biases a 10 kohm divider from the USB
-inlet. Two [[tlv7042dgkr]] comparators watch that divider against a 39k/100k cold reference and a
+An [[ntcle317e4103sba]] bead taped to the cell biases a 10 kohm divider from the USB inlet. Two [[tlv7042dgkr]] comparators watch that divider against a 39k/100k cold reference and a
 300k/200k hot reference. Their open-drain outputs are wired together, so the shared node is high
-only inside the window, and that node is the enable pin of the [[ap22811aw5-7]] switch feeding
-[[pisugar3-plus]]. Firmware reads a divided copy of the sensor voltage for reporting and has no path
-that can override the decision. See [[../../../docs/hardware/hub.md|the hub spec]].
+only inside the window, and that node is the enable pin of the [[ap22811aw5-7]] switch feeding the
+power module. Firmware reads a divided copy of the sensor voltage for reporting and has no path
+that can override the decision. See [[../../../../docs/hardware/hub.md|the hub spec]].
 
 ## The two gaps V3 had to close first
 
@@ -61,7 +60,7 @@ both would have reported a usable window two kelvin wider on each side than the 
 
 | Quantity | Simulated | Limit and source |
 | --- | --- | --- |
-| Widest permitted window | 2.17 to 36.43 C | inside 0 to 40 C, [[pisugar3-plus]] safety document |
+| Widest permitted window | 2.17 to 36.43 C | inside 0 to 40 C, candidate cell safety document |
 | Narrowest permitted window | 6.87 to 32.48 C | must cover 20 to 25 C, functional charge spec |
 | Enable level, permitting | 4.40 V | at least 1.5 V, AP22811 VIH |
 | Enable level, inhibiting | 6.3 mV | at most 0.5 V, AP22811 VIL |
@@ -78,6 +77,11 @@ V3 is not closed by this. The rest of the hub's power path has no simulation yet
 over line, load and temperature, the AP22811's own current limit and fault timing, the TPS2553 LED
 rail trip, and every transient case (cold start, brownout, USB insertion, rail handover). Two of
 those parts also lack vendor models and will need the same substitute treatment.
+
+The 0 to 40 degree window itself is provisional. It comes from the safety document of a cell that
+was bound when this was written and is not any more, so the fitted cell's own document has to confirm
+or tighten it. The gate's worst case sits inside that range with about two kelvin to spare at the
+cold edge, which is the margin a tighter limit would eat into.
 
 Nor does simulation replace measurement. The thresholds rest on a curve, a comparator model, and
 ideal resistors; V8 has to measure the built gate against a real cell before any of this counts as

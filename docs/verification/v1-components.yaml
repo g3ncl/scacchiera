@@ -1325,10 +1325,10 @@ components:
   uses:
   - board: hub
     reference: C20
-    value: 1u 10V
+    value: 1u 25V
   - board: hub
     reference: C24
-    value: 1u 10V
+    value: 1u 25V
   library_audit:
     status: passed
     checked: '2026-07-26'
@@ -1541,7 +1541,7 @@ components:
   uses:
   - board: hub
     reference: C13
-    value: 1u 10V
+    value: 1u 50V
   - board: hub
     reference: C6
     value: 1u
@@ -1628,13 +1628,13 @@ components:
   uses:
   - board: hub
     reference: C14
-    value: 10u 10V
+    value: 10u 25V
   - board: hub
     reference: C2
-    value: 10u 10V
+    value: 10u 25V
   - board: hub
     reference: C27
-    value: 10u 10V
+    value: 10u 25V
   library_audit:
     status: passed
     checked: '2026-07-26'
@@ -1676,10 +1676,10 @@ components:
   uses:
   - board: hub
     reference: C3
-    value: 22u 10V
+    value: 22u 25V
   - board: hub
     reference: C4
-    value: 22u 10V
+    value: 22u 25V
   library_audit:
     status: passed
     checked: '2026-07-26'

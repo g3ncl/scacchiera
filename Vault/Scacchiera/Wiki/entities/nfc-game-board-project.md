@@ -18,7 +18,7 @@ respond to a tile move within about half a second, and hold that response time f
 count grows to 225.
 
 This is the primary prior art behind our own row-column antenna matrix direction (see
-[[../../../docs/planning.md|docs/planning.md]] for the current rebuild plan): same core idea (one
+[[../../../../docs/planning.md|docs/planning.md]] for the current rebuild plan): same core idea (one
 reader, a matrix of row/column antennas, tag UID intersection gives position) applied to a 15x15
 Scrabble board instead of an 8x8 chessboard.
 

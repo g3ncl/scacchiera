@@ -12,7 +12,7 @@ publisher: "Samsung Electro-Mechanics"
 # CL05A105KA5NQNC datasheet
 
 This source binds [CL05A105KA5NQNC](../entities/cl05a105ka5nqnc.md) to supplier order
-code `C52923`. It is used by hub C20 (1u 10V), hub C24 (1u 10V).
+code `C52923`. It is used by hub C20 (1u 25V), hub C24 (1u 25V).
 
 [mpn::CL05A105KA5NQNC] [order_code::C52923]
 [manufacturer::Samsung Electro-Mechanics] [footprint::Capacitor_SMD:C_0402_1005Metric]

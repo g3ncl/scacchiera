@@ -12,7 +12,7 @@ publisher: "Samsung Electro-Mechanics"
 # CL10A105KB8NNNC datasheet
 
 This source binds [CL10A105KB8NNNC](../entities/cl10a105kb8nnnc.md) to supplier order
-code `C15849`. It is used by hub C13 (1u 10V), hub C6 (1u).
+code `C15849`. It is used by hub C13 (1u 50V), hub C6 (1u).
 
 [mpn::CL10A105KB8NNNC] [order_code::C15849]
 [manufacturer::Samsung Electro-Mechanics] [footprint::Capacitor_SMD:C_0603_1608Metric]

@@ -1,6 +1,6 @@
 ---
 type: log
-date_updated: 2026-07-26
+date_updated: 2026-07-29
 tags:
   - wiki/log
 ---
@@ -474,3 +474,82 @@ is a few euro against a holder, a separate protection board and a centimetre of 
 is the right choice here despite costing more per watt-hour. Two of the reasons
 [[commercial-power-subsystem-selection]] rejected the smaller DFRobot module have weakened, which
 reopens an unbundled module-plus-chosen-cell option at roughly 35 to 40 EUR.
+
+## [2026-07-29] lint | Align docs and wiki after the two-layer and module changes
+
+Health check across `docs/` and the vault, prompted by two structural changes landing at once.
+Corrected: the recorded stackup evidence still described a four-layer hub and six static tests, the
+catalog row and the battery survey still called the hub 110 x 46 mm, and [[v1-component-proof]] and
+[[v3-charge-interlock]] still read as though [[pisugar3-plus]] were bound.
+
+Two findings worth more than a text fix. Fifteen cross-references from wiki subfolders into `docs/`
+used one `../` too few and resolved to a directory that does not exist; top-level pages used the same
+depth correctly, which is how the error survived. And the qualified 0 to 40 degree charge window,
+which [[v3-charge-interlock]] validates the gate against, is sourced from the safety document of a
+cell that is no longer bound. The limits stand for now and are marked provisional in
+[[../../../docs/hardware/criteria.yaml|criteria.yaml]] until a cell is chosen, since the gate's worst
+case leaves about two kelvin of room at the cold edge for a tighter bound.
+
+Nineteen entity pages are orphaned, almost all parts from the superseded charger design
+([[mcp73871t-2cci-ml]], [[tps63802dlar]], [[tps61023drlr]], [[usblc6-2sc6]] and similar). They are
+history rather than rot, so they stay unlinked rather than being wired into pages that no longer use
+them.
+
+## [2026-07-29] verification | Measure the light-bar current limit on the vendor model
+
+Second piece of V3 for the hub. The 39 k resistor programming the [[tps2553dbvr-1]] limiter had only the
+data sheet's IOS formula behind it, and the workflow is explicit that a formula is not release
+evidence. TI publishes a transient PSpice model for this part, already filed in the repository as an
+archive; extracted, wrapped and driven from the rail's own SKiDL connectivity, it carries both light
+bars at full white (444 mA at 4.459 V) without tripping and clamps a short at 657 to 670 mA across
+resistor and supply corners.
+
+The model agrees with the formula to within one percent, which is the useful outcome: the number was
+right, and now it has evidence rather than arithmetic behind it. The spread the model shows is
+resistor tolerance only, so the data sheet's own 609 to 734 mA process spread stays the worst case
+and both new criteria are written against that rather than against the simulation.
+
+Two findings came out of using it. ngspice needs PSpice compatibility to parse TI's ABM primitives,
+which is now scoped to this bench through a `.spiceinit` beside the deck rather than set globally.
+And **TI's model contradicts TI's data sheet**: the model enables on EN low, while the data sheet for
+this part states EN is active high and that the -1 suffix selects latch-off rather than an inverted
+enable. The data sheet governs the fitted part, the schematic already follows it with a pull-down
+that keeps the rail dark at power-up, and the wrapper inverts in one place with the contradiction
+written next to it. Recorded on [[tps2553dbvr-1]] as an open conflict against the vendor model, not against
+the design.
+
+## [2026-07-29] correction | Eight capacitors carried the wrong voltage rating
+
+Gathering power-stage parameters for the buck simulation meant opening the output capacitor's
+manufacturer data sheet, which describes CL21A226MAQNNNE as a 25 V part. The schematic called it
+10 V. Auditing every voltage-bearing capacitor label against its filed data sheet found four of five
+part numbers wrong, eight component records in all:
+
+| Part | Labelled | Filed data sheet |
+| --- | --- | --- |
+| CL05A105KA5NQNC | 1u 10V | 1 uF **25 V** |
+| CL10A105KB8NNNC | 1u 10V | 1 uF **50 V** |
+| CL21A106KAYNNNE | 10u 10V | 10 uF **25 V** |
+| CL21A226MAQNNNE | 22u 10V | 22 uF **25 V** |
+| CL10A225KO8NNNC | 2.2u 16V | 2.2 uF 16 V, correct |
+
+Every error understates the fitted part, so nothing was operating over its rating and the boards were
+always safe. The risk was downstream: these strings become the Comment column of the JLCPCB BOM, and
+a 10 V description invites a substitution to a genuinely 10 V part, which at 5 V with derating would
+be a real one. The corrected ratings are now in the schematic and regenerated into
+`docs/verification/v1-components.yaml`.
+
+It also improves the numbers the buck bench will use: a 25 V X5R 0805 loses far less capacitance to
+DC bias at 3.3 V than a 10 V part would, so the output filter is better than the label claimed.
+
+## [2026-07-29] correction | Scope PSpice mode to one directory
+
+The light-bar bench needs ngspice's PSpice compatibility to parse TI's model, enabled through a
+`.spiceinit`. Written into the shared `generated/hub/` directory it also reached the charge-interlock
+deck sitting beside it, whose behavioral resistances stopped parsing: ngspice reads that file from
+the deck's directory, not only from the working directory it is invoked in. Five interlock tests
+errored in the full check that caught it.
+
+The bench now generates into its own directory. Worth remembering as a general shape: a per-run
+configuration file is still global state if two runs share a directory, and the thing that found it
+was running the whole suite rather than the tests near the change.

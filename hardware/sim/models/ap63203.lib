@@ -1,0 +1,54 @@
+* AP63203 3.3 V buck, substitute power-stage model.
+*
+* Diodes publishes no distributable ngspice model for this part, which its V1
+* record states, so every number here is quoted from the filed data sheet
+* Vault/Scacchiera/Datasheets/AP63203WU-7_C780769.pdf.
+*
+* Fitted parameters:
+*   fsw      1100 kHz. The Oscillator Frequency table gives 1100 kHz for
+*            AP63203/AP63205 and 500 kHz for AP63200/AP63201; this part is the
+*            1100 kHz one, and reading the wrong row would halve the ripple.
+*   rds_hs   125 mOhm, High-Side Switch On-Resistance.
+*   rds_ls   68 mOhm, Low-Side Switch On-Resistance.
+*   vref     3.30 V, the CCM Feedback Voltage for the AP63203, whose 3.27 to
+*            3.33 V band the bench sweeps separately rather than baking in here.
+*
+* What this model is for: the power stage. Inductor ripple and peak current,
+* output ripple, and conduction loss, with the real inductor and the real
+* output capacitance. Those follow from switching frequency, duty and the
+* passive values, and are exactly what a formula alone cannot be trusted for.
+*
+* What it deliberately does not model, so nobody reads a result it cannot give:
+*
+*   Loop compensation, and any control behaviour at all. The part compensates
+*   internally and the data sheet does not publish the network, so rather than
+*   invent one this model has no feedback: the bench computes the duty each
+*   corner needs from the conduction drops and drives it open loop. That keeps
+*   every dynamic here traceable to a data sheet number, and it means the bench
+*   says nothing about transient response, phase margin or stability. The data
+*   sheet asserts those and V8 measures them. FB is terminated, not read.
+*
+*   Light-load PFM. This is a continuous-conduction model with a synchronous
+*   rectifier that conducts in both directions. Below the CCM boundary, around
+*   110 mA at nominal values, the real part enters pulse-frequency modulation
+*   and this model does not. The bench sweeps loads above that boundary.
+*
+*   Soft start, spread spectrum, current limit, thermal shutdown. The 4 ms
+*   soft start and the +/-6 percent frequency dither exist in the part and not
+*   here; both matter for startup and EMI, which are separate cases.
+*
+.subckt AP63203 fb en vin gnd sw bst
++ params: duty=0.66 fsw=1100k rds_hs=0.125 rds_ls=0.068
+* A sawtooth at the switching frequency, compared against the demanded duty.
+Bsaw sawtooth gnd V = '(time * fsw) - floor(time * fsw)'
+Bpwm pwm gnd V = '{duty} > V(sawtooth,gnd) ? 1 : 0'
+* Complementary switches at their data sheet on-resistances. Off is 100 MOhm,
+* which is six orders above the load and cannot carry a meaningful current.
+Rhs vin sw R = 'V(pwm,gnd) > 0.5 ? rds_hs : 100meg'
+Rls sw gnd R = 'V(pwm,gnd) > 0.5 ? 100meg : rds_ls'
+* FB, EN and BST exist so the schematic's pins have somewhere to land. The
+* model has no feedback, no enable sequencing and no bootstrap charge pump.
+Rfb fb gnd 100meg
+Ren en gnd 1meg
+Rbst bst sw 1meg
+.ends AP63203

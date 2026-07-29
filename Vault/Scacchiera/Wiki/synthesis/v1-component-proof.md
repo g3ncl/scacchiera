@@ -3,7 +3,7 @@ type: synthesis
 tags:
   - wiki/synthesis
   - wiki/verification
-date_updated: 2026-07-26
+date_updated: 2026-07-29
 ---
 
 # V1 component proof
@@ -17,9 +17,17 @@ catalogs in [[index]] link one source summary and one entity page per exact MPN.
 rebuilds the inventory from SKiDL and requires exact set equality, so changing a fitted part without
 updating its evidence fails V1.
 
-The same evidence separately binds the external [[pisugar3-plus]] commercial power boundary and
-[[ntcle317e4103sba]] cell sensor. Their interface, ratings, immutable sources, availability, and
-simulation treatment are checked without pretending either off-board item has a PCB footprint.
+The same evidence separately binds the external [[ntcle317e4103sba]] cell sensor: its interface,
+ratings, immutable sources, availability and simulation treatment are checked without pretending an
+off-board item has a PCB footprint.
+
+**V1 reopened on 2026-07-29.** The audit also used to bind [[pisugar3-plus]] as the commercial power
+boundary. The design stopped binding any module and now builds against
+[[../../../../docs/hardware/power-module-interface.md|a written contract]] instead, so that record
+was withdrawn: a part nobody has chosen cannot have a passing audit, and keeping one would have been
+exactly the kind of comfortable fiction this gate exists to prevent. Every board part still passes.
+Binding a module closes the gate again, and needs its documentation filed, its exact product and
+revision recorded, and every mandatory property of the contract checked.
 
 Three ambiguities were resolved by changing parts. The rejected SK6805 selection is preserved in
 [[sk6805mini-e]], while the fitted lightbar source is now [[t37k3rgb-05c000112u1930-datasheet]].
@@ -40,7 +48,8 @@ The rebuilt hub removed the custom lithium charger and duplicate conversion stag
 the catalog MPN. The comparator uses a code-generated DGK0008A manufacturer land pattern after PCB
 DRC showed the generic KiCad VSSOP footprint could not maintain the board's 0.2 mm clearance.
 
-[component_count::44] [external_component_count::2] [open_conflict_count::0]
+[component_count::44] [external_component_count::1] [open_conflict_count::0]
+[gate_state::open, power module unbound]
 [vendor_model_count::3]
 
 Related: [[verification-evidence-model]], [[jlcpcb]], [[matrix-discrete-datasheets]]

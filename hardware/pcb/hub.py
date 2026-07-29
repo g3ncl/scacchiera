@@ -249,8 +249,8 @@ def _build_power(circuit: Circuit, nets: dict[str, Net]) -> None:
     _connect(nets["USB_VBUS"], switch, "5")
 
     for ref, name, value, footprint, mpn in (
-        ("C13", "USB_VBUS", "1u 10V", "Capacitor_SMD:C_0603_1608Metric", "CL10A105KB8NNNC"),
-        ("C14", "CHARGE_5V", "10u 10V", "Capacitor_SMD:C_0805_2012Metric", "CL21A106KAYNNNE"),
+        ("C13", "USB_VBUS", "1u 50V", "Capacitor_SMD:C_0603_1608Metric", "CL10A105KB8NNNC"),
+        ("C14", "CHARGE_5V", "10u 25V", "Capacitor_SMD:C_0805_2012Metric", "CL21A106KAYNNNE"),
         ("C15", "CHARGE_5V", "100n", "Capacitor_SMD:C_0402_1005Metric", "CL05B104KO5NNNC"),
         ("C16", "USB_VBUS", "100n", "Capacitor_SMD:C_0402_1005Metric", "CL05B104KO5NNNC"),
     ):
@@ -303,9 +303,9 @@ def _build_power(circuit: Circuit, nets: dict[str, Net]) -> None:
     _connect(buck_bst, bootstrap, "1")
     _connect(buck_sw, bootstrap, "2")
     for ref, net, value, mpn in (
-        ("C2", "MODULE_5V", "10u 10V", "CL21A106KAYNNNE"),
-        ("C3", "3V3", "22u 10V", "CL21A226MAQNNNE"),
-        ("C4", "3V3", "22u 10V", "CL21A226MAQNNNE"),
+        ("C2", "MODULE_5V", "10u 25V", "CL21A106KAYNNNE"),
+        ("C3", "3V3", "22u 25V", "CL21A226MAQNNNE"),
+        ("C4", "3V3", "22u 25V", "CL21A226MAQNNNE"),
     ):
         capacitor = two_pin(
             circuit, ref, value, "Capacitor_SMD:C_0805_2012Metric", mpn=mpn, unit_cost_eur=0.05,
@@ -399,7 +399,7 @@ def _build_mcu(circuit: Circuit, nets: dict[str, Net]) -> None:
     # 3V3 pin. The regulator's own output caps are centimetres away, and WiFi
     # TX bursts brown the module out without local charge.
     for ref, value, mpn, footprint in (
-        ("C27", "10u 10V", "CL21A106KAYNNNE", "Capacitor_SMD:C_0805_2012Metric"),
+        ("C27", "10u 25V", "CL21A106KAYNNNE", "Capacitor_SMD:C_0805_2012Metric"),
         ("C28", "100n", "CL05B104KO5NNNC", "Capacitor_SMD:C_0402_1005Metric"),
     ):
         local_cap = two_pin(circuit, ref, value, footprint, mpn=mpn, unit_cost_eur=0.05)
@@ -491,7 +491,7 @@ def _build_reader(circuit: Circuit, nets: dict[str, Net]) -> None:
     core = Net("NFC_VDD", circuit=circuit)
     for pin in ("28", "29", "30"):
         _connect(core, reader, pin)
-    core_cap = _rc(circuit, "C20", "1u 10V", "CL05A105KA5NQNC")
+    core_cap = _rc(circuit, "C20", "1u 25V", "CL05A105KA5NQNC")
     _connect(core, core_cap, "1")
     _connect(nets["GND"], core_cap, "2")
     vmid = _pin_net(circuit, "NFC_VMID", reader, "17")
@@ -502,7 +502,7 @@ def _build_reader(circuit: Circuit, nets: dict[str, Net]) -> None:
         _connect(nets["GND"], stabilizer, "2")
     supply_caps = (
         ("C23", "3V3", "100n", "CL05B104KO5NNNC"),
-        ("C24", "3V3", "1u 10V", "CL05A105KA5NQNC"),
+        ("C24", "3V3", "1u 25V", "CL05A105KA5NQNC"),
         ("C26", "3V3", "100n", "CL05B104KO5NNNC"),
     )
     for ref, name, value, mpn in supply_caps:
