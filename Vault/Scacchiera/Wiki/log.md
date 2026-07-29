@@ -721,3 +721,14 @@ The audit extractor now reads one board per subprocess and combines only immutab
 This keeps the matrix and hub from occupying one SKiDL process at the same time while still deriving
 the result from their real builders. V2 evidence now also records the power board's zero DRC,
 unconnected and parity results, its deliberate no-connects, and both ends of its hub interface.
+
+## [2026-07-29] audit | Bind the power inductor and correct the display load
+
+Replaced the unverified power L1 with [[dfe252012f-1r0m-p2]], LCSC C435392, using Murata's
+0.8 by 2.0 mm recommended pads. A fresh reviewed route passes with zero DRC violations,
+unconnected pads and parity issues, and the panel still measures 130.1 by 63.0 mm.
+
+Ingested [[er-oledm3-12-1w-manufacturer-evidence]]. Its electrical table says 320 mA maximum active
+current and 2 mA sleep current, while the product page calls 2 mA the active maximum. The design now
+uses the conservative 320 mA, raising coincident module load to 1.48 A. That exposes TPS61023's
+guaranteed current-limit corner as inadequate, so the converter needs replacement before V3 can pass.

@@ -1,6 +1,6 @@
 ---
 type: index
-date_updated: 2026-07-26
+date_updated: 2026-07-29
 tags:
   - wiki/index
 ---
@@ -22,7 +22,7 @@ Raw sources that have been captured but not yet ingested into the wiki. Move a
 row into the Sources table below once its summary page exists.
 
 Component datasheets live in [Datasheets/](../Datasheets) and are immutable in the same way
-`Clippings/` is. V1 filed and ingested all 44 purchased fitted MPNs plus two external power
+`Clippings/` is. V1 filed and ingested all 49 purchased fitted MPNs plus two external electrical
 components. The generated catalogs below list one `source-summary` and one component `entity` per
 exact fitted part. Historical family summaries
 remain because they explain rejected selections and contradictions that must not be forgotten.
@@ -67,6 +67,7 @@ One [[wiki/source]] summary per ingested raw source. Factual, no interpretation.
 | [[ntcle317e4103sba-datasheet]] | component datasheet | 2026-07-26 |
 | [[ntcle317e4103sba-rt-curve]] | manufacturer resistance curve | 2026-07-26 |
 | [[swpa5045s4r7mt-datasheet]] | component datasheet | 2026-07-26 |
+| [[er-oledm3-12-1w-manufacturer-evidence]] | component manufacturer evidence | 2026-07-29 |
 
 ## Entities
 
@@ -91,6 +92,7 @@ People, tools, orgs, repos. See [[wiki/entity]] pages.
 | [[tlv7042]] | 1 | 2026-07-26 |
 | [[ntcle317e4103sba]] | 1 | 2026-07-26 |
 | [[swpa5045s4r7mt]] | 1 | 2026-07-26 |
+| [[er-oledm3-12-1w]] | 1 | 2026-07-29 |
 
 <!-- V1-COMPONENT-CATALOG:START -->
 ## V1 component datasheet sources
@@ -130,6 +132,7 @@ One exact source summary per purchased fitted MPN. The structured audit is
 | [[cl21a106kaynnne-datasheet]] | Samsung Electro-Mechanics | 2026-07-29 |
 | [[cl21a226maqnnne-datasheet]] | Samsung Electro-Mechanics | 2026-07-29 |
 | [[cl32a107mqvnnne-datasheet]] | Samsung Electro-Mechanics | 2026-07-26 |
+| [[dfe252012f-1r0m-p2-datasheet]] | Murata | 2026-07-29 |
 | [[esp32-c6-mini-1u-n4-datasheet]] | Espressif Systems | 2026-07-26 |
 | [[grm1555c1h221ja01d-datasheet]] | Murata | 2026-07-26 |
 | [[grm1555c1h680ja01d-datasheet]] | Murata | 2026-07-26 |
@@ -183,6 +186,7 @@ One exact source summary per purchased fitted MPN. The structured audit is
 | [[cl21a106kaynnne]] | 1 | 2026-07-29 |
 | [[cl21a226maqnnne]] | 1 | 2026-07-29 |
 | [[cl32a107mqvnnne]] | 1 | 2026-07-26 |
+| [[dfe252012f-1r0m-p2]] | 1 | 2026-07-29 |
 | [[esp32-c6-mini-1u-n4]] | 1 | 2026-07-26 |
 | [[grm1555c1h221ja01d]] | 1 | 2026-07-26 |
 | [[grm1555c1h680ja01d]] | 1 | 2026-07-26 |

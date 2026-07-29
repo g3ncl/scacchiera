@@ -26,9 +26,10 @@ voltage and gates charging from its independent temperature window, so the imple
 replaced without moving safety or telemetry across the boundary. See
 [[battery-format-and-module-alternatives]].
 
-[[v1-component-proof|V1]] audits 48 exact fitted tuples and records the power inductor's unverified
-order code as an explicit blocker. It also remains open on the displays and the unbound purchased
-replacement-module class. [[v2-static-connectivity|V2]] passes on all four board designs, and all
+[[v1-component-proof|V1]] audits 49 exact fitted tuples with no fitted-part sourcing blocker. The
+power inductor is now exact [[dfe252012f-1r0m-p2]]. V1 remains open on the
+[[er-oledm3-12-1w]] documentation conflict and its cable definition; a purchased power module is
+only an optional replacement, not a fitted dependency. [[v2-static-connectivity|V2]] passes on all four board designs, and all
 four are two copper layers. The
 hub reached that by growing to 162 x 46 mm rather than by adding layers, since the rail it lives in
 has length to spare and a four-layer panel costs a multiple of a two-layer one.
@@ -43,9 +44,13 @@ corners, from a model that deliberately holds no control behaviour, so regulatio
 data sheet claims for V8. The custom power board has no simulation yet. The AP22811 input switch and
 many transient and fault cases remain unsimulated.
 
+The display evidence raises coincident load from 1.14 A to 1.48 A. TI's guaranteed minimum current
+limit shows that [[tps61023drlr]] cannot support that load at the depleted-cell corner, so the custom
+power board needs a stronger converter before its V3 work can proceed.
+
 The earlier [[chessboard-quick-charge-architecture|custom PD architecture]] and
 [[quick-charge-module-evaluation|RBS18634 article]] remain historical evidence rather than active
-designs. The current open risks are the power inductor binding, complete charger and boost
+designs. The current open risks are the boost redesign, complete charger and boost
 simulation, enclosure ventilation, measured recharge time, and representative runtime. The selected
 [[fail-safe-cell-temperature-window]] uses a wired thermistor and analog comparators so firmware
 cannot override the qualified charge range. Hub L1 is the fully documented [[nr6045s4r7mt]];

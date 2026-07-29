@@ -1,8 +1,8 @@
 # Power module interface
 
-The battery, charger, protection, power path and 5 V conversion live in a purchased module outside
-the custom boards. This file is the contract that module must satisfy, so it can be swapped for a
-different one without changing the hub, its firmware, or the enclosure's electrical assumptions.
+The battery, charger, protection, power path and 5 V conversion live on the custom power board. This
+file is the contract that board satisfies and that an optional purchased replacement must also satisfy,
+so either can be used without changing the hub, firmware, or enclosure electrical assumptions.
 
 The hub owns the safety gate regardless of which module is fitted: qualified 5 V leaves the hub, and
 a module that misbehaves cannot charge a cell outside the window proven in
@@ -37,9 +37,9 @@ why it has more supply contacts than J3.
 
 A candidate module must provide all of these:
 
-- **5 V output at 1.3 A continuous, never sagging below 4.0 V.** The board's coincident worst case
-  is derived in `hardware/verification/load_budget.py` and comes to 1.14 A: both light bars white
-  (448 mA) on the 5 V directly, plus 891 mA on the 3.3 V rail behind the buck, with the radio at its
+- **5 V output at 1.6 A continuous, never sagging below 4.0 V.** The board's coincident worst case
+  is derived in `hardware/verification/load_budget.py` and comes to 1.48 A: both light bars white
+  (448 mA) on the 5 V directly, plus 1.33 A on the 3.3 V rail behind the buck, with the radio at its
   transmit peak, the reader driving its field at maximum, both displays active and the matrix biased. The floor comes from the hub side: its buck holds 3.3 V until its input falls to 3.51 V at
   that load, and 4.0 V keeps half a volt in hand for the cable and connector drops that figure
   excludes. A module that sags further browns out the MCU, and the hub cannot ride it out; its
@@ -70,12 +70,11 @@ A candidate module must provide all of these:
   see [the format survey](../../Vault/Scacchiera/Wiki/synthesis/battery-format-and-module-alternatives.md)
   for why a 1S pouch is the current choice.
 
-## Fitted module
+## Fitted implementation
 
-None bound yet. Binding one is a V1 action: file its manufacturer documentation in the vault, record
-the exact product and revision, and check it against every mandatory property above. The previously
-selected PiSugar 3 Plus satisfies the electrical contract but fails the 46 mm width, which is why
-the interface is written as a contract rather than around one product.
+The custom power board is fitted. A purchased module is only an optional replacement and is not a V1
+release dependency. The previously selected PiSugar 3 Plus fails the 46 mm width, which is why the
+interface remains a contract rather than being written around that product.
 
 ## Verification
 

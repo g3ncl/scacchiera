@@ -11,9 +11,9 @@ date_updated: 2026-07-29
 How is every fitted component tied to an exact purchasable part, authoritative source, library
 audit and simulation treatment?
 
-The four authoritative schematics generate 48 unique purchased fitted MPN, supplier, order-code and
-footprint tuples, plus one fitted inductor whose supplier order code is not verified.
-`docs/verification/v1-components.yaml` records each exact tuple and the blocker, and the generated
+The four authoritative schematics generate 49 unique purchased fitted MPN, supplier, order-code and
+footprint tuples with no fitted sourcing blocker.
+`docs/verification/v1-components.yaml` records each exact tuple, and the generated
 catalogs in [[index]] link one source summary and one entity page per exact MPN. The test suite
 rebuilds the inventory from SKiDL and requires exact set equality, so changing a fitted part without
 updating its evidence fails V1.
@@ -22,12 +22,12 @@ The same evidence separately binds the external [[ntcle317e4103sba]] cell sensor
 ratings, immutable sources, availability and simulation treatment are checked without pretending an
 off-board item has a PCB footprint.
 
-**V1 remains open on three items as of 2026-07-29.** The custom power board restored
-[[mcp73871t-2cci-ml]], [[tps61023drlr]] and the PH cell connector to the exact audit. Its
-NR6045S1R0NT inductor is supported by the filed manufacturer series table but has no verified exact
-order code, so it is a machine-readable blocker rather than an invented binding. The two display
-modules still lack filed evidence. A purchased power-module replacement is bounded by
-[[../../../../docs/hardware/power-module-interface.md|a written contract]] but no product is bound.
+**V1 remains open on the display interface as of 2026-07-29.** The custom power board restores
+[[mcp73871t-2cci-ml]], [[tps61023drlr]] and the PH cell connector to the exact audit, and its
+inductor is now exact [[dfe252012f-1r0m-p2]], LCSC C435392. The
+[[er-oledm3-12-1w-manufacturer-evidence]] capture records a conflict between 320 mA active current
+in the datasheet and 2 mA on the product page, while the original PDF and exact 16-to-7-pin cable
+remain unfiled. A purchased power-module replacement is optional and therefore not a fitted V1 item.
 
 Three ambiguities were resolved by changing parts. The rejected SK6805 selection is preserved in
 [[sk6805mini-e]], while the fitted lightbar source is now [[t37k3rgb-05c000112u1930-datasheet]].
@@ -48,8 +48,8 @@ The rebuilt hub removed the charger and duplicate conversion stages from the hub
 the catalog MPN. The comparator uses a code-generated DGK0008A manufacturer land pattern after PCB
 DRC showed the generic KiCad VSSOP footprint could not maintain the board's 0.2 mm clearance.
 
-[component_count::48] [blocked_fitted_component_count::1] [external_component_count::1]
-[gate_state::open, inductor order code, displays and replacement module]
+[component_count::49] [blocked_fitted_component_count::0] [external_component_count::2]
+[gate_state::open, display documentation conflict and interconnect]
 [vendor_model_count::3]
 
 Related: [[verification-evidence-model]], [[jlcpcb]], [[matrix-discrete-datasheets]]

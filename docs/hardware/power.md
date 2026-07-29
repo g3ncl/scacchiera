@@ -49,10 +49,14 @@ over-voltage threshold. The lower leg is two resistors because the exact ratio w
 design does not already carry, and a series pair of bound parts beats a new part number whose order
 code the catalogue reports two ways.
 
-L1 is an NR6045S1R0NT: the same series and footprint as the hub's inductor, so the filed data sheet
-already covers it. Its selection table lists 1.0 uH, 9.5 A saturation and 5.5 A rated against the
-2.4 A this converter draws from a depleted cell, and the value sits on the boost's 1 uH nominal even
-at its 30 percent tolerance extremes.
+L1 is Murata DFE252012F-1R0M=P2, bound to LCSC C435392. It is 1.0 uH at 20 percent tolerance,
+40 mOhm maximum DCR, 4.7 A saturation and 3.3 A temperature-rise current. Its exact manufacturer
+land pattern is generated with the board.
+
+The corrected display load invalidates this revision of the converter stage. The two displays may
+draw 320 mA each, taking coincident module load to 1.48 A. TPS61023's 2.7 A guaranteed minimum
+valley limit cannot support that at the depleted-cell and inductor corners. The converter must be
+replaced before V3 can pass; its typical 5 V at 1.5 A application is not release evidence.
 
 ## Board and panel
 
@@ -71,8 +75,8 @@ already wrong: a 120 x 8.5 mm light bar is below the outline JLCPCB will assembl
 
 ## Open evidence
 
-The board is new, so its gates are not. **V1 is open on it**: L1's order code is unverified, and the
-four revived parts need their audit records regenerated. **V3 is open on it**: nothing here has a
+The board is new, so its gates are not. Its fitted-part audit now has no sourcing blockers, but the
+display-current contradiction has exposed a required converter redesign. **V3 is open on it**: nothing here has a
 corner sweep yet, and a charger with a cell on it is exactly the circuit the workflow wants
 simulated, then measured at V8 and reviewed at V9. That burden is the price of building this rather
 than buying it, and panelising the PCB does not reduce it.

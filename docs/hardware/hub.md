@@ -207,7 +207,7 @@ The rail's transient behaviour is in `hardware/tests/test_rail_budget.py`, deriv
 reason as the switch: what is left after handover and loop response are excluded is bounded by
 conduction and charge. Soft start draws 36 mA into the output capacitors over its 4 ms ramp, so cold
 start needs no inrush limiting. The rail holds 3.3 V until the module's output falls to 3.51 V at the
-1.3 A the interface obliges, which is where that contract's 4.0 V floor comes from. Hold-up is about
+1.34 A on the 3.3 V rail, which is where the interface contract's 4.0 V floor comes from. Hold-up is about
 five microseconds, so the rail follows its input and riding out a source change is the module's job.
 
 `hardware/tests/test_signal_integrity.py` covers the two buses that leave the board on a cable. The

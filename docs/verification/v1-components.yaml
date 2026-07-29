@@ -1864,6 +1864,48 @@ components:
     valid_region: lumped model with datasheet tolerance, bias, ESR, DCR and temperature
       corners
   conflicts: []
+- mpn: DFE252012F-1R0M=P2
+  manufacturer: Murata
+  supplier: JLCPCB
+  order_code: C435392
+  availability:
+    status: available
+    checked: '2026-07-26'
+    source: https://jlcpcb.com/partdetail?part=C435392
+  datasheet: Vault/Scacchiera/Datasheets/DFE252012F-1R0M-P2_C435392.pdf
+  wiki_source: Vault/Scacchiera/Wiki/sources/dfe252012f-1r0m-p2-datasheet.md
+  wiki_entity: Vault/Scacchiera/Wiki/entities/dfe252012f-1r0m-p2.md
+  category: inductor
+  footprint: Chessboard:DFE252012F
+  uses:
+  - board: power
+    reference: L1
+    value: 1uH
+  library_audit:
+    status: passed
+    checked: '2026-07-26'
+    evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
+      KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
+    checks:
+    - symbol_pin_numbers_and_names
+    - symbol_electrical_types
+    - exposed_and_no_connect_pins
+    - footprint_pad_numbers
+    - package_dimensions
+    - polarity_and_pin_one
+    - assembly_side
+    - cpl_zero_rotation
+  ratings_audit:
+    status: passed
+    fields: inductance, tolerance, rated or saturation current, DC resistance, self-resonance,
+      temperature range and package dimensions
+    datasheet_locator: electrical characteristics, ratings and dimensions tables
+  simulation_model:
+    kind: analytical
+    path: hardware/sim
+    valid_region: lumped model with datasheet tolerance, bias, ESR, DCR and temperature
+      corners
+  conflicts: []
 - mpn: ESP32-C6-MINI-1U-N4
   manufacturer: Espressif Systems
   supplier: DigiKey
@@ -2802,15 +2844,7 @@ components:
     valid_region: contact and interconnect parasitics derived from rated contacts
       and routed geometry
   conflicts: []
-component_blockers:
-- mpn: NR6045S1R0NT
-  footprint: Chessboard:NR6045S
-  uses:
-  - board: power
-    reference: L1
-    value: 1uH
-  status: blocked
-  reason: Exact supplier order code and current availability are not verified.
+component_blockers: []
 external_components:
 - mpn: NTCLE317E4103SBA
   role: Cell-bonded off-board charge-temperature sensor
@@ -2839,3 +2873,34 @@ external_components:
     valid_region: V3 beta-equation resistance model sweeps filed R25, beta, comparator
       and resistor corners; V8 measures the assembled trip temperatures
   conflicts: []
+- mpn: ER-OLEDM3.12-1W
+  role: Two off-board player OLED display modules
+  supplier: BuyDisplay
+  order_code: ER-OLEDM3.12-1W
+  availability:
+    status: available
+    checked: '2026-07-29'
+    source: https://www.buydisplay.com/white-grayscale-3-12-inch-oled-display-module-256x64-arduino-raspberry-pi
+  datasheets:
+  - Vault/Scacchiera/Datasheets/ER-OLEDM3.12-1W_BUYDISPLAY.md
+  wiki_source: Vault/Scacchiera/Wiki/sources/er-oledm3-12-1w-manufacturer-evidence.md
+  wiki_entity: Vault/Scacchiera/Wiki/entities/er-oledm3-12-1w.md
+  interface_audit:
+    status: blocked
+    evidence: The module has a 16-pin 2.54 mm header while hub J5 and J6 are seven-pin
+      JST GH; the exact harness and required serial-mode low straps are not yet bound.
+  ratings_audit:
+    status: blocked
+    fields: 3.0 to 3.5 V logic supply, 3.6 V absolute maximum, 320 mA active maximum
+      and 2 mA sleep maximum from datasheet section 4.3
+    datasheet_locator: sections 4.1 through 4.3
+  simulation_model:
+    kind: datasheet_bounded
+    path: hardware/verification/load_budget.py
+    valid_region: 320 mA maximum current per display; digital protocol belongs to
+      V6
+  conflicts:
+  - Product page calls 2 mA the active maximum while the datasheet calls it sleep
+    current.
+  - Original manufacturer PDF could not be filed because the supplier returned HTTP
+    403.

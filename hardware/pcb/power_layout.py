@@ -139,6 +139,10 @@ def _finalize_ground(board_path: Path) -> None:
             zone.SetNet(board.FindNet("GND"))
             zone.SetLocalClearance(pcbnew.FromMM(0.2))
             zone.SetIslandRemovalMode(pcbnew.ISLAND_REMOVAL_MODE_ALWAYS)
+            # This compact power board has several high-current ground pins.
+            # Solid joins avoid both thermal bottlenecks and isolated partial
+            # spokes where routing passes close to the edge connector.
+            zone.SetPadConnection(pcbnew.ZONE_CONNECTION_FULL)
             outline = zone.Outline()
             outline.NewOutline()
             for point in (

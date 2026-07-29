@@ -219,18 +219,13 @@ def build_power() -> Circuit:
     _connect(nets["BOOST_SW"], boost, "5")
     _connect(nets["MODULE_5V"], boost, "6")
     _connect(nets["BOOST_FB"], boost, "1")
-    # Same series and footprint as the hub's inductor, so the filed
-    # NR6045S4R7MT data sheet covers it: its selection table lists NR6045S1R0NT
-    # at 1.0 uH +/-30%, 9.5 A saturation and 5.5 A rated, against the roughly
-    # 2.4 A this converter draws from a depleted cell. The value sits on the
-    # boost's 1 uH nominal and inside its 0.37 to 2.9 uH range even at the
-    # tolerance extremes. Its LCSC order code is not verified yet, which is an
-    # open V1 item; the catalogue reports the neighbouring SWPA family under a
-    # part number the manufacturer's own table does not list, so this one is
-    # bound from the series table rather than from a search result.
+    # Murata's exact 1 uH part is stocked under C435392. Its 20 percent
+    # tolerance stays inside the boost's 0.37 to 2.9 uH effective range. The
+    # 4.7 A saturation and 3.3 A temperature-rise limits must be checked again
+    # when the inadequate boost converter is replaced.
     inductor = two_pin(
-        circuit, "L1", "1uH", "Chessboard:NR6045S",
-        mpn="NR6045S1R0NT", unit_cost_eur=0.06,
+        circuit, "L1", "1uH", "Chessboard:DFE252012F",
+        mpn="DFE252012F-1R0M=P2", unit_cost_eur=0.07,
     )
     _connect(nets["SYS"], inductor, "1")
     _connect(nets["BOOST_SW"], inductor, "2")

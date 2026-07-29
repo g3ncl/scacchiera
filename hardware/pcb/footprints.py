@@ -158,6 +158,24 @@ def nr6045s_footprint() -> str:
 )\n'''
 
 
+def dfe252012f_footprint() -> str:
+    """Murata DFE252012F land pattern from the manufacturer series sheet."""
+    return '''(footprint "DFE252012F"
+  (version 20240108)
+  (generator pcbnew)
+  (layer "F.Cu")
+  (descr "Murata DFE252012F recommended land pattern")
+  (tags "shielded metal-alloy power inductor")
+  (property "Reference" "REF**" (at 0 -1.8 0) (layer "F.SilkS"))
+  (property "Value" "DFE252012F" (at 0 1.8 0) (layer "F.Fab"))
+  (attr smd)
+  (fp_rect (start -1.25 -1) (end 1.25 1) (stroke (width 0.1) (type default)) (fill none) (layer "F.Fab"))
+  (fp_rect (start -1.65 -1.25) (end 1.65 1.25) (stroke (width 0.05) (type default)) (fill none) (layer "F.CrtYd"))
+  (pad "1" smd roundrect (at -1 0) (size 0.8 2) (layers "F.Cu" "F.Paste" "F.Mask") (roundrect_rratio 0.15))
+  (pad "2" smd roundrect (at 1 0) (size 0.8 2) (layers "F.Cu" "F.Paste" "F.Mask") (roundrect_rratio 0.15))
+)\n'''
+
+
 def tlv7042_dgk_footprint() -> str:
     """TI DGK0008A land pattern from the TLV7042 data sheet."""
     pads = []
@@ -225,6 +243,7 @@ def write_footprints(output: Path = OUTPUT) -> None:
     (output / "ESP32-C6-MINI-1U.kicad_mod").write_text(esp32_footprint(), encoding="utf-8")
     (output / "T37K3RGB-05C000112U1930.kicad_mod").write_text(t37k3rgb_footprint(), encoding="utf-8")
     (output / "NR6045S.kicad_mod").write_text(nr6045s_footprint(), encoding="utf-8")
+    (output / "DFE252012F.kicad_mod").write_text(dfe252012f_footprint(), encoding="utf-8")
     (output / "TLV7042_DGK.kicad_mod").write_text(tlv7042_dgk_footprint(), encoding="utf-8")
     (output / "SOT-563_DRL.kicad_mod").write_text(sot563_drl_footprint(), encoding="utf-8")
 

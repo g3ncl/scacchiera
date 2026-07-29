@@ -42,20 +42,20 @@ def test_every_fitted_purchased_mpn_is_audited_or_explicitly_blocked() -> None:
         (part.mpn, part.supplier, part.order_code, part.footprint)
         for part in _bound_parts()
     }
-    assert len(audited) == 48
+    assert len(audited) == 49
     assert audited.isdisjoint(blocked)
     assert audited | blocked == bound
 
 
-def test_power_board_has_only_the_recorded_inductor_sourcing_blocker() -> None:
-    blockers = _component_blockers()
-    assert len(blockers) == 1
-    blocker = blockers[0]
-    assert blocker.get("mpn") == "NR6045S1R0NT"
-    assert blocker.get("status") == "blocked"
-    require_nonempty_string(blocker.get("reason"), "blocker reason")
-    uses = [require_mapping(raw, "blocked use") for raw in require_list(blocker.get("uses"), "uses")]
-    assert uses == [{"board": "power", "reference": "L1", "value": "1uH"}]
+def test_every_fitted_power_board_part_has_a_verified_order_code() -> None:
+    assert _component_blockers() == []
+    power_uses = [
+        use
+        for record in _components()
+        for use in require_list(record.get("uses"), "component uses")
+        if require_mapping(use, "component use").get("board") == "power"
+    ]
+    assert power_uses
 
 
 def test_every_exact_part_has_an_immutable_manufacturer_source_and_wiki_ingest() -> None:
@@ -139,17 +139,17 @@ def test_external_power_components_are_exact_sourced_and_modelled() -> None:
         require_mapping(raw, "external component")
         for raw in require_list(document.get("external_components"), "external components")
     ]
-    # The power module is not here on purpose. It is bounded by a written
-    # interface rather than bound to a product, and V1 cannot pass an audit of a
-    # part nobody has chosen yet.
-    assert {record.get("mpn") for record in records} == {"NTCLE317E4103SBA"}
+    assert {record.get("mpn") for record in records} == {
+        "ER-OLEDM3.12-1W",
+        "NTCLE317E4103SBA",
+    }
     for record in records:
         mpn = require_nonempty_string(record.get("mpn"), "external MPN")
         require_nonempty_string(record.get("supplier"), f"{mpn} supplier")
         require_nonempty_string(record.get("order_code"), f"{mpn} order code")
         availability = require_mapping(record.get("availability"), f"{mpn} availability")
         assert availability.get("status") == "available"
-        assert availability.get("checked") == "2026-07-26"
+        assert availability.get("checked") in {"2026-07-26", "2026-07-29"}
         for relative in require_list(record.get("datasheets"), f"{mpn} datasheets"):
             source = ROOT / require_nonempty_string(relative, f"{mpn} datasheet")
             assert source.is_file()
@@ -160,8 +160,13 @@ def test_external_power_components_are_exact_sourced_and_modelled() -> None:
         interface = require_mapping(record.get("interface_audit"), f"{mpn} interface")
         ratings = require_mapping(record.get("ratings_audit"), f"{mpn} ratings")
         model = require_mapping(record.get("simulation_model"), f"{mpn} model")
-        assert interface.get("status") == "passed"
-        assert ratings.get("status") == "passed"
+        expected_status = "blocked" if mpn == "ER-OLEDM3.12-1W" else "passed"
+        assert interface.get("status") == expected_status
+        assert ratings.get("status") == expected_status
         assert model.get("kind") in {"analytical", "datasheet_bounded"}
         require_nonempty_string(model.get("valid_region"), f"{mpn} model region")
-        assert record.get("conflicts") == []
+        conflicts = require_list(record.get("conflicts"), f"{mpn} conflicts")
+        if expected_status == "passed":
+            assert conflicts == []
+        else:
+            assert conflicts

@@ -42,6 +42,11 @@ DESIGN_FACTS = {
         "4.7 uH plus or minus 20 percent, 34 mOhm maximum DCR, 4.97 A minimum saturation, "
         "3.3 A minimum thermal current, 6 x 6 x 4.5 mm body and 1.7 x 5.7 mm pads"
     ),
+    "DFE252012F-1R0M=P2": (
+        "1.0 uH plus or minus 20 percent, 40 mOhm maximum DCR, 4.7 A maximum "
+        "inductance-decrease current, 3.3 A maximum 40 degree temperature-rise current, "
+        "minus 40 to 125 degrees Celsius and 2.5 x 2.0 x 1.2 mm body"
+    ),
     "TPS61023DRLR": (
         "0.5 to 5.5 V input, 1.8 V maximum startup threshold, 2.2 to 5.5 V output, "
         "0.37 to 2.9 uH effective inductance, 580 to 610 mV PWM feedback reference, "
@@ -96,6 +101,49 @@ EXTERNAL_COMPONENTS: tuple[dict[str, Any], ...] = (
             ),
         },
         "conflicts": [],
+    },
+    {
+        "mpn": "ER-OLEDM3.12-1W",
+        "role": "Two off-board player OLED display modules",
+        "supplier": "BuyDisplay",
+        "order_code": "ER-OLEDM3.12-1W",
+        "availability": {
+            "status": "available",
+            "checked": WIKI_UPDATE_DATE,
+            "source": (
+                "https://www.buydisplay.com/white-grayscale-3-12-inch-oled-display-module-"
+                "256x64-arduino-raspberry-pi"
+            ),
+        },
+        "datasheets": ["Vault/Scacchiera/Datasheets/ER-OLEDM3.12-1W_BUYDISPLAY.md"],
+        "wiki_source": (
+            "Vault/Scacchiera/Wiki/sources/er-oledm3-12-1w-manufacturer-evidence.md"
+        ),
+        "wiki_entity": "Vault/Scacchiera/Wiki/entities/er-oledm3-12-1w.md",
+        "interface_audit": {
+            "status": "blocked",
+            "evidence": (
+                "The module has a 16-pin 2.54 mm header while hub J5 and J6 are seven-pin JST GH; "
+                "the exact harness and required serial-mode low straps are not yet bound."
+            ),
+        },
+        "ratings_audit": {
+            "status": "blocked",
+            "fields": (
+                "3.0 to 3.5 V logic supply, 3.6 V absolute maximum, 320 mA active maximum and "
+                "2 mA sleep maximum from datasheet section 4.3"
+            ),
+            "datasheet_locator": "sections 4.1 through 4.3",
+        },
+        "simulation_model": {
+            "kind": "datasheet_bounded",
+            "path": "hardware/verification/load_budget.py",
+            "valid_region": "320 mA maximum current per display; digital protocol belongs to V6",
+        },
+        "conflicts": [
+            "Product page calls 2 mA the active maximum while the datasheet calls it sleep current.",
+            "Original manufacturer PDF could not be filed because the supplier returned HTTP 403.",
+        ],
     },
 )
 
@@ -219,7 +267,7 @@ def _category(part: BoundPart) -> str:
         return "resistor"
     if footprint.startswith("Capacitor_SMD"):
         return "capacitor"
-    if footprint.startswith("Inductor_SMD") or part.mpn.startswith("NR6045"):
+    if footprint.startswith("Inductor_SMD") or part.mpn.startswith(("DFE", "NR6045")):
         return "inductor"
     if footprint.startswith("Connector_"):
         return "connector"
@@ -475,7 +523,7 @@ def _record(part: BoundPart) -> dict[str, Any]:
 def _wiki_date(record: dict[str, Any]) -> str:
     uses = record["uses"]
     assert isinstance(uses, list)
-    if str(record["mpn"]) == "NR6045S4R7MT" or any(
+    if str(record["mpn"]) in {"DFE252012F-1R0M=P2", "NR6045S4R7MT"} or any(
         use.get("board") == "power" for use in uses
     ):
         return WIKI_UPDATE_DATE
