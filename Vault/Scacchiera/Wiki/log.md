@@ -708,3 +708,16 @@ The panel is 130.1 by 63.0 mm, two bars and the power board on four five-hole mo
 generated from the routed boards so it cannot disagree with them. It also fixes something already
 wrong: a 120 by 8.5 mm light bar is below the outline JLCPCB will assemble, which is why the bars
 were routed to hand assembly. The panel is not.
+
+## [2026-07-29] audit | Bring the power board under V1 and V2 evidence
+
+Regenerated the fitted-component catalog from all four authoritative schematics. The power board
+adds four exact audited tuples: [[mcp73871t-2cci-ml]], [[tps61023drlr]], the PH cell connector and
+the 330 kohm feedback resistor. Existing component pages now record their additional power-board
+uses. The exact NR6045S1R0NT order code still could not be verified, so it is a structured V1
+blocker rather than a fabricated catalog binding.
+
+The audit extractor now reads one board per subprocess and combines only immutable part fields.
+This keeps the matrix and hub from occupying one SKiDL process at the same time while still deriving
+the result from their real builders. V2 evidence now also records the power board's zero DRC,
+unconnected and parity results, its deliberate no-connects, and both ends of its hub interface.

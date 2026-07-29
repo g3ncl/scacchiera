@@ -1,5 +1,7 @@
 """V2 connector, no-connect, startup, programming, and stackup checks."""
 
+from functools import cache
+import json
 import os
 import re
 import subprocess
@@ -56,6 +58,21 @@ def _evidence() -> dict[str, Any]:
     return document
 
 
+@cache
+def _power_connectivity() -> dict[str, dict[str, list[str]]]:
+    result = subprocess.run(
+        (sys.executable, "-m", "hardware.verification.power_connectivity"),
+        check=True,
+        cwd=ROOT,
+        env=os.environ,
+        capture_output=True,
+        text=True,
+    )
+    snapshot = json.loads(result.stdout)
+    assert isinstance(snapshot, dict)
+    return snapshot
+
+
 def test_reviewed_no_connects_are_exact_traced_and_applied() -> None:
     evidence = _evidence()
     assert set(evidence["reviewed_erc_warning_classes"]) == REVIEWED_WARNINGS
@@ -88,6 +105,21 @@ def test_reviewed_no_connects_are_exact_traced_and_applied() -> None:
     matrix_datasheet = ROOT / str(matrix_records["U2"]["datasheet"])
     assert matrix_datasheet.is_file()
     assert matrix_datasheet.read_bytes().startswith(b"%PDF")
+
+    power_records = evidence["power_no_connects"]
+    power_no_connects = {"U1": ("6", "7", "8"), "J2": ("5", "6")}
+    assert SCHEMATIC_NO_CONNECTS["power"] == frozenset(
+        f"{reference}:{pin}"
+        for reference, pins in power_no_connects.items()
+        for pin in pins
+    )
+    snapshot = _power_connectivity()["no_connects"]
+    for reference, pins in power_no_connects.items():
+        assert snapshot[reference] == ["__NOCONNECT"] * len(pins)
+        datasheet = ROOT / str(power_records[reference]["datasheet"])
+        assert datasheet.is_file()
+        assert datasheet.read_bytes().startswith(b"%PDF")
+        assert str(power_records[reference]["locator"]).strip()
     assert str(matrix_records["U2"]["locator"]).strip()
 
 
@@ -107,6 +139,16 @@ def test_board_to_board_connectors_match_at_both_ends() -> None:
     assert _pin_map(lightbar, "J1", 4) == bar_link
     assert _pin_map(hub, "J7", 4) == ("LED_5V", "GND", "LED_DATA_5V", "LED_RETURN")
     assert _pin_map(hub, "J8", 3) == ("LED_5V", "GND", "LED_RETURN")
+
+    power_connectors = _power_connectivity()["connectors"]
+    assert tuple(power_connectors["J1"]) == _pin_map(hub, "J2", 7)
+    assert tuple(power_connectors["J2"]) == (
+        "MODULE_5V", "MODULE_5V", "GND", "GND", "__NOCONNECT", "__NOCONNECT", "BAT_RAW"
+    )
+    assert _pin_map(hub, "J3", 7) == (
+        "MODULE_5V", "MODULE_5V", "GND", "GND", "I2C_SCL", "I2C_SDA", "BAT_RAW"
+    )
+    assert tuple(power_connectors["J3"]) == ("BAT_RAW", "GND")
 
 
 def test_hub_connectors_and_usb_use_the_reviewed_pin_order() -> None:

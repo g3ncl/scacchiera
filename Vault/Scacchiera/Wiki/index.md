@@ -103,19 +103,21 @@ One exact source summary per purchased fitted MPN. The structured audit is
 | [[0402cg101j500nt-datasheet]] | Fenghua Advanced Technology | 2026-07-26 |
 | [[0402cg150j500nt-datasheet]] | Fenghua Advanced Technology | 2026-07-26 |
 | [[0603waf1000t5e-datasheet]] | UNI-ROYAL | 2026-07-26 |
-| [[0603waf1001t5e-datasheet]] | UNI-ROYAL | 2026-07-26 |
-| [[0603waf1002t5e-datasheet]] | UNI-ROYAL | 2026-07-26 |
-| [[0603waf1003t5e-datasheet]] | UNI-ROYAL | 2026-07-26 |
+| [[0603waf1001t5e-datasheet]] | UNI-ROYAL | 2026-07-29 |
+| [[0603waf1002t5e-datasheet]] | UNI-ROYAL | 2026-07-29 |
+| [[0603waf1003t5e-datasheet]] | UNI-ROYAL | 2026-07-29 |
 | [[0603waf1004t5e-datasheet]] | UNI-ROYAL | 2026-07-26 |
 | [[0603waf150kt5e-datasheet]] | UNI-ROYAL | 2026-07-26 |
-| [[0603waf3902t5e-datasheet]] | UNI-ROYAL | 2026-07-26 |
+| [[0603waf3303t5e-datasheet]] | UNI-ROYAL | 2026-07-29 |
+| [[0603waf3902t5e-datasheet]] | UNI-ROYAL | 2026-07-29 |
 | [[0603waf4701t5e-datasheet]] | UNI-ROYAL | 2026-07-26 |
-| [[0603waf5101t5e-datasheet]] | UNI-ROYAL | 2026-07-26 |
+| [[0603waf5101t5e-datasheet]] | UNI-ROYAL | 2026-07-29 |
 | [[74hc595d-118-datasheet]] | Nexperia | 2026-07-26 |
 | [[7m27100009-datasheet]] | TXC | 2026-07-26 |
 | [[a1257wr-s-4p-datasheet]] | CJT | 2026-07-26 |
 | [[ap22811aw5-7-datasheet]] | Diodes Incorporated | 2026-07-26 |
 | [[ap63203wu-7-datasheet]] | Diodes Incorporated | 2026-07-26 |
+| [[b2b-ph-k-s-lf-sn-datasheet]] | JST | 2026-07-29 |
 | [[bar64-02v-datasheet]] | Jiangsu Changjing Electronics Technology | 2026-07-26 |
 | [[bss123-7-f-datasheet]] | Diodes Incorporated | 2026-07-26 |
 | [[bss84-7-f-datasheet]] | Diodes Incorporated | 2026-07-26 |
@@ -125,24 +127,26 @@ One exact source summary per purchased fitted MPN. The structured audit is
 | [[cl05b104ko5nnnc-datasheet]] | Samsung Electro-Mechanics | 2026-07-26 |
 | [[cl10a105kb8nnnc-datasheet]] | Samsung Electro-Mechanics | 2026-07-26 |
 | [[cl10a225ko8nnnc-datasheet]] | Samsung Electro-Mechanics | 2026-07-26 |
-| [[cl21a106kaynnne-datasheet]] | Samsung Electro-Mechanics | 2026-07-26 |
-| [[cl21a226maqnnne-datasheet]] | Samsung Electro-Mechanics | 2026-07-26 |
+| [[cl21a106kaynnne-datasheet]] | Samsung Electro-Mechanics | 2026-07-29 |
+| [[cl21a226maqnnne-datasheet]] | Samsung Electro-Mechanics | 2026-07-29 |
 | [[cl32a107mqvnnne-datasheet]] | Samsung Electro-Mechanics | 2026-07-26 |
 | [[esp32-c6-mini-1u-n4-datasheet]] | Espressif Systems | 2026-07-26 |
 | [[grm1555c1h221ja01d-datasheet]] | Murata | 2026-07-26 |
 | [[grm1555c1h680ja01d-datasheet]] | Murata | 2026-07-26 |
 | [[lqw2basr47j00l-datasheet]] | Murata | 2026-07-26 |
-| [[nr6045s4r7mt-datasheet]] | Magnetsyc | 2026-07-26 |
+| [[mcp73871t-2cci-ml-datasheet]] | Microchip Technology | 2026-07-29 |
+| [[nr6045s4r7mt-datasheet]] | Magnetsyc | 2026-07-29 |
 | [[pn5180a0hn-c3e-datasheet]] | NXP Semiconductors | 2026-07-26 |
 | [[rs-03k1800ft-datasheet]] | Fenghua Advanced Technology | 2026-07-26 |
 | [[sdfl2012s100ktf-datasheet]] | Sunlord | 2026-07-26 |
 | [[sm02b-ghs-tb-lf-sn-datasheet]] | JST | 2026-07-26 |
-| [[sm07b-ghs-tb-lf-sn-datasheet]] | JST | 2026-07-26 |
+| [[sm07b-ghs-tb-lf-sn-datasheet]] | JST | 2026-07-29 |
 | [[sn74ahct1g125dbvr-datasheet]] | Texas Instruments | 2026-07-26 |
 | [[t37k3rgb-05c000112u1930-datasheet]] | Harvatek | 2026-07-26 |
 | [[tca9535pwr-datasheet]] | Texas Instruments | 2026-07-26 |
 | [[tlv7042dgkr-datasheet]] | Texas Instruments | 2026-07-26 |
 | [[tps2553dbvr-1-datasheet]] | Texas Instruments | 2026-07-26 |
+| [[tps61023drlr-datasheet]] | Texas Instruments | 2026-07-29 |
 | [[usb4105-gf-a-datasheet]] | GCT | 2026-07-26 |
 
 ## V1 component entities
@@ -152,19 +156,21 @@ One exact source summary per purchased fitted MPN. The structured audit is
 | [[0402cg101j500nt]] | 1 | 2026-07-26 |
 | [[0402cg150j500nt]] | 1 | 2026-07-26 |
 | [[0603waf1000t5e]] | 1 | 2026-07-26 |
-| [[0603waf1001t5e]] | 1 | 2026-07-26 |
-| [[0603waf1002t5e]] | 1 | 2026-07-26 |
-| [[0603waf1003t5e]] | 1 | 2026-07-26 |
+| [[0603waf1001t5e]] | 1 | 2026-07-29 |
+| [[0603waf1002t5e]] | 1 | 2026-07-29 |
+| [[0603waf1003t5e]] | 1 | 2026-07-29 |
 | [[0603waf1004t5e]] | 1 | 2026-07-26 |
 | [[0603waf150kt5e]] | 1 | 2026-07-26 |
-| [[0603waf3902t5e]] | 1 | 2026-07-26 |
+| [[0603waf3303t5e]] | 1 | 2026-07-29 |
+| [[0603waf3902t5e]] | 1 | 2026-07-29 |
 | [[0603waf4701t5e]] | 1 | 2026-07-26 |
-| [[0603waf5101t5e]] | 1 | 2026-07-26 |
+| [[0603waf5101t5e]] | 1 | 2026-07-29 |
 | [[74hc595d-118]] | 1 | 2026-07-26 |
 | [[7m27100009]] | 1 | 2026-07-26 |
 | [[a1257wr-s-4p]] | 1 | 2026-07-26 |
 | [[ap22811aw5-7]] | 1 | 2026-07-26 |
 | [[ap63203wu-7]] | 1 | 2026-07-26 |
+| [[b2b-ph-k-s-lf-sn]] | 1 | 2026-07-29 |
 | [[bar64-02v]] | 1 | 2026-07-26 |
 | [[bss123-7-f]] | 1 | 2026-07-26 |
 | [[bss84-7-f]] | 1 | 2026-07-26 |
@@ -174,24 +180,26 @@ One exact source summary per purchased fitted MPN. The structured audit is
 | [[cl05b104ko5nnnc]] | 1 | 2026-07-26 |
 | [[cl10a105kb8nnnc]] | 1 | 2026-07-26 |
 | [[cl10a225ko8nnnc]] | 1 | 2026-07-26 |
-| [[cl21a106kaynnne]] | 1 | 2026-07-26 |
-| [[cl21a226maqnnne]] | 1 | 2026-07-26 |
+| [[cl21a106kaynnne]] | 1 | 2026-07-29 |
+| [[cl21a226maqnnne]] | 1 | 2026-07-29 |
 | [[cl32a107mqvnnne]] | 1 | 2026-07-26 |
 | [[esp32-c6-mini-1u-n4]] | 1 | 2026-07-26 |
 | [[grm1555c1h221ja01d]] | 1 | 2026-07-26 |
 | [[grm1555c1h680ja01d]] | 1 | 2026-07-26 |
 | [[lqw2basr47j00l]] | 1 | 2026-07-26 |
-| [[nr6045s4r7mt]] | 1 | 2026-07-26 |
+| [[mcp73871t-2cci-ml]] | 1 | 2026-07-29 |
+| [[nr6045s4r7mt]] | 1 | 2026-07-29 |
 | [[pn5180a0hn-c3e]] | 1 | 2026-07-26 |
 | [[rs-03k1800ft]] | 1 | 2026-07-26 |
 | [[sdfl2012s100ktf]] | 1 | 2026-07-26 |
 | [[sm02b-ghs-tb-lf-sn]] | 1 | 2026-07-26 |
-| [[sm07b-ghs-tb-lf-sn]] | 1 | 2026-07-26 |
+| [[sm07b-ghs-tb-lf-sn]] | 1 | 2026-07-29 |
 | [[sn74ahct1g125dbvr]] | 1 | 2026-07-26 |
 | [[t37k3rgb-05c000112u1930]] | 1 | 2026-07-26 |
 | [[tca9535pwr]] | 1 | 2026-07-26 |
 | [[tlv7042dgkr]] | 1 | 2026-07-26 |
 | [[tps2553dbvr-1]] | 1 | 2026-07-26 |
+| [[tps61023drlr]] | 1 | 2026-07-29 |
 | [[usb4105-gf-a]] | 1 | 2026-07-26 |
 <!-- V1-COMPONENT-CATALOG:END -->
 ## Concepts

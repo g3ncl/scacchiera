@@ -156,6 +156,9 @@ components:
   - board: hub
     reference: R30
     value: 1k
+  - board: power
+    reference: R1
+    value: 1k 1%
   library_audit:
     status: passed
     checked: '2026-07-26'
@@ -210,6 +213,12 @@ components:
   - board: hub
     reference: R31
     value: 10k
+  - board: power
+    reference: R2
+    value: 10k 1%
+  - board: power
+    reference: R3
+    value: 10k 1%
   library_audit:
     status: passed
     checked: '2026-07-26'
@@ -333,6 +342,9 @@ components:
   - board: hub
     reference: R26
     value: 100k
+  - board: power
+    reference: R4
+    value: 100k 1%
   library_audit:
     status: passed
     checked: '2026-07-26'
@@ -499,6 +511,48 @@ components:
     valid_region: lumped model with datasheet tolerance, bias, ESR, DCR and temperature
       corners
   conflicts: []
+- mpn: 0603WAF3303T5E
+  manufacturer: UNI-ROYAL
+  supplier: JLCPCB
+  order_code: C23137
+  availability:
+    status: available
+    checked: '2026-07-26'
+    source: https://jlcpcb.com/partdetail?part=C23137
+  datasheet: Vault/Scacchiera/Datasheets/0603WAF3303T5E_C23137.pdf
+  wiki_source: Vault/Scacchiera/Wiki/sources/0603waf3303t5e-datasheet.md
+  wiki_entity: Vault/Scacchiera/Wiki/entities/0603waf3303t5e.md
+  category: resistor
+  footprint: Resistor_SMD:R_0603_1608Metric
+  uses:
+  - board: power
+    reference: R6
+    value: 330k 1%
+  library_audit:
+    status: passed
+    checked: '2026-07-26'
+    evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
+      KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
+    checks:
+    - symbol_pin_numbers_and_names
+    - symbol_electrical_types
+    - exposed_and_no_connect_pins
+    - footprint_pad_numbers
+    - package_dimensions
+    - polarity_and_pin_one
+    - assembly_side
+    - cpl_zero_rotation
+  ratings_audit:
+    status: passed
+    fields: value, tolerance, rated power, maximum working voltage, temperature coefficient,
+      operating temperature and package dimensions
+    datasheet_locator: ratings, dimensions and part-number tables
+  simulation_model:
+    kind: analytical
+    path: hardware/sim
+    valid_region: lumped model with datasheet tolerance, bias, ESR, DCR and temperature
+      corners
+  conflicts: []
 - mpn: 0603WAF3902T5E
   manufacturer: UNI-ROYAL
   supplier: JLCPCB
@@ -518,6 +572,12 @@ components:
     value: 39k 1%
   - board: hub
     reference: R17
+    value: 39k 1%
+  - board: power
+    reference: R5
+    value: 39k 1%
+  - board: power
+    reference: R7
     value: 39k 1%
   library_audit:
     status: passed
@@ -609,6 +669,9 @@ components:
   - board: hub
     reference: R2
     value: 5.1k
+  - board: power
+    reference: R8
+    value: 5.1k 1%
   library_audit:
     status: passed
     checked: '2026-07-26'
@@ -864,6 +927,48 @@ components:
     valid_region: no distributable vendor ngspice model was identified; V3 may use
       only parameters enumerated in this part's filed datasheet and must sweep their
       full published limits; digital protocol behavior belongs to V6
+  conflicts: []
+- mpn: B2B-PH-K-S(LF)(SN)
+  manufacturer: JST
+  supplier: JLCPCB
+  order_code: C131337
+  availability:
+    status: available
+    checked: '2026-07-26'
+    source: https://jlcpcb.com/partdetail?part=C131337
+  datasheet: Vault/Scacchiera/Datasheets/B2B-PH-K-S-LF-SN_C131337.pdf
+  wiki_source: Vault/Scacchiera/Wiki/sources/b2b-ph-k-s-lf-sn-datasheet.md
+  wiki_entity: Vault/Scacchiera/Wiki/entities/b2b-ph-k-s-lf-sn.md
+  category: connector
+  footprint: Connector_JST:JST_PH_B2B-PH-K_1x02_P2.00mm_Vertical
+  uses:
+  - board: power
+    reference: J3
+    value: B2B-PH-K-S(LF)(SN)
+  library_audit:
+    status: passed
+    checked: '2026-07-26'
+    evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
+      KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
+    checks:
+    - symbol_pin_numbers_and_names
+    - symbol_electrical_types
+    - exposed_and_no_connect_pins
+    - footprint_pad_numbers
+    - package_dimensions
+    - polarity_and_pin_one
+    - assembly_side
+    - cpl_zero_rotation
+  ratings_audit:
+    status: passed
+    fields: pin numbering, current, voltage, contact resistance, temperature, mating
+      direction and package dimensions
+    datasheet_locator: ratings, ordering information and dimensional drawing
+  simulation_model:
+    kind: layout_derived
+    path: hardware/sim
+    valid_region: contact and interconnect parasitics derived from rated contacts
+      and routed geometry
   conflicts: []
 - mpn: BAR64-02V
   manufacturer: Jiangsu Changjing Electronics Technology
@@ -1635,6 +1740,15 @@ components:
   - board: hub
     reference: C27
     value: 10u 25V
+  - board: power
+    reference: C1
+    value: 10u 25V
+  - board: power
+    reference: C2
+    value: 10u 25V
+  - board: power
+    reference: C3
+    value: 10u 25V
   library_audit:
     status: passed
     checked: '2026-07-26'
@@ -1678,6 +1792,9 @@ components:
     reference: C3
     value: 22u 25V
   - board: hub
+    reference: C4
+    value: 22u 25V
+  - board: power
     reference: C4
     value: 22u 25V
   library_audit:
@@ -1924,23 +2041,23 @@ components:
     valid_region: lumped model with datasheet tolerance, bias, ESR, DCR and temperature
       corners
   conflicts: []
-- mpn: NR6045S4R7MT
-  manufacturer: Magnetsyc
+- mpn: MCP73871T-2CCI/ML
+  manufacturer: Microchip Technology
   supplier: JLCPCB
-  order_code: C42370396
+  order_code: C511310
   availability:
     status: available
     checked: '2026-07-26'
-    source: https://jlcpcb.com/partdetail?part=C42370396
-  datasheet: Vault/Scacchiera/Datasheets/NR6045S4R7MT_C42370396.pdf
-  wiki_source: Vault/Scacchiera/Wiki/sources/nr6045s4r7mt-datasheet.md
-  wiki_entity: Vault/Scacchiera/Wiki/entities/nr6045s4r7mt.md
+    source: https://jlcpcb.com/partdetail?part=C511310
+  datasheet: Vault/Scacchiera/Datasheets/MCP73871T-2CCI-ML_C511310.pdf
+  wiki_source: Vault/Scacchiera/Wiki/sources/mcp73871t-2cci-ml-datasheet.md
+  wiki_entity: Vault/Scacchiera/Wiki/entities/mcp73871t-2cci-ml.md
   category: semiconductor
-  footprint: Chessboard:NR6045S
+  footprint: Package_DFN_QFN:QFN-20-1EP_4x4mm_P0.5mm_EP2.6x2.6mm
   uses:
-  - board: hub
-    reference: L1
-    value: 4.7uH
+  - board: power
+    reference: U1
+    value: MCP73871T-2CCI/ML
   library_audit:
     status: passed
     checked: '2026-07-26'
@@ -1968,6 +2085,48 @@ components:
     valid_region: no distributable vendor ngspice model was identified; V3 may use
       only parameters enumerated in this part's filed datasheet and must sweep their
       full published limits; digital protocol behavior belongs to V6
+  conflicts: []
+- mpn: NR6045S4R7MT
+  manufacturer: Magnetsyc
+  supplier: JLCPCB
+  order_code: C42370396
+  availability:
+    status: available
+    checked: '2026-07-26'
+    source: https://jlcpcb.com/partdetail?part=C42370396
+  datasheet: Vault/Scacchiera/Datasheets/NR6045S4R7MT_C42370396.pdf
+  wiki_source: Vault/Scacchiera/Wiki/sources/nr6045s4r7mt-datasheet.md
+  wiki_entity: Vault/Scacchiera/Wiki/entities/nr6045s4r7mt.md
+  category: inductor
+  footprint: Chessboard:NR6045S
+  uses:
+  - board: hub
+    reference: L1
+    value: 4.7uH
+  library_audit:
+    status: passed
+    checked: '2026-07-26'
+    evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
+      KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
+    checks:
+    - symbol_pin_numbers_and_names
+    - symbol_electrical_types
+    - exposed_and_no_connect_pins
+    - footprint_pad_numbers
+    - package_dimensions
+    - polarity_and_pin_one
+    - assembly_side
+    - cpl_zero_rotation
+  ratings_audit:
+    status: passed
+    fields: inductance, tolerance, rated or saturation current, DC resistance, self-resonance,
+      temperature range and package dimensions
+    datasheet_locator: electrical characteristics, ratings and dimensions tables
+  simulation_model:
+    kind: analytical
+    path: hardware/sim
+    valid_region: lumped model with datasheet tolerance, bias, ESR, DCR and temperature
+      corners
   conflicts: []
 - mpn: PN5180A0HN/C3E
   manufacturer: NXP Semiconductors
@@ -2265,6 +2424,12 @@ components:
   - board: hub
     reference: J6
     value: SM07B-GHS-TB(LF)(SN)
+  - board: power
+    reference: J1
+    value: SM07B-GHS-TB(LF)(SN)
+  - board: power
+    reference: J2
+    value: SM07B-GHS-TB(LF)(SN)
   library_audit:
     status: passed
     checked: '2026-07-26'
@@ -2551,6 +2716,50 @@ components:
     valid_region: TI unencrypted transient PSpice model; V3 must prove ngspice compatibility
       and sweep datasheet input, load, temperature and external-component limits
   conflicts: []
+- mpn: TPS61023DRLR
+  manufacturer: Texas Instruments
+  supplier: JLCPCB
+  order_code: C919459
+  availability:
+    status: available
+    checked: '2026-07-26'
+    source: https://jlcpcb.com/partdetail?part=C919459
+  datasheet: Vault/Scacchiera/Datasheets/TPS61023DRLR_C919459.pdf
+  wiki_source: Vault/Scacchiera/Wiki/sources/tps61023drlr-datasheet.md
+  wiki_entity: Vault/Scacchiera/Wiki/entities/tps61023drlr.md
+  category: semiconductor
+  footprint: Chessboard:SOT-563_DRL
+  uses:
+  - board: power
+    reference: U2
+    value: TPS61023DRLR
+  library_audit:
+    status: passed
+    checked: '2026-07-26'
+    evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
+      KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
+    checks:
+    - symbol_pin_numbers_and_names
+    - symbol_electrical_types
+    - exposed_and_no_connect_pins
+    - footprint_pad_numbers
+    - package_dimensions
+    - polarity_and_pin_one
+    - assembly_side
+    - cpl_zero_rotation
+  ratings_audit:
+    status: passed
+    fields: pinout, no-connect and exposed-pad treatment, recommended operating range,
+      absolute maximum voltage, current, power and temperature, startup state, thermal
+      data and package
+    datasheet_locator: pin description, absolute maximum, recommended operation, electrical,
+      thermal and package tables
+  simulation_model:
+    kind: vendor
+    path: hardware/sim/models/vendor/TPS61023_SLVMD68A.zip
+    valid_region: TI unencrypted transient PSpice model; V3 must prove ngspice compatibility
+      and sweep datasheet input, load, temperature and external-component limits
+  conflicts: []
 - mpn: USB4105-GF-A
   manufacturer: GCT
   supplier: JLCPCB
@@ -2593,6 +2802,15 @@ components:
     valid_region: contact and interconnect parasitics derived from rated contacts
       and routed geometry
   conflicts: []
+component_blockers:
+- mpn: NR6045S1R0NT
+  footprint: Chessboard:NR6045S
+  uses:
+  - board: power
+    reference: L1
+    value: 1uH
+  status: blocked
+  reason: Exact supplier order code and current availability are not verified.
 external_components:
 - mpn: NTCLE317E4103SBA
   role: Cell-bonded off-board charge-temperature sensor

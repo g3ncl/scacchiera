@@ -1,37 +1,33 @@
 """Generate the V1 fitted-component audit and its small wiki pages."""
 
 from collections import defaultdict
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
+from functools import cache
+import json
 import os
 from pathlib import Path
 import re
+import subprocess
+import sys
 from typing import Any
 
 import yaml
 
 ROOT = Path(__file__).parents[2]
-_FLATPAK_RUNTIME = Path.home() / ".local" / "share" / "flatpak" / "runtime"
-os.environ.setdefault(
-    "KICAD9_SYMBOL_DIR",
-    str(
-        _FLATPAK_RUNTIME
-        / "org.kicad.KiCad.Library.Symbols/x86_64/stable/active/files/symbols"
-    ),
-)
-
-from skidl import Circuit  # noqa: E402
-
-from hardware.pcb.hub import build_hub  # noqa: E402
-from hardware.pcb.lightbar import build_lightbar  # noqa: E402
-from hardware.pcb.matrix import build_matrix  # noqa: E402
-
-
 DATASHEETS = ROOT / "Vault" / "Scacchiera" / "Datasheets"
 WIKI = ROOT / "Vault" / "Scacchiera" / "Wiki"
 AUDIT_PATH = ROOT / "docs" / "verification" / "v1-components.yaml"
 REVIEW_DATE = "2026-07-26"
+WIKI_UPDATE_DATE = "2026-07-29"
+MODULE_NAME = "hardware.verification.generate_component_audit"
 
 DESIGN_FACTS = {
+    "MCP73871T-2CCI/ML": (
+        "900 to 1100 mA fast charge with PROG1 at 1 kohm and SEL high, 75 to 125 mA "
+        "termination with PROG3 at 10 kohm, 1.5 to 1.8 A adapter input limit, 1.23 V VPCC "
+        "threshold plus or minus 3 percent, and 7 V absolute maximum input"
+    ),
     "AP22811AW5-7": (
         "2.7 to 5.5 V input, 2 A continuous current, 65 mOhm maximum on-resistance at 5 V and "
         "25 degrees Celsius, 2.2 to 3.2 A overload limit, active-high enable, open-drain fault, "
@@ -45,6 +41,11 @@ DESIGN_FACTS = {
     "NR6045S4R7MT": (
         "4.7 uH plus or minus 20 percent, 34 mOhm maximum DCR, 4.97 A minimum saturation, "
         "3.3 A minimum thermal current, 6 x 6 x 4.5 mm body and 1.7 x 5.7 mm pads"
+    ),
+    "TPS61023DRLR": (
+        "0.5 to 5.5 V input, 1.8 V maximum startup threshold, 2.2 to 5.5 V output, "
+        "0.37 to 2.9 uH effective inductance, 580 to 610 mV PWM feedback reference, "
+        "5.5 V minimum overvoltage threshold and 3.7 A typical valley current limit"
     ),
     "TLV7042DGKR": (
         "1.6 to 6.5 V supply, rail-to-rail fail-safe inputs, open-drain outputs, internal "
@@ -115,11 +116,7 @@ class BoundPart:
     uses: tuple[Use, ...]
 
 
-BUILDERS = {
-    "lightbar": build_lightbar,
-    "matrix": build_matrix,
-    "hub": build_hub,
-}
+BOARD_NAMES = ("lightbar", "matrix", "hub", "power")
 
 MANUFACTURERS = {
     "0402CG": "Fenghua Advanced Technology",
@@ -222,7 +219,7 @@ def _category(part: BoundPart) -> str:
         return "resistor"
     if footprint.startswith("Capacitor_SMD"):
         return "capacitor"
-    if footprint.startswith("Inductor_SMD"):
+    if footprint.startswith("Inductor_SMD") or part.mpn.startswith("NR6045"):
         return "inductor"
     if footprint.startswith("Connector_"):
         return "connector"
@@ -353,23 +350,70 @@ def _model(part: BoundPart, category: str) -> dict[str, str]:
     }
 
 
+def _board_parts(board: str) -> list[dict[str, str]]:
+    if board == "lightbar":
+        from hardware.pcb.lightbar import build_lightbar
+
+        builder = build_lightbar
+    elif board == "matrix":
+        from hardware.pcb.matrix import build_matrix
+
+        builder = build_matrix
+    elif board == "hub":
+        from hardware.pcb.hub import build_hub
+
+        builder = build_hub
+    elif board == "power":
+        from hardware.pcb.power import build_power
+
+        builder = build_power
+    else:
+        raise ValueError(f"unknown board: {board}")
+    circuit = builder()
+    records: list[dict[str, str]] = []
+    for raw_part in circuit.parts:
+        if str(getattr(raw_part, "fitted", "yes")) != "yes":
+            continue
+        mpn = str(getattr(raw_part, "manf_num", ""))
+        if not mpn or mpn == "PCB_COPPER":
+            continue
+        records.append(
+            {
+                "mpn": mpn,
+                "supplier": str(getattr(raw_part, "supplier", "")),
+                "order_code": str(getattr(raw_part, "order_code", "")),
+                "footprint": str(getattr(raw_part, "footprint", "")),
+                "reference": str(raw_part.ref),
+                "value": str(raw_part.value),
+            }
+        )
+    return records
+
+
+@cache
 def _bound_parts() -> tuple[BoundPart, ...]:
     uses: dict[tuple[str, str, str, str], list[Use]] = defaultdict(list)
-    for board, builder in BUILDERS.items():
-        circuit: Circuit = builder()
-        for raw_part in circuit.parts:
-            if str(getattr(raw_part, "fitted", "yes")) != "yes":
-                continue
-            mpn = str(getattr(raw_part, "manf_num", ""))
-            if not mpn or mpn == "PCB_COPPER":
-                continue
-            key = (
-                mpn,
-                str(getattr(raw_part, "supplier", "")),
-                str(getattr(raw_part, "order_code", "")),
-                str(getattr(raw_part, "footprint", "")),
-            )
-            uses[key].append(Use(board, str(raw_part.ref), str(raw_part.value)))
+
+    def read_board(board: str) -> tuple[str, list[dict[str, str]]]:
+        # SKiDL retains enough library and circuit state that the matrix and hub
+        # together exceed the audit process's memory budget. Each subprocess
+        # reads one authoritative builder and returns only immutable strings.
+        result = subprocess.run(
+            [sys.executable, "-m", MODULE_NAME, "--bound-board", board],
+            cwd=ROOT,
+            env=os.environ,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        return board, json.loads(result.stdout)
+
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        board_records = executor.map(read_board, BOARD_NAMES)
+    for board, raw_records in board_records:
+        for raw in raw_records:
+            key = (raw["mpn"], raw["supplier"], raw["order_code"], raw["footprint"])
+            uses[key].append(Use(board, raw["reference"], raw["value"]))
     return tuple(
         BoundPart(mpn, supplier, order_code, footprint, tuple(part_uses))
         for (mpn, supplier, order_code, footprint), part_uses in sorted(uses.items())
@@ -428,6 +472,16 @@ def _record(part: BoundPart) -> dict[str, Any]:
     }
 
 
+def _wiki_date(record: dict[str, Any]) -> str:
+    uses = record["uses"]
+    assert isinstance(uses, list)
+    if str(record["mpn"]) == "NR6045S4R7MT" or any(
+        use.get("board") == "power" for use in uses
+    ):
+        return WIKI_UPDATE_DATE
+    return REVIEW_DATE
+
+
 def _write_wiki_page(record: dict[str, Any]) -> None:
     source_path = ROOT / str(record["wiki_source"])
     entity_path = ROOT / str(record["wiki_entity"])
@@ -442,7 +496,7 @@ type: source-summary
 tags:
   - wiki/source
   - wiki/component
-date_updated: {REVIEW_DATE}
+date_updated: {_wiki_date(record)}
 source_file: "{str(record['datasheet']).removeprefix('Vault/Scacchiera/')}"
 source_title: "{record['mpn']} manufacturer datasheet"
 publisher: "{record['manufacturer']}"
@@ -471,7 +525,7 @@ type: entity
 tags:
   - wiki/entity
   - wiki/component
-date_updated: {REVIEW_DATE}
+date_updated: {_wiki_date(record)}
 source_count: 1
 ---
 
@@ -496,11 +550,11 @@ def _update_wiki_index(records: list[dict[str, Any]]) -> None:
     start = "<!-- V1-COMPONENT-CATALOG:START -->"
     end = "<!-- V1-COMPONENT-CATALOG:END -->"
     source_rows = "\n".join(
-        f"| [[{_slug(str(record['mpn']))}-datasheet]] | {record['manufacturer']} | {REVIEW_DATE} |"
+        f"| [[{_slug(str(record['mpn']))}-datasheet]] | {record['manufacturer']} | {_wiki_date(record)} |"
         for record in records
     )
     entity_rows = "\n".join(
-        f"| [[{_slug(str(record['mpn']))}]] | 1 | {REVIEW_DATE} |" for record in records
+        f"| [[{_slug(str(record['mpn']))}]] | 1 | {_wiki_date(record)} |" for record in records
     )
     catalog = f"""{start}
 ## V1 component datasheet sources
@@ -529,7 +583,20 @@ One exact source summary per purchased fitted MPN. The structured audit is
 
 
 def main() -> None:
-    records = [_record(part) for part in _bound_parts()]
+    bound_parts = _bound_parts()
+    auditable_parts = [part for part in bound_parts if part.supplier and part.order_code]
+    blocked_parts = [part for part in bound_parts if not part.supplier or not part.order_code]
+    records = [_record(part) for part in auditable_parts]
+    blockers = [
+        {
+            "mpn": part.mpn,
+            "footprint": part.footprint,
+            "uses": [use.__dict__ for use in part.uses],
+            "status": "blocked",
+            "reason": "Exact supplier order code and current availability are not verified.",
+        }
+        for part in blocked_parts
+    ]
     document = {
         "version": 1,
         "milestone": "V1",
@@ -539,6 +606,7 @@ def main() -> None:
             "manufacturer datasheet, library-audited, ratings-audited and model-classified."
         ),
         "components": records,
+        "component_blockers": blockers,
         "external_components": list(EXTERNAL_COMPONENTS),
     }
     AUDIT_PATH.write_text(yaml.safe_dump(document, sort_keys=False), encoding="utf-8")
@@ -548,4 +616,7 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) == 3 and sys.argv[1] == "--bound-board":
+        print(json.dumps(_board_parts(sys.argv[2])))
+    else:
+        main()

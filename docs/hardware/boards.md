@@ -20,7 +20,7 @@ shared 13.56 MHz bus, while reverse-biased PIN diodes stay under a picofarad.
 
 ## The boards
 
-Three custom board designs, four physical PCBs. The two OLED displays are purchased
+Four custom board designs, five physical PCBs. The two OLED displays are purchased
 ER-OLEDM3.12-1W modules (fixed by [interface.md](../functional/interface.md)), so they appear
 here only as interfaces, not as boards.
 
@@ -68,6 +68,15 @@ here only as interfaces, not as boards.
   [lightbar.md](lightbar.md)).
 - **Cost target:** 5 EUR per bar including fab.
 
+### 4. Power board
+
+- **Responsibility:** hold the protected cell, charge it at 1 A through an MCP73871 power path,
+  and boost the managed system rail to the regulated 5 V the hub consumes.
+- **Interfaces:** qualified charge input, regulated 5 V return and raw cell sense through the same
+  [power module contract](power-module-interface.md) a purchased replacement would implement.
+- **Envelope:** 46 x 32 mm, 2-layer. It is a snap-off part of the panel carrying both light bars.
+- **Cost target:** fabrication rides on the light-bar panel; component cost remains to be quoted.
+
 ### Purchased accessories (not boards)
 
 Bought parts that appear on no board BOM but without which the product does not work. Recorded here
@@ -82,10 +91,7 @@ for the same reason the display modules are: an order that forgets them is incom
   antenna PCB was considered and rejected: its radiation pattern is the one thing in this project
   that no ngspice test can validate, and per-attempt iteration costs a fabrication run rather than
   a euro.
-- **One power board and its cell.** As of 2026-07-29 this is a custom design,
-  [power.md](power.md), built to the same [power-module-interface.md](power-module-interface.md) a
-  bought module would satisfy, and fabricated as a snap-off piece of the light-bar panel. A purchased
-  module remains a drop-in alternative.
+- **One protected cell** for the custom [power board](power.md).
 - **Superseded option, one purchased power module**, meeting [power-module-interface.md](power-module-interface.md).
   It provides charging, protection, the UPS power path and the regulated 5 V output. No product is
   bound yet; the contract caps it at 46 mm across the rail, cell included, so that it fits the

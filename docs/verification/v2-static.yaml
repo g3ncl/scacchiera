@@ -44,10 +44,21 @@ matrix_no_connects:
     datasheet: Vault/Scacchiera/Datasheets/74HC595D-118_C5947.pdf
     locator: SO16 pin 9 Q7S serial output; deliberately open at the end of the register chain.
 
+power_no_connects:
+  U1:
+    pins: ['6', '7', '8']
+    datasheet: Vault/Scacchiera/Datasheets/MCP73871T-2CCI-ML_C511310.pdf
+    locator: QFN-20 pin description; PG, STAT2 and STAT1 are unused status outputs.
+  J2:
+    pins: ['5', '6']
+    datasheet: Vault/Scacchiera/Datasheets/SM07B-GHS-TB-LF-SN_C495552.pdf
+    locator: Seven-position connector pin numbering; the module contract makes I2C optional and this implementation omits it.
+
 board_results:
   lightbar: {drc_violations: 0, unconnected_items: 0, schematic_parity_issues: 0}
   matrix: {drc_violations: 0, unconnected_items: 0, schematic_parity_issues: 0}
   hub: {drc_violations: 0, unconnected_items: 0, schematic_parity_issues: 0}
+  power: {drc_violations: 0, unconnected_items: 0, schematic_parity_issues: 0}
 
 hub_layout:
   envelope_mm: [162, 46]
@@ -72,6 +83,7 @@ commands:
   static_gate: make check
   fresh_autoroute_matrix: make pcb-matrix-reroute
   fresh_autoroute_hub: make pcb-hub-reroute
+  fresh_autoroute_power: make pcb-power-reroute
 evidence:
   hub_drc_command: make pcb-hub-drc
   static_tests: 7 passed on 2026-07-29, including the on-board battery measurement and the recorded two-layer stackup and envelope

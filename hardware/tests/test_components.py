@@ -13,7 +13,13 @@ def _components() -> list[dict[str, Any]]:
     return [require_mapping(raw, "component") for raw in raw_components]
 
 
-def test_every_fitted_purchased_mpn_has_one_exact_audit_record() -> None:
+def _component_blockers() -> list[dict[str, Any]]:
+    document = load_component_audit()
+    raw_blockers = require_list(document.get("component_blockers"), "component blockers")
+    return [require_mapping(raw, "component blocker") for raw in raw_blockers]
+
+
+def test_every_fitted_purchased_mpn_is_audited_or_explicitly_blocked() -> None:
     audited = {
         (
             require_nonempty_string(record.get("mpn"), "mpn"),
@@ -23,12 +29,33 @@ def test_every_fitted_purchased_mpn_has_one_exact_audit_record() -> None:
         )
         for record in _components()
     }
+    blocked = {
+        (
+            require_nonempty_string(record.get("mpn"), "blocked mpn"),
+            "",
+            "",
+            require_nonempty_string(record.get("footprint"), "blocked footprint"),
+        )
+        for record in _component_blockers()
+    }
     bound = {
         (part.mpn, part.supplier, part.order_code, part.footprint)
         for part in _bound_parts()
     }
-    assert len(audited) == 44
-    assert audited == bound
+    assert len(audited) == 48
+    assert audited.isdisjoint(blocked)
+    assert audited | blocked == bound
+
+
+def test_power_board_has_only_the_recorded_inductor_sourcing_blocker() -> None:
+    blockers = _component_blockers()
+    assert len(blockers) == 1
+    blocker = blockers[0]
+    assert blocker.get("mpn") == "NR6045S1R0NT"
+    assert blocker.get("status") == "blocked"
+    require_nonempty_string(blocker.get("reason"), "blocker reason")
+    uses = [require_mapping(raw, "blocked use") for raw in require_list(blocker.get("uses"), "uses")]
+    assert uses == [{"board": "power", "reference": "L1", "value": "1uH"}]
 
 
 def test_every_exact_part_has_an_immutable_manufacturer_source_and_wiki_ingest() -> None:

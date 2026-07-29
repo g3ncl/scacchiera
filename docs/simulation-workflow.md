@@ -251,7 +251,7 @@ Definition of done:
 
 - The reviewer signs off component pinouts, footprints, power, reset and programming, RF topology,
   protection, connectors, layout, fabrication outputs, and the remaining risk register.
-- The complete clean-build test command passes, including all three boards, firmware host tests,
+- The complete clean-build test command passes, including all four board designs, firmware host tests,
   Wokwi scenarios, ngspice corners, electromagnetic tests, ERC, DRC, and schematic parity.
 - No critical Assumed evidence, open sourcing conflict, unexplained waiver, or manual-only test
   remains.

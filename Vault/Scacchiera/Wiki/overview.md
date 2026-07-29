@@ -19,32 +19,34 @@ release authority. [[verification-evidence-model]] records the executable V0 str
 functional power specification adds bounded runtime, charge time, source fallback, and battery
 safety requirements after the original 500 mA architecture proved unsuitable.
 
-[[commercial-power-subsystem-selection]] replaced the custom charger and raw-cell plan with a
-purchased subsystem owning the cell, charging, protection and the uninterrupted 5 V path. As of
-2026-07-29 that subsystem is a written contract rather than a product: [[pisugar3-plus]] is 57 mm
-across against the 46 mm a player rail allows, and the board now measures cell voltage itself, so no
-module's telemetry is load-bearing and the module can be swapped. See
-[[battery-format-and-module-alternatives]]. V1 is open again as a result, because an unbound part
-cannot have a passing audit; every board part still passes it.
+The power boundary remains a written contract, but the default implementation is now a custom
+46 x 32 mm board panelized with the light bars. [[mcp73871t-2cci-ml]] owns charging and power-path
+management, while [[tps61023drlr]] produces the regulated 5 V return. The hub still measures cell
+voltage and gates charging from its independent temperature window, so the implementation can be
+replaced without moving safety or telemetry across the boundary. See
+[[battery-format-and-module-alternatives]].
 
-[[v2-static-connectivity|V2]] passes on all three boards, and all three are two copper layers. The
+[[v1-component-proof|V1]] audits 48 exact fitted tuples and records the power inductor's unverified
+order code as an explicit blocker. It also remains open on the displays and the unbound purchased
+replacement-module class. [[v2-static-connectivity|V2]] passes on all four board designs, and all
+four are two copper layers. The
 hub reached that by growing to 162 x 46 mm rather than by adding layers, since the rail it lives in
 has length to spare and a four-layer panel costs a multiple of a two-layer one.
 
-V3 power and fault simulation is the open gate, with two hub results so far.
+V3 power and fault simulation is the open gate, with three hub results so far.
 [[v3-charge-interlock]]: the cell-temperature cutoff holds inside the qualified 0 to 40 degree range
 across 384 published tolerance corners and both sensor failure directions.
 [[v3-led-rail-current-limit]]: the light-bar limiter carries both bars at full white and clamps a
 short inside its harness rating, on TI's own transient model, replacing a value that had only a
 formula behind it. [[v3-buck-power-stage]]: the 3.3 V rail's ripple and inductor stress over 72
 corners, from a model that deliberately holds no control behaviour, so regulation and stability stay
-data sheet claims for V8. The AP22811 input switch and every transient case on every board remain
-unsimulated.
+data sheet claims for V8. The custom power board has no simulation yet. The AP22811 input switch and
+many transient and fault cases remain unsimulated.
 
 The earlier [[chessboard-quick-charge-architecture|custom PD architecture]] and
 [[quick-charge-module-evaluation|RBS18634 article]] remain historical evidence rather than active
-designs. The current open risks are enclosure ventilation, choosing a power module that fits the
-rail, measured recharge time, and representative runtime. The selected
+designs. The current open risks are the power inductor binding, complete charger and boost
+simulation, enclosure ventilation, measured recharge time, and representative runtime. The selected
 [[fail-safe-cell-temperature-window]] uses a wired thermistor and analog comparators so firmware
 cannot override the qualified charge range. Hub L1 is the fully documented [[nr6045s4r7mt]];
 the earlier [[swpa5045s4r7mt]] catalog binding is rejected because its claimed MPN is absent from

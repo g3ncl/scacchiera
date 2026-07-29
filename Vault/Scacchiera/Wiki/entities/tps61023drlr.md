@@ -3,13 +3,13 @@ type: entity
 tags:
   - wiki/entity
   - wiki/component
-date_updated: 2026-07-25
+date_updated: 2026-07-29
 source_count: 1
 ---
 
 # TPS61023DRLR
 
-Exact fitted component from Texas Instruments, used by hub U5 (TPS61023DRLR).
+Exact fitted component from Texas Instruments, used by power U2 (TPS61023DRLR).
 
 [mpn::TPS61023DRLR] [supplier::JLCPCB]
 [order_code::C919459] [category::semiconductor]

@@ -3,7 +3,7 @@ type: source-summary
 tags:
   - wiki/source
   - wiki/component
-date_updated: 2026-07-26
+date_updated: 2026-07-29
 source_file: "Datasheets/CL21A226MAQNNNE_C45783_manufacturer.pdf"
 source_title: "CL21A226MAQNNNE manufacturer datasheet"
 publisher: "Samsung Electro-Mechanics"
@@ -12,7 +12,7 @@ publisher: "Samsung Electro-Mechanics"
 # CL21A226MAQNNNE datasheet
 
 This source binds [CL21A226MAQNNNE](../entities/cl21a226maqnnne.md) to supplier order
-code `C45783`. It is used by hub C3 (22u 25V), hub C4 (22u 25V).
+code `C45783`. It is used by hub C3 (22u 25V), hub C4 (22u 25V), power C4 (22u 25V).
 
 [mpn::CL21A226MAQNNNE] [order_code::C45783]
 [manufacturer::Samsung Electro-Mechanics] [footprint::Capacitor_SMD:C_0805_2012Metric]
