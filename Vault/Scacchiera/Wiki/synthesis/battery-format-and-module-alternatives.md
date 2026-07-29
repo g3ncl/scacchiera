@@ -1,6 +1,6 @@
 ---
 type: synthesis
-date_updated: 2026-07-29
+date_updated: 2026-07-30
 tags:
   - wiki/synthesis
   - wiki/power
@@ -32,6 +32,34 @@ So height rules nothing out. An 18650 at 18.4 mm diameter fits, a 21700 at 21.2 
 holder walls are thin, and any pouch under about 12 mm is comfortable.
 
 [usable_rail_width_mm::46] [usable_rail_height_mm::24] [free_rail_length_mm::148]
+
+## Current 21700 decision
+
+The [[inr-21700-m65a]] proves that a single large cylindrical cell can meet the electrical and
+geometric target, but it is not selected. [NKON](https://www.nkon.nl/en/molicel-inr21700-m65a-6500mah-26a.html)
+reported the exact flat-top cell out of stock on 2026-07-30, and
+[Akkuparts24](https://www.akkuparts24.de/https/wwwakkuparts24de/Molicel-INR21700-M65A-6500mAh-26A-LiIon-Akku-Zelle)
+offered only a September preorder. Its filed one-page sheet gives
+a 71.0 mm maximum height while Molicel's product page says 70.2 mm, so the design uses the larger
+envelope and keeps the source contradiction open.
+
+The more important boundary is the pack, not the can. Molicel's newer tentative approval sheet
+requires a protection circuit and recommends direct FET cutoff of both charge and discharge on
+cell overtemperature. The hub's independent thermistor window controls charging only. A qualified
+assembly therefore still needs a cell-bonded 1S protector with NTC, back-to-back FETs, voltage,
+charge-current, discharge-current, and short-circuit protection, plus welded tabs and insulation.
+[ABLIC's S-82D1A family](https://www.ablic.com/en/semicon/datasheets/power-management-ic/lithium-ion-battery-protection-ic/s-82d1a/)
+demonstrates this architecture, but no exact suffix or pack assembler is bound. Adding an invented
+generic protection board would not close V1.
+
+Two European assemblers are plausible quote candidates, not selected suppliers.
+[Eltec](https://www.elteconline.com/en/about-us/) advertises custom battery packs from Italy, while
+[ANV Production](https://anvproduction.pl/en/battery-packs/) advertises 21700 pack assembly,
+prototypes, and small-to-medium production runs from Poland. A useful response must identify the
+exact cell and protection circuit, both temperature cutoffs, voltage and current thresholds,
+thermistor, interconnect, insulation, connector, lead gauge, assembly drawing, test record, and
+transport evidence. Price or availability alone cannot close V1. Neither company has been
+contacted.
 
 ## The overhang is the cell, not only the board
 
@@ -113,5 +141,8 @@ power cycle? This applies to the DFRobot module above as much as to any IP5306 b
 
 - Uninterrupted output during source insertion and removal, unstated by the vendor.
 - A pouch part number at or under 46 mm wide with 18 Wh and a filed transport report.
+- An in-stock exact cylindrical cell or protected pouch with consistent dimensional evidence.
+- A qualified pack assembler and exact protector that disconnects both directions on cell
+  overtemperature, not only a charger-side temperature gate.
 - Retention and impact protection for a bare pouch inside a printed rail, with the ventilation the
   cell's own safety instructions require either way.

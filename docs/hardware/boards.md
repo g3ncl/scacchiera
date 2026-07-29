@@ -93,7 +93,7 @@ for the same reason the display modules are: an order that forgets them is incom
   that no ngspice test can validate, and per-attempt iteration costs a fabrication run rather than
   a euro.
 - **One protected 1S cell assembly** for the custom [power board](power.md). A cylindrical cell may
-  lie lengthwise in the player rail. The filed 21.7 x 70.2 mm Molicel 21700 candidate demonstrates
+  lie lengthwise in the player rail. The filed 21.7 x 71.0 mm Molicel 21700 candidate demonstrates
   that the geometry and discharge current are feasible, but the protected assembly is not bound.
 - **Micro-Fit mating hardware:** two Molex 430250800 eight-circuit receptacle housings for the
   hub-to-power harness, one 430250200 two-circuit housing for the battery, and 430300038 female

@@ -56,7 +56,11 @@ scoped test-article order. V0 through V9 permit a final-board order.
   and module straps are not yet bound. The Micro-Fit mating housings and 18 AWG female terminals
   are now exact, but the protected cell assembly, wire, qualified crimp or pre-crimped leads, color
   coding, and assembled harness are not yet bound. The load budget conservatively
-  uses 320 mA each. Every fitted board record has dated availability,
+  uses 320 mA each. The Molicel M65A remains only a geometric and electrical candidate: it was out
+  of stock at NKON on 2026-07-30, its filed sheet conflicts with the product page on cell height,
+  and no qualified pack assembly exists. The pack protector must directly disconnect both charge
+  and discharge on cell overtemperature; the hub's charge-only interlock cannot satisfy that
+  assembly obligation. Every fitted board record has dated availability,
   immutable manufacturer sources, wiki ingestion, library or interface proof, ratings, model
   treatment, and no open conflict. The AP63203WU-7, AP22811AW5-7, TLV7042DGKR and NR6045S4R7MT
   records include their exact selected limits and footprints. TLV7042DGKR uses the manufacturer's
@@ -177,7 +181,9 @@ against the functional requirement it serves.
 - [x] Power board schematic: `hardware/pcb/power.py` implements the 5 V at 2 A contract with a
   BQ25895 NVDC charger, TPS61088 boost stage, TLV809 undervoltage supervisor, Sumida 1.2 uH
   inductor, and Micro-Fit power connectors. The matching housings and 18 AWG terminals are exact;
-  the protected 21700 assembly and qualified complete harnesses remain V1 accessory blockers.
+  the protected 21700 assembly and qualified complete harnesses remain V1 accessory blockers. The
+  cell candidate is currently unavailable, and the assembly needs independent temperature control
+  over both charge and discharge in addition to voltage, current, and short-circuit protection.
 
 ### M3: SPICE validation (per board)
 

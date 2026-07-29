@@ -100,9 +100,11 @@ each contact at 8.5 A. The mating receptacle housings are Molex 430250800 and 43
 coding, strain relief, and the protected battery assembly still have to be bound before V1 can close.
 
 The filed Molicel INR-21700-M65A demonstrates the electrical and geometric feasibility of one large
-cell. It stores 23.4 Wh typically, is 21.7 mm by 70.2 mm, and permits 26 A continuous discharge.
-Placed lengthwise in the player rail, its diameter is the limiting cross-section. It is a bare cell,
-not permission to install an unprotected loose cell.
+cell. It stores 23.4 Wh typically, has a conservative 21.7 by 71.0 mm envelope, and permits 26 A
+continuous discharge. Placed lengthwise in the player rail, its diameter is the limiting
+cross-section. It is a bare cell, not permission to install an unprotected loose cell. It was out
+of stock at NKON on 2026-07-30, and its qualified assembly must directly disconnect both charge and
+discharge on cell overtemperature.
 
 ## Board, panel, and release state
 

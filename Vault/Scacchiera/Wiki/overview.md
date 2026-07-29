@@ -1,6 +1,6 @@
 ---
 type: overview
-date_updated: 2026-07-29
+date_updated: 2026-07-30
 tags:
   - wiki/overview
 ---
@@ -73,6 +73,11 @@ loop evidence, enclosure ventilation, measured recharge time, and representative
 cannot override the qualified charge range. Hub L1 is the fully documented [[nr6045s4r7mt]];
 the earlier [[swpa5045s4r7mt]] catalog binding is rejected because its claimed MPN is absent from
 the manufacturer series table.
+
+The [[inr-21700-m65a]] remains a feasibility candidate rather than a selected cell. It was out of
+stock at NKON on 2026-07-30, its public sources disagree on height, and its pack guidance requires
+cell-bonded protection that opens both charge and discharge on overtemperature. The hub's tighter
+charge-only interlock remains useful independent protection but cannot replace that pack function.
 
 ## NFC Game Board: the reference project
 

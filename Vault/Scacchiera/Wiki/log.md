@@ -834,3 +834,21 @@ plus or minus 30 percent, but TI publishes only a typical value, so V3 loop clos
 A fresh reviewed power route, the 130.1 by 63.0 mm panel, and manufacturing export reproduce with
 zero power-board DRC violations, unconnected items, or parity issues. The complete gate passes all
 four boards at zero findings, mypy on 78 source files, and 129 tests.
+
+## [2026-07-30] research | Keep the cell candidate provisional
+
+Checked the exact [[inr-21700-m65a]] against current European supply. NKON listed the flat-top cell
+out of stock, and Akkuparts24 offered only a September 2026 preorder. The filed one-page sheet gives
+a 71.0 mm maximum height while Molicel's product page says 70.2 mm, so the larger envelope now owns
+mechanical planning and the contradiction remains open.
+
+A newer tentative Molicel approval sheet exposed through NKON requires pack protection and direct
+FET cutoff of both charge and discharge on cell overtemperature. It could not be downloaded into
+the immutable vault outside the browser, and several of its fields remain TBD or estimated, so it
+is reconnaissance rather than V1 evidence. The protected assembly now explicitly requires this
+bidirectional temperature cutoff. ABLIC S-82D1A is recorded only as an architecture candidate
+until an exact suffix, protection circuit, and qualified pack assembler are bound.
+
+Recorded Eltec in Italy and ANV Production in Poland as quote candidates. Neither has been
+contacted or selected. The acceptance request must return exact protection thresholds,
+construction, test, and transport evidence, not merely price and nominal capacity.

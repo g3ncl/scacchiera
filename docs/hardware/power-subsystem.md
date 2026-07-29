@@ -29,10 +29,36 @@ more per watt-hour than cylindrical cells, is in
 
 ## Cell
 
-The filed Molicel INR-21700-M65A is the cell candidate: 23.4 Wh typical, 26 A continuous discharge,
-and 21.7 by 70.2 mm. It lies lengthwise in the rail and easily supports the roughly 4 A electrical
-load. It is a bare cell. A qualified assembler must still bind the protection circuit, welded tabs,
-insulation, thermistor, lead wire, connector, and transport evidence.
+The filed Molicel INR-21700-M65A remains a cell candidate, not a bound component: 23.4 Wh typical,
+26 A continuous discharge, and a conservative 21.7 by 71.0 mm envelope. It lies lengthwise in the
+rail and easily supports the roughly 4 A electrical load. NKON listed the exact flat-top cell as out
+of stock on 2026-07-30, while Akkuparts24 offered only a September 2026 preorder. Availability
+therefore blocks selection even before pack qualification.
+
+The filed one-page manufacturer sheet and Molicel's product page disagree on height, 71.0 against
+70.2 mm, so mechanical work uses the larger value. A newer public but tentative approval sheet
+adds detailed pack rules, but the distributor blocks downloading it into the immutable vault and
+several of its own performance and regulatory fields remain TBD or estimated. It is useful
+reconnaissance, not V1 evidence.
+
+The cell is bare. A qualified assembly must bind welded tabs, insulation, thermistor, lead wire,
+connector, transport evidence, and a cell-bonded protection circuit that independently disconnects
+both charge and discharge for overtemperature. It must also cut off overcharge, overdischarge,
+charge overcurrent, discharge overcurrent, and short circuit. The existing hub interlock remains a
+separate, tighter charging safeguard and cannot substitute for pack protection because it has no
+authority over discharge.
+
+ABLIC's S-82D1A family demonstrates that a 1-cell protector can combine an external NTC with
+separate temperature, voltage, overcurrent, and short-circuit decisions. It is only an architecture
+candidate. No exact suffix, supplier code, FET pair, sense resistor, NTC, protection PCB, or pack
+assembler is bound, so no new battery board has been added to the inventory.
+
+[Eltec](https://www.elteconline.com/en/about-us/) in Italy and
+[ANV Production](https://anvproduction.pl/en/battery-packs/) in Poland are current quote candidates
+because they advertise custom pack work, and ANV explicitly advertises prototypes and
+small-to-medium runs. Neither has been contacted or selected. A quote is useful only if it returns
+the exact cell, protector, temperature and electrical thresholds, construction drawing, connector
+and wire details, test record, and transport evidence rather than only a capacity and price.
 
 ## Charging
 

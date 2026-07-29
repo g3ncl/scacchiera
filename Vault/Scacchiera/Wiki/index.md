@@ -56,7 +56,7 @@ One [[wiki/source]] summary per ingested raw source. Factual, no interpretation.
 | [[sk68xx-mini-e-led-datasheets]] | component datasheets (two revisions, conflicting) | 2026-07-25 |
 | [[hub-power-tree-datasheets]] | component datasheets (7 parts, power and logic) | 2026-07-25 |
 | [[matrix-discrete-datasheets]] | component datasheets (5 parts, switch cell) | 2026-07-25 |
-| [[inr-21700-m65a-datasheet]] | component datasheet | 2026-07-29 |
+| [[inr-21700-m65a-datasheet]] | component datasheet | 2026-07-30 |
 | [[bq25638-datasheet]] | component datasheet | 2026-07-26 |
 | [[tps25730-datasheet]] | component datasheet | 2026-07-26 |
 | [[pmp23456-reference-design]] | TI reference-design test report | 2026-07-26 |
@@ -88,7 +88,7 @@ People, tools, orgs, repos. See [[wiki/entity]] pages.
 | [[pn5180]] | 2 | 2026-07-25 |
 | [[txc-7m27100009]] | 2 | 2026-07-25 |
 | [[sk6805mini-e]] | 1 | 2026-07-25 |
-| [[inr-21700-m65a]] | 1 | 2026-07-29 |
+| [[inr-21700-m65a]] | 1 | 2026-07-30 |
 | [[bq25638]] | 2 | 2026-07-26 |
 | [[tps25730s]] | 2 | 2026-07-26 |
 | [[sw6106]] | 2 | 2026-07-26 |
@@ -267,7 +267,7 @@ Query answers filed back into the wiki. See [[wiki/synthesis]] pages.
 | [[v3-charge-interlock]] | How is the cell-temperature charge cutoff proven over every published tolerance? | 2026-07-29 |
 | [[v3-led-rail-current-limit]] | Does the light-bar limiter pass the real load and clamp a fault? | 2026-07-29 |
 | [[v3-buck-power-stage]] | What do the 3.3 V rail's passives do over their published tolerances? | 2026-07-29 |
-| [[battery-format-and-module-alternatives]] | Which cell format and power module fit the rail at one or two units? | 2026-07-29 |
+| [[battery-format-and-module-alternatives]] | Which cell format and power module fit the rail at one or two units? | 2026-07-30 |
 | [[chessboard-quick-charge-architecture]] | How can recharge time become much shorter than useful play time? | 2026-07-26 |
 | [[quick-charge-module-evaluation]] | Can a cheap purchased board de-risk quick charging? | 2026-07-26 |
 | [[commercial-power-subsystem-selection]] | Which purchased subsystem should own the battery and charging? | 2026-07-26 |
