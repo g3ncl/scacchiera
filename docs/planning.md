@@ -69,11 +69,16 @@ scoped test-article order. V0 through V9 permit a final-board order.
   battery measurement, and the recorded stackup and envelope.
 - [ ] V3 power, analog, timing, and fault simulation: started, not close. Passing so far: the hub's
   cell-temperature charge gate over an exhaustive 384-corner sweep with sensor-fault cases, the
-  light-bar rail's current limit on TI's own transient model over resistor and supply corners, and
-  the light bar and matrix supply and RF simulations from earlier. Open: the AP63203 buck and the
-  AP22811 input switch, and the transient cases (cold start, brownout, USB insertion, rail handover)
-  that no board has yet. Both Diodes parts lack a distributable vendor model, which the workflow
-  allows only with a documented substitute and a full published sweep.
+  light-bar rail's current limit on TI's own transient model, the 3.3 V buck's power stage over 72
+  corners, the light bar and matrix supply and RF simulations from earlier, and the input switch's
+  steady state as Derived arithmetic, and the rail's startup, dropout and hold-up likewise. What is
+  left is not board-side and cannot be closed by simulation: uninterrupted handover and source
+  insertion are the power module's behaviour and are V8 measurements, and the buck's transient
+  response and stability rest on a compensation network Diodes does not publish. The hub's V3 work is
+  therefore complete to the limit of what a model can honestly say; the gate stays open on those two
+  measured items and on the matrix and light bar's own remaining corners. Also open by construction: the buck's control loop, since Diodes publishes no model
+  and its compensation is not in the data sheet, so regulation and stability stay data sheet claims
+  for V8 rather than simulated ones.
 - [ ] V4 layout-derived electromagnetic validation: the hub is two layers again, so the RF front end
   returns through the back copper reserved under it rather than an inner plane. Extraction must use
   that reserved region and confirm the reserve is wide enough, since it is the whole return path.
@@ -153,6 +158,13 @@ evidence is an analytical formula; it needs a passing simulation.
   drive and preserves useful RF evidence. The 68 pF series match value came from this bench.
   The power module's charge and handover behavior is measured at V8 rather than represented by an
   invented internal model.
+
+  The 3.3 V power stage is validated: `hardware/tests/test_sim_buck.py` sweeps 72 corners of load,
+  input voltage, inductance tolerance and output capacitance. Worst case it produces 3.59 mV of
+  ripple against a 50 mV budget, 2.141 A of inductor peak current against the converter's 2.5 A
+  lowest guaranteed limit, and 2.015 A rms against the inductor's 3.30 A rating. The model is an
+  open-loop datasheet-bounded substitute and makes no claim about the control loop. Evidence: 5 tests
+  passed on 2026-07-29.
 
   The light-bar rail is validated: `hardware/tests/test_sim_led_rail.py` drives TI's transient model
   for the TPS2553 from the rail's own connectivity, over both extremes of the 1% programming resistor

@@ -553,3 +553,66 @@ errored in the full check that caught it.
 The bench now generates into its own directory. Worth remembering as a general shape: a per-run
 configuration file is still global state if two runs share a directory, and the thing that found it
 was running the whole suite rather than the tests near the change.
+
+## [2026-07-29] verification | Simulate the 3.3 V buck power stage
+
+Third V3 piece for the hub. Everything except the light bars runs from this rail, and its inductor
+and capacitors were chosen from an application table rather than a simulation. 72 corners of load,
+input voltage, inductance tolerance and output capacitance give 3.59 mV of ripple against a 50 mV
+budget, 2.141 A of inductor peak against the converter's 2.5 A lowest guaranteed limit, and 2.015 A
+rms against the inductor's 3.30 A rating. Saturation never binds: the converter current-limits first.
+
+Two dead ends worth recording, both from trying to make the model do more than it should. A feedback
+loop added to place the operating point rang to 17.9 A, so it was deleted rather than tuned: the
+bench now computes duty analytically per corner and the model contains no control behaviour at all,
+which is what its header claimed anyway. And measuring ripple over a long window caught the LC
+startup ring, because an open-loop stage is nearly undamped; the deck now starts at its operating
+point and measures whole switching periods.
+
+Two data sheet details that would have been easy to get wrong. The AP63203 switches at 1100 kHz, not
+the 500 kHz on the adjacent row of the same table, which would have halved the predicted ripple. And
+the output capacitor's data sheet prints only example bias curves, no numeric derating for that part,
+so effective capacitance is treated as a bound (half of nominal) applied in the pessimistic direction
+rather than as a number nobody can source.
+
+## [2026-07-29] verification | Check the input switch by arithmetic, not simulation
+
+Started a SPICE bench for the [[ap22811aw5-7]] input switch and abandoned it, which is the useful
+part of this entry. A current-limited switch written with min() or max() has a flat region and a
+kink in its characteristic; the operating point stopped converging, and ngspice printed "DC solution
+failed" alongside numbers that the bench happily parsed as results. Smoothing it with tanh did not
+help, because a hard saturating element has almost no derivative over most of its range.
+
+The problem was the approach. The switch is a resistor with a current limit, so its steady state is
+Ohm's law on data sheet values, which the workflow already recognises as Derived evidence. It is now
+`hardware/verification/charge_path.py` and three tests, with no model and no deck. What genuinely
+needs simulating on this path is the transient, and that is blocked on binding a module whose input
+capacitance sets the inrush.
+
+Doing the arithmetic carefully surfaced something the simulation would not have. At the top of its
+published spread the switch passes 3.2 A, while the three J2 contacts carrying it are rated 1.0 A
+each. Contact ratings are continuous and a fault in limit is not, since the part burns about 16 W
+into a short and shuts down thermally in milliseconds, so it is recorded for V8 rather than treated
+as a violation. A test pins the 0.2 A overshoot so it cannot change size unnoticed.
+
+Worth keeping: a bench that parses whatever ngspice prints will report a failed solve as a
+measurement. The numbers looked plausible enough to write down.
+
+## [2026-07-29] verification | Close the hub's V3 transients, and say what cannot close
+
+The transient cases V3 asks for split three ways on this board, and only one of the three is
+board-side. Handover and source insertion are the power module's behaviour, measured at V8.
+Transient response and stability rest on a compensation network Diodes does not publish, so no
+honest model here can produce them. What is left is bounded by conduction and charge and reduces to
+arithmetic on filed values, so `hardware/verification/rail_budget.py` derives it rather than dressing
+it as a simulation: 36 mA of inrush over the 4 ms soft start, dropout at 3.51 V input, and about five
+microseconds of hold-up.
+
+The dropout figure earned its keep immediately. The power-module interface required a 5 V output at
+1.3 A but never said how far that output could sag, and now it does: 4.0 V, which is the hub's
+3.51 V dropout plus half a volt for cable and connector drops the figure excludes. Five microseconds
+of hold-up is also worth stating plainly, because it means the rail follows its input and riding out
+a source change is the module's job, which is exactly what the contract already demands of it.
+
+The hub's V3 work is now complete to the limit of what a model can honestly say. The gate stays open
+on two measured items rather than on missing effort.

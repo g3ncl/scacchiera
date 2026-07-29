@@ -224,6 +224,7 @@ Query answers filed back into the wiki. See [[wiki/synthesis]] pages.
 | [[v2-static-connectivity]] | How are schematic connectivity and the routed boards proven equivalent? | 2026-07-29 |
 | [[v3-charge-interlock]] | How is the cell-temperature charge cutoff proven over every published tolerance? | 2026-07-29 |
 | [[v3-led-rail-current-limit]] | Does the light-bar limiter pass the real load and clamp a fault? | 2026-07-29 |
+| [[v3-buck-power-stage]] | What do the 3.3 V rail's passives do over their published tolerances? | 2026-07-29 |
 | [[battery-format-and-module-alternatives]] | Which cell format and power module fit the rail at one or two units? | 2026-07-29 |
 | [[chessboard-quick-charge-architecture]] | How can recharge time become much shorter than useful play time? | 2026-07-26 |
 | [[quick-charge-module-evaluation]] | Can a cheap purchased board de-risk quick charging? | 2026-07-26 |

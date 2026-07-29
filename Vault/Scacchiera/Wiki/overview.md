@@ -36,8 +36,10 @@ V3 power and fault simulation is the open gate, with two hub results so far.
 across 384 published tolerance corners and both sensor failure directions.
 [[v3-led-rail-current-limit]]: the light-bar limiter carries both bars at full white and clamps a
 short inside its harness rating, on TI's own transient model, replacing a value that had only a
-formula behind it. The AP63203 buck, the AP22811 input switch, and every transient case on every
-board remain unsimulated.
+formula behind it. [[v3-buck-power-stage]]: the 3.3 V rail's ripple and inductor stress over 72
+corners, from a model that deliberately holds no control behaviour, so regulation and stability stay
+data sheet claims for V8. The AP22811 input switch and every transient case on every board remain
+unsimulated.
 
 The earlier [[chessboard-quick-charge-architecture|custom PD architecture]] and
 [[quick-charge-module-evaluation|RBS18634 article]] remain historical evidence rather than active

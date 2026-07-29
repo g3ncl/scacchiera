@@ -37,8 +37,12 @@ why it has more supply contacts than J3.
 
 A candidate module must provide all of these:
 
-- **5 V output at 1.3 A continuous.** The board's worst case is both light bars white (448 mA) plus
-  the 3.3 V rail under an ESP32-C6 transmit peak, reader, displays and matrix.
+- **5 V output at 1.3 A continuous, never sagging below 4.0 V.** The board's worst case is both
+  light bars white (448 mA) plus the 3.3 V rail under an ESP32-C6 transmit peak, reader, displays and
+  matrix. The floor comes from the hub side: its buck holds 3.3 V until its input falls to 3.51 V at
+  that load, and 4.0 V keeps half a volt in hand for the cable and connector drops that figure
+  excludes. A module that sags further browns out the MCU, and the hub cannot ride it out; its
+  output capacitance is worth about five microseconds.
 - **Charging from a 5 V input at 1 A or more**, which meets `POWER-CHARGE-10-80` at 240 minutes.
 - **Uninterrupted output across source insertion and removal.** The board must not reset when the
   adapter is connected or pulled. This is the property the module exists for, and V8 measures it.
@@ -62,8 +66,8 @@ A candidate module must provide all of these:
   without an NTC input is acceptable and a module with one is redundant rather than trusted.
 - **USB Power Delivery.** The inlet is power-only and presents passive sink resistors.
 - **A specific cell format.** Any cell meeting the runtime requirement and the 46 mm width fits;
-  see [[../../Vault/Scacchiera/Wiki/synthesis/battery-format-and-module-alternatives.md|the format
-  survey]] for why a 1S pouch is the current choice.
+  see [the format survey](../../Vault/Scacchiera/Wiki/synthesis/battery-format-and-module-alternatives.md)
+  for why a 1S pouch is the current choice.
 
 ## Fitted module
 
@@ -75,7 +79,8 @@ the interface is written as a contract rather than around one product.
 ## Verification
 
 - V2 checks both connector pin maps against this table from the schematic.
-- V3 proves the temperature gate holds for any module, since the gate is on the hub.
+- V3 proves the temperature gate holds for any module, since the gate is on the hub, and derives the
+  4.0 V output floor above from the hub's own dropout.
 - V8 measures, on the fitted module: charge time against `POWER-CHARGE-10-80` and
   `POWER-CHARGE-10-FULL`, output continuity across source insertion and removal, output held during
   sleep, and cell-surface temperature under charge.

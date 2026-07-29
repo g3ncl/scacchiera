@@ -168,9 +168,52 @@ not an inverted enable. The data sheet governs; the schematic follows it, with a
 leaves the rail dark until firmware asserts it. `hardware/sim/models/tps2553.lib` inverts in one
 place and says why.
 
-The remaining V3 work on this board is the rest of the power path: the AP63203 buck at line, load
-and temperature corners, the AP22811 current limit and fault behavior, and the startup, brownout and
-handover transients.
+`hardware/tests/test_sim_buck.py` covers the 3.3 V power stage over 72 corners: loads from 0.2 A to
+the converter's rated 2 A, 4.5 to 5.5 V in, the inductor across its 20 percent tolerance, and output
+capacitance at nominal and at half of nominal.
+
+| Quantity | Worst corner | Limit |
+| --- | --- | --- |
+| Output ripple | 3.59 mV pk-pk | 50 mV, from the MCU's 3.0 to 3.6 V supply range |
+| Inductor peak current | 2.141 A | 2.5 A, the converter's lowest guaranteed peak limit |
+| Inductor RMS current | 2.015 A | 3.30 A, the inductor's rated current |
+| Inductor conduction loss | 138 mW | reported, not limited |
+
+The peak-current margin is 14 percent, and it is smallest at the converter's own 2 A rating rather
+than at anything this board draws. Saturation is never the binding limit: the converter's current
+limit arrives first, at 2.5 A against the inductor's 4.97 A.
+
+This is a power-stage result, not a control-loop one. Diodes publishes no model, so
+`hardware/sim/models/ap63203.lib` is a datasheet-bounded substitute that runs open loop at a duty
+computed per corner, and it deliberately contains no compensation, no soft start and no light-load
+pulse-frequency mode. Regulation, transient response and stability stay data sheet claims that V8
+measures. The DC output this bench reports (3.228 to 3.300 V) is an artifact of open loop, since the
+real part senses after the inductor and corrects its resistance drop.
+
+The gated input switch is checked by arithmetic rather than simulation, in
+`hardware/tests/test_charge_path.py`. It is a resistor with a current limit, so its steady state is
+Ohm's law on data sheet values and a SPICE bench would restate that with more ceremony and no more
+confidence. At the 2 A a compliant source delivers it drops 130 mV, and its guaranteed-lowest 2.2 A
+limit clears that load by 10 percent, which is deliberately tight because the switch limits at about
+the point the adapter itself runs out.
+
+One finding is recorded rather than resolved. At the top of its published spread the switch passes
+3.2 A, while the three J2 contacts carrying that current are rated 1.0 A each. Contact ratings are
+continuous and a fault in current limit is not, since the part dissipates about 16 W into a short and
+its thermal protection intervenes in milliseconds, so this is a V8 measurement rather than a static
+violation. A test pins the 0.2 A overshoot so it cannot quietly grow.
+
+The rail's transient behaviour is in `hardware/tests/test_rail_budget.py`, derived for the same
+reason as the switch: what is left after handover and loop response are excluded is bounded by
+conduction and charge. Soft start draws 36 mA into the output capacitors over its 4 ms ramp, so cold
+start needs no inrush limiting. The rail holds 3.3 V until the module's output falls to 3.51 V at the
+1.3 A the interface obliges, which is where that contract's 4.0 V floor comes from. Hold-up is about
+five microseconds, so the rail follows its input and riding out a source change is the module's job.
+
+What remains for V3 on this board is not board-side. Uninterrupted handover and source insertion
+belong to the power module and are V8 measurements; transient response and stability belong to a
+compensation network the buck's manufacturer does not publish, so no honest model here can produce
+them. Both are recorded as such rather than left looking unfinished.
 
 ## Cost
 

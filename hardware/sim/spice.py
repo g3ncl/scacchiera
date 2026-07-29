@@ -63,6 +63,11 @@ MODELS: dict[str, SpiceModel] = {
         pins=("IN", "GND", "EN", "FAULT_N", "ILIM", "OUT"),
         include="tps2553.lib",
     ),
+    "AP63203WU-7": SpiceModel(
+        name="AP63203",
+        pins=("FB", "EN", "VIN", "GND", "SW", "BST"),
+        include="ap63203.lib",
+    ),
 }
 
 # Diodes reference their .model name directly from a D card, so unlike the VDMOS
