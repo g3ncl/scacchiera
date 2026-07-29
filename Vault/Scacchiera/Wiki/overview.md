@@ -78,6 +78,9 @@ The [[inr-21700-m65a]] remains a feasibility candidate rather than a selected ce
 stock at NKON on 2026-07-30, its public sources disagree on height, and its pack guidance requires
 cell-bonded protection that opens both charge and discharge on overtemperature. The hub's tighter
 charge-only interlock remains useful independent protection but cannot replace that pack function.
+A parametric rail-fit model reserves 80 x 23 x 23 mm for that complete protected assembly beside
+the 90 x 32 x 10 mm power-board envelope. The allocation fits with 125 mm of rail length left, but
+the exact pack drawing, lead bend, and retention remain open.
 
 ## NFC Game Board: the reference project
 

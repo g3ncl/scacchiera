@@ -31,7 +31,13 @@ in one of them.
 So height rules nothing out. An 18650 at 18.4 mm diameter fits, a 21700 at 21.2 mm fits only if the
 holder walls are thin, and any pouch under about 12 mm is comfortable.
 
-[usable_rail_width_mm::46] [usable_rail_height_mm::24] [free_rail_length_mm::148]
+[usable_rail_width_mm::46] [usable_rail_height_mm::24] [hub_rail_free_length_mm::148]
+
+The custom-board path now has an executable allocation rather than only a cross-section argument.
+`hardware/cad/power_rail_fit.py` reserves 80 x 23 x 23 mm for the complete protected assembly and
+places it lengthwise beside the 90 x 32 x 10 mm power-board envelope. Including 5 mm end and
+inter-assembly clearances, it leaves 125 mm of the 310 mm rail length. The STEP is a supplier
+acceptance envelope, not evidence that a pack is qualified or that its lead bend fits.
 
 ## Current 21700 decision
 

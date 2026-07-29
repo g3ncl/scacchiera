@@ -20,7 +20,7 @@ export KICAD_FOOTPRINT_DIR
 	pcb-lightbar pcb-lightbar-drc pcb-lightbar-fab \
 	pcb-matrix pcb-matrix-route pcb-matrix-reroute pcb-matrix-drc pcb-matrix-fab \
 	pcb-hub pcb-hub-route pcb-hub-reroute pcb-hub-drc pcb-hub-fab \
-	pcb-power pcb-power-reroute pcb-power-drc pcb-power-fab panel pcb-fab clean
+	pcb-power pcb-power-reroute pcb-power-drc pcb-power-fab power-rail-fit panel pcb-fab clean
 
 check: pcb-lightbar-drc pcb-matrix-drc pcb-hub-drc pcb-power-drc
 	$(PYTHON) -m mypy hardware
@@ -82,6 +82,9 @@ pcb-power-drc: pcb-power
 
 pcb-power-fab: schematic-power
 	$(PYTHON) -m hardware.pcb.fab power
+
+power-rail-fit:
+	$(PYTHON) -m hardware.cad.power_rail_fit
 
 # One fabricated panel holding both light bars and the power board, snapped
 # apart after delivery. Built from the routed boards, so re-run it after any

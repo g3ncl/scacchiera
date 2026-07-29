@@ -67,7 +67,7 @@ scoped test-article order. V0 through V9 permit a final-board order.
   DGK0008A land pattern because the generic KiCad VSSOP footprint does not meet the board's 0.2 mm
   clearance. The rejected SWPA catalog binding remains as contradiction evidence rather than a
   waiver. Evidence: `make check` regenerated all four boards at zero DRC violations, unconnected
-  items and parity issues, mypy passed on 78 source files, and all 129 tests passed on 2026-07-30.
+  items and parity issues, mypy passed on 81 source files, and all 133 tests passed on 2026-07-30.
 - [x] V2 connectivity and static electrical checks: clean generation runs full SKiDL and KiCad ERC,
   imports reviewed deterministic routing sessions, and runs PCB DRC with schematic parity on all
   four boards. [verification/v2-static.yaml](verification/v2-static.yaml) records the four
@@ -131,7 +131,10 @@ scoped test-article order. V0 through V9 permit a final-board order.
 - [ ] V6 firmware-in-simulation system verification
 - [ ] V7 mechanical and fabrication preflight: no fab quote exists for any board at its final
   dimensions. The hub is 162 x 46 mm and the matrix 300 x 300 mm, both 2-layer; the matrix is
-  area-dominated and is the likely largest single line in the product.
+  area-dominated and is the likely largest single line in the product. A parametric power-rail fit
+  reserves 80 x 23 x 23 mm for the complete protected cell assembly beside the 90 x 32 x 10 mm
+  power-board envelope and leaves 125 mm of rail length after the end clearances. It proves an
+  allocation exists, not that an unbound pack, its lead exit, or the other rail contents fit.
 - [ ] V8 test-article measurement and model calibration
 - [ ] V9 independent review and final release
 

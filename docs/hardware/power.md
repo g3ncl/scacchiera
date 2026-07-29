@@ -106,6 +106,15 @@ cross-section. It is a bare cell, not permission to install an unprotected loose
 of stock at NKON on 2026-07-30, and its qualified assembly must directly disconnect both charge and
 discharge on cell overtemperature.
 
+`hardware/cad/power_rail_fit.py` reserves 80 x 23 x 23 mm for the complete protected assembly,
+rather than fitting only the bare can. The 71.0 x 21.7 mm candidate fits inside that allocation,
+which sits lengthwise beside a conservative 90 x 32 x 10 mm power-board envelope with a 5 mm gap.
+Both fit the 310 x 46 x 24 mm service volume and leave 125 mm of rail length after the end
+clearances. This is an allocation, not pack evidence: its extra 9 mm of length and 1.3 mm of
+cross-section must contain the actual protection PCB, welded tabs, insulation, sensor, and lead
+exit. The supplier drawing and cable bend still have to pass the generated STEP fit before V7 can
+close.
+
 ## Board, panel, and release state
 
 The board is 90 x 32 mm, two layers, and 1.0 mm thick. `make pcb-power-drc` reproduces zero

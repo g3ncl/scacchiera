@@ -852,3 +852,13 @@ until an exact suffix, protection circuit, and qualified pack assembler are boun
 Recorded Eltec in Italy and ANV Production in Poland as quote candidates. Neither has been
 contacted or selected. The acceptance request must return exact protection thresholds,
 construction, test, and transport evidence, not merely price and nominal capacity.
+
+Added a build123d power-rail fit model. It reserves an 80 x 23 x 23 mm protected-pack envelope
+around the 71.0 x 21.7 mm candidate cell, places the routed 90 x 32 mm power board beside it, and
+leaves 125 mm after clearances. This closes only the provisional allocation question; a supplier
+drawing, lead bend, retention, and complete rail fit remain V7 work.
+
+The complete gate regenerated all four boards with zero DRC violations, unconnected items, or
+parity issues, passed mypy on 81 source files, and passed all 133 tests. The build123d import emits
+14 upstream Python 3.14 deprecation warnings; they do not change the generated geometry or test
+result.
