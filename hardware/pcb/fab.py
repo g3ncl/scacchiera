@@ -16,7 +16,7 @@ from hardware.pcb.bom import HAND_POPULATED_BOARDS
 
 KICAD_CLI = "/usr/bin/kicad-cli"
 GENERATED = Path(__file__).parent / "generated"
-BOARDS = ("lightbar", "matrix", "hub")
+BOARDS = ("lightbar", "matrix", "hub", "power")
 LEGACY_ASSEMBLY_SUFFIXES = (
     "_bom.csv",
     "_cpl.csv",

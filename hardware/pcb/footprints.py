@@ -184,6 +184,41 @@ def tlv7042_dgk_footprint() -> str:
 ''' + "\n".join(pads) + "\n)\n"
 
 
+def sot563_drl_footprint() -> str:
+    """TI DRL0006A land pattern from the TPS61023 data sheet.
+
+    The stock SOT-563 footprint holds 0.15 mm between adjacent pads, under this
+    project's 0.2 mm rule. TI's own pattern is 0.3 mm pads on the 0.5 mm pitch,
+    which leaves exactly 0.2 mm, so the manufacturer geometry is the one that
+    fits rather than a relaxed rule.
+    """
+    pads = []
+    # Pins 1 to 3 down the left column, 4 to 6 up the right, per the data
+    # sheet's pin configuration. Pad centres sit 0.405 mm either side, so the
+    # pattern spans the 1.48 mm the drawing dimensions.
+    for number, x, y in (
+        (1, -0.405, -0.5), (2, -0.405, 0.0), (3, -0.405, 0.5),
+        (4, 0.405, 0.5), (5, 0.405, 0.0), (6, 0.405, -0.5),
+    ):
+        pads.append(
+            f'  (pad "{number}" smd roundrect (at {x} {y}) (size 0.67 0.3) '
+            '(layers "F.Cu" "F.Paste" "F.Mask") (roundrect_rratio 0.15))'
+        )
+    return '''(footprint "SOT-563_DRL"
+  (version 20240108)
+  (generator pcbnew)
+  (layer "F.Cu")
+  (descr "Texas Instruments DRL0006A manufacturer land pattern")
+  (tags "SOT-563 DRL")
+  (property "Reference" "REF**" (at 0 -1.4 0) (layer "F.SilkS"))
+  (property "Value" "SOT-563_DRL" (at 0 1.4 0) (layer "F.Fab"))
+  (attr smd)
+  (fp_rect (start -0.8 -0.6) (end 0.8 0.6) (stroke (width 0.1) (type default)) (fill none) (layer "F.Fab"))
+  (fp_rect (start -1.0 -0.85) (end 1.0 0.85) (stroke (width 0.05) (type default)) (fill none) (layer "F.CrtYd"))
+  (fp_circle (center -0.9 -0.75) (end -0.8 -0.75) (stroke (width 0.12) (type default)) (fill none) (layer "F.SilkS"))
+''' + "\n".join(pads) + "\n)\n"
+
+
 def write_footprints(output: Path = OUTPUT) -> None:
     output.mkdir(parents=True, exist_ok=True)
     (output / "Antenna_Line.kicad_mod").write_text(antenna_line_footprint(), encoding="utf-8")
@@ -191,6 +226,7 @@ def write_footprints(output: Path = OUTPUT) -> None:
     (output / "T37K3RGB-05C000112U1930.kicad_mod").write_text(t37k3rgb_footprint(), encoding="utf-8")
     (output / "NR6045S.kicad_mod").write_text(nr6045s_footprint(), encoding="utf-8")
     (output / "TLV7042_DGK.kicad_mod").write_text(tlv7042_dgk_footprint(), encoding="utf-8")
+    (output / "SOT-563_DRL.kicad_mod").write_text(sot563_drl_footprint(), encoding="utf-8")
 
 
 if __name__ == "__main__":

@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Scacchiera/Wiki/log.md",
+                "file": "Scacchiera/Wiki/index.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "log"
+              "title": "index"
             }
           }
         ]
@@ -94,7 +94,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Scacchiera/Wiki/log.md",
+                "file": "Scacchiera/Wiki/index.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -104,7 +104,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Riferimenti a log"
+              "title": "Riferimenti a index"
             }
           },
           {
@@ -113,12 +113,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Scacchiera/Wiki/log.md",
+                "file": "Scacchiera/Wiki/index.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Collegamenti in uscita da log"
+              "title": "Collegamenti in uscita da index"
             }
           },
           {
@@ -156,13 +156,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Scacchiera/Wiki/log.md",
+                "file": "Scacchiera/Wiki/index.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Struttura di log"
+              "title": "Struttura di index"
             }
           }
         ]
@@ -185,6 +185,7 @@
   },
   "active": "878fd64fc9785e3b",
   "lastOpenFiles": [
+    "Scacchiera/Wiki/log.md",
     "Scacchiera/Wiki/synthesis/v3-buck-power-stage.md",
     "Scacchiera/Wiki/synthesis/v3-buck-power-stage.md.tmp.495541.ec776a1b3da3",
     "Scacchiera/Wiki/synthesis/v3-led-rail-current-limit.md",
@@ -219,7 +220,6 @@
     "Scacchiera/Wiki/concepts/commercial-battery-subsystem.md",
     "Scacchiera/Wiki/entities/pisugar3-plus.md",
     "Scacchiera/Wiki/sources/955465-un38-3.md",
-    "Scacchiera/Wiki/sources/pisugar3-plus-manufacturer-docs.md",
-    "Scacchiera/Wiki/synthesis/quick-charge-module-evaluation.md"
+    "Scacchiera/Wiki/sources/pisugar3-plus-manufacturer-docs.md"
   ]
 }

@@ -19,9 +19,10 @@ export KICAD_FOOTPRINT_DIR
 .PHONY: check footprints schematic-lightbar schematic-matrix schematic-hub \
 	pcb-lightbar pcb-lightbar-drc pcb-lightbar-fab \
 	pcb-matrix pcb-matrix-route pcb-matrix-reroute pcb-matrix-drc pcb-matrix-fab \
-	pcb-hub pcb-hub-route pcb-hub-reroute pcb-hub-drc pcb-hub-fab pcb-fab clean
+	pcb-hub pcb-hub-route pcb-hub-reroute pcb-hub-drc pcb-hub-fab \
+	pcb-power pcb-power-reroute pcb-power-drc pcb-power-fab panel pcb-fab clean
 
-check: pcb-lightbar-drc pcb-matrix-drc pcb-hub-drc
+check: pcb-lightbar-drc pcb-matrix-drc pcb-hub-drc pcb-power-drc
 	$(PYTHON) -m mypy hardware
 	$(PYTHON) -m pytest
 
@@ -33,6 +34,9 @@ schematic-matrix: footprints
 
 schematic-hub: footprints
 	$(PYTHON) -m hardware.pcb.generate hub
+
+schematic-power: footprints
+	$(PYTHON) -m hardware.pcb.generate power
 
 footprints:
 	$(PYTHON) -m hardware.pcb.footprints
@@ -66,6 +70,24 @@ pcb-hub-drc: pcb-hub
 
 pcb-hub-fab: schematic-hub
 	$(PYTHON) -m hardware.pcb.fab hub
+
+pcb-power: schematic-power
+	/usr/bin/python3 -m hardware.pcb.power_layout --route
+
+pcb-power-reroute: schematic-power
+	/usr/bin/python3 -m hardware.pcb.power_layout --reroute
+
+pcb-power-drc: pcb-power
+	$(KICAD_CLI) pcb drc --exit-code-violations --schematic-parity --output hardware/pcb/generated/power/power-drc.rpt hardware/pcb/generated/power/power.kicad_pcb
+
+pcb-power-fab: schematic-power
+	$(PYTHON) -m hardware.pcb.fab power
+
+# One fabricated panel holding both light bars and the power board, snapped
+# apart after delivery. Built from the routed boards, so re-run it after any
+# of them changes.
+panel: pcb-lightbar pcb-power
+	/usr/bin/python3 -m hardware.pcb.panel
 
 # Layout runs under the system interpreter: pcbnew ships with the native
 # KiCad install and is not importable from the venv.

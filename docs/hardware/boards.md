@@ -82,7 +82,11 @@ for the same reason the display modules are: an order that forgets them is incom
   antenna PCB was considered and rejected: its radiation pattern is the one thing in this project
   that no ngspice test can validate, and per-attempt iteration costs a fabrication run rather than
   a euro.
-- **One power module and its cell**, meeting [power-module-interface.md](power-module-interface.md).
+- **One power board and its cell.** As of 2026-07-29 this is a custom design,
+  [power.md](power.md), built to the same [power-module-interface.md](power-module-interface.md) a
+  bought module would satisfy, and fabricated as a snap-off piece of the light-bar panel. A purchased
+  module remains a drop-in alternative.
+- **Superseded option, one purchased power module**, meeting [power-module-interface.md](power-module-interface.md).
   It provides charging, protection, the UPS power path and the regulated 5 V output. No product is
   bound yet; the contract caps it at 46 mm across the rail, cell included, so that it fits the
   player-rail service volume rather than needing a separate cassette. Selection status is in

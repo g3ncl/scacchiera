@@ -677,3 +677,34 @@ edge rate against the shift registers' own 139 ns/V transition-rate specificatio
 the same edge is a third of a half period at 4 MHz, which a rule of thumb would flag even though the
 sourced limit is met eight times over. Keeping both means raising the clock later is a decision, not
 an accident.
+
+## [2026-07-29] design | A custom power board, panelised with the light bars
+
+Reversing the buy decision, on the reasoning that panelising removes the fabrication cost that made
+custom lose. That reasoning holds for the PCB and only for the PCB: the evidence burden of putting a
+lithium charger in the design is unchanged, and V1 and V3 both open further because of this board.
+
+The design leans entirely on the interface contract written a few days ago. The board implements it
+rather than defining its own boundary, so the hub is untouched, V2 stays passing, and a bought module
+is still a drop-in replacement. The cell-temperature interlock stays on the hub where it has corner
+evidence, and the hub keeps measuring cell voltage itself, so nothing on the new board is trusted for
+either safety or telemetry.
+
+[[mcp73871t-2cci-ml]] comes back from the superseded charger design, and so do [[tps61023drlr]] and
+the PH cell connector, which is why this took hours rather than days: their data sheets were still
+filed and their entities merely orphaned. The part was rejected the first time for charging at
+500 mA, which made a recharge as long as a session. The relaxed 240-minute limit lets it run at its
+full 1 A and clear that with 30 minutes in hand.
+
+Three places where the honest answer was to refuse a number. The 220k and 30k feedback divider was
+abandoned when the catalogue returned two different order codes for the same part; it is now three
+resistors this design already carries. L1 is bound from the manufacturer's own series table inside an
+already-filed data sheet, with its order code recorded as an open V1 item rather than guessed, after
+a search surfaced the rejected SWPA family again. And the boost's stock footprint holds 0.15 mm
+between pads against a 0.2 mm rule, so it uses TI's own land pattern, whose row-to-row gap of 0.14 mm
+then needs a clearance exception scoped to that part rather than to the board.
+
+The panel is 130.1 by 63.0 mm, two bars and the power board on four five-hole mouse-bite tabs,
+generated from the routed boards so it cannot disagree with them. It also fixes something already
+wrong: a 120 by 8.5 mm light bar is below the outline JLCPCB will assemble, which is why the bars
+were routed to hand assembly. The panel is not.
