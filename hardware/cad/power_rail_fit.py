@@ -2,8 +2,8 @@
 
 This is not a battery-pack model. The protected assembly is not bound, so the
 larger rectangular allocation remains the mechanical acceptance boundary a
-supplier drawing has to fit. The bare cylindrical cell is shown only to prove
-that the candidate leaves room for insulation and protection hardware.
+supplier drawing has to fit. The cylindrical reference is the maximum listed
+body of the leading protected-pack candidate. Leads and their bend stay open.
 """
 
 from dataclasses import dataclass
@@ -17,10 +17,10 @@ RAIL_WIDTH_MM = 46.0
 RAIL_HEIGHT_MM = 24.0
 
 PACK_LENGTH_MM = 80.0
-PACK_WIDTH_MM = 23.0
+PACK_WIDTH_MM = 26.0
 PACK_HEIGHT_MM = 23.0
-CELL_LENGTH_MM = 71.0
-CELL_DIAMETER_MM = 21.7
+CELL_LENGTH_MM = 75.45
+CELL_DIAMETER_MM = 22.25
 
 POWER_BOARD_LENGTH_MM = 90.0
 POWER_BOARD_WIDTH_MM = 32.0
@@ -99,7 +99,7 @@ def _box(allocation: Allocation) -> Part:
 
 
 def model() -> Compound:
-    """Build the two allocations and the candidate bare-cell reference solid."""
+    """Build both allocations and the candidate protected-body reference."""
     allocation = fit()
     pack = _box(allocation.pack)
     board = _box(allocation.board)

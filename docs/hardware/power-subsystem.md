@@ -29,11 +29,37 @@ more per watt-hour than cylindrical cells, is in
 
 ## Cell
 
-The filed Molicel INR-21700-M65A remains a cell candidate, not a bound component: 23.4 Wh typical,
-26 A continuous discharge, and a conservative 21.7 by 71.0 mm envelope. It lies lengthwise in the
-rail and easily supports the roughly 4 A electrical load. NKON listed the exact flat-top cell as out
-of stock on 2026-07-30, while Akkuparts24 offered only a September 2026 preorder. Availability
-therefore blocks selection even before pack qualification.
+The leading cost candidate is
+[Keeppower's wired 1S1P 21700 6000 mAh protected pack](https://www.akkuteile.de/en/keeppower-1s1p-21700-6000mah-3-6v-3-7v-li-ion-battery-pcb/bms-protected-with-cable-connector_12148_3847).
+The European distributor listing identifies a Seiko protection PCB, 5900 mAh minimum capacity,
+12 A continuous discharge, 22.00 +/- 0.25 mm diameter, and 75.2 +/- 0.25 mm body length.
+Keeppower's European shop
+[listed it from EUR 11.00](https://www.keeppower.de/power-bank-mobile-energie/akkupack) on
+2026-07-30. Its 21.6 Wh nominal energy is 7.7 percent below the M65A,
+but its current rating is 2.7 times the 4.442 A RMS bound and 2.0 times the 5.871 A peak bound.
+Buying the protected, wired article for roughly the price of a premium bare cell is likely the
+lowest total-cost path for one or two builds.
+
+The pack remains a candidate, not a bound component. The listing does not identify the wire gauge,
+connector, exact cell revision, protection thresholds, or a fitted thermistor. Supplier evidence
+must confirm those details and the exact shipped revision. The existing NTCLE317E4103SBA is bonded
+to the pack body and independently gates charging on the hub. The functional specification does
+not require pack-controlled discharge temperature cutoff; that additional condition came from the
+tentative M65A pack guidance and follows that cell if it is used.
+
+The Samsung INR21700-58E is the cheapest credible bare-cell alternative found. It was in stock at
+[18650 Battery Store](https://www.18650batterystore.com/products/samsung-58e-21700-battery) for
+USD 3.15 and at
+[NKON](https://www.nkon.nl/rechargeable/li-ion.html?brand=Samsung) for EUR 3.45 on 2026-07-30. Its
+10.7 A continuous
+rating clears the load, but the US store offers online international cell shipping only to Canada,
+not Italy. More importantly, either listing is for a bare cell, so protection, welded connections,
+insulation, leads, and assembly evidence still have to be purchased. Its low cell price therefore
+does not beat the Keeppower pack on completed-unit cost.
+
+The filed Molicel INR-21700-M65A remains a feasibility reference rather than the preferred
+candidate: 23.4 Wh typical, 26 A continuous discharge, and a conservative 21.7 by 71.0 mm envelope.
+NKON listed it out of stock on 2026-07-30, while Akkuparts24 offered only a September 2026 preorder.
 
 The filed one-page manufacturer sheet and Molicel's product page disagree on height, 71.0 against
 70.2 mm, so mechanical work uses the larger value. A newer public but tentative approval sheet
@@ -41,12 +67,11 @@ adds detailed pack rules, but the distributor blocks downloading it into the imm
 several of its own performance and regulatory fields remain TBD or estimated. It is useful
 reconnaissance, not V1 evidence.
 
-The cell is bare. A qualified assembly must bind welded tabs, insulation, thermistor, lead wire,
-connector, transport evidence, and a cell-bonded protection circuit that independently disconnects
-both charge and discharge for overtemperature. It must also cut off overcharge, overdischarge,
-charge overcurrent, discharge overcurrent, and short circuit. The existing hub interlock remains a
-separate, tighter charging safeguard and cannot substitute for pack protection because it has no
-authority over discharge.
+If the bare M65A is retained, a qualified assembly must bind welded tabs, insulation, thermistor,
+lead wire, connector, transport evidence, and the cell-bonded protection circuit required by its
+pack guidance. For any selected pack, the product contract requires overcharge, overdischarge,
+overcurrent, and short-circuit cutoff. The existing hub interlock independently enforces the
+qualified charging temperature range.
 
 ABLIC's S-82D1A family demonstrates that a 1-cell protector can combine an external NTC with
 separate temperature, voltage, overcurrent, and short-circuit decisions. It is only an architecture

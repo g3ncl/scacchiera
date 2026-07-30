@@ -16,7 +16,7 @@ from hardware.cad.power_rail_fit import (
 )
 
 
-def test_candidate_cell_fits_inside_the_protected_pack_allocation() -> None:
+def test_candidate_protected_body_fits_inside_pack_allocation() -> None:
     assert CELL_LENGTH_MM < PACK_LENGTH_MM
     assert CELL_DIAMETER_MM < PACK_WIDTH_MM
     assert CELL_DIAMETER_MM < PACK_HEIGHT_MM

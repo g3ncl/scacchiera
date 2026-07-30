@@ -1,6 +1,6 @@
 ---
 type: log
-date_updated: 2026-07-29
+date_updated: 2026-07-30
 tags:
   - wiki/log
 ---
@@ -862,3 +862,23 @@ The complete gate regenerated all four boards with zero DRC violations, unconnec
 parity issues, passed mypy on 81 source files, and passed all 133 tests. The build123d import emits
 14 upstream Python 3.14 deprecation warnings; they do not change the generated geometry or test
 result.
+
+## [2026-07-30] research | Prefer completed-pack cost over bare-cell price
+
+Compared current 21700 offers against the 4.442 A RMS and 5.871 A peak battery bounds. The Samsung
+58E at 18650 Battery Store was the cheapest credible cell at USD 3.15, but the seller does not offer
+online lithium-cell shipping to Italy and the offer excludes protection and assembly. NKON listed
+the same bare cell at EUR 3.45.
+
+Recorded Keeppower's wired 1S1P 6000 mAh protected pack as the leading total-cost candidate. Its
+European listing gives 5900 mAh minimum, 12 A continuous discharge, the four mandatory electrical
+protections, and a maximum listed body of 75.45 x 22.25 mm. The roughly EUR 11 price includes the
+protection PCB and leads. Selection remains open until the cell revision, protection thresholds,
+wire gauge, connector, thermistor retention, exact construction, and transport evidence are filed.
+
+Expanded the mechanical pack allocation laterally from 80 x 23 x 23 mm to 80 x 26 x 23 mm. This
+keeps the pack below the 24 mm rail height while reserving side space for the bonded thermistor.
+The board position and 125 mm unused rail length do not change.
+
+The regenerated STEP and all four allocation tests pass. Mypy is clean on 81 source files and all
+133 tests pass. The 14 warnings are the existing upstream Python 3.14 lib3mf deprecations.

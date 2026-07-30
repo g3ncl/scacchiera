@@ -34,12 +34,34 @@ holder walls are thin, and any pouch under about 12 mm is comfortable.
 [usable_rail_width_mm::46] [usable_rail_height_mm::24] [hub_rail_free_length_mm::148]
 
 The custom-board path now has an executable allocation rather than only a cross-section argument.
-`hardware/cad/power_rail_fit.py` reserves 80 x 23 x 23 mm for the complete protected assembly and
+`hardware/cad/power_rail_fit.py` reserves 80 x 26 x 23 mm for the complete protected assembly and
 places it lengthwise beside the 90 x 32 x 10 mm power-board envelope. Including 5 mm end and
 inter-assembly clearances, it leaves 125 mm of the 310 mm rail length. The STEP is a supplier
 acceptance envelope, not evidence that a pack is qualified or that its lead bend fits.
 
 ## Current 21700 decision
+
+The best total-cost candidate found on 2026-07-30 is the
+[Keeppower wired 1S1P 6000 mAh pack](https://www.akkuteile.de/en/keeppower-1s1p-21700-6000mah-3-6v-3-7v-li-ion-battery-pcb/bms-protected-with-cable-connector_12148_3847),
+not the cheapest loose cell. Its European distributor lists a Seiko protection PCB, 5900 mAh
+minimum, 12 A continuous discharge, 22.00 +/- 0.25 mm diameter, and 75.2 +/- 0.25 mm body length.
+[Keeppower's shop](https://www.keeppower.de/power-bank-mobile-energie/akkupack) listed the wired pack
+from EUR 11.00. At 21.6 Wh nominal it gives up 7.7 percent of the M65A's energy, but it clears the
+4.442 A RMS and 5.871 A peak bounds and includes the protection PCB and leads.
+
+The [Samsung 58E at 18650 Battery Store](https://www.18650batterystore.com/products/samsung-58e-21700-battery)
+was only USD 3.15, with 5330 mAh and 10.7 A continuous discharge. It is not a practical Italian
+supply path because the seller's
+[shipping policy](https://www.18650batterystore.com/en-au/pages/shipping-and-returns) limits online
+international battery shipping to Canada. NKON listed the same cell in Europe for EUR 3.45. Both
+are bare-cell offers, so the headline saving disappears once protection, welding, insulation,
+wires, and qualification are included.
+
+The Keeppower pack is not selected yet. The public listing omits its exact cell revision, wire
+gauge, connector, protection thresholds, and thermistor. Those must be documented, and the
+NTCLE317E4103SBA must be retained against the pack body before V1 and V7 can close. Its maximum
+listed body now drives the CAD reference and the extra lateral allocation leaves room for that
+sensor.
 
 The [[inr-21700-m65a]] proves that a single large cylindrical cell can meet the electrical and
 geometric target, but it is not selected. [NKON](https://www.nkon.nl/en/molicel-inr21700-m65a-6500mah-26a.html)
@@ -52,7 +74,7 @@ envelope and keeps the source contradiction open.
 The more important boundary is the pack, not the can. Molicel's newer tentative approval sheet
 requires a protection circuit and recommends direct FET cutoff of both charge and discharge on
 cell overtemperature. The hub's independent thermistor window controls charging only. A qualified
-assembly therefore still needs a cell-bonded 1S protector with NTC, back-to-back FETs, voltage,
+M65A assembly therefore still needs a cell-bonded 1S protector with NTC, back-to-back FETs, voltage,
 charge-current, discharge-current, and short-circuit protection, plus welded tabs and insulation.
 [ABLIC's S-82D1A family](https://www.ablic.com/en/semicon/datasheets/power-management-ic/lithium-ion-battery-protection-ic/s-82d1a/)
 demonstrates this architecture, but no exact suffix or pack assembler is bound. Adding an invented
@@ -61,7 +83,7 @@ generic protection board would not close V1.
 Two European assemblers are plausible quote candidates, not selected suppliers.
 [Eltec](https://www.elteconline.com/en/about-us/) advertises custom battery packs from Italy, while
 [ANV Production](https://anvproduction.pl/en/battery-packs/) advertises 21700 pack assembly,
-prototypes, and small-to-medium production runs from Poland. A useful response must identify the
+prototypes, and small-to-medium production runs from Poland. An M65A response must identify the
 exact cell and protection circuit, both temperature cutoffs, voltage and current thresholds,
 thermistor, interconnect, insulation, connector, lead gauge, assembly drawing, test record, and
 transport evidence. Price or availability alone cannot close V1. Neither company has been

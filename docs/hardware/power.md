@@ -99,21 +99,21 @@ each contact at 8.5 A. The mating receptacle housings are Molex 430250800 and 43
 430300038 female terminals for 18 AWG wire. Exact wire, qualified crimp or pre-crimped lead, color
 coding, strain relief, and the protected battery assembly still have to be bound before V1 can close.
 
-The filed Molicel INR-21700-M65A demonstrates the electrical and geometric feasibility of one large
-cell. It stores 23.4 Wh typically, has a conservative 21.7 by 71.0 mm envelope, and permits 26 A
-continuous discharge. Placed lengthwise in the player rail, its diameter is the limiting
-cross-section. It is a bare cell, not permission to install an unprotected loose cell. It was out
-of stock at NKON on 2026-07-30, and its qualified assembly must directly disconnect both charge and
-discharge on cell overtemperature.
+The leading low-cost candidate is Keeppower's wired 1S1P 21700 protected pack. Its distributor
+listing gives 21.6 Wh nominal, 12 A continuous discharge, and a maximum listed body of 75.45 by
+22.25 mm. It clears the 4.442 A RMS and 5.871 A peak load bounds, while its protection PCB covers
+overcharge, overdischarge, overcurrent, and short circuit. It is not yet bound because wire gauge,
+connector, exact thresholds, shipped revision, thermistor attachment, and lead bend remain open.
+The filed Molicel INR-21700-M65A remains the higher-capacity feasibility reference, but it is bare
+and currently unavailable.
 
-`hardware/cad/power_rail_fit.py` reserves 80 x 23 x 23 mm for the complete protected assembly,
-rather than fitting only the bare can. The 71.0 x 21.7 mm candidate fits inside that allocation,
-which sits lengthwise beside a conservative 90 x 32 x 10 mm power-board envelope with a 5 mm gap.
+`hardware/cad/power_rail_fit.py` reserves 80 x 26 x 23 mm for the complete protected assembly.
+The 75.45 x 22.25 mm Keeppower body fits inside that allocation, with lateral room reserved for the
+cell-bonded thermistor rather than stacking it against the 24 mm rail height. The allocation sits
+lengthwise beside a conservative 90 x 32 x 10 mm power-board envelope with a 5 mm gap.
 Both fit the 310 x 46 x 24 mm service volume and leave 125 mm of rail length after the end
-clearances. This is an allocation, not pack evidence: its extra 9 mm of length and 1.3 mm of
-cross-section must contain the actual protection PCB, welded tabs, insulation, sensor, and lead
-exit. The supplier drawing and cable bend still have to pass the generated STEP fit before V7 can
-close.
+clearances. This is an allocation, not pack evidence. The supplier drawing, NTC retention, lead
+exit, connector, and cable bend still have to pass the generated STEP fit before V7 can close.
 
 ## Board, panel, and release state
 

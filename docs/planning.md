@@ -56,11 +56,12 @@ scoped test-article order. V0 through V9 permit a final-board order.
   and module straps are not yet bound. The Micro-Fit mating housings and 18 AWG female terminals
   are now exact, but the protected cell assembly, wire, qualified crimp or pre-crimped leads, color
   coding, and assembled harness are not yet bound. The load budget conservatively
-  uses 320 mA each. The Molicel M65A remains only a geometric and electrical candidate: it was out
-  of stock at NKON on 2026-07-30, its filed sheet conflicts with the product page on cell height,
-  and no qualified pack assembly exists. The pack protector must directly disconnect both charge
-  and discharge on cell overtemperature; the hub's charge-only interlock cannot satisfy that
-  assembly obligation. Every fitted board record has dated availability,
+  uses 320 mA each. A Keeppower wired 1S1P 21700 6000 mAh protected pack is now the leading
+  total-cost candidate at about EUR 11: 12 A continuous, 5900 mAh minimum, and the four mandatory
+  electrical protections. V1 remains open because its exact cell revision, protection thresholds,
+  wire gauge, connector, thermistor attachment, and shipped construction are not documented. The
+  Molicel M65A remains a higher-capacity feasibility reference but is unavailable and would need a
+  custom protected assembly. Every fitted board record has dated availability,
   immutable manufacturer sources, wiki ingestion, library or interface proof, ratings, model
   treatment, and no open conflict. The AP63203WU-7, AP22811AW5-7, TLV7042DGKR and NR6045S4R7MT
   records include their exact selected limits and footprints. TLV7042DGKR uses the manufacturer's
@@ -132,7 +133,7 @@ scoped test-article order. V0 through V9 permit a final-board order.
 - [ ] V7 mechanical and fabrication preflight: no fab quote exists for any board at its final
   dimensions. The hub is 162 x 46 mm and the matrix 300 x 300 mm, both 2-layer; the matrix is
   area-dominated and is the likely largest single line in the product. A parametric power-rail fit
-  reserves 80 x 23 x 23 mm for the complete protected cell assembly beside the 90 x 32 x 10 mm
+  reserves 80 x 26 x 23 mm for the complete protected cell assembly beside the 90 x 32 x 10 mm
   power-board envelope and leaves 125 mm of rail length after the end clearances. It proves an
   allocation exists, not that an unbound pack, its lead exit, or the other rail contents fit.
 - [ ] V8 test-article measurement and model calibration

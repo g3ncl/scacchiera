@@ -74,13 +74,13 @@ cannot override the qualified charge range. Hub L1 is the fully documented [[nr6
 the earlier [[swpa5045s4r7mt]] catalog binding is rejected because its claimed MPN is absent from
 the manufacturer series table.
 
-The [[inr-21700-m65a]] remains a feasibility candidate rather than a selected cell. It was out of
-stock at NKON on 2026-07-30, its public sources disagree on height, and its pack guidance requires
-cell-bonded protection that opens both charge and discharge on overtemperature. The hub's tighter
-charge-only interlock remains useful independent protection but cannot replace that pack function.
-A parametric rail-fit model reserves 80 x 23 x 23 mm for that complete protected assembly beside
-the 90 x 32 x 10 mm power-board envelope. The allocation fits with 125 mm of rail length left, but
-the exact pack drawing, lead bend, and retention remain open.
+The leading total-cost battery candidate is now a wired Keeppower 1S1P 21700 protected pack. Its
+21.6 Wh nominal energy and 12 A continuous rating clear the electrical bounds, and the roughly
+EUR 11 article includes a protection PCB and leads. The [[inr-21700-m65a]] remains the unavailable
+higher-capacity reference. A parametric rail-fit model reserves 80 x 26 x 23 mm around the maximum
+listed Keeppower body beside the 90 x 32 x 10 mm power-board envelope. The allocation fits with
+125 mm of rail length left, but the exact cell revision, protection thresholds, wire, connector,
+thermistor retention, lead bend, and supplier drawing remain open.
 
 ## NFC Game Board: the reference project
 
