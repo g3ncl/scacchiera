@@ -714,6 +714,36 @@ criteria:
     margin: 796 ns at that ceiling leaves a fifth of standard mode. It does not leave fast mode, which needs under 300 ns and so under about 70 pF of bus, so the bus is a standard-mode bus and firmware must not raise it.
     test_ids: [TEST-HUB-I2C-001]
 
+  HUB-DISPLAY-SPI-EDGE-TIME:
+    description: Rise or fall time at either SSD1362 display input.
+    requirement_ids: [IF-DISPLAY-001]
+    unit: ns
+    limits: {maximum: 15.0}
+    evidence: {class: Datasheet, source: Vault/Scacchiera/Datasheets/SSD1362_SOLOMON.pdf, locator: "Table 12-4, Serial Interface Timing Characteristics, tR and tF"}
+    operating_conditions: ESP32-C6 driving either display through a hub trace, connector, harness and module input whose complete load is at most 50 pF.
+    margin: The weaker guaranteed MCU drive side produces a 12.96 ns edge at 50 pF, leaving 2.04 ns and placing the absolute derived load ceiling at 57.86 pF.
+    test_ids: [TEST-HUB-DISPLAY-SPI-001]
+
+  HUB-DISPLAY-SPI-WRITE-TIMING:
+    description: Mode-0 SSD1362 clock and write-data timing at either display input.
+    requirement_ids: [IF-DISPLAY-001]
+    unit: ns
+    limits: {period_minimum: 100.0, high_minimum: 20.0, low_minimum: 25.0, data_setup_minimum: 15.0, data_hold_minimum: 30.0}
+    evidence: {class: Datasheet, source: Vault/Scacchiera/Datasheets/SSD1362_SOLOMON.pdf, locator: "Table 12-4, Serial Interface Timing Characteristics"}
+    operating_conditions: Four-wire SPI mode 0 at 4 MHz with the complete clock and data load bounded at 50 pF per display input.
+    margin: A 250 ns period leaves 112.04 ns after the conservative edge allowance in either half-cycle, over three times the largest 30 ns setup or hold obligation.
+    test_ids: [TEST-HUB-DISPLAY-SPI-001]
+
+  HUB-DISPLAY-SPI-CONTROL-TIMING:
+    description: SSD1362 chip-select and command/data framing at either display input.
+    requirement_ids: [IF-DISPLAY-001]
+    unit: ns
+    limits: {cs_setup_minimum: 20.0, cs_hold_minimum: 10.0, dc_setup_minimum: 15.0, dc_hold_minimum: 40.0}
+    evidence: {class: Datasheet, source: Vault/Scacchiera/Datasheets/SSD1362_SOLOMON.pdf, locator: "Table 12-4, Serial Interface Timing Characteristics, tCSS, tCSH, tDCS and tDCH"}
+    operating_conditions: Four-wire SPI mode 0 at 4 MHz with CS# and D/C# framed a full clock period around each burst and the complete load bounded at 50 pF per display input.
+    margin: A full 250 ns period less the 12.96 ns edge leaves 237.04 ns of framing, close to six times the 40 ns D/C# hold that is the largest control obligation in the table.
+    test_ids: [TEST-HUB-DISPLAY-SPI-001]
+
   MATRIX-SERIAL-TRANSITION-RATE:
     description: Edge rate the matrix shift registers see on the hub's serial link.
     requirement_ids: [PHY-RF-001]

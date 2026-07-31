@@ -882,3 +882,28 @@ The board position and 125 mm unused rail length do not change.
 
 The regenerated STEP and all four allocation tests pass. Mypy is clean on 81 source files and all
 133 tests pass. The 14 warnings are the existing upstream Python 3.14 lib3mf deprecations.
+
+## [2026-07-30] ingest | File the SSD1362 controller timing
+
+Filed and read Solomon Systech's complete 62-page SSD1362 Rev 1.0 data sheet. Added
+[[ssd1362-datasheet]] and [[ssd1362]], then linked the controller to both purchased
+[[er-oledm3-12-1w]] modules. Table 12-4 supplies the four-wire SPI limits missing from the module
+capture: 100 ns minimum clock period, 15 ns maximum edges, and bounded clock, data, chip-select and
+address setup and hold times.
+
+The 15 ns edge limit derives a 57.86 pF absolute load ceiling from the weaker guaranteed ESP32-C6
+drive side. The V3 implementation uses a 50 pF complete-load acceptance limit and fixes display SPI
+to mode 0 at 4 MHz. The exact harness remains a V1 blocker until its cable, connector and module
+input stay within that bound. The data sheet's advance-information status and 25-degree timing
+condition remain explicit rather than being treated as guaranteed temperature-corner evidence.
+
+## [2026-07-31] verify | Extend the display SPI segment to the control lines
+
+Added `HUB-DISPLAY-SPI-CONTROL-TIMING` so the segment covers the whole of [[ssd1362]] Table 12-4
+rather than only the write-data rows. Chip select needs 20 ns of setup and 10 ns of hold, and
+command/data needs 15 ns and 40 ns, which makes the 40 ns D/C# hold the largest single obligation
+on the bus, larger than the 30 ns write-data hold the earlier criterion treated as the worst case.
+
+Framing both control lines a full clock period around each burst leaves 237.04 ns at the bounded
+50 pF load, close to six times that obligation. Mypy is clean on 81 source files and the signal
+integrity and traceability tests pass.

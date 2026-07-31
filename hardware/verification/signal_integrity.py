@@ -162,3 +162,70 @@ class SerialLinkBudget:
         the swing the quoted rate applies to.
         """
         return self.rise_time_s * 1e9 / (0.8 * MCU_V)
+
+
+# SSD1362 Table 12-4 requires a 100 ns clock period, 15 ns maximum rise and
+# fall times, 15 ns of write-data setup and 30 ns of hold. The display harness
+# is not bound yet, so 50 pF is an acceptance limit for the complete load at
+# each display input, including the hub trace, cable, connector and module.
+DISPLAY_SPI_CLOCK_HZ = 4e6
+DISPLAY_SPI_LOAD_BOUND_PF = 50.0
+DISPLAY_SPI_EDGE_LIMIT_NS = 15.0
+DISPLAY_SPI_PERIOD_MIN_NS = 100.0
+DISPLAY_SPI_HIGH_MIN_NS = 20.0
+DISPLAY_SPI_LOW_MIN_NS = 25.0
+DISPLAY_SPI_DATA_SETUP_MIN_NS = 15.0
+DISPLAY_SPI_DATA_HOLD_MIN_NS = 30.0
+
+# Same table, control lines. D/C# hold is the largest obligation on the bus, so
+# it, not the write-data hold, is what sizes the framing the driver must keep.
+DISPLAY_SPI_CS_SETUP_MIN_NS = 20.0
+DISPLAY_SPI_CS_HOLD_MIN_NS = 10.0
+DISPLAY_SPI_DC_SETUP_MIN_NS = 15.0
+DISPLAY_SPI_DC_HOLD_MIN_NS = 40.0
+
+
+@dataclass(frozen=True)
+class DisplaySpiBudget:
+    """Mode-0 write timing at either SSD1362 display input."""
+
+    load_pf: float = DISPLAY_SPI_LOAD_BOUND_PF
+    clock_hz: float = DISPLAY_SPI_CLOCK_HZ
+
+    @property
+    def edge_time_s(self) -> float:
+        """Conservative ten-to-ninety edge using the weaker MCU drive side."""
+        return 2.2 * MCU_OUTPUT_OHM * self.load_pf * 1e-12
+
+    @property
+    def clock_period_s(self) -> float:
+        return 1.0 / self.clock_hz
+
+    @property
+    def timing_window_s(self) -> float:
+        """Half-cycle left after charging or discharging the bounded load."""
+        return self.clock_period_s / 2.0 - self.edge_time_s
+
+    @property
+    def maximum_load_pf(self) -> float:
+        """Total load that would consume the controller's complete edge limit."""
+        return DISPLAY_SPI_EDGE_LIMIT_NS * 1e-9 / (2.2 * MCU_OUTPUT_OHM) * 1e12
+
+    @property
+    def control_obligation_ns(self) -> float:
+        """Longest setup or hold the controller asks of CS# or D/C#."""
+        return max(
+            DISPLAY_SPI_CS_SETUP_MIN_NS,
+            DISPLAY_SPI_CS_HOLD_MIN_NS,
+            DISPLAY_SPI_DC_SETUP_MIN_NS,
+            DISPLAY_SPI_DC_HOLD_MIN_NS,
+        )
+
+    @property
+    def control_framing_s(self) -> float:
+        """Framing a driver gets by holding CS# and D/C# a whole clock period.
+
+        The ESP32-C6 SPI peripheral asserts both a full cycle around the burst,
+        so the period, less one edge, is what the display actually sees.
+        """
+        return self.clock_period_s - self.edge_time_s

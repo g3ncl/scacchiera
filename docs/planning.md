@@ -111,8 +111,12 @@ scoped test-article order. V0 through V9 permit a final-board order.
     junction-temperature estimates are not done.** TI specifies the error-amplifier
     transconductance only typically, so the plus or minus 30 percent sweep is not release evidence.
   - Waveform integrity: I2C, the light-bar data line, the matrix serial link, and the filtered
-    Type-C CC current advertisement are bounded against their sources. **The display SPI segment is
-    not done.**
+    Type-C CC current advertisement are bounded against their sources. The display SPI segment is
+    now bounded too: SSD1362 Table 12-4 caps both edges at 15 ns, which the ESP32-C6's guaranteed
+    drive meets only up to 57.86 pF, so 50 pF is an acceptance limit on the complete clock, data,
+    chip-select and command load at each display input. Period, high, low, write setup and hold,
+    and the CS# and D/C# framing all clear at 4 MHz. **The harness that has to stay inside 50 pF is
+    still unbound, which is a V1 blocker rather than a V3 one.**
 - [ ] V3 power-board addition: `hardware/tests/test_sim_power_boost.py` sweeps 162 switching-stage
   corners and passes ripple, feedback and an 80 percent efficiency current bound at the full 10 W
   obligation. `hardware/tests/test_sim_power_path.py` covers eleven averaged NVDC states and faults,

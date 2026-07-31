@@ -1,6 +1,6 @@
 ---
 type: index
-date_updated: 2026-07-29
+date_updated: 2026-07-30
 tags:
   - wiki/index
 ---
@@ -73,6 +73,7 @@ One [[wiki/source]] summary per ingested raw source. Factual, no interpretation.
 | [[tps61088rhlr-datasheet]] | component datasheet | 2026-07-29 |
 | [[micro-fit-3-0-mating-evidence]] | connector manufacturer evidence | 2026-07-29 |
 | [[usb-type-c-r2-current-advertisement]] | USB Type-C specification scoped extract | 2026-07-29 |
+| [[ssd1362-datasheet]] | component datasheet | 2026-07-30 |
 
 ## Entities
 
@@ -97,7 +98,8 @@ People, tools, orgs, repos. See [[wiki/entity]] pages.
 | [[tlv7042]] | 1 | 2026-07-26 |
 | [[ntcle317e4103sba]] | 1 | 2026-07-26 |
 | [[swpa5045s4r7mt]] | 1 | 2026-07-26 |
-| [[er-oledm3-12-1w]] | 1 | 2026-07-29 |
+| [[er-oledm3-12-1w]] | 2 | 2026-07-30 |
+| [[ssd1362]] | 1 | 2026-07-30 |
 | [[bq25619rtwr]] | 1 | 2026-07-29 |
 | [[bq25895rtwr]] | 1 | 2026-07-29 |
 | [[tps61088rhlr]] | 1 | 2026-07-29 |

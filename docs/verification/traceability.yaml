@@ -210,8 +210,8 @@ requirements:
   - id: IF-DISPLAY-001
     source: {path: docs/functional/interface.md, locator: Displays}
     statement: Two 100 by 33 mm ER-OLEDM3.12-1W displays fit one per player rail.
-    criterion_ids: [IF-DISPLAY-COUNT, IF-DISPLAY-WIDTH, IF-DISPLAY-HEIGHT]
-    test_ids: [TEST-IF-DISPLAY-001]
+    criterion_ids: [IF-DISPLAY-COUNT, IF-DISPLAY-WIDTH, IF-DISPLAY-HEIGHT, HUB-DISPLAY-SPI-EDGE-TIME, HUB-DISPLAY-SPI-WRITE-TIMING, HUB-DISPLAY-SPI-CONTROL-TIMING]
+    test_ids: [TEST-IF-DISPLAY-001, TEST-HUB-DISPLAY-SPI-001]
   - id: IF-DISPLAY-002
     source: {path: docs/functional/interface.md, locator: Displays}
     statement: Displays show clocks, setup, countdowns, faults, and battery state.

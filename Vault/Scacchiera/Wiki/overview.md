@@ -82,6 +82,12 @@ listed Keeppower body beside the 90 x 32 x 10 mm power-board envelope. The alloc
 125 mm of rail length left, but the exact cell revision, protection thresholds, wire, connector,
 thermistor retention, lead bend, and supplier drawing remain open.
 
+The filed [[ssd1362-datasheet]] now supplies the timing the purchased display-module document
+omits. Its 15 ns edge limit produces a 50 pF complete-load acceptance bound for each display SPI
+input. At the fixed 4 MHz bus rate, the derived clock and write windows clear the controller table.
+The exact cable still has to prove that load bound, and the controller document remains advance
+information with timing characterized only at 25 degrees Celsius.
+
 ## NFC Game Board: the reference project
 
 The wiki's first ingest covers [[nfc-game-board-project|NFC Game Board]], [[ben-bulsink|Ben
