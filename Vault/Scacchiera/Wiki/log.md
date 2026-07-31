@@ -907,3 +907,78 @@ on the bus, larger than the 30 ns write-data hold the earlier criterion treated 
 Framing both control lines a full clock period around each burst leaves 237.04 ns at the bounded
 50 pF load, close to six times that obligation. Mypy is clean on 81 source files and the signal
 integrity and traceability tests pass.
+
+## [2026-07-31] verify | Close the warm reset, power-off and brownout cases
+
+Walking the generated hub schematic showed the 3.3 V rail has no discharge path at all. The
+[[ap63203wu-7]] is the fixed-output part, so there is no feedback divider and no output discharge,
+and every pull on the board ends on a high-impedance node. The decay was therefore unspecified
+leakage, which matters because [[tca9535pwr]] section 7.4.1 requires VCC below VPORF, 0.75 V
+minimum, before another power-on reset happens.
+
+Added hub R36, 10 k across 3V3, reusing an already-bound resistor. It reaches that floor in 1.46 s
+against a 2.0 s limit, discharging 97.7 uF summed from the hub and matrix schematics plus a 20 uF
+acceptance allowance for each unbound display module. It costs 333 uA while the board runs, 0.025
+percent of the coincident rail load, and nothing while the board is off. That time is also the
+off-time that turns repeated brownout into a bounded case.
+
+The warm reset case needed no change but did need stating. MCU_EN reaches only its pull-up, delay
+capacitor and recovery pad, so no peripheral resets with the MCU, and the TCA9535 has no reset pin,
+so its ten driven nets survive at whatever firmware last wrote. That enumeration is now generated
+from the schematic and handed to V6.
+
+A fresh Freerouting session was needed for R36. The promoted route passes at zero DRC violations,
+zero unconnected items and zero parity issues. Mypy is clean on 83 source files.
+
+## [2026-07-31] verify | Bound junction temperature for every dissipating part
+
+Read the thermal tables of [[ap63203wu-7]], [[tps2553dbvr-1]], [[tps61088rhlr]], [[bq25895rtwr]] and
+[[csd25404q3]]: 89, 182.6, 38.8, 31.8 and 55 degrees per watt, with the CSD sheet also giving 160
+for minimum pad copper, and a 150 degree junction limit throughout.
+
+Stating one junction temperature would need an ambient nobody has measured, so each case is
+inverted into the highest ambient the part tolerates. The light-bar limiter reaches 145.1 degrees,
+the charger 103.5, the reverse FET 96.5 on the pessimistic 160 figure, the buck 81.0, and the boost
+53.0. The allowance they are judged against is 45 degrees: the functional specification's 25 degree
+room plus a 20 degree enclosure rise, which is an acceptance limit on the enclosure, not a
+measurement.
+
+The boost is the tightest in the product by a wide margin, and only because the bound charges the
+controller the whole stage's 20 percent efficiency floor, inductor loss included. Recorded as a
+bound rather than as margin, with V8 owing a measurement of both it and the enclosure rise.
+
+## [2026-08-01] verify | Close the current-limit latch and open-load fault cases
+
+Read [[tps2553dbvr-1]]'s fault timing: the latch-off suffix holds a 5 to 10 ms overcurrent deglitch,
+and section 9.5.1's formulas give 610, 667 and 734 mA at the board's 39 k ILIM resistor. Both
+numbers matter in opposite directions.
+
+A cold start into both bars' 202.9 uF would draw 1.45 A on the soft-start ramp alone, above the
+limit, so the rail charges at the 610 mA floor and takes 1.66 ms. That is a third of the 5 ms
+minimum deglitch, and the rail could carry 610 uF before a normal power-on latched itself off. A
+real short is bounded the other way at 10 ms and 36.7 mJ, with the transient junction rise left to
+V8 because the data sheet does not tabulate it.
+
+The open-cable sweep, which reads the schematic for nets that appear only on connectors, found one:
+LED_RETURN carries the first bar's data output to the second bar's input, and both bars stay powered
+from the same limiter, so unplugging the first left a pixel input floating at 5 V. Hub R37 defines
+it. An open load stays invisible to the limiter itself, which reports only overcurrent and reverse
+voltage.
+
+Fixing that turned up a separate latent defect. The reader's VMID pin was given two net names,
+`NFC_VMID` at its stabilizer and `NFC_VMID_TAP` at the receive bias, so SKiDL merged them and picked
+between the names by build order. The board's net name flipped between builds, and the layout
+carried a net alias to paper over it, which made a fresh route fail to apply. The second name is
+gone and the alias with it. The rerouted board passes at zero DRC violations, zero unconnected items
+and zero parity issues, and mypy is clean on 87 source files.
+
+## [2026-08-01] verify | Full gate after the three V3 segments
+
+`make check` regenerated all four boards at zero DRC violations, zero unconnected items and zero
+parity issues, mypy passed on 88 source files, and all 155 tests passed. The hub gained R36 and R37
+and a fresh reviewed route; nothing else moved.
+
+Two stale figures were corrected while passing through: the hub BOM is 14.090 EUR across 40 fitted
+lines rather than 13.768 across 39, and the traceability manifest holds 83 requirements and 80
+numeric criteria. Neither drift came from this work, but both were quoted next to numbers it
+touched.

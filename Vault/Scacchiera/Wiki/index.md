@@ -69,8 +69,8 @@ One [[wiki/source]] summary per ingested raw source. Factual, no interpretation.
 | [[swpa5045s4r7mt-datasheet]] | component datasheet | 2026-07-26 |
 | [[er-oledm3-12-1w-manufacturer-evidence]] | component manufacturer evidence | 2026-07-29 |
 | [[bq25619rtwr-datasheet]] | component datasheet | 2026-07-29 |
-| [[bq25895rtwr-datasheet]] | component datasheet | 2026-07-29 |
-| [[tps61088rhlr-datasheet]] | component datasheet | 2026-07-29 |
+| [[bq25895rtwr-datasheet]] | component datasheet | 2026-07-31 |
+| [[tps61088rhlr-datasheet]] | component datasheet | 2026-07-31 |
 | [[micro-fit-3-0-mating-evidence]] | connector manufacturer evidence | 2026-07-29 |
 | [[usb-type-c-r2-current-advertisement]] | USB Type-C specification scoped extract | 2026-07-29 |
 | [[ssd1362-datasheet]] | component datasheet | 2026-07-30 |
@@ -135,10 +135,10 @@ One exact source summary per purchased fitted MPN. The structured audit is
 | [[7m27100009-datasheet]] | TXC | 2026-07-26 |
 | [[a1257wr-s-4p-datasheet]] | CJT | 2026-07-26 |
 | [[ap22811aw5-7-datasheet]] | Diodes Incorporated | 2026-07-26 |
-| [[ap63203wu-7-datasheet]] | Diodes Incorporated | 2026-07-26 |
+| [[ap63203wu-7-datasheet]] | Diodes Incorporated | 2026-07-31 |
 | [[bar64-02v-datasheet]] | Jiangsu Changjing Electronics Technology | 2026-07-26 |
 | [[bat54h-datasheet]] | Jiangsu Changjing Electronics Technology | 2026-07-29 |
-| [[bq25895rtwr-datasheet]] | Texas Instruments | 2026-07-29 |
+| [[bq25895rtwr-datasheet]] | Texas Instruments | 2026-07-31 |
 | [[bss123-7-f-datasheet]] | Diodes Incorporated | 2026-07-26 |
 | [[bss84-7-f-datasheet]] | Diodes Incorporated | 2026-07-26 |
 | [[cc0603frnpo9bn221-datasheet]] | Yageo | 2026-07-26 |
@@ -152,7 +152,7 @@ One exact source summary per purchased fitted MPN. The structured audit is
 | [[cl21a226maqnnne-datasheet]] | Samsung Electro-Mechanics | 2026-07-29 |
 | [[cl21a475kaqnnne-datasheet]] | Samsung Electro-Mechanics | 2026-07-29 |
 | [[cl32a107mqvnnne-datasheet]] | Samsung Electro-Mechanics | 2026-07-26 |
-| [[csd25404q3-datasheet]] | Texas Instruments | 2026-07-29 |
+| [[csd25404q3-datasheet]] | Texas Instruments | 2026-07-31 |
 | [[dfe252012f-1r0m-p2-datasheet]] | Murata | 2026-07-29 |
 | [[esp32-c6-mini-1u-n4-datasheet]] | Espressif Systems | 2026-07-26 |
 | [[grm1555c1h221ja01d-datasheet]] | Murata | 2026-07-26 |
@@ -166,12 +166,12 @@ One exact source summary per purchased fitted MPN. The structured audit is
 | [[sm07b-ghs-tb-lf-sn-datasheet]] | JST | 2026-07-29 |
 | [[sn74ahct1g125dbvr-datasheet]] | Texas Instruments | 2026-07-26 |
 | [[t37k3rgb-05c000112u1930-datasheet]] | Harvatek | 2026-07-26 |
-| [[tca9535pwr-datasheet]] | Texas Instruments | 2026-07-26 |
+| [[tca9535pwr-datasheet]] | Texas Instruments | 2026-07-31 |
 | [[tlv7021dckr-datasheet]] | Texas Instruments | 2026-07-29 |
 | [[tlv7042dgkr-datasheet]] | Texas Instruments | 2026-07-26 |
 | [[tlv809k33dbvr-datasheet]] | Texas Instruments | 2026-07-29 |
-| [[tps2553dbvr-1-datasheet]] | Texas Instruments | 2026-07-26 |
-| [[tps61088rhlr-datasheet]] | Texas Instruments | 2026-07-29 |
+| [[tps2553dbvr-1-datasheet]] | Texas Instruments | 2026-07-31 |
+| [[tps61088rhlr-datasheet]] | Texas Instruments | 2026-07-31 |
 | [[usb4105-gf-a-datasheet]] | GCT | 2026-07-26 |
 
 ## V1 component entities
@@ -229,7 +229,7 @@ One exact source summary per purchased fitted MPN. The structured audit is
 | [[sm07b-ghs-tb-lf-sn]] | 1 | 2026-07-29 |
 | [[sn74ahct1g125dbvr]] | 1 | 2026-07-26 |
 | [[t37k3rgb-05c000112u1930]] | 1 | 2026-07-26 |
-| [[tca9535pwr]] | 1 | 2026-07-26 |
+| [[tca9535pwr]] | 1 | 2026-07-31 |
 | [[tlv7021dckr]] | 1 | 2026-07-29 |
 | [[tlv7042dgkr]] | 1 | 2026-07-26 |
 | [[tlv809k33dbvr]] | 1 | 2026-07-29 |

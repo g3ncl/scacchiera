@@ -339,6 +339,15 @@ def _build_power(circuit: Circuit, nets: dict[str, Net]) -> None:
         _connect(nets[net], capacitor, "1")
         _connect(nets["GND"], capacitor, "2")
 
+    # Nothing else discharges this rail. The AP63203 is the fixed-output part,
+    # so there is no feedback divider, it has no output discharge, and every
+    # other pull on the board ends on a high-impedance node. Without this
+    # resistor the rail decays only through unspecified leakage, and the
+    # TCA9535 needs to see below its VPORF before it will power-on reset.
+    bleeder = _rc(circuit, "R36", "10k", "0603WAF1002T5E")
+    _connect(nets["3V3"], bleeder, "1")
+    _connect(nets["GND"], bleeder, "2")
+
 
 def _build_led_rail(circuit: Circuit, nets: dict[str, Net]) -> Net:
     led_limiter = _led_limiter(circuit)
@@ -384,6 +393,12 @@ def _build_led_rail(circuit: Circuit, nets: dict[str, Net]) -> Net:
     led_data_pulldown = _rc(circuit, "R19", "100k", "0603WAF1003T5E")
     _connect(nets["LED_DATA"], led_data_pulldown, "1")
     _connect(nets["GND"], led_data_pulldown, "2")
+    # The second bar's data input arrives from the first bar's output, so with
+    # the first bar unplugged it has no driver at all. Both bars stay powered
+    # from the same limiter, which leaves a pixel input floating at 5 V.
+    led_return_pulldown = _rc(circuit, "R37", "100k", "0603WAF1003T5E")
+    _connect(nets["LED_RETURN"], led_return_pulldown, "1")
+    _connect(nets["GND"], led_return_pulldown, "2")
     return led_data_5v
 
 
@@ -632,7 +647,10 @@ def _build_reader(circuit: Circuit, nets: dict[str, Net]) -> None:
     _connect(rxp, rx_series_r, "2")
     rx_bias = _rc(circuit, "R30", "1k", "0603WAF1001T5E")
     _connect(rxn, rx_bias, "1")
-    _connect(_pin_net(circuit, "NFC_VMID_TAP", reader, "17"), rx_bias, "2")
+    # The same pin the stabilizer sits on. Naming a second net here made SKiDL
+    # merge two names onto one net and pick between them by build order, so the
+    # board's net name flipped and a fresh route could not be applied.
+    _connect(reader["17"].net, rx_bias, "2")
 
 
 def build_hub() -> Circuit:

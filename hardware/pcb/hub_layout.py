@@ -187,6 +187,10 @@ def _placements() -> dict[str, Placement]:
     placements.update(_grid(("C14", "C15", "C17"), (24.0, 30.0), 3, (3.6, 3.8), 90.0))
     # Buck and protected LED rail support.
     placements.update(_grid(("C1", "C2", "C3", "C4"), (39.0, 32.5), 2, (4.0, 3.8), 90.0))
+    # The 3V3 bleeder sits with the output capacitors it discharges, and the
+    # light-bar data pulldown with the buffer and connectors it defines.
+    placements.update(_grid(("R36",), (47.0, 36.3), 1, (2.2, 3.4), 90.0))
+    placements.update(_grid(("R37",), (57.0, 25.0), 1, (2.2, 3.4), 90.0))
     placements.update(_grid(("C10", "C11", "C6"), (48.0, 10.0), 3, (2.6, 3.4), 90.0))
     # MCU support: strapping, I2C, button, latch resistors.
     placements.update(
@@ -416,13 +420,7 @@ def route_board(
             check=True,
         )
     board = pcbnew.LoadBoard(str(board_path))
-    apply_session(
-        board,
-        session_path.read_text(encoding="utf-8"),
-        # The reviewed route predates the explicit tap name. Fresh sessions
-        # already use NFC_VMID_TAP, while the historical one uses NFC_VMID.
-        net_aliases={"NFC_VMID": "NFC_VMID_TAP"},
-    )
+    apply_session(board, session_path.read_text(encoding="utf-8"))
     _postroute_fixups(board)
     if not pcbnew.SaveBoard(str(board_path), board):
         raise OSError(f"could not save routed board {board_path}")

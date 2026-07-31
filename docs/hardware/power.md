@@ -92,6 +92,15 @@ at 2.87 V. A reversed 4.2 V cell leaves `BAT_RAW` at minus 5.8 mV with USB absen
 4.2 V with USB already present, inside the BQ25895 minus 0.3 V absolute limit. The 4.442 A RMS hot
 pass-FET loss bound is 0.334 W and remains a V8 temperature and voltage-drop measurement.
 
+`hardware/tests/test_junction_temperature.py` now puts a bound on that temperature rather than
+leaving it entirely to V8. Stated as the ambient each part tolerates before its junction reaches the
+data sheet limit, the reverse FET reaches its at 96.5 degrees on the 160 degrees per watt the data
+sheet gives for minimum pad copper, and the charger reaches its at 103.5 degrees on the 85 percent
+efficiency floor at the qualified 1.95 A input. The boost is the tightest of the whole product at
+53.0 degrees, because charging it the complete 20 percent stage loss also hands it the inductor's
+share. All three clear the 45 degree allowance, but the boost's 8 degrees is a bound, not margin,
+until V8 measures it.
+
 ## Interconnect and cell
 
 The output uses Molex 430450800 and the cell input uses 430450200. Their manufacturer records rate

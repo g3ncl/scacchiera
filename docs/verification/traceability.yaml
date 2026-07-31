@@ -227,8 +227,8 @@ requirements:
   - id: IF-LIGHTBAR-001
     source: {path: docs/functional/interface.md, locator: Light bars}
     statement: Two 120 by 8.5 mm light-bar PCBs fit one per player rail behind replaceable diffusers.
-    criterion_ids: [IF-LIGHTBAR-ASSEMBLY-COUNT, IF-LIGHTBAR-WIDTH, IF-LIGHTBAR-HEIGHT]
-    test_ids: [TEST-IF-LIGHTBAR-001]
+    criterion_ids: [IF-LIGHTBAR-ASSEMBLY-COUNT, IF-LIGHTBAR-WIDTH, IF-LIGHTBAR-HEIGHT, HUB-LED-RAIL-STARTUP-CURRENT-LIMIT, HUB-LED-RAIL-LATCH-LATENCY]
+    test_ids: [TEST-IF-LIGHTBAR-001, TEST-HUB-LED-RAIL-002, TEST-HUB-OPEN-CABLE-001]
   - id: IF-LIGHTBAR-002
     source: {path: docs/functional/interface.md, locator: Light bars}
     statement: Each light bar has exactly 14 low-current LEDs with every component on the front side.
@@ -269,8 +269,8 @@ requirements:
   - id: POWER-OUTPUT-001
     source: {path: docs/functional/power.md, locator: Peak output}
     statement: The battery subsystem supplies a regulated 5 V at 2 A across the qualified cell-voltage range without USB input power.
-    criterion_ids: [POWER-MODULE-OUTPUT-POWER, POWER-BOOST-OUTPUT-VOLTAGE, POWER-BOOST-RIPPLE, POWER-BOOST-OUTPUT-ESR, POWER-BOOST-PHASE-MARGIN, POWER-BOOST-GAIN-MARGIN, POWER-BOOST-INDUCTOR-PEAK, POWER-BOOST-INDUCTOR-RMS, POWER-CELL-PASS-FET-LOSS]
-    test_ids: [TEST-POWER-OUTPUT-001, TEST-V8-POWER-OUTPUT-001]
+    criterion_ids: [POWER-MODULE-OUTPUT-POWER, POWER-BOOST-OUTPUT-VOLTAGE, POWER-BOOST-RIPPLE, POWER-BOOST-OUTPUT-ESR, POWER-BOOST-PHASE-MARGIN, POWER-BOOST-GAIN-MARGIN, POWER-BOOST-INDUCTOR-PEAK, POWER-BOOST-INDUCTOR-RMS, POWER-CELL-PASS-FET-LOSS, THERMAL-JUNCTION-AMBIENT]
+    test_ids: [TEST-POWER-OUTPUT-001, TEST-V8-POWER-OUTPUT-001, TEST-THERMAL-JUNCTION-001]
   - id: POWER-CHARGE-001
     source: {path: docs/functional/power.md, locator: USB-C charging}
     statement: A compliant 5 V 2 A USB source charges an idle board from 10 to 80 percent in no more than 240 minutes at 20 to 25 degrees Celsius, without requiring USB Power Delivery.
@@ -284,8 +284,8 @@ requirements:
   - id: POWER-CHARGE-003
     source: {path: docs/functional/power.md, locator: USB-C charging}
     statement: The board remains usable on USB while power-path management prioritizes the system and safely reduces charge current when needed.
-    criterion_ids: [HUB-3V3-RIPPLE, HUB-3V3-INDUCTOR-PEAK, HUB-3V3-INDUCTOR-RMS, HUB-CHARGE-SWITCH-DROP, HUB-CHARGE-SWITCH-LIMIT-FLOOR, HUB-3V3-DROPOUT-INPUT, HUB-3V3-STARTUP-INRUSH, HUB-MODULE-LOAD-BUDGET]
-    test_ids: [TEST-POWER-CHARGE-003, TEST-HUB-3V3-001, TEST-HUB-3V3-002, TEST-HUB-CHARGE-PATH-001, TEST-HUB-LOAD-BUDGET-001, TEST-V8-POWER-PATH-001]
+    criterion_ids: [HUB-3V3-RIPPLE, HUB-3V3-INDUCTOR-PEAK, HUB-3V3-INDUCTOR-RMS, HUB-CHARGE-SWITCH-DROP, HUB-CHARGE-SWITCH-LIMIT-FLOOR, HUB-3V3-DROPOUT-INPUT, HUB-3V3-STARTUP-INRUSH, HUB-MODULE-LOAD-BUDGET, HUB-3V3-POR-DISCHARGE, HUB-3V3-BLEED-FRACTION, THERMAL-JUNCTION-AMBIENT]
+    test_ids: [TEST-POWER-CHARGE-003, TEST-HUB-3V3-001, TEST-HUB-3V3-002, TEST-HUB-3V3-003, TEST-HUB-WARM-RESET-001, TEST-THERMAL-JUNCTION-001, TEST-HUB-CHARGE-PATH-001, TEST-HUB-LOAD-BUDGET-001, TEST-V8-POWER-PATH-001]
   - id: POWER-CHARGE-004
     source: {path: docs/functional/power.md, locator: USB-C charging}
     statement: The board never loads a USB source beyond its advertised capability and safely falls back to slower charging.

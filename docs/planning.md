@@ -29,10 +29,10 @@ No gate is complete until its definition of done in
 [simulation-workflow.md](simulation-workflow.md) has recorded evidence. V0 through V7 permit only a
 scoped test-article order. V0 through V9 permit a final-board order.
 
-- [x] V0 requirement traceability: 82 atomic requirements in
+- [x] V0 requirement traceability: 83 atomic requirements in
   [verification/traceability.yaml](verification/traceability.yaml) map the complete functional
   specification and fitted-part absolute-maximum audit to stable test IDs. The manifest pins the
-  reviewed functional sources by SHA-256. Sixty-seven numeric criteria in
+  reviewed functional sources by SHA-256. Eighty numeric criteria in
   [hardware/criteria.yaml](hardware/criteria.yaml) record units, evidence, conditions, and margin.
   `hardware/tests/test_traceability.py` enforces source freshness, schema completeness, unique IDs,
   and bidirectional requirement/criterion links. The 2026-07-26 revision specifies runtime,
@@ -68,7 +68,7 @@ scoped test-article order. V0 through V9 permit a final-board order.
   DGK0008A land pattern because the generic KiCad VSSOP footprint does not meet the board's 0.2 mm
   clearance. The rejected SWPA catalog binding remains as contradiction evidence rather than a
   waiver. Evidence: `make check` regenerated all four boards at zero DRC violations, unconnected
-  items and parity issues, mypy passed on 81 source files, and all 133 tests passed on 2026-07-30.
+  items and parity issues, mypy passed on 88 source files, and all 155 tests passed on 2026-08-01.
 - [x] V2 connectivity and static electrical checks: clean generation runs full SKiDL and KiCad ERC,
   imports reviewed deterministic routing sessions, and runs PCB DRC with schematic parity on all
   four boards. [verification/v2-static.yaml](verification/v2-static.yaml) records the four
@@ -93,9 +93,14 @@ scoped test-article order. V0 through V9 permit a final-board order.
     uses TPS61088 switch-resistance maxima specified across minus 40 to 125 degrees Celsius.
     The power boost also sweeps a derived 15 milliohm assembled-bank ESR acceptance limit.
     **Other temperature corners remain open, and the fitted bank's ESR still needs V8 measurement.**
-  - Startup and transients: soft-start inrush, dropout and hold-up are derived. **Warm reset,
-    power-off discharge and repeated brownout are not done.** USB insertion, removal and rail
-    handover belong to the power module and are V8 measurements.
+  - Startup and transients: soft-start inrush, dropout and hold-up are derived. Warm reset,
+    power-off discharge and repeated brownout are now derived too. A warm reset reaches no
+    peripheral, and the ten TCA9535-driven nets that survive it are enumerated from the schematic as
+    a V6 firmware obligation. Hub R36, a 10 k bleeder, was added because nothing else discharged the
+    3.3 V rail, so the decay was leakage rather than a specified number; it reaches the expander's
+    0.75 V power-on reset floor in 1.46 s, which is also the off-time that makes repeated brownout
+    bounded, and costs 0.025 percent of the rail load. USB insertion, removal and rail handover
+    belong to the power module and are V8 measurements.
   - Coincident loads: the corrected worst case is 1.48 A, while the revised interface supplies
     5 V at 2 A. The fitted BQ25895 and TPS61088 path is swept at the full 10 W obligation.
     **Radio and reader current steps as transients are not done**, because the load-transient
@@ -103,13 +108,25 @@ scoped test-article order. V0 through V9 permit a final-board order.
   - Faults: light-bar short circuit on the vendor model, input-switch limit derived, sensor open and
     short in the charge gate, plus averaged power-board missing, depleted and shorted cell cases, a
     stuck charge command, and an ngspice reverse-cell bench for cold and already-powered insertion.
-    **Physical reversed insertion, current-limit latch timing and open load are not done.**
+    Current-limit latch timing and open load are now done. A cold start into both bars' 202.9 uF
+    spends 1.66 ms in current limit against the limiter's 5 ms minimum latch deglitch, and the rail
+    could carry 610 uF before a normal power-on latched it off. A real short is bounded at 10 ms and
+    36.7 mJ. The open-cable sweep found one hub net with no driver and no pull, LED_RETURN, which
+    left the second bar's data input floating at 5 V whenever the first bar was unplugged; hub R37
+    defines it, and the check reads that list from the schematic rather than keeping its own copy.
+    **Physical reversed insertion is not done** and stays a V8 measurement.
   - Regulator behaviour: ripple, absolute maximums and logic threshold margins are covered.
     The TPS61088 loop now has a 4,374-corner small-signal sensitivity check from TI's published
     transfer functions. It selects 22 nF compensation with 54.64 degrees minimum phase margin and
-    rejects the former 4.7 nF value. **Guaranteed stability, overshoot, undershoot, sequencing and
-    junction-temperature estimates are not done.** TI specifies the error-amplifier
-    transconductance only typically, so the plus or minus 30 percent sweep is not release evidence.
+    rejects the former 4.7 nF value. Junction temperature is now bounded for all five dissipating
+    parts, inverted into the highest ambient each tolerates: 145.1 degrees for the light-bar
+    limiter, 103.5 for the charger, 96.5 for the reverse FET, 81.0 for the buck and 53.0 for the
+    boost, against a 45 degree allowance that is the specification's 25 degree room plus a 20 degree
+    enclosure rise. That rise is an acceptance limit, and the boost's 8 degrees is thin because the
+    bound charges it the whole stage's efficiency floor, so V8 must measure both.
+    **Guaranteed stability, overshoot, undershoot and sequencing are not done.** TI specifies the
+    error-amplifier transconductance only typically, so the plus or minus 30 percent sweep is not
+    release evidence.
   - Waveform integrity: I2C, the light-bar data line, the matrix serial link, and the filtered
     Type-C CC current advertisement are bounded against their sources. The display SPI segment is
     now bounded too: SSD1362 Table 12-4 caps both edges at 15 ns, which the ESP32-C6's guaranteed

@@ -3,7 +3,7 @@ type: source-summary
 tags:
   - wiki/source
   - wiki/component
-date_updated: 2026-07-29
+date_updated: 2026-07-31
 source_file: "Datasheets/TPS61088RHLR_C87357.pdf"
 source_title: "TPS61088RHLR manufacturer datasheet"
 publisher: "Texas Instruments"
@@ -26,3 +26,9 @@ code `C87357`. It is used by power U2 (TPS61088RHLR).
 - Simulation treatment: vendor, valid only for
   official TI transient model is filed; its two-expression ngspice compatibility copy parses but does not switch, so V3 uses a datasheet-bounded switching stage and leaves control-loop evidence open.
 - Conflicts: none open. Any later catalog or document mismatch reopens V1.
+
+## Thermal data, read 2026-07-31
+
+Section 6.4 Thermal Information gives theta-JA as 38.8 degrees Celsius per watt on the standard
+board and 29.7 on the EVM. The design uses the higher standard-board figure. Absolute maximum
+junction temperature is 150 degrees, with thermal shutdown at the same 150.

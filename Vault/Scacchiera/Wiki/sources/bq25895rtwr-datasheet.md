@@ -3,7 +3,7 @@ type: source-summary
 tags:
   - wiki/source
   - wiki/component
-date_updated: 2026-07-29
+date_updated: 2026-07-31
 source_file: "Datasheets/BQ25895RTWR_C80200.pdf"
 source_title: "BQ25895RTWR manufacturer datasheet"
 publisher: "Texas Instruments"
@@ -26,3 +26,8 @@ code `C80200`. It is used by power U1 (BQ25895RTWR).
 - Simulation treatment: datasheet_bounded, valid only for
   no distributable vendor ngspice model was identified; V3 may use only parameters enumerated in this part's filed datasheet and must sweep their full published limits; digital protocol behavior belongs to V6.
 - Conflicts: none open. Any later catalog or document mismatch reopens V1.
+
+## Thermal data, read 2026-07-31
+
+The Thermal Information table gives theta-JA as 31.8 degrees Celsius per watt for the RTW
+WQFN-24 package, and the Absolute Maximum table puts the junction limit at 150 degrees.

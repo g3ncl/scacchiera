@@ -3,7 +3,7 @@ type: source-summary
 tags:
   - wiki/source
   - wiki/component
-date_updated: 2026-07-26
+date_updated: 2026-07-31
 source_file: "Datasheets/TPS2553DBVR-1_C111738.pdf"
 source_title: "TPS2553DBVR-1 manufacturer datasheet"
 publisher: "Texas Instruments"
@@ -26,3 +26,9 @@ code `C111738`. It is used by hub U7 (TPS2553DBVR-1).
 - Simulation treatment: vendor, valid only for
   TI unencrypted transient PSpice model; V3 must prove ngspice compatibility and sweep datasheet input, load, temperature and external-component limits.
 - Conflicts: none open. Any later catalog or document mismatch reopens V1.
+
+## Thermal data, read 2026-07-31
+
+Section 7.4 Thermal Information gives theta-JA as 182.6 degrees Celsius per watt for the DBV
+SOT-23 package. The Electrical Characteristics power-switch rows give rDS(on) as 135 mOhm
+maximum over minus 40 to 125 degrees in DBV, and the junction maximum is 150 degrees.

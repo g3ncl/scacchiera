@@ -674,6 +674,56 @@ criteria:
     margin: The 4 ms ramp is what makes cold start uneventful. At 36 mA the capacitor charge is a twentieth of the converter's rating and disappears into the load, so startup needs no inrush limiting of its own.
     test_ids: [TEST-HUB-3V3-002]
 
+  HUB-LED-RAIL-STARTUP-CURRENT-LIMIT:
+    description: How long a cold start holds the light-bar limiter in current limit, against its latch-off deglitch.
+    requirement_ids: [IF-LIGHTBAR-001]
+    unit: ms
+    limits: {maximum: 2.5}
+    evidence: {class: Datasheet, source: Vault/Scacchiera/Datasheets/TPS2553DBVR-1_C111738.pdf, locator: "Electrical Characteristics, FAULT deglitch 5 ms minimum for an overcurrent condition, with the section 9.5.1 IOSmin formula at the board's 39 kOhm ILIM resistor"}
+    operating_conditions: Both bars' nominal 202.9 uF charged from zero at the 610 mA minimum limit current, the pessimistic end because less current takes longer. The bars' inrush on the soft-start ramp alone would be 1.45 A, above the limit, so the rail charges at the limit rather than on the ramp.
+    margin: 1.66 ms against a 2.5 ms limit and the 5 ms minimum deglitch the part guarantees, so a normal power-on finishes in a third of the window that would latch it off. The rail may carry 610 uF before a startup latches, three times what it does carry.
+    test_ids: [TEST-HUB-LED-RAIL-002]
+
+  HUB-LED-RAIL-LATCH-LATENCY:
+    description: Longest a short on the light-bar rail stays energised before the limiter latches off.
+    requirement_ids: [IF-LIGHTBAR-001]
+    unit: ms
+    limits: {maximum: 20.0}
+    evidence: {class: Datasheet, source: Vault/Scacchiera/Datasheets/TPS2553DBVR-1_C111738.pdf, locator: "Electrical Characteristics, FAULT deglitch 10 ms maximum for an overcurrent condition, with the latch-off behaviour of the -1 suffix"}
+    operating_conditions: A dead short on LED_5V with the rail enabled, at the 734 mA maximum limit current the 39 kOhm ILIM resistor sets.
+    margin: The fault is bounded at 10 ms and 36.7 mJ, half the 20 ms the product's fault reporting is allowed. What that energy does to the part's own junction in 10 ms is a transient its data sheet does not tabulate, so V8 measures it.
+    test_ids: [TEST-HUB-LED-RAIL-002]
+
+  THERMAL-JUNCTION-AMBIENT:
+    description: Highest ambient each dissipating part tolerates before its junction reaches its data sheet limit.
+    requirement_ids: [POWER-OUTPUT-001, POWER-CHARGE-003]
+    unit: degrees Celsius
+    limits: {minimum: 45.0}
+    evidence: {class: Derived, source: Vault/Scacchiera/Wiki/sources/, locator: "The Thermal data sections of ap63203wu-7, tps2553dbvr-1, tps61088rhlr, bq25895rtwr and csd25404q3: 89, 182.6, 38.8, 31.8 and 55 C/W, the last also 160 C/W on minimum pad copper, all against a 150 C junction limit"}
+    operating_conditions: Each part at its worst-case dissipation bound, with the whole stage's accepted efficiency floor charged to the controller for the two switching converters. The 45 degree allowance is the functional specification's 25 degree room plus a 20 degree enclosure rise, which is an acceptance limit on the enclosure rather than a measured value.
+    margin: The light-bar limiter, charger, reverse FET and buck reach 145.1, 103.5, 96.5 and 81.0 degrees. The boost is the tightest at 53.0 degrees, 8 degrees over the allowance, because charging it the complete 20 percent stage loss also hands it the inductor's share. V8 must measure both the boost and the enclosure rise before that 8 degrees is treated as real margin.
+    test_ids: [TEST-THERMAL-JUNCTION-001]
+
+  HUB-3V3-POR-DISCHARGE:
+    description: Time the 3.3 V rail takes to fall to the expander's power-on reset floor once its input is gone.
+    requirement_ids: [POWER-CHARGE-003]
+    unit: s
+    limits: {maximum: 2.0}
+    evidence: {class: Datasheet, source: Vault/Scacchiera/Datasheets/TCA9535PWR_C130204.pdf, locator: "Electrical Characteristics VPORF 0.75 V minimum, with section 7.4.1 requiring VCC below VPORF before another power-on reset"}
+    operating_conditions: Hub R36 alone discharging the summed nominal 3V3 capacitance of the hub and matrix schematics plus a 20 uF acceptance allowance for each unbound display module, with no other load and the bleeder at its 1 percent slow end.
+    margin: 1.46 s against 2.0 s. The load and every device leakage only add discharge current, so the resistor by itself is the slowest the rail can be. That figure is also the off-time a power cycle needs before the expander is guaranteed to reset, which is what makes repeated brownout a bounded case rather than an open one.
+    test_ids: [TEST-HUB-3V3-003]
+
+  HUB-3V3-BLEED-FRACTION:
+    description: Standing current the 3.3 V bleeder costs, against the coincident rail load.
+    requirement_ids: [POWER-CHARGE-003]
+    unit: percent
+    limits: {maximum: 0.1}
+    evidence: {class: Derived, source: docs/hardware/criteria.yaml, locator: "HUB-MODULE-LOAD-BUDGET coincident 3.3 V rail load, with hub R36 at its 1 percent fast end"}
+    operating_conditions: 3.3 V across R36 at 9.9 kOhm, compared with the rounded-up 1.34 A coincident rail load. The rail is unpowered when the board is off, so this current never reaches the cell in storage.
+    margin: 333 uA is 0.025 percent of the load, a quarter of the limit. Buying a guaranteed power-on reset costs four times less than the tolerance band on any single load in the budget.
+    test_ids: [TEST-HUB-3V3-003]
+
   HUB-MODULE-LOAD-BUDGET:
     description: Coincident worst-case current the hub draws from its power module.
     requirement_ids: [POWER-CHARGE-003]

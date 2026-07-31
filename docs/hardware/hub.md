@@ -212,12 +212,42 @@ continuous and a fault in current limit is not, since the part dissipates about 
 its thermal protection intervenes in milliseconds, so this is a V8 measurement rather than a static
 violation. A test pins the 0.2 A overshoot so it cannot quietly grow.
 
+`hardware/tests/test_fault_response.py` covers the light-bar limiter's latch and what an unplugged
+harness does. The limiter is the latch-off suffix, so its 5 to 10 ms deglitch matters in both
+directions. A cold start into both bars' 202.9 uF draws 1.45 A on the soft-start ramp alone, above
+the limit, so the rail charges at the 610 mA limit floor instead and takes 1.66 ms to reach 5 V,
+a third of the 5 ms window that would latch it off. The rail could carry 610 uF before a normal
+power-on became a fault. A real short is bounded the other way: 36.7 mJ over at most 10 ms.
+
+The open-cable case turned up one defect. LED_RETURN carries the first bar's data output to the
+second bar's input, and both bars stay powered from the same limiter, so unplugging the first bar
+left a pixel input floating at 5 V. R37, 100 k to ground, defines it. The check that found it reads
+the schematic for nets that appear only on connectors, so it keeps looking rather than restating a
+list. An open load itself stays invisible to the limiter, which reports overcurrent and reverse
+voltage and nothing else.
+
 The rail's transient behaviour is in `hardware/tests/test_rail_budget.py`, derived for the same
 reason as the switch: what is left after handover and loop response are excluded is bounded by
 conduction and charge. Soft start draws 36 mA into the output capacitors over its 4 ms ramp, so cold
 start needs no inrush limiting. The rail holds 3.3 V until the module's output falls to 3.51 V at the
 1.34 A on the 3.3 V rail, which is where the interface contract's 4.0 V floor comes from. Hold-up is about
 five microseconds, so the rail follows its input and riding out a source change is the module's job.
+
+`hardware/tests/test_rail_transients.py` covers the two cases that do not end with the rail in
+regulation. A warm reset does not reach any peripheral: MCU_EN goes to its pull-up, its delay
+capacitor and the recovery pad and nowhere else, so nothing on the board resets with the MCU. The
+TCA9535 has no reset pin either, so its ten driven nets, LED_EN and the two peripheral resets among
+them, come back at the level firmware last wrote rather than at the level their passive pulls give
+at cold start. That list is enumerated from the schematic and is what V6 firmware has to restore.
+
+A power cycle only resets those peripherals if the rail actually gets low enough, and the TCA9535
+will not reset again until its supply has been below VPORF. Nothing else on the board discharges
+3V3: the AP63203 is the fixed-output part, so it has no feedback divider and no output discharge,
+and every other pull ends on a high-impedance node. R36, 10 k across the rail, is what turns the
+decay into a specified number: 1.46 s to the 0.75 V floor with 97.7 uF on the rail, including a
+20 uF allowance for each unbound display module, for 333 uA while the board runs and nothing at all
+while it is off. That time is also the off-time a power cycle needs, which is what makes repeated
+brownout a bounded case.
 
 `hardware/tests/test_signal_integrity.py` covers the two buses that leave the board on a cable. The
 light-bar data line is self-clocked, so a uniform delay costs nothing and only the buffer's asymmetry
@@ -235,8 +265,15 @@ decision rather than an accident.
 
 Not everything V3 asks of this board is done, and `docs/planning.md` lists what is not against the
 workflow's own six cases rather than against effort spent. The largest remaining gaps here are
-temperature corners, capacitor ESR, junction-temperature estimates, and the fault cases beyond short
-circuit and a lost sensor.
+temperature corners, capacitor ESR, and the fault cases beyond short circuit and a lost sensor.
+
+Junction temperature is in `hardware/tests/test_junction_temperature.py`, stated as the highest
+ambient each part tolerates rather than as one temperature, because the air inside the enclosure has
+not been measured. The buck's 85 percent efficiency floor puts 0.78 W into a TSOT26 at 89 degrees
+per watt, so it reaches its junction limit at 81.0 degrees ambient; the light-bar limiter, whose
+loss is nothing but 135 mOhm of conduction at 448 mA, reaches its at 145.1. The allowance both are
+judged against is 45 degrees, the specification's 25 degree room plus a 20 degree enclosure rise
+that V8 has to confirm.
 
 What cannot be closed here at all is not board-side. Uninterrupted handover and source insertion
 belong to the power module and are V8 measurements; transient response and stability belong to a
@@ -245,12 +282,13 @@ them. Both are recorded as such rather than left looking unfinished.
 
 ## Cost
 
-The engineering BOM is 13.768 EUR in estimated custom-board parts across 39 fitted lines, up
-0.366 EUR from the four-layer revision: J2 became seven-way and J3 later became eight-way Micro-Fit
+The engineering BOM is 14.090 EUR in estimated custom-board parts across 40 fitted lines, up
+0.688 EUR from the four-layer revision: J2 became seven-way and J3 later became eight-way Micro-Fit
 to spread their supply across
-1.0 A contacts, and the cell divider added three passives with values already in the BOM. No new
-part type entered the design, so the four fee-bearing Extended lines and their 10.80 EUR of feeder
-charges are unchanged.
+1.0 A contacts, and the cell divider added three passives with values already in the BOM. R36 and
+R37, the 3V3 bleeder and the light-bar data pulldown, add 0.004 EUR between them and no line, since
+both values were already fitted. No new part type entered the design, so the four fee-bearing
+Extended lines and their 10.80 EUR of feeder charges are unchanged.
 
 This is not a factory quote and excludes assembly fees, the power module, its cell, sensor and cable
 assemblies. The purchased subsystem belongs in complete-product cost, not the JLCPCB BOM. Two copper

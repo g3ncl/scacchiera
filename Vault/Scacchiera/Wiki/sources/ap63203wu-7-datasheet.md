@@ -3,7 +3,7 @@ type: source-summary
 tags:
   - wiki/source
   - wiki/component
-date_updated: 2026-07-26
+date_updated: 2026-07-31
 source_file: "Datasheets/AP63203WU-7_C780769.pdf"
 source_title: "AP63203WU-7 manufacturer datasheet"
 publisher: "Diodes Incorporated"
@@ -26,3 +26,9 @@ code `C780769`. It is used by hub U5 (AP63203WU-7).
 - Simulation treatment: datasheet_bounded, valid only for
   no distributable vendor ngspice model was identified; V3 may use only parameters enumerated in this part's filed datasheet and must sweep their full published limits; digital protocol behavior belongs to V6.
 - Conflicts: none open. Any later catalog or document mismatch reopens V1.
+
+## Thermal data, read 2026-07-31
+
+Thermal Resistance (Note 6) gives theta-JA as 89 degrees Celsius per watt for the TSOT26
+package, and the Absolute Maximum table puts the junction limit at 160 degrees with thermal
+shutdown at 150. The design uses 150.
