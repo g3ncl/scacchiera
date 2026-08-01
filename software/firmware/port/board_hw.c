@@ -162,31 +162,26 @@ static esp_err_t sweep_lines(uint8_t first_line, uint8_t count, line_reading_t *
     for (uint8_t index = 0; index < count; index++) {
         ESP_RETURN_ON_ERROR(matrix_select((uint8_t)(first_line + index)), TAG, "select");
 
-        uint64_t uid = 0;
-        const esp_err_t err = pn5180_iso15693_inventory(&uid);
-        if (err == ESP_OK) {
-            out[index].present = true;
-            out[index].uid = uid;
-        } else if (err == ESP_ERR_NOT_FOUND) {
-            /* An empty line is the common case, not a failure. */
-            out[index].present = false;
-        } else if (err == ESP_ERR_INVALID_RESPONSE) {
-            /* Two tags answering in one slot collide. Recorded as present with
-             * no usable UID so the join reports it rather than silently
-             * treating the line as empty. */
-            out[index].present = true;
-            out[index].uid = 0;
-        } else {
-            return err;
-        }
+        uint8_t found = 0;
+        bool incomplete = false;
+        ESP_RETURN_ON_ERROR(
+            pn5180_iso15693_inventory_16(out[index].uids, SCAN_MAX_TAGS_PER_LINE,
+                                         &found, &incomplete),
+            TAG, "inventory");
+        out[index].count = found;
+        out[index].incomplete = incomplete;
     }
     return ESP_OK;
 }
 
 bool hw_scan_board(board_snapshot_t *snapshot)
 {
-    line_reading_t rows[SCAN_ROWS] = {0};
-    line_reading_t columns[SCAN_COLUMNS] = {0};
+    /* Static rather than automatic: sixteen lines of eight UIDs is about a
+     * kilobyte, which is a large fraction of a default task stack. */
+    static line_reading_t rows[SCAN_ROWS];
+    static line_reading_t columns[SCAN_COLUMNS];
+    memset(rows, 0, sizeof(rows));
+    memset(columns, 0, sizeof(columns));
 
     if (pn5180_load_rf_config(PN5180_RF_TX_ISO15693_ASK100_26,
                               PN5180_RF_RX_ISO15693_26) != ESP_OK) {

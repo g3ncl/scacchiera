@@ -19,8 +19,7 @@ void tearDown(void) {}
 
 static void see(line_reading_t *lines, uint8_t line, uint64_t uid)
 {
-    lines[line].present = true;
-    lines[line].uid = uid;
+    lines[line].uids[lines[line].count++] = uid;
 }
 
 static void test_empty_board_is_empty_and_faultless(void)
@@ -119,6 +118,59 @@ static void test_a_fault_does_not_discard_the_valid_tags(void)
 /* Identity is provisioning's job and provisioning does not exist, so a scanned
  * square carries its UID and no piece type. Pinned so nobody later "fixes"
  * this by inventing a default piece. */
+/* The case single-slot inventory could not do: eight pieces on rank 1, which
+ * is every real starting position. */
+static void test_a_full_rank_resolves(void)
+{
+    for (uint8_t file = 0; file < 8u; file++) {
+        const uint64_t uid = 0x100u + file;
+        see(rows, 0, uid);
+        see(columns, file, uid);
+    }
+    scan_join(rows, columns, &snapshot);
+
+    TEST_ASSERT_EQUAL_INT(BOARD_FAULT_NONE, snapshot.fault.fault);
+    TEST_ASSERT_EQUAL_UINT8(8u, board_snapshot_occupied_count(&snapshot));
+    for (uint8_t file = 0; file < 8u; file++) {
+        const square_t square = square_from_file_rank((char)('a' + file), 1);
+        TEST_ASSERT_EQUAL_HEX64(0x100u + file, snapshot.squares[square].uid);
+    }
+}
+
+/* Two full ranks facing each other, which is the other half of a starting
+ * position and the case where a column carries two tags. */
+static void test_two_full_ranks_resolve(void)
+{
+    for (uint8_t file = 0; file < 8u; file++) {
+        const uint64_t white = 0x100u + file;
+        const uint64_t black = 0x200u + file;
+        see(rows, 0, white);
+        see(rows, 7, black);
+        see(columns, file, white);
+        see(columns, file, black);
+    }
+    scan_join(rows, columns, &snapshot);
+
+    TEST_ASSERT_EQUAL_INT(BOARD_FAULT_NONE, snapshot.fault.fault);
+    TEST_ASSERT_EQUAL_UINT8(16u, board_snapshot_occupied_count(&snapshot));
+    TEST_ASSERT_EQUAL_HEX64(0x100u, snapshot.squares[square_from_file_rank('a', 1)].uid);
+    TEST_ASSERT_EQUAL_HEX64(0x207u, snapshot.squares[square_from_file_rank('h', 8)].uid);
+}
+
+/* A line anticollision could not fully resolve makes the sweep untrustworthy:
+ * a piece missing from it looks identical to a piece that is not there. */
+static void test_an_incomplete_line_is_reported(void)
+{
+    see(rows, 0, 0x55u);
+    see(columns, 0, 0x55u);
+    rows[3].incomplete = true;
+    scan_join(rows, columns, &snapshot);
+
+    TEST_ASSERT_EQUAL_INT(BOARD_FAULT_SQUARE_UNSTABLE, snapshot.fault.fault);
+    /* The resolvable tag is still placed. */
+    TEST_ASSERT_EQUAL_UINT8(1u, board_snapshot_occupied_count(&snapshot));
+}
+
 static void test_identity_is_left_unknown_rather_than_guessed(void)
 {
     see(rows, 0, 0x99u);
@@ -140,6 +192,9 @@ int main(void)
     RUN_TEST(test_a_row_only_tag_is_not_placed);
     RUN_TEST(test_a_column_only_tag_is_not_placed);
     RUN_TEST(test_a_fault_does_not_discard_the_valid_tags);
+    RUN_TEST(test_a_full_rank_resolves);
+    RUN_TEST(test_two_full_ranks_resolve);
+    RUN_TEST(test_an_incomplete_line_is_reported);
     RUN_TEST(test_identity_is_left_unknown_rather_than_guessed);
     return UNITY_END();
 }

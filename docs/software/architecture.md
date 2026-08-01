@@ -179,22 +179,14 @@ Not real, and deliberately so:
 - **Piece identity.** The scan resolves a square and a UID; mapping a UID to a colour and type is
   provisioning's job and provisioning does not exist, so a scanned square carries `PIECE_TYPE_NONE`
   rather than a guess. A host test pins that, so nobody later "fixes" it by defaulting to a pawn.
-- **Sixteen-slot anticollision** and the BitwiseID scheme above it. This is a larger gap than it
-  first sounds and is the next firmware work, not a refinement.
-
-  Single-slot inventory means every tag in the field answers in the same window, so it can only
-  read a line carrying exactly one tag. A chess starting position puts eight pieces on rank 1, so
-  row 0 sees eight tags collide and reports nothing but a fault. The row-and-column architecture
-  guarantees this: sixteen antennas covering sixty-four squares means a line is shared by eight
-  squares, and [the BitwiseID research](../../Vault/Scacchiera/Wiki/concepts/bitwiseid-method.md)
-  exists precisely because a line scan returns several tags at once.
-
-  So what is implemented proves the RF path end to end and reads a sparse board, but it cannot
-  read a real game. The mechanism for the fix is confirmed in the datasheet rather than guessed:
-  sixteen-slot inventory uses flags 0x06 instead of 0x26, and a slot is advanced by emitting an
-  EOF, which TX_CONFIG bit 10 provides. That bit is TX_DATA_ENABLE, and clearing it makes a
-  transmission send "only symbols" (Table 98), which is the EOF pulse ISO 15693 anticollision
-  needs.
+- **The BitwiseID scheme.** Sixteen-slot anticollision now resolves the several tags a line
+  carries, which is what makes a real position readable at all, but it does so one slot at a time.
+  [The research](../../Vault/Scacchiera/Wiki/concepts/bitwiseid-method.md) exists because that
+  scales badly: the source paper measures an equivalent 8x8 scan at 616 to 745 ms with classic
+  anticollision. Throughput, not correctness, is what BitwiseID buys.
+- **Retry and debounce.** A slot where two tags collide is reported as an under-read line rather
+  than retried, and nothing yet distinguishes a square that flickers between scans, which is what
+  `SQUARE_UNSTABLE` is really for.
 
 The join from sixteen line reads to sixty-four squares lives in `core/scan_join.c`, not in a
 driver, because that is where the ghost-piece and crosstalk faults live and it is testable without

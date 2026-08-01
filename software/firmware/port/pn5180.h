@@ -41,6 +41,13 @@
 #define PN5180_SYSTEM_CONFIG_COMMAND_MASK 0x00000007u
 #define PN5180_SYSTEM_CONFIG_COMMAND_TRANSCEIVE 0x00000003u
 
+/* TX_CONFIG bit 10, datasheet Table 98: "If set to 1; transmission of data is
+ * enabled otherwise only symbols are transmitted." Clearing it turns a
+ * transmission into frame symbols alone, which is the EOF that advances an
+ * ISO 15693 anticollision slot. */
+#define PN5180_REG_TX_CONFIG 0x18u
+#define PN5180_TX_CONFIG_DATA_ENABLE 0x00000400u
+
 /* IRQ_STATUS bit 0. RX_STATUS bits 8:0 hold the received byte count. */
 #define PN5180_IRQ_RX 0x00000001u
 #define PN5180_RX_STATUS_BYTES_MASK 0x000001FFu
@@ -90,6 +97,16 @@ esp_err_t pn5180_received_byte_count(uint16_t *count);
  * increment. One slot is enough to prove the RF path end to end and is what a
  * first bring-up needs. */
 esp_err_t pn5180_iso15693_inventory(uint64_t *uid);
+
+/* Sixteen-slot ISO 15693 anticollision on the selected antenna. This is the
+ * one a real board needs: a line is shared by eight squares, so a starting
+ * position puts eight tags on rank 1 and single-slot inventory only collides.
+ *
+ * Fills up to capacity UIDs and reports how many answered. Sets incomplete
+ * when a slot stayed collided or more tags answered than fit, which means the
+ * line is known to be under-reported rather than empty. */
+esp_err_t pn5180_iso15693_inventory_16(uint64_t *uids, uint8_t capacity,
+                                       uint8_t *found, bool *incomplete);
 
 pn5180_version_t pn5180_product_version(void);
 pn5180_version_t pn5180_firmware_version(void);

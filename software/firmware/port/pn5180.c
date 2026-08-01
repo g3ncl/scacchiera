@@ -276,6 +276,9 @@ esp_err_t pn5180_received_byte_count(uint16_t *count)
 #define ISO15693_CMD_INVENTORY 0x01u
 #define ISO15693_INVENTORY_RESPONSE_BYTES 10u
 
+/* One slot at 26 kbit/s is well under a millisecond; this is generous. */
+#define SLOT_TIMEOUT_US 20000
+
 esp_err_t pn5180_iso15693_inventory(uint64_t *uid)
 {
     if (uid == NULL) {
@@ -340,4 +343,119 @@ esp_err_t pn5180_iso15693_inventory(uint64_t *uid)
     }
     *uid = value;
     return ESP_OK;
+}
+
+static esp_err_t set_transceive(void)
+{
+    uint32_t system_config = 0;
+    ESP_RETURN_ON_ERROR(pn5180_read_register(PN5180_REG_SYSTEM_CONFIG, &system_config),
+                        TAG, "system config");
+    system_config &= ~PN5180_SYSTEM_CONFIG_COMMAND_MASK;
+    system_config |= PN5180_SYSTEM_CONFIG_COMMAND_TRANSCEIVE;
+    return pn5180_write_register(PN5180_REG_SYSTEM_CONFIG, system_config);
+}
+
+static esp_err_t set_tx_data_enable(bool enable)
+{
+    uint32_t tx_config = 0;
+    ESP_RETURN_ON_ERROR(pn5180_read_register(PN5180_REG_TX_CONFIG, &tx_config),
+                        TAG, "tx config");
+    if (enable) {
+        tx_config |= PN5180_TX_CONFIG_DATA_ENABLE;
+    } else {
+        tx_config &= ~PN5180_TX_CONFIG_DATA_ENABLE;
+    }
+    return pn5180_write_register(PN5180_REG_TX_CONFIG, tx_config);
+}
+
+/* Waits one slot. Returns ESP_OK with the byte count when something answered,
+ * ESP_ERR_NOT_FOUND on an empty slot. */
+static esp_err_t await_slot(uint16_t *received)
+{
+    const int64_t deadline = esp_timer_get_time() + SLOT_TIMEOUT_US;
+    uint32_t irq = 0;
+    do {
+        ESP_RETURN_ON_ERROR(pn5180_read_register(PN5180_REG_IRQ_STATUS, &irq), TAG, "irq");
+        if ((irq & PN5180_IRQ_RX) != 0u) {
+            return pn5180_received_byte_count(received);
+        }
+    } while (esp_timer_get_time() < deadline);
+    return ESP_ERR_NOT_FOUND;
+}
+
+/* Emits an EOF with no payload, advancing the inventory to the next slot.
+ *
+ * SEND_DATA will not accept a zero-length array, so one dummy byte is passed
+ * with TX_DATA_ENABLE cleared: the datasheet says only symbols are transmitted
+ * in that state, so the byte never reaches the air. */
+static esp_err_t next_slot(void)
+{
+    ESP_RETURN_ON_ERROR(pn5180_write_register(PN5180_REG_IRQ_CLEAR, 0xFFFFFFFFu),
+                        TAG, "irq clear");
+    ESP_RETURN_ON_ERROR(set_tx_data_enable(false), TAG, "data off");
+    ESP_RETURN_ON_ERROR(set_transceive(), TAG, "transceive");
+    const uint8_t dummy = 0x00u;
+    return pn5180_send_data(&dummy, 1, 0);
+}
+
+esp_err_t pn5180_iso15693_inventory_16(uint64_t *uids, uint8_t capacity,
+                                       uint8_t *found, bool *incomplete)
+{
+    if (uids == NULL || found == NULL || incomplete == NULL || capacity == 0u) {
+        return ESP_ERR_INVALID_ARG;
+    }
+    *found = 0;
+    *incomplete = false;
+
+    ESP_RETURN_ON_ERROR(pn5180_write_register(PN5180_REG_IRQ_CLEAR, 0xFFFFFFFFu),
+                        TAG, "irq clear");
+    ESP_RETURN_ON_ERROR(set_tx_data_enable(true), TAG, "data on");
+    ESP_RETURN_ON_ERROR(set_transceive(), TAG, "transceive");
+
+    /* Flags 0x06 is inventory plus high data rate with the one-slot bit clear,
+     * so the round runs all sixteen slots. */
+    const uint8_t inventory[3] = {0x06u, ISO15693_CMD_INVENTORY, 0x00u};
+    ESP_RETURN_ON_ERROR(pn5180_send_data(inventory, sizeof(inventory), 0), TAG, "inventory");
+
+    for (uint8_t slot = 0; slot < 16u; slot++) {
+        if (slot > 0u) {
+            ESP_RETURN_ON_ERROR(next_slot(), TAG, "next slot");
+        }
+
+        uint16_t received = 0;
+        const esp_err_t err = await_slot(&received);
+        if (err == ESP_ERR_NOT_FOUND) {
+            continue; /* empty slot, the common case */
+        }
+        ESP_RETURN_ON_ERROR(err, TAG, "slot");
+
+        if (received != ISO15693_INVENTORY_RESPONSE_BYTES) {
+            /* Two tags picked the same slot. Sixteen slots for at most eight
+             * tags makes this uncommon, and a retry reshuffles nothing because
+             * slot choice is UID-derived, so the line is reported as
+             * under-read rather than silently short. */
+            *incomplete = true;
+            continue;
+        }
+
+        uint8_t response[ISO15693_INVENTORY_RESPONSE_BYTES] = {0};
+        ESP_RETURN_ON_ERROR(pn5180_read_data(response, sizeof(response)), TAG, "read data");
+
+        if (*found >= capacity) {
+            /* More tags than a line can legitimately hold, so something is
+             * coupling from a neighbour. */
+            *incomplete = true;
+            continue;
+        }
+        uint64_t value = 0;
+        for (int index = 7; index >= 0; index--) {
+            value = (value << 8) | response[2 + index];
+        }
+        uids[*found] = value;
+        (*found)++;
+    }
+
+    /* Leave data transmission enabled, or the next ordinary command would send
+     * symbols only. */
+    return set_tx_data_enable(true);
 }
