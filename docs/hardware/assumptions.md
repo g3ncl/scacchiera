@@ -27,10 +27,12 @@ position at that point is that these were accepted knowingly.
 | **A7** | The charge window is **0 to 40 degrees Celsius**. | Borrowed from `PISUGAR3_PLUS_safety.md`, a module no longer bound. Conservative for any consumer lithium-ion cell. | Probably conservative. A cell datasheet may permit wider, which would only relax the interlock. | Replaced when a cell datasheet is filed |
 | **A8** | The AD Circus SLIX2 tag coil resonates against the SL2S2602's 23.5 pF input capacitance. | Avery Dennison publishes no coil inductance, turn count or resonant frequency for any converted inlay. The tag coil is back-solved from the resonance condition. | The V4 coupling model is bounded rather than exact. Read range per cell shifts. | V8 assembled RF |
 | **A9** | Loaded tag Q is bounded from the SL2S2602's 40 uW minimum input power. | NXP publishes no equivalent parallel resistance at minimum operating power. | Same as A8. | V8 assembled RF |
+| **A10** | The Harvatek T37K3RGB datasheet's numbers hold. | It is marked **Preliminary**, dated 2025-05-19, the third preliminary document in the build after the display module and its controller. Its bit timings and RGB order are specific enough to be deliberate rather than placeholder. | Wrong bit timings show as flicker or no output at bring-up; a wrong colour order shows as a green illegal-move flash. Both fail visibly and immediately. | First light-bar bring-up |
 
 ## What this costs at the gate
 
-Nine rows, of which A1, A3, A4, A6 and A7 are low consequence or conservative in the safe direction.
+Ten rows, of which A1, A3, A4, A6, A7 and A10 are low consequence or conservative in the safe
+direction, or fail visibly at first bring-up.
 
 The three that actually matter:
 

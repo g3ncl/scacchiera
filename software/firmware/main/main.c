@@ -3,11 +3,10 @@
 
 #include "esp_err.h"
 #include "esp_log.h"
-#include "esp_timer.h"
 
 #include "core/engine.h"
-#include "core/hw/clock.h"
 #include "core/snapshot.h"
+#include "port/board_hw.h"
 #include "port/board_pins.h"
 #include "port/expander.h"
 #include "port/matrix.h"
@@ -17,11 +16,6 @@
 #include "port/spi_bus.h"
 
 static const char *TAG = "chessboard";
-
-uint32_t hw_clock_now_ms(void)
-{
-    return (uint32_t)(esp_timer_get_time() / 1000);
-}
 
 void app_main(void)
 {
@@ -42,6 +36,7 @@ void app_main(void)
     ESP_ERROR_CHECK(pn5180_init());
     ESP_ERROR_CHECK(display_init());
     ESP_ERROR_CHECK(lightbar_init());
+    ESP_ERROR_CHECK(board_hw_storage_init());
 
     engine_state_t engine;
     engine_init(&engine);
