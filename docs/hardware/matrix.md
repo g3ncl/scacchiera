@@ -74,6 +74,52 @@ measured at V8, and that value is derived, not sourced. NXP publishes no equival
 resistance at minimum operating power, so loaded tag Q is derived too. V4 can run a bounded model
 on this part; it cannot yet run a fully datasheet-sourced one.
 
+### Coupling against the proven design
+
+The prior art is in the vault as a full design package: schematics, Sprint Layout PCBs and the
+vendor datasheets, at `Vault/Scacchiera/Clippings/nfcgameboard.com/files/`. Its antenna grid
+schematic states **"Antenna: 15 x 320 (347) mm single winding PCB trace"**, thirty of them, on a
+15 by 15 grid. Running that geometry through the same FastHenry model as ours is the only
+calibration available for a number no datasheet gives:
+
+| | nfcgameboard | this design |
+| --- | --- | --- |
+| Loop | 15 x 320 mm | 31 x 276 mm |
+| Lane pitch | 21.3 mm (inferred from 320/15) | 35 mm |
+| Fill, breadth over pitch | 0.70 | **0.89** |
+| Gap between adjacent loops | 6.3 mm | **4.0 mm** |
+| Adjacent-line coupling | 0.0786 | **0.1398** |
+| Worst row-to-column coupling | 0.0170 | **0.0664** |
+
+**Our lines couple 1.8 times harder than the design that demonstrably works, and our worst
+row-to-column crossing is 3.9 times theirs.** That is not a proven defect, because nothing
+establishes where the failure threshold is, but it does mean this copper sits outside the regime
+the working hardware demonstrates, and the prior art can no longer be cited as covering it.
+
+The lever is `LOOP_INSET`, and it is already against a wall:
+
+| Inset | Breadth | Adjacent coupling | Margin enclosing a worst-case off-centre tag |
+| --- | --- | --- | --- |
+| **2.0 mm, current** | 31.0 mm | 0.1398 | **+1.0 mm** |
+| 3.0 mm | 29.0 mm | 0.1067 | 0.0 mm |
+| 4.0 mm | 27.0 mm | 0.0842 | -1.0 mm |
+| 5.25 mm | 24.5 mm | 0.0640 | -2.2 mm |
+
+A 24 mm piece base can sit 5.5 mm off centre in a 35 mm square, putting the far edge of an 18 mm
+tag coil 14.5 mm from the centre, and the current loop half-breadth is 15.5 mm. So the 2 mm inset
+is what keeps a badly placed piece inside its own loop, and buying crosstalk margin spends read
+margin one for one. The enclosure figure is a proxy rather than a cliff, because a loop's field
+does not stop at its conductor, but the direction of the trade is real.
+
+Three ways out, none free: accept the coupling and show it harmless, widen the inset and accept
+less tolerance to a badly placed piece, or enlarge the piece bases further so pieces self-centre
+better and the inset can grow. The third interacts with the 24 mm minimum already set in
+[functional/physical.md](../functional/physical.md).
+
+Which is why this is a measurement question. The test article in
+[test-article-matrix.md](test-article-matrix.md) settles read range against off-centre position and
+whether a neighbouring line answers, in one session, and neither can be settled by more solving.
+
 ## Switch cell
 
 One cell per line, the single-ended half of the hybrid PIN switch the previous 64-antenna design
