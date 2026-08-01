@@ -314,7 +314,29 @@ scoped test-article order. V0 through V9 permit a final-board order.
   interface, so the layers around it can be exercised. V5's generated-gameplay-sequence bullet
   stays open while that stub stands.
 - [ ] V6 firmware-in-simulation system verification
-- [ ] V7 mechanical and fabrication preflight: fabrication artifacts now generate for **all four**
+- [ ] V7 **fabrication** preflight. The mechanical half is deliberately out of this gate: the
+  enclosure and the pieces are 3D printed and owned by the builder, where a wrong dimension costs a
+  reprint rather than a respin, so iterating in plastic beats modelling in build123d. `hardware/cad/`
+  keeps only the power-rail reservation.
+
+  That is only safe because the dependency runs one way: **a print adapts to the board, the board
+  cannot adapt to a print.** So the mechanical items that survive into this gate are exactly those
+  a reprint cannot fix, and they are all PCB-side:
+
+  - connector position, edge and orientation on every board, since a connector facing the wrong way
+    is a respin;
+  - cable reach and bend space between boards at their real positions in the rail;
+  - component height and assembly side on the matrix, which must stay flat against the controlled
+    air gap;
+  - board outlines against the 310 x 380 mm body, where the 300 mm matrix leaves 5 mm of wall each
+    side;
+  - the antenna keepout and the conductor clearance behind the sensing plane.
+
+  Everything else the workflow lists under mechanical fit, diffuser clearance, fastener access,
+  service access and the display cradle's hard stops, is a print-iteration matter and is not
+  tracked here.
+
+  Fabrication artifacts now generate for **all four**
   boards. `make pcb-fab` previously omitted the power board, so the aggregate target produced an
   incomplete order set; that is fixed. Each board emits gerbers, drills, a JLCPCB BOM and CPL, a
   hybrid pair and a hand-assembly BOM. Geometry extracted from the routed boards:
