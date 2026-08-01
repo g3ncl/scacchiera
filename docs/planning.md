@@ -181,12 +181,35 @@ scoped test-article order. V0 through V9 permit a final-board order.
   the gap the router laid MOSI on the back layer at x 121.3535, **0.034 mm** from the RF trace and
   straight through its return. At this frequency the return current sits within roughly three
   dielectric thicknesses of the trace, 2.8 mm on a 1.0 mm two-layer board, so that copper is inside
-  the corridor the reserve exists to protect. Widening the reserve to x 118 to 161 was tried and the
-  two-layer route stopped converging: three reroutes left 2, 7 and 3 unconnected items where the
-  current reserve reliably reaches zero. The board is therefore left on its committed clean route
-  with the defect recorded rather than half-fixed. Resolving it needs either layout effort to free
-  back-copper channel next to the RF entry, a fourth copper layer, or an extraction of the slotted
-  return to show the coupling is tolerable. That choice is not made yet.
+  the corridor the reserve exists to protect.
+
+  The root cause is placement, not routing. RF_BUS has to reach three points: the match output at
+  C34 and C35 near x 141 to 143, the connector J4 at 150.5, and the receive tap C37 at 121.8, 33.8.
+  C37 sits at the reader deliberately, so the high-impedance receive traces stay short, which
+  obliges the bus to cross a third of the board. Protecting the return corridor of a bus that long
+  is what conflicts with the back copper the rest of the board needs. Two keepout shapes were tried.
+  A wide one, x 118 to 161, stopped the two-layer route converging: three reroutes left 2, 7 and 3
+  unconnected items. A targeted one at the entry cleared that end, moving the nearest back-copper
+  signal from 0.034 to 21 mm, but left the other end open where the run passes x 156, and scored
+  reroutes then gave 0.56, 4.69 and 3.43 mm of clearance against the 2.79 mm requirement with 0, 4
+  and 8 DRC violations. A constraint the router meets on some seeds and not others is not a
+  constraint.
+
+  The board stays on its committed clean route and
+  `hardware/tests/test_rf_return.py::test_nothing_interrupts_the_return_inside_the_corridor` fails
+  rather than being waived. Three ways out, none chosen: move C37, R29 and R30 to the connector end
+  and accept longer high-impedance receive traces, which shortens the bus and its corridor together;
+  go to four copper layers on the hub, which this plan already notes would also shorten the board
+  from 162 mm; or extract the slotted return and show the coupling is tolerable, which needs the
+  FastHenry model to converge with a meshed slot and it does not yet.
+
+  Cloud and third-party routers were considered and rejected on their own terms. DeepPCB's free tier
+  allows 150 airwires against this board's 254, and is 30 USD an hour beyond it. TopoR Lite is free
+  under 650 pins and does read DSN and write SES, but it is Windows-only with no batch mode, and a
+  manual GUI step in the routing path contradicts the layout-as-code rule in CLAUDE.md. Its session
+  would also not import as-is: `ses_import.py` hardcodes Freerouting's 10 um resolution and via
+  padstack naming. Neither tool addresses the cause, which is that the constraint is unsatisfiable
+  as currently placed rather than merely hard to route.
 - [ ] V5 firmware host verification: scoped for hardware validation rather than completeness, per
   [software/architecture.md](software/architecture.md). The hardware-facing layer comes first,
   because it is the part whose failure costs a respin: the PN5180 driver, the expander, display SPI,

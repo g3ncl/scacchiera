@@ -1045,3 +1045,28 @@ Widening the reserve to x 118 to 161 was tried and the two-layer route stopped c
 reroutes left 2, 7 and 3 unconnected items where the current reserve reliably reaches zero. The
 board is left on its committed clean route with the defect recorded rather than half fixed. The
 regression test carries a strict xfail so it turns red the moment the layout is corrected.
+
+## [2026-08-01] verify | The RF return defect is placement, not routing
+
+Removed the xfail that had been masking the failed corridor check. The project's own workflow calls a
+manually waived critical check a failure, and the marker was exactly that, so the test now fails
+until the board is right.
+
+Chasing the fix found the real cause. RF_BUS has to reach the match output near x 141 to 143, the
+connector at 150.5, and the receive tap C37 at 121.8, 33.8. C37 sits by the reader on purpose, to
+keep the high-impedance receive traces short, so the bus is obliged to cross a third of the board.
+Protecting the return corridor of a bus that long is what fights the back copper everything else
+needs. A wide keepout stopped the two-layer route converging; a targeted one fixed the entry, from
+0.034 to 21 mm, and left the far end open past x 156. Scored reroutes then gave 0.56, 4.69 and
+3.43 mm against a 2.79 mm requirement with 0, 4 and 8 DRC violations. A constraint met on some
+random seeds and not others is not a constraint.
+
+Cloud and third-party routers do not address that. DeepPCB's free tier caps at 150 airwires against
+this board's 254. TopoR Lite is free under 650 pins and reads DSN and writes SES, but is Windows
+only with no batch mode, which would put a manual GUI step in a path CLAUDE.md requires to be code,
+and its session would not import anyway because `ses_import.py` hardcodes Freerouting's resolution
+and via padstack naming.
+
+Three ways out, none chosen: move C37, R29 and R30 to the connector end and accept longer receive
+traces; go to four layers on the hub; or extract the slotted return and show the coupling is
+tolerable, which needs the FastHenry slot model to converge and it does not yet.
