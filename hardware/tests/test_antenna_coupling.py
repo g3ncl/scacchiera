@@ -13,7 +13,7 @@ import pytest
 import yaml
 
 from hardware.pcb.matrix_geometry import LINE_COUNT, ROW_COUNT
-from hardware.sim.antenna_coupling import extract
+from hardware.sim.antenna_coupling import Coupling, extract
 
 from pathlib import Path
 
@@ -24,7 +24,7 @@ CRITERIA = yaml.safe_load(
 
 
 @pytest.fixture(scope="module")
-def coupling():
+def coupling() -> Coupling:
     return extract()
 
 
@@ -32,7 +32,7 @@ def _limit(name: str, bound: str) -> float:
     return float(CRITERIA[name]["limits"][bound])
 
 
-def test_self_inductance_agrees_with_the_analytical_loop(coupling):
+def test_self_inductance_agrees_with_the_analytical_loop(coupling: Coupling) -> None:
     """`hardware/sim/loop.py` gives 590 nH from Grover on the same geometry.
 
     Two independent methods on one shape. Disagreement would mean the extraction
@@ -45,7 +45,7 @@ def test_self_inductance_agrees_with_the_analytical_loop(coupling):
         ), f"line {line} at {nanohenry:.1f} nH"
 
 
-def test_every_line_is_interchangeable(coupling):
+def test_every_line_is_interchangeable(coupling: Coupling) -> None:
     """A scan treats all sixteen lines the same, so they must behave the same.
 
     A spread here would mean one square reads differently from its neighbour
@@ -59,7 +59,7 @@ def test_every_line_is_interchangeable(coupling):
     assert resistance_spread <= _limit("MATRIX-ANTENNA-UNIFORMITY", "maximum")
 
 
-def test_a_row_and_a_column_are_decoupled(coupling):
+def test_a_row_and_a_column_are_decoupled(coupling: Coupling) -> None:
     """The claim the whole architecture rests on.
 
     Orthogonal loops should share almost no flux. They do not share none: the
@@ -76,7 +76,7 @@ def test_a_row_and_a_column_are_decoupled(coupling):
     )
 
 
-def test_parallel_neighbours_are_the_dominant_coupling(coupling):
+def test_parallel_neighbours_are_the_dominant_coupling(coupling: Coupling) -> None:
     """Adjacent same-axis lines couple far more strongly than crossing ones.
 
     Recorded as a bound rather than a pass, because this is the number a tag
@@ -92,7 +92,7 @@ def test_parallel_neighbours_are_the_dominant_coupling(coupling):
     )
 
 
-def test_coupling_falls_away_with_distance(coupling):
+def test_coupling_falls_away_with_distance(coupling: Coupling) -> None:
     """Neighbour coupling must be a local effect, not a board-wide one.
 
     If distant lines coupled comparably, one energised line would excite the
@@ -105,7 +105,7 @@ def test_coupling_falls_away_with_distance(coupling):
     assert far < adjacent / 50.0
 
 
-def test_the_matrix_is_reciprocal(coupling):
+def test_the_matrix_is_reciprocal(coupling: Coupling) -> None:
     """M(i,j) must equal M(j,i) by physics, so the residual is solver error.
 
     Normalised against self inductance rather than against each mutual term.
@@ -124,7 +124,7 @@ def test_the_matrix_is_reciprocal(coupling):
     assert worst <= 5e-3, f"reciprocity residual {worst:.2e} of self inductance"
 
 
-def test_resistance_is_not_claimed_as_converged(coupling):
+def test_resistance_is_not_claimed_as_converged(coupling: Coupling) -> None:
     """Guards the honest gap rather than a value.
 
     Resistance rises monotonically with mesh density and was still rising at

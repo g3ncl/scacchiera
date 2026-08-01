@@ -36,6 +36,7 @@ from __future__ import annotations
 import os
 import re
 import subprocess
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -88,12 +89,24 @@ class Coupling:
         return abs(self.mutual_h[i][j]) / denominator if denominator else 0.0
 
 
-def loop_path(line: int) -> tuple[tuple[float, float, float], ...]:
+def monolith_plane_z(line: int) -> float:
+    """Rows on the front copper, columns on the back of one 1.0 mm substrate."""
+    return FRONT_Z_MM if line < ROW_COUNT else BACK_Z_MM
+
+
+def loop_path(
+    line: int, plane_z: Callable[[int], float] = monolith_plane_z
+) -> tuple[tuple[float, float, float], ...]:
     """The rectangular conductor of one line, as it sits on the board.
 
-    Lines 0 to 7 are rows on the front copper, running along x at their lane's
-    y centre. Lines 8 to 15 are columns on the back, the same shape rotated a
-    quarter turn. The path starts and ends either side of the feed gap.
+    Lines 0 to 7 are rows running along x at their lane's y centre; lines 8 to
+    15 are columns, the same shape rotated a quarter turn. The path starts and
+    ends either side of the feed gap.
+
+    Only the height of each plane is a parameter, because that is the only thing
+    the split changes: the split sensing plane keeps this x and y geometry
+    exactly and moves the two planes onto separate substrates. Sharing the path
+    is what makes the two extractions comparable.
     """
     half_length = LOOP_LENGTH / 2.0
     half_breadth = LOOP_BREADTH / 2.0
@@ -109,18 +122,20 @@ def loop_path(line: int) -> tuple[tuple[float, float, float], ...]:
         (-half_length, half_gap),
     )
 
+    z = plane_z(line)
     if line < ROW_COUNT:
-        z = FRONT_Z_MM
         cx, cy = PLAY_CENTER, line_center(line)
         return tuple((cx + x, cy + y, z) for x, y in flat)
 
-    z = BACK_Z_MM
     cx, cy = line_center(line - ROW_COUNT), PLAY_CENTER
     # Rotated a quarter turn: the footprint's x runs along the board's y.
     return tuple((cx - y, cy + x, z) for x, y in flat)
 
 
-def deck() -> str:
+def deck(
+    plane_z: Callable[[int], float] = monolith_plane_z,
+    title: str = "one 1.0 mm board, rows on front copper and columns on back",
+) -> str:
     """A FastHenry input holding all sixteen loops at once.
 
     All of them together, not one at a time, because the mutual terms are the
@@ -133,14 +148,14 @@ def deck() -> str:
     # claim. Meshing for the quantity actually being extracted keeps the solve
     # at a couple of seconds instead of four minutes.
     lines = [
-        "* Sixteen matrix line antennas: eight rows on front copper, eight",
-        "* columns on back, from hardware/pcb/matrix_geometry.py.",
+        "* Sixteen line antennas from hardware/pcb/matrix_geometry.py,",
+        f"* on {title}.",
         ".units mm",
         f".default sigma={COPPER_SIGMA_PER_MM} nhinc=1 nwinc=9 h={COPPER_THICKNESS_MM}",
         "",
     ]
     for line in range(LINE_COUNT):
-        path = loop_path(line)
+        path = loop_path(line, plane_z)
         lines.append(f"* line {line} ({'row' if line < ROW_COUNT else 'column'})")
         for index, (x, y, z) in enumerate(path):
             lines.append(f"N{line}_{index} x={x:.4f} y={y:.4f} z={z:.4f}")
