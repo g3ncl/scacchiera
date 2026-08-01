@@ -1,6 +1,7 @@
 /* Application wiring. The only place that knows both core/ and port/ exist;
  * see docs/software/architecture.md. */
 
+#include "esp_err.h"
 #include "esp_log.h"
 #include "esp_timer.h"
 
@@ -8,6 +9,7 @@
 #include "core/hw/clock.h"
 #include "core/snapshot.h"
 #include "port/board_pins.h"
+#include "port/expander.h"
 
 static const char *TAG = "chessboard";
 
@@ -20,6 +22,10 @@ void app_main(void)
 {
     ESP_LOGI(TAG, "chessboard firmware, reader CS on GPIO%d, I2C on %d/%d",
              PIN_NFC_CS_N, PIN_I2C_SCL, PIN_I2C_SDA);
+
+    /* Before anything else: until the expander is configured the reader and
+     * both displays are floating rather than held in reset. */
+    ESP_ERROR_CHECK(expander_init());
 
     engine_state_t engine;
     engine_init(&engine);

@@ -26,6 +26,9 @@ target_include_directories(chessboard_fakes PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 function(chessboard_test name)
   add_executable(${name} ${name}.c)
   target_link_libraries(${name} PRIVATE chessboard_core chessboard_fakes unity)
+  # port/ itself needs ESP-IDF, but its pin map and mask headers are plain
+  # macros, so the host gate can assert them.
+  target_include_directories(${name} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/..)
   add_test(NAME ${name} COMMAND ${name})
 endfunction()
 
@@ -34,3 +37,4 @@ chessboard_test(test_snapshot)
 chessboard_test(test_fault)
 chessboard_test(test_engine_stub)
 chessboard_test(test_fakes)
+chessboard_test(test_expander_config)
