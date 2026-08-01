@@ -64,7 +64,13 @@ improvement at the same time.
 
 ## Status
 
-Nothing is bound. The Keeppower wired 1S1P 21700 6000 mAh pack remains the leading candidate on
-total cost at about EUR 11, and its published 12 A continuous rating clears the current bounds
-comfortably. It fails documentation acceptance on all four counts, and the fix is a supplier
-request rather than more searching.
+**Selected on assumption: the Keeppower wired 1S1P 21700 6000 mAh pack**, about EUR 11, whose
+published 12 A continuous rating clears the current bounds comfortably. It still fails the
+documentation acceptance above on all four counts, so the selection rests on assumption A5 in
+[assumptions.md](assumptions.md): that a Seiko 1S protection PCB sits within the required windows
+at typical thresholds.
+
+This is the highest-consequence open assumption in the project, because getting protection
+thresholds wrong is a safety and behaviour problem rather than a margin problem. It is carried
+deliberately so the design can proceed, and a V8 test article characterises the pack before any
+final-board order.

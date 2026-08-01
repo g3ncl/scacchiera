@@ -89,7 +89,11 @@ rather than mandatory.
 | do something unexpected | the fallback adapter below |
 
 All four are settled by the same EastRising interfacing document that settles mode selection.
-Nothing should be fabricated before reading it.
+Rather than wait on it, the design proceeds on assumptions A2 and A3 in
+[assumptions.md](assumptions.md): the modules ship strapped for four-wire SPI, as BuyDisplay sells
+and documents them, and pins 7 and 8 are grounded externally anyway because section 4.1 says they
+must be and the bridge is harmless if redundant. Both fail loudly at first bring-up rather than
+silently in the field, which is what makes them acceptable to assume.
 
 ### Fallback: the adapter board, if the module needs more than a bridge
 
@@ -121,21 +125,18 @@ and only 2.15 mm of free length. Widening the hub connectors to 2 x 8 for a stoc
 attractive but adds about 19 mm of hub edge and forces a re-route of a two-layer board that already
 had to buy length to converge.
 
-## Before the harness can be ordered
+## Carried as assumptions, not blockers
 
-- **The module's interface-select configuration is not documented anywhere in the datasheet.**
-  Section 4.1 describes what each pin does "when serial interface mode is selected" but never says
-  how to select it. The outline drawing's back view shows the mechanism: paired resistor positions
-  R3/R9, R5/R8 and the R10/R11/R12 group are 0-ohm selection jumpers. Which combination selects
-  four-wire SPI, and which combination the module ships in, must come from EastRising's separate
-  interfacing document (the datasheet's own Attention note points at it) or from the supplier
-  directly. The adapter cannot fix this: if the modules arrive strapped for parallel or I2C they
-  need rework before they will talk to the hub at all.
-- The datasheet is revision 1.0, **preliminary**, dated 2025-08-07. V1 treats a provisional
-  document as a release blocker regardless of what it says.
-- **The 2 x 8 socket is not bound.** The footprint is a stock
-  `Connector_PinSocket_2.54mm:PinSocket_2x08_P2.54mm_Vertical` (1.7 mm pads, 1.0 mm drill), but no
-  MPN, order code or datasheet is filed, so the adapter's schematic cannot be generated: the
-  build fails any fitted part without a manufacturer number, which is the intended behaviour.
-  Binding it is an ordinary Datasheets-workflow job and the only thing standing between this
-  design and a routed board.
+Three things the datasheet does not settle. All three are registered in
+[assumptions.md](assumptions.md) and carried rather than chased, so that display work proceeds.
+
+- **Interface selection is documented nowhere.** Section 4.1 describes what each pin does "when
+  serial interface mode is selected" and never says how to select it; the back view shows paired
+  0-ohm jumpers R3/R9, R5/R8 and R10/R11/R12. Assumption A2 takes the modules as shipping strapped
+  for four-wire SPI, which is how BuyDisplay sells and documents them. If wrong, the display is
+  silent at bring-up and the jumpers are reworked. No board change either way.
+- **The datasheet is revision 1.0, preliminary**, dated 2025-08-07. Assumption A4 takes its numbers
+  as holding, which its independently corroborated 320 mA supports.
+- **The 2 x 8 socket is unbound.** This only matters for the fallback adapter, which is not being
+  built. The footprint is a stock
+  `Connector_PinSocket_2.54mm:PinSocket_2x08_P2.54mm_Vertical` if it ever is.

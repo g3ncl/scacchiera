@@ -1470,3 +1470,28 @@ power board is untouched.
 One thing worth keeping from the detour: the terminal caps insulation outside diameter at 1.85 mm,
 and plenty of ordinary 18 AWG is jacketed thicker than that. That is now an explicit acceptance
 item on the cell leads rather than an assumption.
+
+## [2026-08-01] decision | Stop waiting on suppliers, register the assumptions instead
+
+Owner's call: make suppositions and keep moving rather than block on correspondence. Wrote
+`docs/hardware/assumptions.md`, a register of nine values the design uses that no filed datasheet
+backs, each with its basis, its consequence if wrong, and the point where it gets measured.
+
+The point of the register is that these stay visible. `simulation-workflow.md` treats an assumed
+critical value as a V1 failure, so every row is a waiver against the V8 and V9 order gates. That
+constrains releasing a fabrication order and nothing else; schematic, layout, simulation and
+firmware work all proceed normally. V1's plan entry now says "closed for design purposes on the
+registered assumptions" and stays unticked, because ticking it would corrupt the gate the whole
+project is tracked against.
+
+Six of the nine are low consequence or conservative in the safe direction: the Micro-Fit 8.5 A
+rating (which passes at either candidate figure), the redundant-if-wrong display ground bridge, the
+preliminary datasheet numbers, the pack re-termination, the borrowed charge window, and the tag
+geometry follow-ons.
+
+Three matter and are named as such. The Keeppower pack's protection thresholds are the highest
+consequence, because wrong thresholds are a safety and behaviour problem rather than a margin
+problem, and the pack is now selected on that assumption rather than left as a candidate. The
+display interface mode decides whether the displays work at all, though it fails loudly at first
+bring-up, which is the best kind of wrong. And the tag resonator assumptions are what keep V4 from
+being a fully datasheet-sourced electromagnetic model.

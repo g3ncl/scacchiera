@@ -41,8 +41,14 @@ scoped test-article order. V0 through V9 permit a final-board order.
   requirement, permits a cylindrical cell to lie lengthwise in the player rail, and files the USB
   Type-C CC advertisement thresholds as Standard evidence. Evidence: 5 traceability tests passed
   on 2026-07-29.
-- [ ] V1 component and library proof: fitted-board sourcing is complete, but the external display
-  interface remains open. The 10 W power board now binds BQ25895RTWR, TPS61088RHLR,
+- [ ] V1 component and library proof: **closed for design purposes on the assumptions registered
+  in [hardware/assumptions.md](hardware/assumptions.md)**, and left unticked only because
+  [simulation-workflow.md](simulation-workflow.md) treats an assumed value as a release blocker.
+  That bears on the V8 and V9 order gates, not on schematic, layout, simulation or firmware work,
+  all of which proceed. Nine assumptions are recorded with their basis, consequence and
+  measurement point; three matter (the cell protection thresholds, the display interface mode,
+  and the tag resonator), and a V8 test article measures every one. Fitted-board sourcing is
+  complete. The 10 W power board now binds BQ25895RTWR, TPS61088RHLR,
   TLV809K33DBVR, CSD25404Q3, TLV7021DCKR, CDMC8D28NP-1R2MC, and both Micro-Fit headers with
   manufacturer sources and a reviewed route.
   [verification/v1-components.yaml](verification/v1-components.yaml) exactly matches 58 unique
