@@ -245,7 +245,41 @@ scoped test-article order. V0 through V9 permit a final-board order.
   already used for the matrix loop before trusting it: 572.6 nH against 584.9 nH and 0.436 against
   0.473 ohm, agreeing to 2 and 8 percent.
 
-  **Retracted 2026-08-01: the defect this section previously reported was an artifact of the
+  **The sixteen antennas are extracted.** `hardware/sim/antenna_coupling.py` solves all sixteen
+  loops together with FastHenry at the carrier and returns the full port-to-port matrix, from the
+  same `matrix_geometry.py` constants the footprint generator and the layout use, so it cannot
+  drift from the board. `hardware/tests/test_antenna_coupling.py` checks it against
+  [criteria.yaml](criteria.yaml).
+
+  | Quantity | Value | Status |
+  | --- | --- | --- |
+  | Self inductance | 566.5 nH | converged; 590 nH from Grover in `loop.py`, agreeing to 4 percent |
+  | Line-to-line spread | 0.05 percent L, 0.3 percent R | the sixteen lines are interchangeable |
+  | Adjacent same-axis coupling | k = 0.1398 | converged; the dominant coupling on the board |
+  | Row-to-column coupling | k = 0.0066 to 0.0665 | converged; worst at the four corners |
+  | Resistance | at least 563 milliohm | **not converged** |
+  | Capacitance, loaded Q | not extracted | needs a different solver |
+
+  Two results worth stating plainly. **Rows and columns are decoupled, but not uniformly**: the
+  cancellation is weakest where two loops cross near their open ends, so the four board corners
+  couple ten times more strongly than the centre. `matrix.md` asserted decoupling without a figure
+  and without that spatial variation. And **adjacent parallel lines are the dominant coupling at
+  k = 0.14**, falling to 0.017 two lanes away and 0.001 across the board; that is the path by which
+  a tag could answer on the wrong line, which is the `RF_CROSSTALK` mechanism the firmware reports.
+
+  A mesh study over nhinc 1 to 7 and nwinc 9 to 13 is what makes those numbers evidence rather than
+  a first solve, and it found two problems. **Resistance never converged**, climbing 525 to 563
+  milliohm and still rising: 17.8 um of skin depth in a 1 mm wide, 35 um thick conductor needs far
+  more filaments than the coupling does, so resistance is a lower bound and loaded Q cannot be
+  stated at all. And the first reciprocity check divided by near-zero mutual terms and reported 47
+  percent error that meant nothing; against the self-inductance scale the residual is 0.15 percent
+  and constant across meshes, which is the solver's floor.
+
+  This is inductive coupling between antennas. It is not tag coupling, which assumptions A8 and A9
+  record as unobtainable from any datasheet, and it is not radiated emission. The bare matrix test
+  article exists to measure both.
+
+    **Retracted 2026-08-01: the defect this section previously reported was an artifact of the
   check, not a property of the board.** `rf_segments()` filtered the net to F.Cu and then measured
   its distance to B.Cu tracks, so it was comparing traces on opposite layers. Two traces that cross
   in plan view on different layers read as nearly zero apart, which is normal and harmless; real

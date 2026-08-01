@@ -1600,3 +1600,43 @@ Three things the project cannot answer from its own files and which must be sett
 0.2 mm via drills against the fabricator's standard tier, copper weight and surface finish which
 the board file leaves to KiCad defaults and therefore does not specify at all, and quantity against
 900 cm2 of area on the most expensive board in the product.
+
+## [2026-08-01] extraction | The sixteen antennas, and what the mesh study caught
+
+First real V4 work on the matrix. `hardware/sim/antenna_coupling.py` solves all sixteen line
+antennas together in FastHenry at 13.56 MHz and returns the full port-to-port matrix. Geometry
+comes from `matrix_geometry.py`, the same constants the footprint generator and layout use, so the
+model cannot drift from the board.
+
+Self inductance is 566.5 nH against 590 nH from Grover's formula in `loop.py`. Two independent
+methods on one shape agreeing to 4 percent, which is the first time this copper has been solved
+rather than estimated. All sixteen lines agree to 0.05 percent on inductance, so they are
+interchangeable, which matters because a scan treats them identically.
+
+Two findings the project did not have before. **Rows and columns are decoupled but not uniformly.**
+[[row-column-antenna-matrix-technique]] and `matrix.md` assert decoupling; the figure is k = 0.0066
+at the board centre and k = 0.0665 at the four corners, a tenfold variation, because the orthogonal
+cancellation is weakest where two loops cross near their open ends. And **adjacent parallel lines
+are the dominant coupling at k = 0.1398**, falling to 0.017 two lanes away and 0.001 across the
+board. That is the physical path by which a tag could answer on the wrong line, which is the
+RF_CROSSTALK mechanism the firmware's `scan_join` reports.
+
+The mesh study is what makes those evidence rather than a first solve, and it earned its keep by
+catching two things.
+
+**Resistance never converged.** It climbed 525 to 563 milliohm across nhinc 1 to 7 and nwinc 9 to
+13 and was still rising. The cause is physical: skin depth in copper at 13.56 MHz is 17.8 um
+against a 1 mm wide, 35 um thick conductor, so resolving the current crowding needs far more
+filaments than the coupling does. Resistance from this extraction is a lower bound and loaded Q,
+being omega L over R, cannot be stated at all. Recorded as a gap with its own test rather than
+quietly reported as a number.
+
+**My reciprocity check measured nothing.** It normalised each mutual term against itself, so
+near-zero couplings between distant lines produced a 47 percent error that did not move with
+refinement. Against the self-inductance scale the residual is 0.15 percent and constant, which is
+the solver's floor. A metric that does not improve with mesh refinement is usually the metric's
+fault, not the solver's.
+
+Still not V4: this is inductive coupling between antennas, not tag coupling, which A8 and A9 record
+as unobtainable from any datasheet, and not capacitance, Q, or radiated emission. The bare matrix
+test article exists to measure what this cannot.

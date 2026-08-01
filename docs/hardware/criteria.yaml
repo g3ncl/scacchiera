@@ -304,6 +304,46 @@ criteria:
     margin: No reduction is allowed without measured V8 evidence.
     test_ids: [TEST-PHY-RF-002]
 
+  MATRIX-ANTENNA-INDUCTANCE:
+    description: Self inductance of one line antenna at the carrier, from the routed geometry.
+    requirement_ids: [PHY-RF-001]
+    unit: nH
+    limits: {minimum: 500.0, maximum: 650.0}
+    evidence: {class: Simulated, source: hardware/sim/antenna_coupling.py, locator: FastHenry extraction of all sixteen loops at 13.56 MHz}
+    operating_conditions: 1 mm trace, 35 um copper, 276 by 31 mm single turn, rows on front copper and columns on back of a 1.0 mm board.
+    margin: FastHenry returns 566.5 nH at a converged mesh against 590 nH from Grover's formula in hardware/sim/loop.py, two independent methods agreeing to 4 percent. A mesh study over nhinc 1 to 7 and nwinc 9 to 13 moves it by 0.04 percent, so the value is converged. The band survives the method spread and still catches a geometry drift. V8 measures the real value with a VNA.
+    test_ids: [TEST-MATRIX-RF-004, TEST-V8-RF-001]
+
+  MATRIX-ANTENNA-UNIFORMITY:
+    description: Fractional spread of self inductance and resistance across the sixteen lines.
+    requirement_ids: [PHY-RF-001]
+    unit: fraction
+    limits: {maximum: 0.02}
+    evidence: {class: Simulated, source: hardware/sim/antenna_coupling.py, locator: Diagonal of the sixteen-port impedance matrix}
+    operating_conditions: All sixteen loops solved together at 13.56 MHz.
+    margin: The extraction returns 0.0005 on inductance and 0.003 on resistance. Both are spreads across identically meshed lines, so the resistance spread stays meaningful even though its absolute value is not converged. A scan treats every line identically, so a spread here would make one square read differently from its neighbour for reasons unrelated to the piece on it.
+    test_ids: [TEST-MATRIX-RF-005]
+
+  MATRIX-ROW-COLUMN-COUPLING:
+    description: Worst inductive coupling coefficient between any row and any column.
+    requirement_ids: [PHY-RF-001]
+    unit: fraction
+    limits: {maximum: 0.10}
+    evidence: {class: Simulated, source: hardware/sim/antenna_coupling.py, locator: Off-diagonal row-to-column terms of the sixteen-port matrix}
+    operating_conditions: All sixteen loops solved together at 13.56 MHz, no tag present.
+    margin: The extraction returns 0.0665 at a converged mesh, at the four board corners where two loops cross near their open ends; the best crossing, at the board centre, is 0.0066, a tenfold variation. This is the claim the row-and-column architecture rests on and it is inductive coupling between antennas, not tag coupling, which A8 and A9 record as unmeasurable from datasheets.
+    test_ids: [TEST-MATRIX-RF-006, TEST-V8-RF-002]
+
+  MATRIX-ADJACENT-LINE-COUPLING:
+    description: Inductive coupling coefficient between adjacent same-axis lines.
+    requirement_ids: [PHY-RF-001]
+    unit: fraction
+    limits: {maximum: 0.20}
+    evidence: {class: Simulated, source: hardware/sim/antenna_coupling.py, locator: Off-diagonal terms at a lane spacing of one}
+    operating_conditions: All sixteen loops solved together at 13.56 MHz, no tag present.
+    margin: The extraction returns 0.1398 at a converged mesh, identical to four figures across the whole mesh study and uniform across every adjacent pair, falling to 0.017 at two lanes and 0.001 across the board. This is the dominant coupling on the board and the path a tag reading on the wrong line would take, so the bound is a recorded ceiling rather than a demonstration of adequacy. V8 must measure it.
+    test_ids: [TEST-MATRIX-RF-007, TEST-V8-RF-002]
+
   PHY-TAG-RECESS-DIAMETER:
     description: Nominal centered NFC tag recess diameter in each piece.
     requirement_ids: [PHY-PIECE-001]
