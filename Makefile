@@ -21,7 +21,7 @@ export KICAD_FOOTPRINT_DIR
 	pcb-matrix pcb-matrix-route pcb-matrix-reroute pcb-matrix-drc pcb-matrix-fab \
 	pcb-hub pcb-hub-route pcb-hub-reroute pcb-hub-drc pcb-hub-fab \
 	pcb-power pcb-power-reroute pcb-power-drc pcb-power-fab power-rail-fit panel pcb-fab \
-	firmware firmware-test firmware-pins firmware-target clean
+	firmware firmware-test firmware-pins firmware-font firmware-target clean
 
 check: pcb-lightbar-drc pcb-matrix-drc pcb-hub-drc pcb-power-drc firmware-test
 	$(PYTHON) -m mypy hardware
@@ -36,6 +36,10 @@ FIRMWARE_BUILD := $(FIRMWARE_DIR)/build
 # schematic change; test_firmware_pins.py fails if the committed copy drifts.
 firmware-pins:
 	$(PYTHON) -m hardware.pcb.firmware_pins
+
+# Regenerate the glyph table from the drawn art in the generator.
+firmware-font:
+	$(PYTHON) software/firmware/tools/generate_font.py
 
 firmware:
 	cmake -S $(FIRMWARE_DIR) -B $(FIRMWARE_BUILD) -DCMAKE_BUILD_TYPE=Debug

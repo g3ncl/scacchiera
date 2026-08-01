@@ -16,6 +16,7 @@
 #include "core/hw/clock.h"
 #include "core/hw/scan.h"
 #include "core/scan_join.h"
+#include "core/text.h"
 #include "core/hw/output.h"
 #include "core/hw/storage.h"
 #include "port/display.h"
@@ -65,17 +66,49 @@ void hw_output_light_cue(piece_color_t side, light_cue_t cue)
     }
 }
 
+/* One text line, scaled to fill the 64-pixel height. A 7-pixel glyph at scale
+ * 6 is 42 pixels tall, which reads across a table without crowding the edges.
+ * The band is the glyph height plus its blank row, times the scale. */
+#define TEXT_SCALE 6
+#define TEXT_BAND_ROWS (FONT_CELL_HEIGHT * TEXT_SCALE)
+#define TEXT_BAND_COLUMNS DISPLAY_COLUMNS
+
+static uint8_t s_text_band[TEXT_BAND_COLUMNS * TEXT_BAND_ROWS];
+
 void hw_output_display_text(piece_color_t side, const char *text)
 {
-    /* Not yet rendered. The display driver can address any window and push
-     * pixels, but there is no glyph source, so text cannot become pixels here
-     * without inventing a font inline. The next display increment generates
-     * one the way board_pins.h is generated, rather than hand-typing a table.
-     *
-     * Logging rather than silently dropping, so a caller can see its text
-     * reaching the boundary and V6 has something to assert on before the font
-     * exists. */
-    ESP_LOGI(TAG, "display %d: %s", (int)side, text != NULL ? text : "(null)");
+    if (side >= DISPLAY_COUNT) {
+        return;
+    }
+    const char *message = (text != NULL) ? text : "";
+
+    const text_canvas_t canvas = {
+        .pixels = s_text_band,
+        .columns = TEXT_BAND_COLUMNS,
+        .rows = TEXT_BAND_ROWS,
+    };
+    text_clear(&canvas);
+
+    /* Centred, and clamped rather than negative when a message is too long to
+     * fit: an overlong string truncates at the right edge instead of starting
+     * off-screen and losing its beginning. */
+    const uint16_t width = text_width(message, TEXT_SCALE);
+    const uint16_t x = (width < DISPLAY_WIDTH_PIXELS)
+                           ? (uint16_t)((DISPLAY_WIDTH_PIXELS - width) / 2u)
+                           : 0u;
+    text_draw(&canvas, x, 0, message, TEXT_SCALE, 0x0F);
+
+    /* Vertically centred band, so the rows above and below stay as the clear
+     * left them rather than needing a full-frame rewrite. */
+    const uint8_t top = (uint8_t)((DISPLAY_ROWS - TEXT_BAND_ROWS) / 2u);
+    esp_err_t err = display_set_window((uint8_t)side, 0, DISPLAY_COLUMNS - 1u,
+                                       top, (uint8_t)(top + TEXT_BAND_ROWS - 1u));
+    if (err == ESP_OK) {
+        err = display_write((uint8_t)side, s_text_band, sizeof(s_text_band));
+    }
+    if (err != ESP_OK) {
+        ESP_LOGW(TAG, "display %d text failed: %s", (int)side, esp_err_to_name(err));
+    }
 }
 
 /* Persistence for the in-progress snapshot. NVS rather than the SPIFFS games
