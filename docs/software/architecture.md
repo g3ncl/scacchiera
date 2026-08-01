@@ -118,5 +118,23 @@ Two gaps, both recorded rather than assumed away:
 - **Sanitizers do not run.** gcc accepts `-fsanitize=address,undefined` whether or not the runtime
   libraries exist and only fails at link, so the build probes a real link and falls back with a
   warning. Installing `libasan` and `libubsan` closes it.
-- **No target build.** `port/` and `main/` are empty directories. The reproducible ESP32-C6 image
-  is the remaining V5 bullet and needs ESP-IDF, which is not installed.
+**The target image builds**, as of 2026-08-01. `make firmware-target` produces a 119 KB
+`chessboard.bin` for the ESP32-C6, leaving 92 percent of its app partition free.
+
+- **Pinned to ESP-IDF v5.5.5**, commit `b774170ff46c393eeb5e495ea37936038d3f4f4f`, with the
+  riscv32 toolchain at esp-14.2.0. v5.5 rather than v6.0 because V6 has to run this exact image in
+  Wokwi and the v5.5 line has the most mileage there.
+- The IDF project root is `target/`, kept separate because the host gate owns
+  `software/firmware/CMakeLists.txt` and two build systems cannot share one project root.
+  `core/CMakeLists.txt` registers itself either as an IDF component or as a plain static library
+  depending on `ESP_PLATFORM`, so both builds compile the same sources rather than a copy.
+- `target/partitions.csv` fixes the layout: two 1.5 MB OTA app slots so a failed update cannot
+  leave a board that will not boot, NVS for the in-progress snapshot because it is rewritten after
+  every committed move and NVS wear-levels, and a 896 KB SPIFFS partition for PGN.
+- `port/board_pins.h` is generated from the hub netlist by `hardware/pcb/firmware_pins.py`, and
+  `hardware/tests/test_firmware_pins.py` fails if the committed copy drifts. A stale pin map is not
+  a compile error, it is a board that boots and does the wrong thing.
+
+`firmware-target` is deliberately not part of `make check`, because it needs a 2 GB toolchain
+exported rather than a checkout dependency. `port/` is still empty of drivers; that is the next
+work.

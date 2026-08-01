@@ -1,0 +1,15 @@
+# Pinned so the image is reproducible; V5 requires the exact target and
+# partition layout, not merely "an ESP32-C6 build".
+CONFIG_IDF_TARGET="esp32c6"
+
+CONFIG_PARTITION_TABLE_CUSTOM=y
+CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="partitions.csv"
+CONFIG_ESPTOOLPY_FLASHSIZE_4MB=y
+
+# Treat warnings as errors here too, so a file cannot pass the host gate and
+# then rot in the target build.
+CONFIG_COMPILER_WARN_WRITE_STRINGS=y
+
+# Native USB is unused: J1 is power only, so the console stays on UART0, which
+# is the service connector the recovery path depends on.
+CONFIG_ESP_CONSOLE_UART_DEFAULT=y

@@ -1,0 +1,12 @@
+# ESP32-C6-MINI-1U-N4: 4 MB flash. Two app slots so a failed over-the-air
+# update cannot leave a board that will not boot, which matters because the
+# only recovery path on an assembled unit is the UART service connector.
+# games/ holds PGN; the in-progress snapshot lives in nvs because it is
+# rewritten after every committed move and NVS wear-levels.
+# Name,     Type, SubType,  Offset,   Size,   Flags
+nvs,        data, nvs,      0x9000,   0x6000,
+otadata,    data, ota,      0xf000,   0x2000,
+phy_init,   data, phy,      0x11000,  0x1000,
+ota_0,      app,  ota_0,    0x20000,  0x180000,
+ota_1,      app,  ota_1,    0x1a0000, 0x180000,
+games,      data, spiffs,   0x320000, 0xe0000,

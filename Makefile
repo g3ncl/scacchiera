@@ -21,7 +21,7 @@ export KICAD_FOOTPRINT_DIR
 	pcb-matrix pcb-matrix-route pcb-matrix-reroute pcb-matrix-drc pcb-matrix-fab \
 	pcb-hub pcb-hub-route pcb-hub-reroute pcb-hub-drc pcb-hub-fab \
 	pcb-power pcb-power-reroute pcb-power-drc pcb-power-fab power-rail-fit panel pcb-fab \
-	firmware firmware-test firmware-pins clean
+	firmware firmware-test firmware-pins firmware-target clean
 
 check: pcb-lightbar-drc pcb-matrix-drc pcb-hub-drc pcb-power-drc firmware-test
 	$(PYTHON) -m mypy hardware
@@ -43,6 +43,13 @@ firmware:
 
 firmware-test: firmware
 	ctest --test-dir $(FIRMWARE_BUILD) --output-on-failure
+
+# The ESP32-C6 image. Not part of `check`, because it needs ESP-IDF exported
+# and that is a 2 GB toolchain rather than a checkout dependency.
+IDF_EXPORT ?= $(HOME)/esp/esp-idf-v5.5.5/export.sh
+
+firmware-target: firmware-pins
+	bash -c '. $(IDF_EXPORT) >/dev/null && cd $(FIRMWARE_DIR)/target && idf.py build'
 
 schematic-lightbar: footprints
 	$(PYTHON) -m hardware.pcb.generate lightbar
@@ -125,4 +132,4 @@ pcb-fab: pcb-lightbar-fab pcb-matrix-fab pcb-hub-fab
 
 clean:
 	rm -rf hardware/pcb/generated hardware/sim/generated hardware/cad/generated \
-		software/firmware/build
+		software/firmware/build software/firmware/target/build
