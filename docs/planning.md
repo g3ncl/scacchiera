@@ -300,6 +300,16 @@ scoped test-article order. V0 through V9 permit a final-board order.
   done, STEP fit against the enclosure and a rendered review package, is untouched because no
   enclosure model exists.
 
+- [ ] **Scoped test-article release, bare matrix board.** Documented in
+  [hardware/test-article-matrix.md](hardware/test-article-matrix.md) and buildable with
+  `make test-article-matrix`. Bare copper, unpopulated, which is the "copper antenna sample" the
+  workflow prefers over an assembled set, and which carries none of the electrical risk V3 covers
+  or the assembly risk V7's BOM and CPL bullets cover. It exists to make V4 possible: assumptions
+  A8 and A9 record that no published datasheet gives the tag coil inductance or the chip's
+  equivalent parallel resistance, so the tag resonator cannot be sourced by further simulation and
+  only a measurement settles it. Three items must be confirmed at upload: the matrix's 0.2 mm via
+  drills against the fabricator's standard tier, copper weight and surface finish which the board
+  file does not specify, and quantity against 900 cm2 of area.
 - [ ] V8 test-article measurement and model calibration
 - [ ] V9 independent review and final release
 

@@ -1575,3 +1575,28 @@ Earlier numbers I nearly reported were wrong and worth noting as a method warnin
 matched every `(width ...)` in the board file and returned 0.05 mm and 0.00 mm minimum tracks,
 which are silkscreen and graphic widths, not copper. Filtering to `(segment ...)` gave the real
 0.200 mm. Extracting from a board file is not the same as extracting the right thing from it.
+
+## [2026-08-01] release | Scoped test article: the bare matrix board
+
+The owner wants boards in production. The honest position is that final boards need V0 through V9
+and V4 has never been run on an RF board, so that cannot happen. What can happen, and what the
+workflow explicitly prefers, is a scoped article: V8 names "copper antenna samples" ahead of a
+complete assembled set. Written up as `docs/hardware/test-article-matrix.md` and buildable with
+`make test-article-matrix`.
+
+The argument for ordering it now rather than after more simulation is [[ad-circus-slix2]] and
+[[sl2s2602]]. Assumptions A8 and A9 exist because Avery Dennison publishes no coil inductance for
+any converted inlay and NXP publishes no equivalent parallel resistance at minimum operating power.
+The tag resonator is back-solved. More simulation cannot fix that; a VNA can. Waiting for a
+datasheet-sourced V4 before ordering the article that would source it is waiting for something that
+cannot arrive.
+
+Bare copper is also releasable in a way a populated board is not: it carries none of the electrical
+risk V3 covers and none of the assembly risk V7's BOM and CPL bullets cover. And the matrix is
+hand-populated regardless, because its outline is outside the assembly service, so ordering it bare
+costs nothing in process.
+
+Three things the project cannot answer from its own files and which must be settled at upload: the
+0.2 mm via drills against the fabricator's standard tier, copper weight and surface finish which
+the board file leaves to KiCad defaults and therefore does not specify at all, and quantity against
+900 cm2 of area on the most expensive board in the product.

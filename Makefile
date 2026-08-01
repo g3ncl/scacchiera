@@ -21,7 +21,8 @@ export KICAD_FOOTPRINT_DIR
 	pcb-matrix pcb-matrix-route pcb-matrix-reroute pcb-matrix-drc pcb-matrix-fab \
 	pcb-hub pcb-hub-route pcb-hub-reroute pcb-hub-drc pcb-hub-fab \
 	pcb-power pcb-power-reroute pcb-power-drc pcb-power-fab power-rail-fit panel pcb-fab \
-	firmware firmware-test firmware-pins firmware-font firmware-target clean
+	firmware firmware-test firmware-pins firmware-font firmware-target \
+	test-article-matrix clean
 
 check: pcb-lightbar-drc pcb-matrix-drc pcb-hub-drc pcb-power-drc firmware-test
 	$(PYTHON) -m mypy hardware
@@ -135,6 +136,13 @@ pcb-lightbar-fab: schematic-lightbar
 # All four boards. The power board was missing here, so `make pcb-fab`
 # produced an incomplete order set.
 pcb-fab: pcb-lightbar-fab pcb-matrix-fab pcb-hub-fab pcb-power-fab
+
+# The bare matrix test article. Regenerates only what the release in
+# docs/hardware/test-article-matrix.md needs, so the upload is one file.
+test-article-matrix: pcb-matrix-drc pcb-matrix-fab
+	@echo
+	@echo "Upload: hardware/pcb/generated/matrix/matrix_gerbers.zip"
+	@echo "Spec and pre-upload checks: docs/hardware/test-article-matrix.md"
 
 clean:
 	rm -rf hardware/pcb/generated hardware/sim/generated hardware/cad/generated \
