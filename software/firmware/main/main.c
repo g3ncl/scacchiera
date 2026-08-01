@@ -10,6 +10,8 @@
 #include "core/snapshot.h"
 #include "port/board_pins.h"
 #include "port/expander.h"
+#include "port/matrix.h"
+#include "port/spi_bus.h"
 
 static const char *TAG = "chessboard";
 
@@ -26,6 +28,11 @@ void app_main(void)
     /* Before anything else: until the expander is configured the reader and
      * both displays are floating rather than held in reset. */
     ESP_ERROR_CHECK(expander_init());
+
+    /* The matrix registers power up driving an undefined selection and cannot
+     * be blanked, so putting a known pattern on them is the next thing done. */
+    ESP_ERROR_CHECK(spi_bus_init());
+    ESP_ERROR_CHECK(matrix_init());
 
     engine_state_t engine;
     engine_init(&engine);
