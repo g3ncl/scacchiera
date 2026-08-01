@@ -33,53 +33,56 @@ Two derivations worth keeping, because both looked like problems and are not:
 - **Cell-lead drop is negligible.** 18 AWG at roughly 21 milliohm per metre over a 0.25 m round trip
   is about 5 milliohm, so 30 mV at 5.871 A. It does not eat into the 2.87 V boost floor.
 
-## The cell harness: 20 AWG at the documented 5 A
+## The cell harness: 18 AWG on a single pair
 
-The cell link is bound to the **documented 20 AWG at 5.0 A** row of Molex PS-43045 rather than to
-the 8.5 A that distributors attach to the 18 AWG terminal, because 8.5 A appears in catalog
-listings and not in any datasheet available here. Summarized in
-[micro-fit-current-rating](../../Vault/Scacchiera/Wiki/sources/micro-fit-current-rating.md).
-
-| AWG | 20 | 22 | 24 | 26 | 28 | 30 |
-| --- | --- | --- | --- | --- | --- | --- |
-| Amps | 5 | 5 | 4 | 3 | 2 | 1 |
-
-Choosing the documented row changes the terminal. 430300038 is the 18 AWG variant and cannot crimp
-20 AWG; the 20 to 24 AWG tin female terminal is **43030-0007** in bag packaging (43030-0001 on
-reel), which suits a two-off build. The board-side 43045 headers do not change, so this is a
-cable-side substitution with no layout consequence.
+**18 AWG wire into 430300038 terminals, a single contact pair, rated 8.5 A.** The harness carries
+4.442 A RMS, so the margin is about 48 percent.
 
 ### The comparison is RMS, not peak
 
-A connector current rating is a thermal limit. Molex states its deratings are based on not
-exceeding a 30 degree Celsius temperature rise, and contact heating is I squared R, so the figure
-to compare against is the **RMS** current, not the switching peak.
+A connector current rating is a thermal limit. Molex bases its deratings on not exceeding a
+30 degree Celsius temperature rise, and contact heating is I squared R, so the figure to compare
+against is the **RMS** current, not the switching peak.
 
 | Quantity | Value | Source |
 | --- | --- | --- |
 | Battery-path RMS | **4.442 A** | `POWER-CELL-PASS-FET-LOSS` operating conditions |
 | Boost inductor peak | 5.871 A | `POWER-BOOST-INDUCTOR-PEAK` margin |
-| Contact rating, 20 AWG | 5.0 A | PS-43045 section 4.2 |
+| Contact rating, 18 AWG | 8.5 A | distributor listings for 430300038, see the caveat below |
 
-So the cell harness is **inside** its rating at 4.442 A against 5.0 A, with about 11 percent margin.
-The 5.871 A figure is a 500 kHz inductor peak and does not heat a contact.
+The 5.871 A figure is a 500 kHz inductor peak. It sizes the converter's current limit and the
+inductor's saturation rating; it does not heat a contact.
 
-### It is inside, but thinly, and it breaks the project's own rule
+### The one caveat, recorded rather than treated as a blocker
 
-Eleven percent is before any derating, and the derating table for a two-circuit housing with both
-circuits energized is not in the filed revision. If that derating is as mild as 90 percent the
-margin falls to roughly one percent, which is not a margin.
+8.5 A comes from distributor listings, not from a datasheet in `Datasheets/`. Molex PS-43045
+revision M1 is filed and its table stops at 20 AWG at 5 A with no 18 AWG row, and Molex's own
+servers did not respond to repeated attempts. See
+[micro-fit-current-rating](../../Vault/Scacchiera/Wiki/sources/micro-fit-current-rating.md).
 
-More telling, [power-module-interface.md](power-module-interface.md) already states the principle:
-"Power and ground use multiple contacts so no single terminal carries the whole interface current."
-J2 gives 5 V three contacts and ground four. J3 gives its output two and two. **The cell link is the
-only power interface in the product that puts the whole current through one contact pair**, and it
-is also the highest-current one.
+This is deliberately not treated as a blocker, because **the harness passes under either candidate
+figure**: 48 percent margin at 8.5 A, and still 11 percent at 5.0 A. The unresolved rating changes
+how much room there is, not whether the design works. Record the evidence class as catalog rather
+than datasheet until a current Molex revision is filed, and prefer 18 AWG regardless, since at
+21 milliohm per metre against 20 AWG's 33 it is the lower-loss wire.
 
-Taking the cell connector from two circuits to four, one pair per polarity, puts 2.22 A on each
-contact and ends the question outright. It costs a change from the 430450200 header to the
-four-circuit part on the power board, and therefore a re-route of that board. That is a real cost
-against a harness that currently passes, so it is recorded as a recommendation rather than done.
+Watch the insulation, though: the terminal caps insulation outside diameter at 1.85 mm, and plenty
+of ordinary 18 AWG is jacketed thicker than that.
+
+### Why a single pair is right here
+
+A single positive and a single negative is the normal way to connect a cell, not a compromise.
+Every battery interconnect in general use is a single pair, most of them carrying far more than
+4.4 A.
+
+[power-module-interface.md](power-module-interface.md) says "power and ground use multiple contacts
+so no single terminal carries the whole interface current", but that is about the board-to-board
+links J2 and J3, where the connector already has pins to spare and paralleling costs nothing. It is
+not a rule about connectors in general, and it does not apply to a two-wire battery link. Doubling
+contacts is also weaker than it looks: paralleled contacts do not share current evenly because
+their resistances differ, so two contacts are worth appreciably less than twice one. The right
+answer for a battery link that needs more current is a larger connector, not more pins of a small
+one, and this one does not need either.
 
 ## What is still open for every harness
 

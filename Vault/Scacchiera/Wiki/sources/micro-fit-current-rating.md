@@ -74,21 +74,26 @@ Every one is 250 V, 5.0 A maximum, 10 milliohm maximum contact resistance, phosp
 fitted 18 AWG [[430300038]] appears in none of them, consistent with this revision's table stopping
 at 20 AWG.
 
-## Consequence for the design, resolved 2026-08-01
+## Consequence for the design, settled 2026-08-01
 
-The design binds the documented 20 AWG at 5.0 A row rather than the 8.5 A that distributors attach
-to the 18 AWG terminal, so the terminal becomes 43030-0007 and the wire becomes exactly 20 AWG.
+The design keeps **18 AWG into [[430300038]] on a single contact pair**, and accepts the 8.5 A that
+distributors publish for that terminal as catalog evidence pending a current Molex revision.
 
 **The comparison is RMS, not peak.** Molex's deratings are based on not exceeding a 30 degree
 temperature rise, and contact heating is I squared R, so a 500 kHz inductor peak does not heat a
-contact. The battery-path RMS is 4.442 A against a 5.0 A rating, about 11 percent margin. The
-earlier framing of this page, which compared the 5.871 A peak against a thermal rating and
-concluded the harness was 17 percent over, was wrong.
+contact. The battery path is 4.442 A RMS. An earlier version of this page compared the 5.871 A peak
+against a thermal rating and concluded the harness was 17 percent over; that was wrong.
 
-Two things still outstanding. The derating for a two-circuit housing with both circuits energized
-is not in this revision, and if it is as mild as 90 percent the margin falls to roughly one
-percent. And this document is an old mirror, so the terminal order numbers above want confirming
-against a current Molex source before anything is bought.
+The unresolved rating is not a blocker, because the harness passes under either candidate figure:
+48 percent margin at 8.5 A, 11 percent at 5.0 A. What is open is the evidence class, not the
+outcome. A current Molex revision would also supply the derating table for a fully energized
+two-circuit housing, which this revision lacks.
+
+A proposal to split the cell link across four contacts has been withdrawn. A single positive and
+negative pair is the normal way to connect a cell; the multiple-contact wording in
+`docs/hardware/power-module-interface.md` concerns the board-to-board links, where the connectors
+already have spare pins; and paralleled contacts share current unevenly because their resistances
+differ, so two are worth well under twice one.
 
 ## Related
 

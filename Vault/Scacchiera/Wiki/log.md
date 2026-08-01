@@ -1443,3 +1443,30 @@ ground use multiple contacts so no single terminal carries the whole interface c
 5 V three contacts, J3 gives its output two. Four circuits on the cell link would put 2.22 A on
 each contact and end the question, at the cost of a power-board re-route, so it is written up as a
 recommendation and not done.
+
+## [2026-08-01] correction | Back to 18 AWG, and the multiple-contact rule does not apply to a cell
+
+Reversing the previous entry on the owner's call, and conceding a second point I got wrong.
+
+**18 AWG stays.** The cell link keeps [[430300038]] on a single contact pair, and the 8.5 A that
+distributors publish for that terminal is accepted as catalog evidence pending a current Molex
+revision. This is recorded as an evidence-class gap, not a blocker, because the harness passes
+under either candidate figure: 4.442 A RMS is 48 percent inside 8.5 A and still 11 percent inside
+5.0 A. The rating question was never pass-or-fail, only how much room, and I should have said so
+before turning it into a decision. 18 AWG is also the better wire at 21 milliohm per metre against
+20 AWG's 33.
+
+**The multiple-contact rule does not apply here, and citing it was a mistake.** A single positive
+and a single negative is the normal way to connect a cell, not a compromise; essentially every
+battery interconnect in general use is a single pair carrying far more than 4.4 A. The wording in
+`power-module-interface.md` is about the board-to-board links J2 and J3, where the connector
+already has pins to spare and paralleling costs nothing. Applying it to a two-wire battery link
+was reading a local convenience as a general law. Paralleling is also weaker than it sounds:
+contacts do not share current evenly because their resistances differ, so two are worth appreciably
+less than twice one, and the right answer for a battery link short of capacity is a bigger
+connector rather than more pins of a small one. The four-circuit proposal is withdrawn and the
+power board is untouched.
+
+One thing worth keeping from the detour: the terminal caps insulation outside diameter at 1.85 mm,
+and plenty of ordinary 18 AWG is jacketed thicker than that. That is now an explicit acceptance
+item on the cell leads rather than an assumption.
