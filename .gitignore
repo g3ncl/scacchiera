@@ -9,6 +9,7 @@ hardware/pcb/generated/
 hardware/cad/generated/
 hardware/sim/generated/
 hardware/release/
+software/firmware/build/
 
 *.rpt
 *.erc

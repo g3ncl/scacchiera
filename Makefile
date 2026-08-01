@@ -20,11 +20,24 @@ export KICAD_FOOTPRINT_DIR
 	pcb-lightbar pcb-lightbar-drc pcb-lightbar-fab \
 	pcb-matrix pcb-matrix-route pcb-matrix-reroute pcb-matrix-drc pcb-matrix-fab \
 	pcb-hub pcb-hub-route pcb-hub-reroute pcb-hub-drc pcb-hub-fab \
-	pcb-power pcb-power-reroute pcb-power-drc pcb-power-fab power-rail-fit panel pcb-fab clean
+	pcb-power pcb-power-reroute pcb-power-drc pcb-power-fab power-rail-fit panel pcb-fab \
+	firmware firmware-test clean
 
-check: pcb-lightbar-drc pcb-matrix-drc pcb-hub-drc pcb-power-drc
+check: pcb-lightbar-drc pcb-matrix-drc pcb-hub-drc pcb-power-drc firmware-test
 	$(PYTHON) -m mypy hardware
 	$(PYTHON) -m pytest
+
+# Host firmware gate for V5. Warnings are errors, gcc's analyzer runs, and
+# the sanitizers are enabled when their runtimes are installed.
+FIRMWARE_DIR := software/firmware
+FIRMWARE_BUILD := $(FIRMWARE_DIR)/build
+
+firmware:
+	cmake -S $(FIRMWARE_DIR) -B $(FIRMWARE_BUILD) -DCMAKE_BUILD_TYPE=Debug
+	cmake --build $(FIRMWARE_BUILD)
+
+firmware-test: firmware
+	ctest --test-dir $(FIRMWARE_BUILD) --output-on-failure
 
 schematic-lightbar: footprints
 	$(PYTHON) -m hardware.pcb.generate lightbar
@@ -106,4 +119,5 @@ pcb-lightbar-fab: schematic-lightbar
 pcb-fab: pcb-lightbar-fab pcb-matrix-fab pcb-hub-fab
 
 clean:
-	rm -rf hardware/pcb/generated hardware/sim/generated hardware/cad/generated
+	rm -rf hardware/pcb/generated hardware/sim/generated hardware/cad/generated \
+		software/firmware/build

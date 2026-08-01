@@ -90,5 +90,33 @@ that the hardware-facing bullets can close first.
 
 ## Status
 
-Not started. V5 and V6 are open in [planning.md](../planning.md), and this file is the plan they
-follow rather than a description of code that exists.
+**Foundation exists as of 2026-08-01.** `software/firmware/` holds the host build, the boundary
+headers, the core types and the deterministic fakes, and `make firmware-test` is part of
+`make check`.
+
+What is there:
+
+- CMake and CTest over `core/` plus the fakes, building with `-Werror`, `-Wconversion`,
+  `-Wsign-conversion`, `-Wshadow` and the rest, and with gcc's `-fanalyzer` as the static analysis
+  step. `clang-tidy` and `cppcheck` are not installed on this machine.
+- `core/`: `square` (zero based, aligned with the sensor array), `piece`, `fault` (the five faults
+  from [functional/gameplay.md](../functional/gameplay.md) with a test that fails if the table
+  drifts), `snapshot` (typed 64-square reading with UID, plus equality, occupancy and duplicate-UID
+  detection), and the `engine` stub.
+- `core/hw/`: `clock`, `scan`, `output`, `storage`, the four headers `port/` and the fakes both
+  implement as free functions. No indirection layer, because link-time substitution already does
+  the job.
+- `test/`: deterministic fakes for all four, and five test executables covering square indexing,
+  snapshot semantics, the fault table, the stub's contract, and the fakes themselves.
+
+The engine stub is pinned by tests deliberately. It records a clean snapshot, refuses a faulted
+one, and never returns ACCEPTED, so a caller cannot mistake "not implemented" for "legal". Those
+tests are expected to be rewritten when the engine is real.
+
+Two gaps, both recorded rather than assumed away:
+
+- **Sanitizers do not run.** gcc accepts `-fsanitize=address,undefined` whether or not the runtime
+  libraries exist and only fails at link, so the build probes a real link and falls back with a
+  warning. Installing `libasan` and `libubsan` closes it.
+- **No target build.** `port/` and `main/` are empty directories. The reproducible ESP32-C6 image
+  is the remaining V5 bullet and needs ESP-IDF, which is not installed.
