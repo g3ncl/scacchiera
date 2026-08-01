@@ -1139,3 +1139,253 @@ asserting whatever the last reroute happened to leave behind, so it cannot be fo
 
 What stands: the layer filter was a real latent bug and is fixed, `deck()` refuses a net on its own
 return plane, and FastHenry remains validated. The 46.9 nH figure is unverified rather than refuted.
+
+## [2026-08-01] finding | The 22 mm tag recess is larger than a pawn base at this grid pitch
+
+Follow-on from the tag ingest above, prompted by asking whether the inlay actually fits a piece.
+It fits the recess. The recess does not fit a conventional pawn, and that conflict was already in
+the functional spec before any tag was chosen.
+
+Conventional proportions put the king base at 0.73 to 0.78 of the square and the pawn base at
+about 0.586 of it. On the 35 mm grid that is a 25.6 to 27.3 mm king base and a 20.5 mm pawn base.
+The [[ad-circus-slix2]] die-cut is 21 mm and the specified recess is 22 mm, so both exceed the
+pawn base, and pawns are half the set.
+
+Nothing is invalidated: `hardware/cad/` contains no piece geometry, so the pieces are undesigned
+and this is a design input rather than a respin. Recorded in `docs/hardware/matrix.md` with four
+options for V7. The interesting one is trimming the die-cut: only the inner 18 mm is coil, the
+outer 1.5 mm is PET carrier, so a punch to about 19 mm clears a standard pawn without touching the
+antenna. Untested and it voids the vendor article, so it is a candidate, not a plan.
+
+Rejected outright: a smaller tag for pawns only. [[bitwiseid-method]] requires uniform tag timing
+across the set, and mixed coil diameters also mean mixed coupling per square.
+
+Method note, given the retraction logged above: this one is arithmetic on published proportions
+plus a datasheet dimension, and the pawn figure was cross-checked two ways (0.586 x square, and
+0.765 x king base) landing at 20.5 and 20.1 mm. It has not been checked against a physical set.
+
+## [2026-08-01] decision | Pawn bases grow to 24 mm rather than the tag shrinking
+
+Resolving the conflict logged above. The owner's instruction was to enlarge the pawn base unless a
+smaller tag existed for the whole set at a comparable price. Surveyed the small end of the ISO
+15693 catalog; none qualifies.
+
+- AD Miniblock SLIX2, 18 x 18 mm die-cut on a 14.5 mm coil. Square, so its 25.5 mm diagonal is
+  what a round recess has to clear. Worse than the 21 mm round [[ad-circus-slix2]], not better.
+- AD Minitrack SLIX2, 14 x 31 mm. The 31 mm dimension fits no base on this board.
+- HID laundry tag SLIX2, 16 mm. Physically fits, but EUR 1.64 against EUR 0.34 to 0.69, and it is
+  a sealed puck rather than a 141 um inlay.
+- SLIX2 on-metal micro, 6 mm, EUR 2.50. Anti-metal behavior is explicitly prohibited by
+  `docs/functional/physical.md`.
+
+The RF argument points the same way independently. Coupling scales with coil area, an 18 mm coil
+against a 276 mm line antenna is already weak by construction, and every smaller candidate roughly
+halves it or worse. Spending piece silhouette to buy coupling margin is the right trade in a
+system whose margin has not been measured yet.
+
+So `docs/functional/physical.md` now requires a 24 mm minimum base on every piece, pawns included:
+1 mm of wall around the 22 mm recess, 1.5 mm around the bound tag. Added PHY-PIECE-004 and the
+PHY-PIECE-BASE-DIAMETER criterion, and re-pinned the physical.md source hash, which is the review
+gate that change is supposed to trip. Recorded honestly in the spec that this makes pawn bases
+nearly as wide as the king's and the set less classically proportioned.
+
+## [2026-08-01] synthesis | The display product page publishes the sleep current as the maximum
+
+V1's oldest open display item was a contradiction between two manufacturer documents: section 4.3
+of the [[er-oledm3-12-1w]] datasheet says 320 mA active and 2 mA sleep, the BuyDisplay product
+page says 2 mA maximum. Resolved in favour of 320 mA, which is what the load budget already
+assumed. Filed as [[er-oledm3-12-1w-display-current]].
+
+Two independent arguments. First, 2 mA at 3.3 V is 6.6 mW for the whole module, which has to run
+the SSD1362, an onboard boost to the panel's high-voltage rail, and 16384 lit pixels; a boost
+converter's quiescent draw alone is in that range. Second, and this is the useful part, a
+comparable 3.12 inch 256 by 64 PMOLED from a different manufacturer publishes the current table
+the product page garbles. [[w256064-xalg-datasheet]] gives 32 mA typical at VCC 14.5 V on a 50
+percent checkerboard, which is 464 mW, roughly 928 mW at full fill, which through a 3.3 V boost at
+85 to 90 percent is 312 to 331 mA. The datasheet says 320 mA. Filed that panel's PDF in
+`Datasheets/` as corroborating evidence, clearly marked not-fitted.
+
+Recorded as Derived, not Datasheet. The bound part's own datasheet always said 320 mA; what is new
+is the demonstration that the contradicting product page is the wrong one. No human at the
+supplier has confirmed it.
+
+Two things this does not fix, and one I should have caught earlier. The original PDF is still not
+filed: `buydisplay.com/download/manual/` returns 403 to automated clients even with ordinary
+browser headers and a referer. Search engines index the path so it is public, just bot-blocked,
+and a human opening it in a browser fixes it in a minute. I did not try to work around the block.
+
+The one I should have caught: the filed datasheet is revision **1.0, preliminary, 2025-08-07**.
+V1's definition of done makes a provisional document a release blocker by itself, independent of
+any number in it. That has been sitting in the evidence capture since 2026-07-29 without being
+recorded as a blocker. It is recorded now.
+
+## [2026-08-01] doc | The display interconnect turns out to be fully specified, except for one fork
+
+Wrote `docs/hardware/display-interface.md`, the contract between the hub's J5/J6 and each
+[[er-oledm3-12-1w]] module's 16-pin header. The map was already recoverable from the immutable
+evidence capture and nobody had assembled it in one place.
+
+In four-wire SPI mode only six of the sixteen module pins carry anything: VCC, RES, CS, D/C, SCLK
+and SID. The other ten are ground. Six signals plus ground is seven conductors, which is exactly
+why the hub connector is a 7-pin GH, so the pin counts were never in conflict. But the cable is
+not straight-through: eight module pins have no hub conductor at all and must be grounded at the
+display end.
+
+That is the fork. Either a small adapter PCB at each display with the grounds poured, which is
+reproducible and DRC-checkable and matches this project's rule that layout is code, or a
+hand-assembled 16-way loom with the ground pins daisy-chained inside it, which is cheaper and adds
+no board. It changes the board inventory, so it is recorded as an open decision rather than
+settled here.
+
+Still blocked on the same two things as everything else about this display: the original PDF is
+403-blocked so the pin map rests on a text capture, and the datasheet is a preliminary revision.
+
+## [2026-08-01] ingest | The display datasheet arrives and settles three things, opens a fourth
+
+The owner downloaded the PDF the supplier's server refuses to serve to scripts. Filed as
+`Datasheets/ER-OLEDM3.12-1W_BUYDISPLAY.pdf`, 21 pages, revision 1.0 preliminary, Aug-07-2025. It
+sits alongside the text capture rather than replacing it; both are immutable.
+
+Confirmed, section 4.3: IDD maximum **320 mA** with note 5 reading "VDD=3.3V, 100% Display Area
+Turn on", and IDD sleep maximum 2 mA. The [[er-oledm3-12-1w-display-current]] analysis was right
+and the product page is wrong. Also worth noting the module has one supply pin: VCC on pin 1 with
+a 3.6 V absolute maximum, so the panel's high-voltage rail is generated on-module and 320 mA is
+the whole module at 3.3 V, which is what the corroboration assumed.
+
+Confirmed, section 4.1: the pin map matches the text capture exactly. Pins 7 (R/W) and 8 (E/RD)
+**must** be tied to VSS in serial mode; pins 11 to 16 (D2 to D7) are unused and only *recommended*
+low. That mandatory-versus-recommended distinction was not in the capture.
+
+New, from the outline drawing: the header is a **2 x 8 on 2.54 mm pitch**, not a single row. Odd
+pins one row, even the other, pin 1 square, 17.78 x 2.54 mm field. That is a stock IDC-16 pattern,
+so the mating part is off the shelf. Reading it took rendering the vector page at 600 dpi and
+cropping, because the pitch could not be told from the page image and guessing between 2.0 mm
+single-row and 2.54 mm dual-row would have produced a footprint that does not mate.
+
+The fourth thing, which is now the real blocker: **the datasheet never says how the interface is
+selected.** Every pin description is conditioned on "when serial interface mode is selected" and
+no section explains the selection. The back view shows why: R3/R9, R5/R8 and R10/R11/R12 are
+paired 0-ohm jumper positions. Which combination gives four-wire SPI, and which the module ships
+with, needs EastRising's separate interfacing document. An adapter board cannot fix a module
+strapped for parallel.
+
+Decision recorded in `docs/hardware/display-interface.md`: a small adapter board that plugs onto
+the display header, snapped off the existing light-bar panel so it costs no new fabrication line
+item. Merging it into the light bar was checked and is physically impossible; the bar is 8.5 mm
+tall with 2.15 mm of free length and everything on the front face behind a diffuser. Widening the
+hub to 2 x 8 and using a stock ribbon was the attractive alternative and lost on the cost of
+re-routing a hub that already struggled to converge on two layers.
+
+## [2026-08-01] design | Display adapter specified, blocked on a connector nobody has bound
+
+Owner confirmed the adapter should ride the existing light-bar panel rather than becoming its own
+fabrication order, which is what `hardware/pcb/panel.py` was built for. Specified in
+`docs/hardware/display-interface.md` and added to `boards.md` as board 5, two off.
+
+The interesting part was orientation. Six signals between a 7-pin GH and a 2 x 8 header do not
+route without crossings unless the two connectors are aimed correctly. With J1's pin 1 at the
+right-hand end and J2's pin 1 at the left, five of the six fall into monotonically increasing
+order (SCLK, MOSI, CS, DC, RESET) and cannot cross; all five go on the front. 3V3 is the exception
+by construction, sitting at one end of the GH and the far end of the display header, so it takes
+the back layer alone and runs out past the right end of the pin field. Ground pours on both layers
+and reaches all ten grounded pins through their own through-hole barrels, so the board needs no
+vias at all.
+
+The far-row nets pass through the 1.27 mm gap beside a near-row pad. 1.7 mm pads on 2.54 mm pitch
+against a 0.25 mm track leaves 0.295 mm, over the 0.2 mm rule. Checked rather than assumed,
+because it is the one dimension in this design that could have failed.
+
+Not generated, and deliberately so: the 2 x 8 socket has no bound MPN. Searching turned up
+candidates but nothing with a datasheet I would put in `Datasheets/`, and binding a connector off
+an ambiguous catalog hit is the exact failure mode the Datasheets rule exists to prevent. The
+schematic generator refuses any fitted part without a manufacturer number, which is correct, so
+the board stays on paper until the socket is bound properly.
+
+## [2026-08-01] retraction | The display adapter board was over-built and is withdrawn
+
+Owner asked why the module's own PCB cannot do the job. It can. Retracting the adapter as the
+design; it stays in `docs/hardware/display-interface.md` as a fallback only, and is removed from
+`boards.md`.
+
+The adapter's entire job was shorting eight pins to ground. Laid out on the 2 x 8, those pins are
+not scattered: columns 6, 7 and 8 are ground on both rows (pins 11 to 16, a solid two-by-three
+block at one end), column 4 is ground on both rows (pins 7 and 8), and then pins 2 and 3. That is
+one solder bridge across six adjacent pins, one across two, and a link wire, on the solder side of
+the module's own header where it does not obstruct mating. Twice, for two displays. I had been
+treating commoning ten adjacent pins as a routing problem when it is a soldering-iron problem.
+
+Also correcting myself: I earlier dismissed hand strapping as failing intermittently rather than
+obviously. That criticism was about a crimped daisy chain inside a flexing loom. A solder bridge
+across adjacent pins on a rigid PCB is not that failure mode.
+
+The more important point, which the adapter was obscuring: it is not established that any strapping
+is needed. The module's interface-select jumpers (R3/R9, R5/R8, R10/R11/R12) plausibly already
+drive R/W and E/RD low when four-wire SPI is selected, and pins 11 to 16 are only recommended low,
+not required. Four outcomes, from no work at all to the fallback board, and all four are decided by
+the same EastRising interfacing document that decides mode selection. Fabricating anything before
+reading it risks building a board to solve a problem the module already solved.
+
+## [2026-08-01] synthesis | The cell was never blocked on searching, it was blocked on a spec
+
+Wrote `docs/hardware/cell-assembly.md`. The V1 entry had been reading as "no protected pack found",
+but [[battery-format-and-module-alternatives]] found a good one on 2026-07-30. What was missing was
+the acceptance specification a candidate has to be judged against, so the Keeppower pack had
+nowhere to pass or fail.
+
+Every bound in it is derived from criteria already recorded, not newly chosen:
+
+- Over-discharge detection at or below 2.8 V, because the TLV809K33 supervisor cuts the boost at
+  2.87 V. A pack tripping above that governs the discharge with an undocumented threshold and the
+  ten-hour runtime claim stops meaning anything.
+- Overcharge detection at or above 4.25 V, because the BQ25895 terminates at 4.2 V and its
+  regulation tolerance puts the real top near 4.221 V. A 4.2 V trip nuisance-trips every charge.
+- Overcurrent detection at or above 6.6 A, because worst case discharge is 5.871 A and the
+  TPS61088's guaranteed limit is 6.502 A. The converter must clamp before the pack disconnects,
+  or a stress condition becomes a dead board.
+- Leads 20 AWG or heavier for 5.871 A peak. Many packs ship 22 AWG, and this is the likeliest
+  acceptance failure.
+
+Two things fall out that are true of every candidate, not just this one. No protected pack includes
+a thermistor, and `functional/power.md` requires charging gated on one attached to the cell, so
+bonding the audited NTCLE317E4103SBA is this project's work regardless; a sensor taped near a cell
+measures air. And the keyed connector is a re-termination in every case, so the lead-gauge question
+is about the wire that stays, not the plug that goes.
+
+One thing worth flagging that I had not noticed before: `POWER-CHARGE-TEMPERATURE-MIN` and `-MAX`
+still cite `PISUGAR3_PLUS_safety.md`, the safety document of a module that is no longer bound. The
+0 and 40 degree charge window is borrowed from an unrelated product. Both criteria say so honestly
+in their margin fields, but it means binding a cell is a V0 evidence improvement as well as a V1
+one.
+
+Still not bound, and the remaining gap is a supplier request rather than more searching: the cell's
+own datasheet and revision, the protection IC behind "Seiko protection PCB" (that family spans
+several parts with different thresholds), the shipped construction against the 80 x 26 x 23 mm
+reserved envelope, and the shipped connector.
+
+## [2026-08-01] doc | Harness inventory, and the highest-current path rests on an assumption
+
+Wrote `docs/hardware/harnesses.md`, the last of the three V1 items that were sitting as prose
+fragments in `planning.md` rather than as anything checkable. Every cable, its connector, its
+contact allocation and its worst-case per-contact current in one table.
+
+The finding: **the cell link puts 5.871 A through a single Micro-Fit 3.0 contact pair, and no filed
+source says what that contact is rated for.** [[micro-fit-3-0-mating-evidence]] binds mating
+compatibility, the 18 AWG wire range and the 1.85 mm insulation limit, and states in its own last
+line that it qualifies nothing else. No current rating, no derating curve. Two circuits both at
+5.871 A is the worst arrangement a two-circuit housing has, and this is the highest-current path in
+the product.
+
+Also retired a problem I thought I had found. J2's three JST GH supply contacts looked like 3.0 A
+across a 1 A-per-contact connector, which would be at the rating with zero margin. It is not:
+`functional/power.md` caps the source at a compliant 5 V 2 A USB supply, so it is 0.67 A per contact
+with the return over four grounds. The "3.0 A capability" in the module interface is the
+connector's capability, not the load. Worth recording as a non-problem so nobody re-derives it.
+
+Cell-lead drop also checked and negligible: 18 AWG, roughly 21 milliohm per metre, 0.25 m round
+trip, about 30 mV at 5.871 A, which does not encroach on the 2.87 V boost floor.
+
+Still open on every harness and now listed explicitly: wire type and insulation diameter (the
+terminal caps insulation at 1.85 mm, which rules out plenty of ordinary 18 AWG), crimp process
+(Molex names hand tool 63828-0200, otherwise pre-crimped leads must be bound as parts), colour
+coding, length and strain relief, and the assembled article itself. Lengths depend on the rail
+arrangement, which is still undrawn.

@@ -50,16 +50,52 @@ scoped test-article order. V0 through V9 permit a final-board order.
   authoritative schematics, records no fitted-part blocker, and separately
   audits the off-board NTCLE317E4103SBA cell sensor. The
   purchased power module is only an optional replacement, not a fitted V1 dependency. The two
-  ER-OLEDM3.12-1W displays now have a manufacturer evidence capture and wiki audit. V1 stays open
-  because the product page's 2 mA maximum contradicts the datasheet's 320 mA active and 2 mA sleep
-  rows, the original PDF download is blocked by the supplier site, and the exact 16-to-7-pin cable
-  and module straps are not yet bound. The Micro-Fit mating housings and 18 AWG female terminals
+  ER-OLEDM3.12-1W displays now have a manufacturer evidence capture and wiki audit. The product
+  page's 2 mA maximum versus the datasheet's 320 mA active and 2 mA sleep rows is resolved in
+  favour of 320 mA, the figure the load budget already used: 2 mA at 3.3 V is 6.6 mW and cannot
+  run the controller, the onboard boost and 16384 lit pixels, and an independently published table
+  for a comparable 3.12 inch 256 by 64 panel (EA W256064-XALG, now filed as corroborating
+  evidence) works out to 312 to 331 mA equivalent at 3.3 V. The product page publishes the sleep
+  figure as the maximum. The original PDF is now filed and confirms it directly: section 4.3 note 5
+  reads "VDD=3.3V, 100% Display Area Turn on" against the 320 mA maximum, and pin 1 VCC has a
+  3.6 V absolute maximum, so the panel's high-voltage rail is generated on-module. The PDF also
+  fixes the header as a stock 2 x 8 on 2.54 mm pitch, and the interconnect contract is written up
+  in [hardware/display-interface.md](hardware/display-interface.md). The ten grounded pins are
+  commoned by a solder bridge on the module's own header rather than by new hardware: they cluster
+  into a two-by-three block at columns 6 to 8 plus column 4, so it is one bridge across six
+  adjacent pins, one across two, and a link wire. An adapter PCB was designed for this and
+  discarded as over-built; it stays documented as a fallback only. V1 stays open on two display
+  items. The datasheet revision 1.0 is
+  **preliminary** (2025-08-07), a release blocker on its own terms. And the module's
+  interface-select configuration is documented nowhere in it: every pin description is conditioned
+  on "when serial interface mode is selected" while the back view shows paired 0-ohm jumpers
+  R3/R9, R5/R8 and R10/R11/R12, so which combination gives four-wire SPI and which the module
+  ships in must come from EastRising. A module strapped for parallel will not talk to the hub and
+  no adapter fixes that. The Micro-Fit mating housings and 18 AWG female terminals
   are now exact, but the protected cell assembly, wire, qualified crimp or pre-crimped leads, color
-  coding, and assembled harness are not yet bound. The load budget conservatively
+  coding, and assembled harness are not yet bound;
+  [hardware/harnesses.md](hardware/harnesses.md) now inventories every cable with its worst-case
+  per-contact current and lists what each still needs. It also surfaces one number nobody had
+  filed: the cell link puts 5.871 A through a single Micro-Fit 3.0 contact pair, and the filed
+  mating evidence records wire range and compatibility but no current rating and no derating curve
+  for a fully energized housing. That is the highest-current path in the product and it currently
+  rests on an assumption. The same file retires a suspected J2 problem: its three JST GH supply
+  contacts carry 0.67 A each, not 1.0 A, because the source is capped at a compliant 5 V 2 A USB
+  supply. The load budget conservatively
   uses 320 mA each. A Keeppower wired 1S1P 21700 6000 mAh protected pack is now the leading
   total-cost candidate at about EUR 11: 12 A continuous, 5900 mAh minimum, and the four mandatory
   electrical protections. V1 remains open because its exact cell revision, protection thresholds,
-  wire gauge, connector, thermistor attachment, and shipped construction are not documented. The
+  wire gauge, connector, thermistor attachment, and shipped construction are not documented.
+  [hardware/cell-assembly.md](hardware/cell-assembly.md) now states what any candidate must satisfy,
+  derived from criteria already recorded rather than newly chosen: over-discharge detection at or
+  below 2.8 V so the TLV809K33 supervisor governs the discharge instead of an undocumented
+  threshold, overcharge at or above 4.25 V so a full charge does not nuisance-trip against the
+  BQ25895's 4.221 V real top, overcurrent at or above 6.6 A so the TPS61088's guaranteed 6.502 A
+  limit acts first, and 20 AWG or heavier leads for the 5.871 A peak. It also records that no
+  protected pack supplies the thermistor the functional spec requires, so bonding the audited
+  NTCLE317E4103SBA and re-terminating to the keyed Molex housing are this project's work whichever
+  pack wins. Binding a cell would additionally replace the borrowed
+  `PISUGAR3_PLUS_safety.md` evidence still standing behind the 0 and 40 degree charge window. The
   Molicel M65A remains a higher-capacity feasibility reference but is unavailable and would need a
   custom protected assembly. The piece tag now has a researched candidate where it previously had
   no MPN at all: an Avery Dennison AD Circus SLIX2 inlay (3006370 / IL-603074) carrying NXP
@@ -68,7 +104,14 @@ scoped test-article order. V0 through V9 permit a final-board order.
   (see [hardware/matrix.md](hardware/matrix.md)). It stays a candidate, not a binding: nothing is
   purchased, so there is no dated availability record, no second source is identified, and the
   inlay's coil inductance and the chip's equivalent parallel resistance are unpublished, so V4's
-  tag resonator is bounded rather than datasheet-sourced. Every fitted board record has dated
+  tag resonator is bounded rather than datasheet-sourced. Selecting the tag also exposed a
+  pre-existing geometry conflict: at conventional chess proportions a 35 mm grid gives an
+  approximately 20.5 mm pawn base, smaller than both the 21 mm die-cut and the 22 mm recess. This
+  is now resolved in favour of the tag. Every smaller ISO 15693 part was surveyed and rejected on
+  cost, format or coupling (see [hardware/matrix.md](hardware/matrix.md)), so
+  [functional/physical.md](functional/physical.md) gains a 24 mm minimum base diameter for every
+  piece, pawns included, carried by PHY-PIECE-004 and PHY-PIECE-BASE-DIAMETER. The physical.md
+  source hash is re-pinned accordingly. Every fitted board record has dated
   availability,
   immutable manufacturer sources, wiki ingestion, library or interface proof, ratings, model
   treatment, and no open conflict. The AP63203WU-7, AP22811AW5-7, TLV7042DGKR and NR6045S4R7MT

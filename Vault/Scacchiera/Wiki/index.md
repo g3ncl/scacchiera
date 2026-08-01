@@ -67,7 +67,7 @@ One [[wiki/source]] summary per ingested raw source. Factual, no interpretation.
 | [[ntcle317e4103sba-datasheet]] | component datasheet | 2026-07-26 |
 | [[ntcle317e4103sba-rt-curve]] | manufacturer resistance curve | 2026-07-26 |
 | [[swpa5045s4r7mt-datasheet]] | component datasheet | 2026-07-26 |
-| [[er-oledm3-12-1w-manufacturer-evidence]] | component manufacturer evidence | 2026-07-29 |
+| [[er-oledm3-12-1w-manufacturer-evidence]] | component manufacturer evidence | 2026-08-01 |
 | [[bq25619rtwr-datasheet]] | component datasheet | 2026-07-29 |
 | [[bq25895rtwr-datasheet]] | component datasheet | 2026-07-31 |
 | [[tps61088rhlr-datasheet]] | component datasheet | 2026-07-31 |
@@ -76,6 +76,7 @@ One [[wiki/source]] summary per ingested raw source. Factual, no interpretation.
 | [[ssd1362-datasheet]] | component datasheet | 2026-07-30 |
 | [[sl2s2602-datasheet]] | component datasheet (piece tag IC, off-board) | 2026-08-01 |
 | [[ad-circus-slix2-datasheet]] | inlay product data sheet (piece tag, off-board) | 2026-08-01 |
+| [[w256064-xalg-datasheet]] | comparable panel datasheet (corroborating, not fitted) | 2026-08-01 |
 
 ## Entities
 
@@ -277,3 +278,4 @@ Query answers filed back into the wiki. See [[wiki/synthesis]] pages.
 | [[chessboard-quick-charge-architecture]] | How can recharge time become much shorter than useful play time? | 2026-07-26 |
 | [[quick-charge-module-evaluation]] | Can a cheap purchased board de-risk quick charging? | 2026-07-26 |
 | [[commercial-power-subsystem-selection]] | Which purchased subsystem should own the battery and charging? | 2026-07-26 |
+| [[er-oledm3-12-1w-display-current]] | Is the display 320 mA or 2 mA? | 2026-08-01 |
