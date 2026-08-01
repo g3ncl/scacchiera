@@ -64,6 +64,6 @@ width, one square of copper at a time.
 
 ## Cost
 
-Generated engineering BOM (`hardware/pcb/generated/lightbar/lightbar_engineering_bom.csv`) totals
+Generated engineering BOM (`hardware/pcb/generated/lightbar/lightbar_bom_all_parts.csv`) totals
 6.33 EUR in parts per bar. This exceeds the original 5 EUR target because an exact, stocked,
 hand-solderable LED was chosen instead of retaining an unresolved catalog part.

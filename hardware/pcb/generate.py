@@ -71,7 +71,7 @@ def generate_design(name: str, circuit: Circuit) -> None:
             design_dir / f"{name}.kicad_sch", design_dir / f"{name}-erc.rpt", reviewed
         )
     run_reviewed_erc(design_dir / f"{name}.kicad_sch", design_dir / f"{name}_erc.rpt")
-    write_bom(circuit, design_dir / f"{name}_engineering_bom.csv")
+    write_bom(circuit, design_dir / f"{name}_bom_all_parts.csv")
     missing = missing_manufacturer_parts(circuit)
     if missing:
         raise RuntimeError(f"fitted parts without an MPN in {name}: {', '.join(missing)}")

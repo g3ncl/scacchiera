@@ -11,9 +11,9 @@ counts, costs, or order files are current release evidence. Update this register
 regenerated simplified hub only after its V1 and V2 gates pass. Lightbar and matrix selections
 remain current.
 
-`make pcb-fab` emits the upload pair `<board>_jlcpcb_bom.csv` and
-`<board>_jlcpcb_cpl.csv`, and rejects the export if their designators differ. The internal costed file is named
-`<board>_engineering_bom.csv`; do not upload it. Blank `LCSC Part #` cells in the upload BOM are
+`make pcb-fab` emits the upload pair `<board>_jlcpcb_upload_bom.csv` and
+`<board>_jlcpcb_upload_cpl.csv`, and rejects the export if their designators differ. The internal costed file is named
+`<board>_bom_all_parts.csv`; do not upload it. Blank `LCSC Part #` cells in the upload BOM are
 intentional unresolved items, not permission to select a substitute during ordering.
 
 The engineering BOM also records `JLC Library`, `Assembly Route`, `Hand Method`, and
@@ -22,11 +22,11 @@ JLCPCB upload. `Hand` identifies a practical candidate to buy elsewhere and omit
 reviewing the JLCPCB match; `JLCPCB` means the part is Basic, too small or hidden for reliable iron
 soldering, or too repetitive to place economically by hand.
 
-Each fabrication run emits two upload choices. `<board>_jlcpcb_bom.csv` and
-`<board>_jlcpcb_cpl.csv` ask JLCPCB to place every fitted part. The matched
-`<board>_jlcpcb_hybrid_bom.csv` and `<board>_jlcpcb_hybrid_cpl.csv` omit every `Hand` row. Upload
+Each fabrication run emits two upload choices. `<board>_jlcpcb_upload_bom.csv` and
+`<board>_jlcpcb_upload_cpl.csv` ask JLCPCB to place every fitted part. The matched
+`<board>_jlcpcb_max_assembly_bom.csv` and `<board>_jlcpcb_max_assembly_cpl.csv` omit every `Hand` row. Upload
 the hybrid pair together when using manual completion, then purchase exactly the rows in
-`<board>_hand_bom.csv` elsewhere. Never mix the full BOM with the hybrid CPL or the reverse.
+`<board>_self_solder_bom.csv` elsewhere. Never mix the full BOM with the hybrid CPL or the reverse.
 The lightbar is the exception: JLCPCB cannot assemble its 120 by 8.5 mm outline, so both of its
 JLCPCB BOM/CPL pairs are intentionally empty and its hand BOM contains every fitted component.
 Order only its bare PCB Gerbers from JLCPCB.
@@ -67,7 +67,7 @@ The lightbar and the matrix are now both fully hand populated, so only the hub g
 Order bare Gerbers for the other two. The hub leaves **seven** Extended lines for factory placement,
 all genuinely reflow-only: J1 (USB-C), U1 (MCP73871 QFN-20), U2 (TPS63802 SON-10), U3 (PN5180
 QFN-40), U4 (ESP32-C6-MINI-1U), U5 (TPS61023 SOT563) and Y1 (the 3225 crystal). Everything else
-Extended on the hub is hand fitted from `hub_hand_bom.csv`.
+Extended on the hub is hand fitted from `hub_self_solder_bom.csv`.
 
 Moving the 0402 C0G RF capacitors (C33/C36, C34) and the TSSOP expander (U6) to hand removes three
 feeder changes, about 8.10 EUR. That is offset by U4 and Y1 becoming real charged lines now that
@@ -125,7 +125,7 @@ Every bound code below was checked against live JLCPCB stock above the five-boar
 ### Lightbar
 
 - **Assembly route:** bare PCB fabrication only, populated by hand with an iron. Both JLCPCB BOM
-  and CPL pairs are intentionally empty and `lightbar_hand_bom.csv` holds every fitted part.
+  and CPL pairs are intentionally empty and `lightbar_self_solder_bom.csv` holds every fitted part.
 - **C15:** C49066, Samsung CL32A107MQVNNNE, is the exact 100 uF, 6.3 V, X5R, 1210 requirement.
 - **J1:** C225127, CJT A1257WR-S-4P, preserves the 1.25 mm GH-compatible right-angle interface.
 - **D1-D14, Harvatek T37K3RGB-05C000112U1930:** DigiKey cut-tape order
@@ -263,3 +263,24 @@ must state:
 For the NFC reader and ESP32 in particular, a different package, protocol, RF architecture, or
 firmware target is a redesign, not a purchasing substitution. Bring a concrete candidate to this
 register before it is introduced.
+
+## Generated order files
+
+`make pcb-fab` writes six files per board. The names say what to do with each, because uploading
+the wrong one is a silent and expensive mistake.
+
+| File | Use |
+| --- | --- |
+| `<board>_bom_all_parts.csv` | Reference. Every part with MPN, supplier, order code, footprint, cost and its assembly classification. The other files are views of this one. |
+| `<board>_jlcpcb_upload_bom.csv` and `_cpl.csv` | **Upload these.** The build plan actually chosen for this board. |
+| `<board>_jlcpcb_max_assembly_bom.csv` and `_cpl.csv` | The alternative: everything JLCPCB could place, excluding only what must be hand-fitted. Kept because the economics that made the other choice can change. |
+| `<board>_self_solder_bom.csv` | What you buy and fit yourself. |
+
+BOM and CPL always come as a pair: the BOM says which part goes on each designator, the CPL says
+where it sits and at what rotation. `validate_assembly_designators` fails the export if the two
+disagree, which is the classic assembly failure.
+
+The two JLCPCB pairs differ only where a board is hand-populated. For the hub and the power board
+they are nearly the same file. For the light bar, which is below JLCPCB's assembly size, and the
+matrix, where the large-size assembly charge exceeded the rest of its PCBA, the upload pair is bare
+copper and the max-assembly pair shows what the alternative would cost.

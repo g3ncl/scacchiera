@@ -17,11 +17,19 @@ from hardware.pcb.bom import HAND_POPULATED_BOARDS
 KICAD_CLI = "/usr/bin/kicad-cli"
 GENERATED = Path(__file__).parent / "generated"
 BOARDS = ("lightbar", "matrix", "hub", "power")
+# Names this export has used before. Deleted on every run so a stale file from
+# an older naming scheme cannot be uploaded by mistake.
 LEGACY_ASSEMBLY_SUFFIXES = (
     "_bom.csv",
     "_cpl.csv",
     "_jlc_bom.csv",
     "_jlc_cpl.csv",
+    "_jlcpcb_bom.csv",
+    "_jlcpcb_cpl.csv",
+    "_jlcpcb_hybrid_bom.csv",
+    "_jlcpcb_hybrid_cpl.csv",
+    "_hand_bom.csv",
+    "_engineering_bom.csv",
 )
 
 GERBER_NON_COPPER_LAYERS = (
@@ -107,8 +115,8 @@ def write_jlc_bom(
         )
 
 
-def write_hand_bom(source: Path, destination: Path) -> None:
-    """Write the externally sourced parts recommended for manual fitting."""
+def write_self_solder_bom(source: Path, destination: Path) -> None:
+    """The parts you buy and fit yourself, not the ones JLCPCB places."""
     with source.open(encoding="utf-8", newline="") as source_file:
         reader = csv.DictReader(source_file)
         required_columns = {*HAND_BOM_COLUMNS, "Fitted", "Assembly Route"}
@@ -214,20 +222,20 @@ def export_fab(name: str) -> tuple[Path, Path, Path, Path, Path, Path]:
             archive.write(gerber_file, arcname=gerber_file.name)
 
     raw_cpl_path = fab_dir / f"{name}.pos.csv"
-    cpl_path = board_dir / f"{name}_jlcpcb_cpl.csv"
-    engineering_bom_path = board_dir / f"{name}_engineering_bom.csv"
-    bom_path = board_dir / f"{name}_jlcpcb_bom.csv"
-    hybrid_bom_path = board_dir / f"{name}_jlcpcb_hybrid_bom.csv"
-    hybrid_cpl_path = board_dir / f"{name}_jlcpcb_hybrid_cpl.csv"
-    hand_bom_path = board_dir / f"{name}_hand_bom.csv"
+    cpl_path = board_dir / f"{name}_jlcpcb_upload_cpl.csv"
+    all_parts_bom_path = board_dir / f"{name}_bom_all_parts.csv"
+    bom_path = board_dir / f"{name}_jlcpcb_upload_bom.csv"
+    max_assembly_bom_path = board_dir / f"{name}_jlcpcb_max_assembly_bom.csv"
+    max_assembly_cpl_path = board_dir / f"{name}_jlcpcb_max_assembly_cpl.csv"
+    self_solder_bom_path = board_dir / f"{name}_self_solder_bom.csv"
     for suffix in LEGACY_ASSEMBLY_SUFFIXES:
         (board_dir / f"{name}{suffix}").unlink(missing_ok=True)
     standard_excluded_routes = (
         HAND_ASSEMBLY_ROUTES if name in HAND_POPULATED_BOARDS else frozenset()
     )
-    write_jlc_bom(engineering_bom_path, bom_path, standard_excluded_routes)
-    write_jlc_bom(engineering_bom_path, hybrid_bom_path, HAND_ASSEMBLY_ROUTES)
-    write_hand_bom(engineering_bom_path, hand_bom_path)
+    write_jlc_bom(all_parts_bom_path, bom_path, standard_excluded_routes)
+    write_jlc_bom(all_parts_bom_path, max_assembly_bom_path, HAND_ASSEMBLY_ROUTES)
+    write_self_solder_bom(all_parts_bom_path, self_solder_bom_path)
     subprocess.run(
         [
             KICAD_CLI, "pcb", "export", "pos",
@@ -243,32 +251,32 @@ def export_fab(name: str) -> tuple[Path, Path, Path, Path, Path, Path]:
     write_jlc_cpl(
         raw_cpl_path,
         cpl_path,
-        assembly_references(engineering_bom_path, standard_excluded_routes),
+        assembly_references(all_parts_bom_path, standard_excluded_routes),
     )
     write_jlc_cpl(
         raw_cpl_path,
-        hybrid_cpl_path,
-        assembly_references(engineering_bom_path, HAND_ASSEMBLY_ROUTES),
+        max_assembly_cpl_path,
+        assembly_references(all_parts_bom_path, HAND_ASSEMBLY_ROUTES),
     )
     validate_assembly_designators(bom_path, cpl_path)
-    validate_assembly_designators(hybrid_bom_path, hybrid_cpl_path)
+    validate_assembly_designators(max_assembly_bom_path, max_assembly_cpl_path)
 
     shutil.rmtree(fab_dir)
-    return zip_path, bom_path, cpl_path, hybrid_bom_path, hybrid_cpl_path, hand_bom_path
+    return zip_path, bom_path, cpl_path, max_assembly_bom_path, max_assembly_cpl_path, self_solder_bom_path
 
 
 def main() -> None:
     if len(sys.argv) != 2 or sys.argv[1] not in BOARDS:
         raise SystemExit(f"Usage: python -m hardware.pcb.fab {{{'|'.join(BOARDS)}}}")
-    zip_path, bom_path, cpl_path, hybrid_bom_path, hybrid_cpl_path, hand_bom_path = export_fab(
+    zip_path, bom_path, cpl_path, max_assembly_bom_path, max_assembly_cpl_path, self_solder_bom_path = export_fab(
         sys.argv[1]
     )
     print(f"gerbers: {zip_path}")
-    print(f"JLCPCB BOM: {bom_path}")
-    print(f"JLCPCB CPL: {cpl_path}")
-    print(f"hybrid JLCPCB BOM: {hybrid_bom_path}")
-    print(f"hybrid JLCPCB CPL: {hybrid_cpl_path}")
-    print(f"hand assembly BOM: {hand_bom_path}")
+    print(f"JLCPCB upload BOM: {bom_path}")
+    print(f"JLCPCB upload CPL: {cpl_path}")
+    print(f"JLCPCB max-assembly BOM: {max_assembly_bom_path}")
+    print(f"JLCPCB max-assembly CPL: {max_assembly_cpl_path}")
+    print(f"self-solder BOM: {self_solder_bom_path}")
 
 
 if __name__ == "__main__":
