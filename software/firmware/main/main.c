@@ -11,6 +11,7 @@
 #include "port/board_pins.h"
 #include "port/expander.h"
 #include "port/matrix.h"
+#include "port/pn5180.h"
 #include "port/spi_bus.h"
 
 static const char *TAG = "chessboard";
@@ -33,6 +34,10 @@ void app_main(void)
      * be blanked, so putting a known pattern on them is the next thing done. */
     ESP_ERROR_CHECK(spi_bus_init());
     ESP_ERROR_CHECK(matrix_init());
+
+    /* Reader last of the three, because its reset line runs through the
+     * expander and its liveness check needs the bus already up. */
+    ESP_ERROR_CHECK(pn5180_init());
 
     engine_state_t engine;
     engine_init(&engine);
