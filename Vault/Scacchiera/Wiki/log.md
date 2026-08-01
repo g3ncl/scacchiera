@@ -1495,3 +1495,35 @@ problem, and the pack is now selected on that assumption rather than left as a c
 display interface mode decides whether the displays work at all, though it fails loudly at first
 bring-up, which is the best kind of wrong. And the tag resonator assumptions are what keep V4 from
 being a fully datasheet-sourced electromagnetic model.
+
+## [2026-08-01] finding | SEL_SRCLR_N is a dead net, and the matrix cannot be blanked
+
+Found while writing the expander driver, which is the right time to find it: the pin map header I
+generate exposes every driven expander bit, and a driver author would reasonably reach for
+`SEL_SRCLR_N` to clear the selection before a scan.
+
+It reaches nothing. From the generated hub netlist, not the source:
+
+    SEL_SRCLR_N: (('R31', '2'), ('U6', '16'))
+    SEL_RCLK:    (('J4', '7'), ('R26', '1'), ('U6', '4'))
+
+Expander P1.3 to pullup R31 and stop. J4 carries seven conductors and none of them is this one, and
+`matrix.py` never mentions it: both 74HC595 `SRCLR_N` pins are tied hard to 3V3, both `OE_N` pins
+to ground. Verified from the matrix netlist too, where U1 and U2 pins 10 and 16 sit on 3V3 and pins
+8 and 13 on GND.
+
+So the selection outputs are permanently enabled and cannot be blanked by any signal. Two
+consequences. The sixteen lines are live with undefined content from power-up until firmware shifts
+and latches, which is an unmanaged current and a meaningless RF state, though at roughly 160 mA
+across sixteen cells it is not damaging. And shifting a known pattern becomes the matrix driver's
+mandatory first action rather than good practice, because nothing else can put the board in a known
+state.
+
+Not worth fixing in copper: J4 is a full 7-pin part, so carrying the signal means an 8-pin
+connector at both ends and a re-route of two boards, all to replace what a 16-bit shift already
+does. The trap was worth fixing, and `hardware/pcb/firmware_pins.py` now excludes the net from the
+generated header with the reason inline, so no driver can call for a clear that would appear to
+succeed and do nothing. Documented in `docs/hardware/matrix.md`.
+
+Checked twice against generated netlists before writing any of this down, because the last time a
+check surprised me this much the check was wrong.

@@ -25,7 +25,12 @@
 #define PIN_USB_CC2_ADC    1
 
 /* TCA9535 ports. A0, A1 and A2 are grounded, so the device answers at
- * 0x20. Each entry is the port index and the bit within it. */
+ * 0x20. Each entry is the port index and the bit within it.
+ *
+ * P1.3 is deliberately absent. Its net SEL_SRCLR_N reaches only a pullup:
+ * the matrix ties both 74HC595 SRCLR_N pins to 3V3 and J4 has no conductor
+ * for it, so the selection registers cannot be cleared by any signal. The
+ * matrix driver must shift a known pattern at boot instead. */
 #define EXPANDER_I2C_ADDRESS 0x20
 
 #define EXP_BUTTON_N_PORT             0
@@ -46,7 +51,5 @@
 #define EXP_OLED_RESET_N_BIT          3
 #define EXP_SEL_RCLK_PORT             0
 #define EXP_SEL_RCLK_BIT              0
-#define EXP_SEL_SRCLR_N_PORT          1
-#define EXP_SEL_SRCLR_N_BIT           3
 
 #endif

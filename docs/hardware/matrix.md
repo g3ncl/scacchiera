@@ -95,6 +95,31 @@ until the hub clocks a pattern in, and the reader field is off until then.
 
 ## Interface to the hub
 
+### The selection registers cannot be cleared
+
+Both 74HC595 `SRCLR_N` pins are tied to 3V3 and both `OE_N` pins to ground, so the sixteen
+selection outputs are permanently enabled and can never be blanked. The hub has a `SEL_SRCLR_N`
+net on expander P1.3, but it runs to pullup R31 and stops: it is absent from J4's seven conductors
+and from this board entirely. Confirmed against the generated netlists, where it reads
+`SEL_SRCLR_N: (('R31', '2'), ('U6', '16'))` against a properly routed
+`SEL_RCLK: (('J4', '7'), ('R26', '1'), ('U6', '4'))`.
+
+Two consequences:
+
+1. **From power-up until firmware acts, the selection is undefined.** A 74HC595's storage register
+   powers up in no particular state and its outputs are live immediately. Several PIN diodes may be
+   forward biased at once, which is an unmanaged current and a meaningless RF state, though not a
+   damaging one: sixteen cells at about 10 mA is 160 mA on a rail sized well above that.
+2. **Shifting a known pattern is the matrix driver's first action and cannot be skipped**, because
+   there is no blanking alternative.
+
+Not worth fixing in copper. J4 is a full 7-pin connector, so routing the signal means an 8-pin part
+at both ends and a re-route of two boards, to replace something a 16-bit shift already does. What
+was worth fixing is the trap: `hardware/pcb/firmware_pins.py` excludes the net from the generated
+firmware header, so no driver can reach for a clear that would appear to succeed and do nothing.
+
+### Connector
+
 7-pin JST GH: the RF bus between two grounds, 3V3, and the register serial (SER, SRCLK, RCLK).
 The reader and its matching live on the hub; this board is copper and switching only.
 

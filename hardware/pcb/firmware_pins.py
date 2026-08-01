@@ -25,6 +25,16 @@ HEADER_PATH = (
 MCU_REFERENCE = "U4"
 EXPANDER_REFERENCE = "U6"
 
+# Nets that exist on the hub but reach nothing, so firmware must not be handed
+# a name for them. Confirmed against the generated netlists, not the source.
+#
+# SEL_SRCLR_N runs from expander P1.3 to pullup R31 and stops: it is absent
+# from J4's seven conductors and from matrix.py entirely, where both 74HC595
+# SRCLR_N pins are tied hard to 3V3. A driver reaching for this to blank the
+# selection would see its I2C write succeed and nothing happen. See
+# docs/hardware/matrix.md.
+DEAD_NETS = {"SEL_SRCLR_N"}
+
 # ESP32-C6-MINI-1U module pin names, from the datasheet v1.5 Table 3-1 map in
 # parts.py, to the GPIO number firmware uses. UART0 sits on IO16 and IO17,
 # which the module exposes under their function names rather than as IOnn.
@@ -56,6 +66,8 @@ def _connected(part_reference: str) -> list[tuple[str, str]]:
             # they arrive here looking connected. They have no firmware
             # identity and must not become macros.
             if net_name.startswith("__NOCONNECT") or net_name in {"GND", "3V3"}:
+                continue
+            if net_name in DEAD_NETS:
                 continue
             rows.append((str(pin.name), net_name))
         return rows
@@ -103,7 +115,12 @@ def render() -> str:
     lines += [
         "",
         "/* TCA9535 ports. A0, A1 and A2 are grounded, so the device answers at",
-        " * 0x20. Each entry is the port index and the bit within it. */",
+        " * 0x20. Each entry is the port index and the bit within it.",
+        " *",
+        " * P1.3 is deliberately absent. Its net SEL_SRCLR_N reaches only a pullup:",
+        " * the matrix ties both 74HC595 SRCLR_N pins to 3V3 and J4 has no conductor",
+        " * for it, so the selection registers cannot be cleared by any signal. The",
+        " * matrix driver must shift a known pattern at boot instead. */",
         "#define EXPANDER_I2C_ADDRESS 0x20",
         "",
     ]
