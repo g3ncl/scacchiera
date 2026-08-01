@@ -21,7 +21,7 @@ export KICAD_FOOTPRINT_DIR
 	pcb-matrix pcb-matrix-route pcb-matrix-reroute pcb-matrix-drc pcb-matrix-fab \
 	pcb-hub pcb-hub-route pcb-hub-reroute pcb-hub-drc pcb-hub-fab \
 	pcb-power pcb-power-reroute pcb-power-drc pcb-power-fab power-rail-fit panel pcb-fab \
-	firmware firmware-test clean
+	firmware firmware-test firmware-pins clean
 
 check: pcb-lightbar-drc pcb-matrix-drc pcb-hub-drc pcb-power-drc firmware-test
 	$(PYTHON) -m mypy hardware
@@ -31,6 +31,11 @@ check: pcb-lightbar-drc pcb-matrix-drc pcb-hub-drc pcb-power-drc firmware-test
 # the sanitizers are enabled when their runtimes are installed.
 FIRMWARE_DIR := software/firmware
 FIRMWARE_BUILD := $(FIRMWARE_DIR)/build
+
+# Regenerate the firmware pin map from the hub netlist. Run after any hub
+# schematic change; test_firmware_pins.py fails if the committed copy drifts.
+firmware-pins:
+	$(PYTHON) -m hardware.pcb.firmware_pins
 
 firmware:
 	cmake -S $(FIRMWARE_DIR) -B $(FIRMWARE_BUILD) -DCMAKE_BUILD_TYPE=Debug
