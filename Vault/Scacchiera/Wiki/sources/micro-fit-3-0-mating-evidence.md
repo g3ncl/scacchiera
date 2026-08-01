@@ -3,7 +3,7 @@ type: source-summary
 tags:
   - wiki/source
   - wiki/component
-date_updated: 2026-07-29
+date_updated: 2026-08-01
 source_file: Datasheets/MICRO-FIT-3.0-MATING_MOLEX.md
 source_title: Molex Micro-Fit 3.0 mating-component manufacturer evidence
 publisher: Molex
@@ -22,3 +22,9 @@ this terminal and wire range.
 
 This source binds mating compatibility and the terminal wire range. It does not qualify wire type,
 length, color coding, crimp workmanship, strain relief, or a complete assembled harness.
+
+It also carries no current rating, which matters because the cell harness runs 5.871 A peak
+through one [[430300038]] contact pair. Partially addressed on 2026-08-01 by
+[[micro-fit-current-rating]], which files PS-43045 revision M1 and finds its table stopping at
+20 AWG at 5 A with no 18 AWG row. That leaves the fitted terminal's rating unresolved rather than
+established.

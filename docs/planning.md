@@ -75,11 +75,16 @@ scoped test-article order. V0 through V9 permit a final-board order.
   are now exact, but the protected cell assembly, wire, qualified crimp or pre-crimped leads, color
   coding, and assembled harness are not yet bound;
   [hardware/harnesses.md](hardware/harnesses.md) now inventories every cable with its worst-case
-  per-contact current and lists what each still needs. It also surfaces one number nobody had
-  filed: the cell link puts 5.871 A through a single Micro-Fit 3.0 contact pair, and the filed
-  mating evidence records wire range and compatibility but no current rating and no derating curve
-  for a fully energized housing. That is the highest-current path in the product and it currently
-  rests on an assumption. The same file retires a suspected J2 problem: its three JST GH supply
+  per-contact current and lists what each still needs. It also surfaces a number nobody had filed:
+  the cell link puts 5.871 A through a single Micro-Fit 3.0 contact pair. Chasing it made the
+  picture worse rather than better. Molex PS-43045 revision M1 is now filed, and its current table
+  **stops at 20 AWG at 5 A** with no 18 AWG row, while its bundled terminal drawing states 5.0 A
+  maximum. The fitted 430300038 is the 18 AWG variant that distributors list at 8.5 A, which is a
+  catalog figure rather than a datasheet one. The cell harness therefore sits between 31 percent
+  margin and 17 percent **over rating** on the highest-current path in the product, and nothing
+  available decides which. The filed copy is also an Octopart mirror of a 2007 revision because
+  Molex's own servers did not respond; a current manufacturer revision with its derating table for
+  a fully energized two-circuit housing is required. The same file retires a suspected J2 problem: its three JST GH supply
   contacts carry 0.67 A each, not 1.0 A, because the source is capped at a compliant 5 V 2 A USB
   supply. The load budget conservatively
   uses 320 mA each. A Keeppower wired 1S1P 21700 6000 mAh protected pack is now the leading

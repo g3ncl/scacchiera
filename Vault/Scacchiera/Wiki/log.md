@@ -1389,3 +1389,29 @@ terminal caps insulation at 1.85 mm, which rules out plenty of ordinary 18 AWG),
 (Molex names hand tool 63828-0200, otherwise pre-crimped leads must be bound as parts), colour
 coding, length and strain relief, and the assembled article itself. Lengths depend on the rail
 arrangement, which is still undrawn.
+
+## [2026-08-01] ingest | Chasing the Micro-Fit rating made the cell harness look worse, not better
+
+Went after the number flagged in the harness inventory: what a Micro-Fit 3.0 contact is actually
+rated for, given the cell link runs 5.871 A peak through one pair. Filed
+[[micro-fit-current-rating]]. It does not close the gap and it moved the design from "unqualified"
+to "possibly over rating", which is worth stating plainly.
+
+Molex PS-43045 revision M1, dated 2007, section 4.2: 20 AWG at 5 A, 22 at 5, 24 at 4, 26 at 3, 28
+at 2, 30 at 1. **The table stops at 20 AWG.** The 43030-0006 terminal drawing bundled with it says
+5.0 A maximum. Neither covers [[430300038]], the fitted 18 AWG variant, which distributors list at
+8.5 A. That is a catalog figure and this project does not bind electrical limits from listings.
+
+So the cell harness sits between 31 percent margin at 8.5 A and 17 percent over rating at 5.0 A,
+and nothing available here decides which. Recorded on the entity page and in
+`docs/hardware/harnesses.md` rather than resolved.
+
+Two caveats on the filing itself, both recorded on the page. It is an Octopart mirror, not a file
+from Molex: `molex.com` and `tools.molex.com` both failed to respond over several attempts with
+different clients and protocols, so this is a stopgap that the manufacturer's own file must
+replace. And revision M1 is old; later revisions are known to carry an 18 AWG row and a derating
+table indexed by circuit count and wire-to-wire versus wire-to-board, which is exactly what a
+two-circuit housing with both circuits energized needs.
+
+Also updated [[micro-fit-3-0-mating-evidence]], which had honestly said it qualified nothing beyond
+mating and wire range, to point at where the current question now lives.

@@ -33,17 +33,37 @@ Two derivations worth keeping, because both looked like problems and are not:
 - **Cell-lead drop is negligible.** 18 AWG at roughly 21 milliohm per metre over a 0.25 m round trip
   is about 5 milliohm, so 30 mV at 5.871 A. It does not eat into the 2.87 V boost floor.
 
-## The one number that blocks the cell harness
+## The cell harness may be over its connector rating
 
-The cell link puts **5.871 A through a single Micro-Fit contact pair**, and no filed source records
-what a Micro-Fit 3.0 contact is rated for. [micro-fit-3-0-mating-evidence](../../Vault/Scacchiera/Wiki/sources/micro-fit-3-0-mating-evidence.md)
-binds mating compatibility, the 18 AWG wire range and the 1.85 mm insulation limit, and explicitly
-says it does not qualify anything else. It carries no current rating and no derating curve.
+The cell link puts **5.871 A through a single Micro-Fit contact pair**, and until 2026-08-01 no
+filed source recorded what a Micro-Fit 3.0 contact is rated for.
+[micro-fit-3-0-mating-evidence](../../Vault/Scacchiera/Wiki/sources/micro-fit-3-0-mating-evidence.md)
+binds mating compatibility, the 18 AWG wire range and the 1.85 mm insulation limit, and says in its
+own last line that it qualifies nothing else.
 
-That has to be read off Molex's own specification before the cell harness is built, including the
-derating that applies when every circuit in the housing is energized. Two circuits both at 5.871 A
-is the worst arrangement a 2-circuit housing has. Until that number is filed, the cell harness is
-an assumption, not a design, and it is the highest-current path in the product.
+Molex PS-43045 revision M1 is now filed and summarized in
+[micro-fit-current-rating](../../Vault/Scacchiera/Wiki/sources/micro-fit-current-rating.md). It does
+not settle the question, and what it does say is uncomfortable:
+
+| AWG | 20 | 22 | 24 | 26 | 28 | 30 |
+| --- | --- | --- | --- | --- | --- | --- |
+| Amps | 5 | 5 | 4 | 3 | 2 | 1 |
+
+**That table stops at 20 AWG at 5 A**, and the terminal drawing bundled with it states 5.0 A
+maximum. The fitted terminal is 430300038, the 18 AWG variant, which distributors list at 8.5 A.
+A catalog figure is not a datasheet figure, and the revision that would carry an 18 AWG row and the
+derating table is dated later than the copy available here. Molex's own servers did not respond to
+repeated attempts.
+
+So the design sits between two outcomes:
+
+- at **8.5 A**, the cell harness has about 31 percent margin and is fine
+- at **5.0 A**, it is about 17 percent **over rating** on the highest-current path in the product
+
+Resolving this needs the current revision of PS-43045 from Molex, including the derating that
+applies with every circuit in the housing energized, which is the worst arrangement a 2-circuit
+housing has. Until then the cell harness is an assumption, not a design, and it is the one place in
+this product where the assumption could be a thermal problem rather than a paperwork problem.
 
 ## What is still open for every harness
 

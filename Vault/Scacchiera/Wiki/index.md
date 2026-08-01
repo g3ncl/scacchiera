@@ -77,6 +77,7 @@ One [[wiki/source]] summary per ingested raw source. Factual, no interpretation.
 | [[sl2s2602-datasheet]] | component datasheet (piece tag IC, off-board) | 2026-08-01 |
 | [[ad-circus-slix2-datasheet]] | inlay product data sheet (piece tag, off-board) | 2026-08-01 |
 | [[w256064-xalg-datasheet]] | comparable panel datasheet (corroborating, not fitted) | 2026-08-01 |
+| [[micro-fit-current-rating]] | connector product specification (mirror, revision superseded) | 2026-08-01 |
 
 ## Entities
 
