@@ -61,7 +61,15 @@ scoped test-article order. V0 through V9 permit a final-board order.
   electrical protections. V1 remains open because its exact cell revision, protection thresholds,
   wire gauge, connector, thermistor attachment, and shipped construction are not documented. The
   Molicel M65A remains a higher-capacity feasibility reference but is unavailable and would need a
-  custom protected assembly. Every fitted board record has dated availability,
+  custom protected assembly. The piece tag now has a researched candidate where it previously had
+  no MPN at all: an Avery Dennison AD Circus SLIX2 inlay (3006370 / IL-603074) carrying NXP
+  SL2S2602, ISO/IEC 15693, 21 mm die-cut in the 22 mm recess, 18 mm coil, about EUR 0.69 each or
+  EUR 0.34 at 100+. Both datasheets are filed and ingested and the protocol choice is settled
+  (see [hardware/matrix.md](hardware/matrix.md)). It stays a candidate, not a binding: nothing is
+  purchased, so there is no dated availability record, no second source is identified, and the
+  inlay's coil inductance and the chip's equivalent parallel resistance are unpublished, so V4's
+  tag resonator is bounded rather than datasheet-sourced. Every fitted board record has dated
+  availability,
   immutable manufacturer sources, wiki ingestion, library or interface proof, ratings, model
   treatment, and no open conflict. The AP63203WU-7, AP22811AW5-7, TLV7042DGKR and NR6045S4R7MT
   records include their exact selected limits and footprints. TLV7042DGKR uses the manufacturer's
@@ -184,9 +192,12 @@ scoped test-article order. V0 through V9 permit a final-board order.
   intrusion, the placement root-cause story built on it, the keepout experiments and the router
   comparison all followed from that number and none of them stand.
 
-  The extraction also modelled the wrong net. RF_BUS is routed on both layers: eleven segments on
-  F.Cu and two on B.Cu, including an 18.35 mm run at x 121.49 from y 14.47 to 32.81, with two vias.
-  The old filter dropped those, so the 46.9 nH it reported was for a path that does not exist.
+  A second claim made during that retraction was itself wrong and is also withdrawn: that RF_BUS
+  runs on both layers with an 18.35 mm back-layer segment. That was read off a board left on disk by
+  the keepout experiments rather than a regenerated one. On the committed route RF_BUS is entirely
+  on F.Cu with no vias. The layer filter is still worth removing, because nothing guaranteed that,
+  but the 46.9 nH figure was not wrong for the reason given. It is unverified rather than refuted:
+  the model omits the reserve's real extent and the criterion it fed was meaningless.
 
   What is established: FastHenry is built, installed and validated against the Grover model the
   matrix loop already uses, agreeing to 2 percent on inductance and 8 on resistance. That much is
@@ -372,7 +383,8 @@ in [simulation-workflow.md](simulation-workflow.md).
 Revised 2026-07-29. V0 passes with ordinary 5 V/2 A charging and bounded recharge time included.
 The custom power board implements the written module interface, and a purchased replacement remains
 possible. All fitted part order codes are bound. V1 remains open on the display documentation
-conflict and interconnect, plus the protected cell and complete power harnesses. The 10 W boost
+conflict and interconnect, the protected cell and complete power harnesses, and the piece tag,
+which now has a researched ISO 15693 candidate and filed datasheets but no purchase. The 10 W boost
 power stage now has bounded V3 evidence, while its control loop and charger faults remain open. V2
 passes for all four board designs. The lightbar and matrix retain their
 passing component, static, simulation, and layout evidence. The 10 uH matrix choke's 15 mA rating is

@@ -1,6 +1,6 @@
 ---
 type: index
-date_updated: 2026-07-30
+date_updated: 2026-08-01
 tags:
   - wiki/index
 ---
@@ -74,6 +74,8 @@ One [[wiki/source]] summary per ingested raw source. Factual, no interpretation.
 | [[micro-fit-3-0-mating-evidence]] | connector manufacturer evidence | 2026-07-29 |
 | [[usb-type-c-r2-current-advertisement]] | USB Type-C specification scoped extract | 2026-07-29 |
 | [[ssd1362-datasheet]] | component datasheet | 2026-07-30 |
+| [[sl2s2602-datasheet]] | component datasheet (piece tag IC, off-board) | 2026-08-01 |
+| [[ad-circus-slix2-datasheet]] | inlay product data sheet (piece tag, off-board) | 2026-08-01 |
 
 ## Entities
 
@@ -106,6 +108,8 @@ People, tools, orgs, repos. See [[wiki/entity]] pages.
 | [[430250800]] | 1 | 2026-07-29 |
 | [[430250200]] | 1 | 2026-07-29 |
 | [[430300038]] | 1 | 2026-07-29 |
+| [[sl2s2602]] | 1 | 2026-08-01 |
+| [[ad-circus-slix2]] | 1 | 2026-08-01 |
 
 <!-- V1-COMPONENT-CATALOG:START -->
 ## V1 component datasheet sources
@@ -243,7 +247,7 @@ Ideas, patterns, techniques. See [[wiki/concept]] pages.
 
 | Page                                    | Confidence | source_count | Updated    |
 | --------------------------------------- | ---------- | ------------ | ---------- |
-| [[bitwiseid-method]]                    | high       | 1            | 2026-07-24 |
+| [[bitwiseid-method]]                    | high       | 1            | 2026-08-01 |
 | [[bitwisexy-method]]                    | high       | 1            | 2026-07-24 |
 | [[set-management-and-setid]]            | high       | 1            | 2026-07-24 |
 | [[row-column-antenna-matrix-technique]] | high       | 4            | 2026-07-24 |

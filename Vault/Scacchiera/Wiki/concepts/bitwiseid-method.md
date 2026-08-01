@@ -1,6 +1,6 @@
 ---
 type: concept
-date_updated: 2026-07-24
+date_updated: 2026-08-01
 source_count: 1
 confidence: high
 tags:
@@ -52,10 +52,15 @@ Go scan in ~760 ms worst case.
 
 This is the concept that most directly de-risks the scan-loop cost of our own 8x8 row+column
 antenna matrix design (see [[../../../../docs/planning.md|docs/planning.md]] for the current rebuild
-plan), since every line scan under that architecture returns multiple tags per read. Whether
-unaddressed block reads and OR-collision behavior hold the same way on whichever reader protocol we
-end up choosing (ISO/IEC 14443-A versus the paper's ISO/IEC 15693) is an open bench question, not
-yet resolved here.
+plan), since every line scan under that architecture returns multiple tags per read.
+
+The protocol question this page previously left open is now closed on the paper's side: as of
+2026-08-01 the piece tag candidate is [[ad-circus-slix2]] carrying [[sl2s2602]] (ICODE SLIX2), so
+the design runs ISO/IEC 15693 like the source paper, not ISO/IEC 14443-A. The SL2S2602 implements
+`READ MULTIPLE BLOCKS` and `(FAST) INVENTORY READ`, which is what this method needs. Whether the
+OR-collision behavior actually holds on the [[pn5180a0hn-c3e|PN5180]] rather than the paper's
+[[clrc632|CLRC632]] is still an open bench question: the two readers expose collision position
+differently, and nothing here has been measured.
 
 ## Sources
 

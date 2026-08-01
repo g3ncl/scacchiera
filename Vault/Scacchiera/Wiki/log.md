@@ -1091,3 +1091,51 @@ inductance and 8 on resistance. The tool is good. What it was pointed at was not
 that refusal. The lesson worth keeping is that the check produced a result surprising enough to
 justify a board respin, and that should have been the cue to validate the check before acting on it,
 not after.
+
+## [2026-08-01] ingest | Piece tag candidate bound: ICODE SLIX2 in a 21 mm Circus inlay
+
+V1's open tag item had no MPN anywhere in the repo, and it is the first definition-of-done bullet
+of V4. Closed the technical half of it.
+
+Protocol first, because it is the decision that constrains everything else. ISO/IEC 15693 over
+14443-A: a vicinity card operates at roughly a tenth the field strength of a proximity card, and
+the matrix couples an 18 mm tag coil to a 280 mm line antenna, which is weak coupling by
+construction. [[bitwiseid-method]] also runs on unaddressed READ MULTIPLE BLOCKS and INVENTORY
+READ, which are 15693 commands with no 14443-A equivalent, so picking 14443-A would throw away the
+one technique that de-risks the scan loop. [[pn5180a0hn-c3e]] is already bound and is NXP's
+strongest 15693 reader. This resolves the open question flagged in [[bitwiseid-method]]'s
+"Relation to our design" section, on architecture grounds rather than bench evidence.
+
+Part: [[ad-circus-slix2]], Avery Dennison's 21 mm round inlay carrying [[sl2s2602]] (ICODE SLIX2).
+Product code 3006370 / IL-603074. It is the smallest round HF inlay Avery Dennison publishes,
+which is why it fits the 22 mm recess at all; the common 25 mm tag does not. Two datasheets filed
+and ingested: `SL2S2602_NXP.pdf` and `AD-CIRCUS-SLIX2_AVERYDENNISON.pdf`.
+
+The number V4 actually needed: input capacitance 23.5 pF typical, 22.3 to 24.7 pF over the
+published spread, plus 40 uW minimum input power. Antenna diameter is 18 mm, not the 21 mm
+die-cut, and modelling the die-cut would overstate the coupling area by 36 percent.
+
+Two gaps recorded rather than papered over. Avery Dennison publishes no coil inductance, turn
+count or resonant frequency, so the tag resonator has to be back-solved against the 23.5 pF or
+measured at V8; that is a derived value and is marked as one. And the SL2S2602 datasheet gives no
+equivalent parallel resistance at minimum operating power, so loaded Q cannot come from the
+datasheet either. V4 can proceed with a bounded model, but not a fully datasheet-sourced one.
+
+Still open on V1: nothing is purchased, so there is no dated availability record, and no second
+source is identified. Avery Dennison disclaims continued availability in its own terms.
+
+## [2026-08-01] correction | The retraction contained its own stale-state error
+
+The entry above withdrew the RF return defect for a sound reason, that comparing front-layer traces
+to back-layer traces by plan-view distance is meaningless. It then added a new claim that was itself
+wrong: that RF_BUS runs 18.35 mm on the back layer with two vias. That was measured from a board
+left on disk by the keepout experiments, not from a regenerated one. On the committed route RF_BUS
+is entirely on the front layer with no vias.
+
+The same mistake in a new place: reading the generated board without checking which run produced it.
+Board state has been a moving target all session because every reroute overwrites it, and nothing in
+the checks noticed. The test that pinned this now builds its own synthetic segment instead of
+asserting whatever the last reroute happened to leave behind, so it cannot be fooled that way again.
+
+What stands: the layer filter was a real latent bug and is fixed, `deck()` refuses a net on its own
+return plane, and FastHenry remains validated. The 46.9 nH figure is unverified rather than refuted.
