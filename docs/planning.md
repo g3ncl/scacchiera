@@ -68,7 +68,7 @@ scoped test-article order. V0 through V9 permit a final-board order.
   DGK0008A land pattern because the generic KiCad VSSOP footprint does not meet the board's 0.2 mm
   clearance. The rejected SWPA catalog binding remains as contradiction evidence rather than a
   waiver. Evidence: `make check` regenerated all four boards at zero DRC violations, unconnected
-  items and parity issues, mypy passed on 88 source files, and all 155 tests passed on 2026-08-01.
+  items and parity issues, mypy passed on 92 source files, and all 168 tests passed on 2026-08-01.
 - [x] V2 connectivity and static electrical checks: clean generation runs full SKiDL and KiCad ERC,
   imports reviewed deterministic routing sessions, and runs PCB DRC with schematic parity on all
   four boards. [verification/v2-static.yaml](verification/v2-static.yaml) records the four
@@ -92,7 +92,13 @@ scoped test-article order. V0 through V9 permit a final-board order.
     example curves. The power boost now includes the output-capacitor X5R temperature limit and
     uses TPS61088 switch-resistance maxima specified across minus 40 to 125 degrees Celsius.
     The power boost also sweeps a derived 15 milliohm assembled-bank ESR acceptance limit.
-    **Other temperature corners remain open, and the fitted bank's ESR still needs V8 measurement.**
+    Both inductors are now cornered from the one point their data sheets fix: rated RMS current is
+    defined at a 40 degree rise from 20 degrees, and the range to 125 degrees includes that rise,
+    so hub L1 tolerates 108.8 degrees ambient at 2.1 A and power L1 tolerates 120.1 at 4.5 A. The
+    hot winding also moves the buck's dropout from 3.513 to 3.520 V, 7 mV of the 487 mV in hand.
+    **What stays open is the converter itself: Diodes publishes the AP63203's switch resistance as
+    a typical with no limits and no temperature coefficient, so a hot dropout cannot be closed from
+    any filed document. The fitted bank's ESR still needs V8 measurement.**
   - Startup and transients: soft-start inrush, dropout and hold-up are derived. Warm reset,
     power-off discharge and repeated brownout are now derived too. A warm reset reaches no
     peripheral, and the ten TCA9535-driven nets that survive it are enumerated from the schematic as
@@ -124,7 +130,15 @@ scoped test-article order. V0 through V9 permit a final-board order.
     boost, against a 45 degree allowance that is the specification's 25 degree room plus a 20 degree
     enclosure rise. That rise is an acceptance limit, and the boost's 8 degrees is thin because the
     bound charges it the whole stage's efficiency floor, so V8 must measure both.
-    **Guaranteed stability, overshoot, undershoot and sequencing are not done.** TI specifies the
+    Sequencing is now done. Five hub signals cross between rails, read from the schematic rather
+    than listed: LED_DATA, LED_EN and LED_FAULT_N land on pins their data sheets rate against
+    ground, so being driven before their own rail exists is a non-event, and CHARGE_TEMP_OK shares
+    a supply with its driver. **CHARGE_INPUT_FAULT_N is a finding: Diodes gives the AP22811 no
+    absolute maximum for its fault flag at all while rating the enable against VIN, so holding it
+    at 3.3 V on battery with USB absent is unspecified rather than permitted.** R15 bounds it at
+    33 uA, which is smaller than the leakages the same sheet specifies, but that bounds the
+    condition instead of clearing it and stays a vendor or V8 question.
+    **Guaranteed stability, overshoot and undershoot are not done.** TI specifies the
     error-amplifier transconductance only typically, so the plus or minus 30 percent sweep is not
     release evidence.
   - Waveform integrity: I2C, the light-bar data line, the matrix serial link, and the filtered
@@ -149,6 +163,11 @@ scoped test-article order. V0 through V9 permit a final-board order.
 - [ ] V4 layout-derived electromagnetic validation: the hub is two layers again, so the RF front end
   returns through the back copper reserved under it rather than an inner plane. Extraction must use
   that reserved region and confirm the reserve is wide enough, since it is the whole return path.
+  Blocked on tooling as of 2026-08-01: openEMS is in neither the Fedora repositories nor PyPI, so it
+  needs a from-source build of CSXCAD and its Python bindings with system development packages.
+  scikit-rf is installed and covers the Touchstone side once an extraction exists. Substituting a
+  different solver is permitted by the workflow but has to be recorded here with its reason, and no
+  candidate has been shown to produce the same evidence.
 - [ ] V5 firmware host verification
 - [ ] V6 firmware-in-simulation system verification
 - [ ] V7 mechanical and fabrication preflight: no fab quote exists for any board at its final
@@ -324,7 +343,9 @@ the setting resistor's tolerance and reaches 10.58 mA, leaving 29 percent of the
 unused.
 
 No board is authorized for a test-article order until V3 through V7 pass. Firmware and the companion
-app have not started, so V5 and V6 remain open.
+app have not started, so V5 and V6 remain open. [software/architecture.md](software/architecture.md)
+now records the split V5 requires, a pure core with no ESP-IDF header and a port layer behind a
+small set of interfaces, so the host tests and the target image build from one set of sources.
 
 The named V8 article is the selected power implementation and cell under
 [hardware/power-module-interface.md](hardware/power-module-interface.md), recorded in

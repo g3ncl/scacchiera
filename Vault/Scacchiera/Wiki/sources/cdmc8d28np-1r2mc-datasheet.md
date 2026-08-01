@@ -3,7 +3,7 @@ type: source-summary
 tags:
   - wiki/source
   - wiki/component
-date_updated: 2026-07-29
+date_updated: 2026-08-01
 source_file: "Datasheets/CDMC8D28NP-1R2MC_C17268233.pdf"
 source_title: "CDMC8D28NP-1R2MC manufacturer datasheet"
 publisher: "Sumida"
@@ -26,3 +26,10 @@ code `C17268233`. It is used by power L2 (1.2uH).
 - Simulation treatment: analytical, valid only for
   lumped model with datasheet tolerance, bias, ESR, DCR and temperature corners.
 - Conflicts: none open. Any later catalog or document mismatch reopens V1.
+
+## Temperature and sequencing data, read 2026-08-01
+
+The features list gives the operating temperature range as -40 to +125 degrees Celsius including
+the coil's self temperature rise, and note 3 defines the temperature-rise current as the DC
+current giving a 40 degree rise at a 20 degree ambient. Same convention as the hub's coil, so the
+two are cornered the same way.

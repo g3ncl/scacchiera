@@ -3,7 +3,7 @@ type: source-summary
 tags:
   - wiki/source
   - wiki/component
-date_updated: 2026-07-26
+date_updated: 2026-08-01
 source_file: "Datasheets/AP22811AW5-7_C3001660.pdf"
 source_title: "AP22811AW5-7 manufacturer datasheet"
 publisher: "Diodes Incorporated"
@@ -26,3 +26,14 @@ code `C3001660`. It is used by hub U1 (AP22811AW5-7).
 - Simulation treatment: datasheet_bounded, valid only for
   no distributable vendor ngspice model was identified; V3 may use only parameters enumerated in this part's filed datasheet and must sweep their full published limits; digital protocol behavior belongs to V6.
 - Conflicts: none open. Any later catalog or document mismatch reopens V1.
+
+## Temperature and sequencing data, read 2026-08-01
+
+Absolute Maximum Ratings list VIN at -0.3 to 6.0 V, and VOUT and VEN at -0.3 V to VIN + 0.3 V.
+**There is no row for the fault flag.** The enable that is listed is supply referenced rather than
+ground referenced, so nothing in the document permits holding any pin above an unpowered VIN.
+
+The hub does exactly that: R15 pulls the flag to 3.3 V and the board runs from the battery with
+USB absent. The condition is unspecified rather than violating a stated limit. R15 bounds the pin
+at 33 uA, which is smaller than leakages this sheet specifies elsewhere, but the gap is real and
+belongs to the vendor or to a V8 measurement.

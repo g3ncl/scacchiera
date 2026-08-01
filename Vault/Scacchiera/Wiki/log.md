@@ -982,3 +982,44 @@ Two stale figures were corrected while passing through: the hub BOM is 14.090 EU
 lines rather than 13.768 across 39, and the traceability manifest holds 83 requirements and 80
 numeric criteria. Neither drift came from this work, but both were quoted next to numbers it
 touched.
+
+## [2026-08-01] verify | Corner the inductors and sequence the rails
+
+Both inductor data sheets, [[nr6045s4r7mt]] and [[cdmc8d28np-1r2mc]], state their temperature range
+to 125 degrees as including the coil's own rise and define rated RMS current as the current giving a
+40 degree rise from 20 degrees ambient. That pair fixes one point on the heating curve, and the rise
+scales with the square of the current, so hub L1 at 2.1 A rises 16.2 degrees and tolerates 108.8
+degrees of ambient, and power L1 at 4.5 A rises 4.9 and tolerates 120.1. The same heating takes hub
+L1's winding from 34 to 39.5 mOhm and the buck's dropout from 3.513 to 3.520 V, 7 mV of the 487 mV
+the interface floor holds.
+
+The converter itself stays uncornered. [[ap63203wu-7]] publishes its switch resistance as a typical
+with no limits and no temperature coefficient, so a hot dropout cannot be closed from any filed
+document. Recorded as open rather than filled in.
+
+Sequencing reads five cross-rail signals off the hub schematic. Three land on pins their data sheets
+rate against ground, minus 0.5 to 7 V for the [[sn74ahct1g125dbvr]] input and minus 0.3 to 7 V for
+the [[tps2553dbvr-1]] enable and flag, so being driven before their own rail exists is a non-event.
+A fourth shares a supply with its driver.
+
+The fifth is a finding. [[ap22811aw5-7]]'s absolute maximum table lists VIN, VOUT and VEN and gives
+its fault flag no row at all, while the enable it does list is rated against VIN. Running on battery
+with USB unplugged holds that flag at 3.3 V with VIN at zero, which no filed document permits. R15
+bounds the pin at 33 uA, under the leakages the same sheet specifies elsewhere and about 0.1 mW into
+whatever clamp is inside. That bounds the condition without making it specified, so it stays a
+vendor or V8 question rather than a closed result.
+
+## [2026-08-01] plan | Record the firmware split and the V4 tooling blocker
+
+Wrote `docs/software/architecture.md`. V5 requires gameplay and product state logic to be
+independent of ESP32 register access, which is the same separation the first product principle
+already asks for: deciding what a position means has to be separable from deciding what the hardware
+just reported. So a pure `core/` with no ESP-IDF header, a `port/` that has them, and a small set of
+interface headers the fakes implement on the host. C, because the target build has to be the exact
+image V6 runs and V9 releases, and a rules engine that is not the shipped one is not evidence.
+
+V4 is blocked on tooling rather than on design. openEMS is in neither the Fedora repositories nor
+PyPI, so it needs a from-source build of CSXCAD and its Python bindings against system development
+packages. scikit-rf is now installed and covers the Touchstone side once an extraction exists. The
+workflow permits an equivalent solver, but the substitution has to be recorded with its reason and
+no candidate has been shown to produce the same evidence.

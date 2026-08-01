@@ -219,6 +219,32 @@ the limit, so the rail charges at the 610 mA limit floor instead and takes 1.66 
 a third of the 5 ms window that would latch it off. The rail could carry 610 uF before a normal
 power-on became a fault. A real short is bounded the other way: 36.7 mJ over at most 10 ms.
 
+`hardware/tests/test_rail_sequencing.py` asks what a signal does while the rail at its far end is
+still down, which on this board is a real interval: the module's 5 V arrives first, the buck's
+3.3 V follows its soft start, the light-bar rail waits for firmware, and USB's 5 V may never come.
+Five signals cross between rails, read from the schematic rather than listed. LED_DATA, LED_EN and
+LED_FAULT_N land on pins whose absolute maximums are written against ground, minus 0.5 to 7 V for
+the buffer input and minus 0.3 to 7 V for the limiter's enable and flag, so driving them before
+their own rail exists is a non-event. CHARGE_TEMP_OK is supply-referenced but safe by construction,
+since both it and its driver hang off USB_VBUS.
+
+CHARGE_INPUT_FAULT_N is the exception and is recorded as a finding rather than a pass. Diodes lists
+VIN, VOUT and VEN in the AP22811's absolute maximum table and gives the fault flag no row at all,
+while the enable it does list is rated against VIN. Running on battery with USB unplugged holds that
+flag at 3.3 V with VIN at zero, which no filed document permits. R15 bounds what can reach the pin
+at 33 uA, below the leakages the same sheet specifies elsewhere, so the exposure is about 0.1 mW
+into whatever clamp is inside. That bounds the condition; it does not make it specified, and it
+stays a question for the vendor or for V8.
+
+`hardware/tests/test_temperature_corners.py` corners the two inductors from the single point their
+data sheets fix: rated RMS current is the current giving a 40 degree rise from a 20 degree ambient,
+and the range to 125 degrees includes that rise. Hub L1 at 2.1 A rises 16.2 degrees and so tolerates
+108.8 degrees of ambient. The same heating takes its winding from 34 to 39.5 mOhm at the 45 degree
+allowance, which moves the dropout figure from 3.513 to 3.520 V: 7 mV of the 487 mV the 4.0 V
+interface floor holds. The converter's own contribution to that number is not cornered, because
+Diodes publishes its switch resistance as a typical with neither limits nor a temperature
+coefficient.
+
 The open-cable case turned up one defect. LED_RETURN carries the first bar's data output to the
 second bar's input, and both bars stay powered from the same limiter, so unplugging the first bar
 left a pixel input floating at 5 V. R37, 100 k to ground, defines it. The check that found it reads

@@ -134,7 +134,7 @@ One exact source summary per purchased fitted MPN. The structured audit is
 | [[74hc595d-118-datasheet]] | Nexperia | 2026-07-26 |
 | [[7m27100009-datasheet]] | TXC | 2026-07-26 |
 | [[a1257wr-s-4p-datasheet]] | CJT | 2026-07-26 |
-| [[ap22811aw5-7-datasheet]] | Diodes Incorporated | 2026-07-26 |
+| [[ap22811aw5-7-datasheet]] | Diodes Incorporated | 2026-08-01 |
 | [[ap63203wu-7-datasheet]] | Diodes Incorporated | 2026-07-31 |
 | [[bar64-02v-datasheet]] | Jiangsu Changjing Electronics Technology | 2026-07-26 |
 | [[bat54h-datasheet]] | Jiangsu Changjing Electronics Technology | 2026-07-29 |
@@ -143,7 +143,7 @@ One exact source summary per purchased fitted MPN. The structured audit is
 | [[bss84-7-f-datasheet]] | Diodes Incorporated | 2026-07-26 |
 | [[cc0603frnpo9bn221-datasheet]] | Yageo | 2026-07-26 |
 | [[cc1206kkx7rcbb472-datasheet]] | Yageo | 2026-07-26 |
-| [[cdmc8d28np-1r2mc-datasheet]] | Sumida | 2026-07-29 |
+| [[cdmc8d28np-1r2mc-datasheet]] | Sumida | 2026-08-01 |
 | [[cl05a105ka5nqnc-datasheet]] | Samsung Electro-Mechanics | 2026-07-26 |
 | [[cl05b104ko5nnnc-datasheet]] | Samsung Electro-Mechanics | 2026-07-29 |
 | [[cl10a105kb8nnnc-datasheet]] | Samsung Electro-Mechanics | 2026-07-29 |
@@ -158,19 +158,19 @@ One exact source summary per purchased fitted MPN. The structured audit is
 | [[grm1555c1h221ja01d-datasheet]] | Murata | 2026-07-26 |
 | [[grm1555c1h680ja01d-datasheet]] | Murata | 2026-07-26 |
 | [[lqw2basr47j00l-datasheet]] | Murata | 2026-07-26 |
-| [[nr6045s4r7mt-datasheet]] | Magnetsyc | 2026-07-29 |
+| [[nr6045s4r7mt-datasheet]] | Magnetsyc | 2026-08-01 |
 | [[pn5180a0hn-c3e-datasheet]] | NXP Semiconductors | 2026-07-26 |
 | [[rs-03k1800ft-datasheet]] | Fenghua Advanced Technology | 2026-07-26 |
 | [[sdfl2012s100ktf-datasheet]] | Sunlord | 2026-07-26 |
 | [[sm02b-ghs-tb-lf-sn-datasheet]] | JST | 2026-07-26 |
 | [[sm07b-ghs-tb-lf-sn-datasheet]] | JST | 2026-07-29 |
-| [[sn74ahct1g125dbvr-datasheet]] | Texas Instruments | 2026-07-26 |
+| [[sn74ahct1g125dbvr-datasheet]] | Texas Instruments | 2026-08-01 |
 | [[t37k3rgb-05c000112u1930-datasheet]] | Harvatek | 2026-07-26 |
 | [[tca9535pwr-datasheet]] | Texas Instruments | 2026-07-31 |
 | [[tlv7021dckr-datasheet]] | Texas Instruments | 2026-07-29 |
 | [[tlv7042dgkr-datasheet]] | Texas Instruments | 2026-07-26 |
 | [[tlv809k33dbvr-datasheet]] | Texas Instruments | 2026-07-29 |
-| [[tps2553dbvr-1-datasheet]] | Texas Instruments | 2026-07-31 |
+| [[tps2553dbvr-1-datasheet]] | Texas Instruments | 2026-08-01 |
 | [[tps61088rhlr-datasheet]] | Texas Instruments | 2026-07-31 |
 | [[usb4105-gf-a-datasheet]] | GCT | 2026-07-26 |
 

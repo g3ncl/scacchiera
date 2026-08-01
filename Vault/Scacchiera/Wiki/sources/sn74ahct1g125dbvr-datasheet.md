@@ -3,7 +3,7 @@ type: source-summary
 tags:
   - wiki/source
   - wiki/component
-date_updated: 2026-07-26
+date_updated: 2026-08-01
 source_file: "Datasheets/SN74AHCT1G125DBVR_C7484.pdf"
 source_title: "SN74AHCT1G125DBVR manufacturer datasheet"
 publisher: "Texas Instruments"
@@ -26,3 +26,10 @@ code `C7484`. It is used by hub U8 (SN74AHCT1G125DBVR).
 - Simulation treatment: datasheet_bounded, valid only for
   no distributable vendor ngspice model was identified; V3 may use only parameters enumerated in this part's filed datasheet and must sweep their full published limits; digital protocol behavior belongs to V6.
 - Conflicts: none open. Any later catalog or document mismatch reopens V1.
+
+## Temperature and sequencing data, read 2026-08-01
+
+Absolute Maximum Ratings give the input voltage range VI as -0.5 to 7 V and the input clamp
+current IIK only for VI below zero. Recommended Operating Conditions give VI as 0 to 5.5 V. None
+of the three is referred to VCC, so the MCU may hold this buffer's input at 3.3 V while the
+light-bar rail that powers it is still off.

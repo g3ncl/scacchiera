@@ -3,7 +3,7 @@ type: source-summary
 tags:
   - wiki/source
   - wiki/component
-date_updated: 2026-07-29
+date_updated: 2026-08-01
 source_file: "Datasheets/NR6045S4R7MT_C42370396.pdf"
 source_title: "NR6045S4R7MT manufacturer datasheet"
 publisher: "Magnetsyc"
@@ -26,3 +26,11 @@ code `C42370396`. It is used by hub L1 (4.7uH).
 - Simulation treatment: analytical, valid only for
   lumped model with datasheet tolerance, bias, ESR, DCR and temperature corners.
 - Conflicts: none open. Any later catalog or document mismatch reopens V1.
+
+## Temperature and sequencing data, read 2026-08-01
+
+The header gives the operating temperature range as -40 to +125 degrees Celsius *including self
+temp. rise*. Note 1 dates all test data to a 20 degree ambient, note 3 defines Isat as the current
+at which inductance drops about 30 percent, and note 4 defines Irms as the DC current causing a
+40 degree rise from that 20 degree ambient. Those three fix the coil's thermal corner: at 3.30 A
+it sits 40 degrees hot, and below that the rise falls with the square of the current.
