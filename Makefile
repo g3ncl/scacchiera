@@ -132,7 +132,9 @@ pcb-lightbar-drc: pcb-lightbar
 pcb-lightbar-fab: schematic-lightbar
 	$(PYTHON) -m hardware.pcb.fab lightbar
 
-pcb-fab: pcb-lightbar-fab pcb-matrix-fab pcb-hub-fab
+# All four boards. The power board was missing here, so `make pcb-fab`
+# produced an incomplete order set.
+pcb-fab: pcb-lightbar-fab pcb-matrix-fab pcb-hub-fab pcb-power-fab
 
 clean:
 	rm -rf hardware/pcb/generated hardware/sim/generated hardware/cad/generated \

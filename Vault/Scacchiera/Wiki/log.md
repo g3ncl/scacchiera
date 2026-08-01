@@ -1552,3 +1552,26 @@ otherwise only symbols are transmitted." Clearing it and transmitting emits the 
 alone, which is the EOF. So the next increment is bounded and does not need a supplier.
 
 Recorded in `docs/software/architecture.md` under what is real and what is not.
+
+## [2026-08-01] finding | `make pcb-fab` was building an incomplete order set
+
+Went looking at fabrication readiness because the owner wants to order boards. The aggregate target
+`pcb-fab` depended on `pcb-lightbar-fab pcb-matrix-fab pcb-hub-fab` and not `pcb-power-fab`, so the
+one command whose whole job is "produce the order artifacts" quietly produced three boards out of
+four. The power board's own target existed and worked; nothing tied it in. Fixed.
+
+That is the kind of defect that does not fail anything: every individual target passes, DRC passes,
+tests pass, and the omission only shows up as a missing folder at the moment somebody uploads an
+order.
+
+Also extracted the DFM-relevant geometry from the routed boards rather than trusting the design
+rules. All four are two layers, 1.0 mm, with 0.200 mm minimum copper track, which is comfortable.
+The matrix is the exception on holes: **0.2 mm via drills into 0.4 mm pads**, against 0.3/0.6 on
+the other three. That is tight enough to risk falling outside a fabricator's standard tier, and it
+is the 300 by 300 mm board, so it is the worst one to discover a price tier on. Recorded in
+`docs/planning.md` under V7 rather than assumed benign.
+
+Earlier numbers I nearly reported were wrong and worth noting as a method warning: a first pass
+matched every `(width ...)` in the board file and returned 0.05 mm and 0.00 mm minimum tracks,
+which are silkscreen and graphic widths, not copper. Filtering to `(segment ...)` gave the real
+0.200 mm. Extracting from a board file is not the same as extracting the right thing from it.

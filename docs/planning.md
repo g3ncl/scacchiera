@@ -280,12 +280,26 @@ scoped test-article order. V0 through V9 permit a final-board order.
   interface, so the layers around it can be exercised. V5's generated-gameplay-sequence bullet
   stays open while that stub stands.
 - [ ] V6 firmware-in-simulation system verification
-- [ ] V7 mechanical and fabrication preflight: no fab quote exists for any board at its final
-  dimensions. The hub is 162 x 46 mm and the matrix 300 x 300 mm, both 2-layer; the matrix is
-  area-dominated and is the likely largest single line in the product. A parametric power-rail fit
-  reserves 80 x 26 x 23 mm for the complete protected cell assembly beside the 90 x 32 x 10 mm
-  power-board envelope and leaves 125 mm of rail length after the end clearances. It proves an
-  allocation exists, not that an unbound pack, its lead exit, or the other rail contents fit.
+- [ ] V7 mechanical and fabrication preflight: fabrication artifacts now generate for **all four**
+  boards. `make pcb-fab` previously omitted the power board, so the aggregate target produced an
+  incomplete order set; that is fixed. Each board emits gerbers, drills, a JLCPCB BOM and CPL, a
+  hybrid pair and a hand-assembly BOM. Geometry extracted from the routed boards:
+
+  | Board | Outline | Layers | Min copper track | Min drill | Min via pad |
+  | --- | --- | --- | --- | --- | --- |
+  | lightbar | 120.0 x 8.5 mm | 2 | 0.200 mm | 0.300 mm | 0.600 mm |
+  | matrix | 300.0 x 300.0 mm | 2 | 0.200 mm | 0.200 mm | 0.400 mm |
+  | hub | 162.0 x 46.0 mm | 2 | 0.200 mm | 0.300 mm | 0.600 mm |
+  | power | 90.0 x 32.0 mm | 2 | 0.200 mm | 0.300 mm | 0.600 mm |
+
+  Two things to settle before ordering. The **matrix uses 0.2 mm via drills into 0.4 mm pads**,
+  tighter than the 0.3/0.6 the other three boards use, and tight enough that it may fall outside a
+  fabricator's standard tier and into a priced-up one. That is the largest and most expensive board,
+  so it is the worst place to discover a tier change. And **no quote exists for any board at its
+  final dimensions**, which is the original V7 blocker and still open. The rest of the definition of
+  done, STEP fit against the enclosure and a rendered review package, is untouched because no
+  enclosure model exists.
+
 - [ ] V8 test-article measurement and model calibration
 - [ ] V9 independent review and final release
 
