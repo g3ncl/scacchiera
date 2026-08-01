@@ -97,8 +97,9 @@ for the same reason the display modules are: an order that forgets them is incom
   the player rail. The filed 21.7 x 71.0 mm Molicel 21700 candidate demonstrates that the geometry
   and discharge current are feasible, but the protected assembly is not bound.
 - **Micro-Fit mating hardware:** two Molex 430250800 eight-circuit receptacle housings for the
-  hub-to-power harness, one 430250200 two-circuit housing for the battery, and 430300038 female
-  terminals for 18 AWG wire. Exact wire, pre-crimped leads or qualified crimp process, color coding,
+  hub-to-power harness, one 430250200 two-circuit housing for the battery, and 43030-0007 female
+  terminals for 20 AWG wire, bound to the documented 5.0 A row of PS-43045 rather than to the
+  8.5 A that distributors attach to the 18 AWG part (see [harnesses.md](harnesses.md)). Exact wire, pre-crimped leads or qualified crimp process, color coding,
   and strain relief remain open.
 - **Superseded option, one purchased power module**, meeting [power-module-interface.md](power-module-interface.md).
   It provides charging, protection, the UPS power path and the regulated 5 V output. No product is

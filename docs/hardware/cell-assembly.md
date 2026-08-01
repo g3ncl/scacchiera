@@ -22,7 +22,7 @@ Every bound below is derived from criteria already in [criteria.yaml](criteria.y
 | Overcurrent detection | at or below the cell's continuous discharge rating | Otherwise the protection never acts before the cell does. |
 | Short-circuit protection | present, with a stated trip current and delay | `POWER-SAFETY` requires it as one of the four independent protections. |
 | Continuous discharge rating | at or above **4.442 A RMS** | `POWER-CELL-PASS-FET-LOSS` operating conditions. |
-| Lead conductor | **20 AWG or heavier**, 18 AWG preferred | It carries 5.871 A peak. The bound harness terminal, Molex 430300038, is specified for 18 AWG. Many packs ship 22 AWG, which is the single most likely acceptance failure. |
+| Lead conductor | **exactly 20 AWG** | The cell link is bound to the documented 20 AWG at 5.0 A row of PS-43045, so the terminal becomes the 20 to 24 AWG part (43030-0007) which cannot crimp 18 AWG. 22 AWG is also rated 5 A but has more resistance for nothing, and many packs ship it, so it remains the likeliest acceptance failure. See [harnesses.md](harnesses.md). |
 
 ## Documentation acceptance
 
@@ -49,7 +49,7 @@ Two things no protected pack on the market provides, so they are this project's 
   audited for this. What is still missing is a documented attachment method and thermal path;
   a sensor taped near a cell rather than bonded to it measures the air, not the cell.
 - **The keyed connector.** `functional/power.md` requires the cell connector to be keyed, and the
-  design binds a Molex 430250200 two-circuit housing with 430300038 terminals. Whatever the pack
+  design binds a Molex 430250200 two-circuit housing with 43030-0007 terminals. Whatever the pack
   ships with is re-terminated, which means the acceptance question about lead gauge above is about
   the wire that stays, not the plug that goes.
 

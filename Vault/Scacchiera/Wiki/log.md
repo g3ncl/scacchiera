@@ -1415,3 +1415,31 @@ two-circuit housing with both circuits energized needs.
 
 Also updated [[micro-fit-3-0-mating-evidence]], which had honestly said it qualified nothing beyond
 mating and wire range, to point at where the current question now lives.
+
+## [2026-08-01] decision | Cell link binds the documented 20 AWG row, and I had the comparison wrong
+
+Owner's call: take the 20 AWG at 5.0 A row that PS-43045 actually documents rather than wait on the
+8.5 A that distributors attach to the 18 AWG terminal. Applied across the docs.
+
+**Correction first, because it changes the conclusion.** The previous entry said the cell harness
+was 17 percent over rating at 5 A. That compared 5.871 A against a thermal limit, which is wrong. A
+connector rating is a 30 degree temperature-rise figure and contact heating is I squared R, so the
+governing quantity is RMS. The battery path is 4.442 A RMS against 5.0 A, about 11 percent margin.
+The 5.871 A is a 500 kHz boost inductor peak and does not heat a contact. The harness is inside its
+rating, not over it.
+
+The binding: wire becomes exactly 20 AWG, and the terminal moves from [[430300038]] (18 AWG, which
+appears nowhere in the filed revision) to 43030-0007, the 20 to 24 AWG tin female part in bag
+packaging, read off the 43030 table in the same document. Board-side 43045 headers are untouched,
+so this is cable-side only with no layout consequence. Propagated to `harnesses.md`,
+`cell-assembly.md`, `boards.md`, `power.md`, `power-subsystem.md` and `planning.md`.
+
+Two reservations recorded rather than smoothed over. Eleven percent is before derating, and the
+table for a two-circuit housing with both circuits energized is absent from this revision; at 90
+percent the margin becomes roughly one percent, which is not a margin. And the cell link is the
+only power interface in the product that puts its whole current through a single contact pair,
+which is contrary to the principle `power-module-interface.md` already states, that power and
+ground use multiple contacts so no single terminal carries the whole interface current. J2 gives
+5 V three contacts, J3 gives its output two. Four circuits on the cell link would put 2.22 A on
+each contact and end the question, at the cost of a power-board re-route, so it is written up as a
+recommendation and not done.

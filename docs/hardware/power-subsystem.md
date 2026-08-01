@@ -8,7 +8,7 @@ what is fitted, what was considered, and what still has to be measured.
 
 **The custom power board is fitted.** It uses BQ25895, TPS61088, TLV809K33, and a
 CSD25404Q3/TLV7021 reverse-cell stage while preserving the same contract an optional purchased
-module would implement. The mating housings and 18 AWG terminals are exact; the wire, qualified
+module would implement. The mating housings and 20 AWG terminals are exact; the wire, qualified
 crimp or pre-crimped leads, complete harnesses, and protected battery assembly are not bound, so V1
 remains open.
 

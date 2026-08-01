@@ -33,37 +33,53 @@ Two derivations worth keeping, because both looked like problems and are not:
 - **Cell-lead drop is negligible.** 18 AWG at roughly 21 milliohm per metre over a 0.25 m round trip
   is about 5 milliohm, so 30 mV at 5.871 A. It does not eat into the 2.87 V boost floor.
 
-## The cell harness may be over its connector rating
+## The cell harness: 20 AWG at the documented 5 A
 
-The cell link puts **5.871 A through a single Micro-Fit contact pair**, and until 2026-08-01 no
-filed source recorded what a Micro-Fit 3.0 contact is rated for.
-[micro-fit-3-0-mating-evidence](../../Vault/Scacchiera/Wiki/sources/micro-fit-3-0-mating-evidence.md)
-binds mating compatibility, the 18 AWG wire range and the 1.85 mm insulation limit, and says in its
-own last line that it qualifies nothing else.
-
-Molex PS-43045 revision M1 is now filed and summarized in
-[micro-fit-current-rating](../../Vault/Scacchiera/Wiki/sources/micro-fit-current-rating.md). It does
-not settle the question, and what it does say is uncomfortable:
+The cell link is bound to the **documented 20 AWG at 5.0 A** row of Molex PS-43045 rather than to
+the 8.5 A that distributors attach to the 18 AWG terminal, because 8.5 A appears in catalog
+listings and not in any datasheet available here. Summarized in
+[micro-fit-current-rating](../../Vault/Scacchiera/Wiki/sources/micro-fit-current-rating.md).
 
 | AWG | 20 | 22 | 24 | 26 | 28 | 30 |
 | --- | --- | --- | --- | --- | --- | --- |
 | Amps | 5 | 5 | 4 | 3 | 2 | 1 |
 
-**That table stops at 20 AWG at 5 A**, and the terminal drawing bundled with it states 5.0 A
-maximum. The fitted terminal is 430300038, the 18 AWG variant, which distributors list at 8.5 A.
-A catalog figure is not a datasheet figure, and the revision that would carry an 18 AWG row and the
-derating table is dated later than the copy available here. Molex's own servers did not respond to
-repeated attempts.
+Choosing the documented row changes the terminal. 430300038 is the 18 AWG variant and cannot crimp
+20 AWG; the 20 to 24 AWG tin female terminal is **43030-0007** in bag packaging (43030-0001 on
+reel), which suits a two-off build. The board-side 43045 headers do not change, so this is a
+cable-side substitution with no layout consequence.
 
-So the design sits between two outcomes:
+### The comparison is RMS, not peak
 
-- at **8.5 A**, the cell harness has about 31 percent margin and is fine
-- at **5.0 A**, it is about 17 percent **over rating** on the highest-current path in the product
+A connector current rating is a thermal limit. Molex states its deratings are based on not
+exceeding a 30 degree Celsius temperature rise, and contact heating is I squared R, so the figure
+to compare against is the **RMS** current, not the switching peak.
 
-Resolving this needs the current revision of PS-43045 from Molex, including the derating that
-applies with every circuit in the housing energized, which is the worst arrangement a 2-circuit
-housing has. Until then the cell harness is an assumption, not a design, and it is the one place in
-this product where the assumption could be a thermal problem rather than a paperwork problem.
+| Quantity | Value | Source |
+| --- | --- | --- |
+| Battery-path RMS | **4.442 A** | `POWER-CELL-PASS-FET-LOSS` operating conditions |
+| Boost inductor peak | 5.871 A | `POWER-BOOST-INDUCTOR-PEAK` margin |
+| Contact rating, 20 AWG | 5.0 A | PS-43045 section 4.2 |
+
+So the cell harness is **inside** its rating at 4.442 A against 5.0 A, with about 11 percent margin.
+The 5.871 A figure is a 500 kHz inductor peak and does not heat a contact.
+
+### It is inside, but thinly, and it breaks the project's own rule
+
+Eleven percent is before any derating, and the derating table for a two-circuit housing with both
+circuits energized is not in the filed revision. If that derating is as mild as 90 percent the
+margin falls to roughly one percent, which is not a margin.
+
+More telling, [power-module-interface.md](power-module-interface.md) already states the principle:
+"Power and ground use multiple contacts so no single terminal carries the whole interface current."
+J2 gives 5 V three contacts and ground four. J3 gives its output two and two. **The cell link is the
+only power interface in the product that puts the whole current through one contact pair**, and it
+is also the highest-current one.
+
+Taking the cell connector from two circuits to four, one pair per polarity, puts 2.22 A on each
+contact and ends the question outright. It costs a change from the 430450200 header to the
+four-circuit part on the power board, and therefore a re-route of that board. That is a real cost
+against a harness that currently passes, so it is recorded as a recommendation rather than done.
 
 ## What is still open for every harness
 

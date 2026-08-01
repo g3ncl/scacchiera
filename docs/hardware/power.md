@@ -105,7 +105,8 @@ until V8 measures it.
 
 The output uses Molex 430450800 and the cell input uses 430450200. Their manufacturer records rate
 each contact at 8.5 A. The mating receptacle housings are Molex 430250800 and 430250200, with
-430300038 female terminals for 18 AWG wire. Exact wire, qualified crimp or pre-crimped lead, color
+43030-0007 female terminals for 20 AWG wire, bound to the documented 5.0 A row of PS-43045
+(see [harnesses.md](harnesses.md)). Exact wire, qualified crimp or pre-crimped lead, color
 coding, strain relief, and the protected battery assembly still have to be bound before V1 can close.
 
 The leading low-cost candidate is Keeppower's wired 1S1P 21700 protected pack. Its distributor
