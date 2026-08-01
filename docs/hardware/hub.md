@@ -101,7 +101,8 @@ stays balanced. RX taps the bus through 100 pF and 1 k into RXP, with RXN refere
 ## Interfaces
 
 All low-voltage harnesses use locking connectors: the 7-pin matrix link (RF bus between grounds,
-3V3, serial selection), two 7-pin display connectors (3V3 SPI plus DC and reset), two 4-pin light
+3V3, serial selection), two 7-pin display connectors (3V3 SPI plus DC and reset, contract in
+[display-interface.md](display-interface.md)), two 4-pin light
 bar connectors chained through LED_RETURN, a 7-pin qualified 5 V output to the power module, a
 7-pin module return carrying 5 V, optional I2C and the cell tap, the 2-pin cell thermistor, a 4-pin
 UART service connector, and the 2-pin button. The cell itself never lands on this board.
