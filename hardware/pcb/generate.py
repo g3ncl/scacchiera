@@ -15,6 +15,8 @@ from hardware.pcb.matrix import build_matrix
 from hardware.pcb.power import NO_CONNECTS as POWER_NO_CONNECTS
 from hardware.pcb.power import build_power
 from hardware.pcb.schematic_placement import install_nonoverlap_placer
+from hardware.pcb.spine import build_spine
+from hardware.pcb.strip import build_strip
 
 
 OUTPUT = Path(__file__).parent / "generated"
@@ -23,8 +25,12 @@ DESIGNS: dict[str, Callable[[], Circuit]] = {
     "matrix": build_matrix,
     "hub": build_hub,
     "power": build_power,
+    "strip": build_strip,
+    "spine": build_spine,
 }
-SCHEMATIC_SEEDS = {"lightbar": 0, "matrix": 6, "hub": 3, "power": 9}
+SCHEMATIC_SEEDS = {
+    "lightbar": 0, "matrix": 6, "hub": 3, "power": 9, "strip": 1, "spine": 4,
+}
 # Pins reviewed as legitimately unused, per design. Matrix U2:9 is the end of
 # the selection daisy chain; the hub pins are the SKiDL no-connects (module
 # spares, reader n.c. pins, unused expander ports) that KiCad still reports.

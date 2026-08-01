@@ -181,7 +181,9 @@ def matrix_cell(
     _connect(gnd, r_bleed, "2")
 
 
-def _shift_register(circuit: Circuit, ref: str) -> Part:
+def shift_register(circuit: Circuit, ref: str) -> Part:
+    """The one-hot selection register. Shared with the split plane's spine,
+    which needs one of these per eight lines exactly as this board needs two."""
     names = (
         "QB", "QC", "QD", "QE", "QF", "QG", "QH", "GND",
         "QH_SERIAL", "SRCLR_N", "SRCLK", "RCLK", "OE_N", "SER", "QA", "VCC",
@@ -249,7 +251,7 @@ def build_matrix() -> Circuit:
 
     sel_lines = [Net(f"SEL{index}_N", circuit=circuit) for index in range(LINE_COUNT)]
     for bank, register_ref in ((0, "U1"), (1, "U2")):
-        register = _shift_register(circuit, register_ref)
+        register = shift_register(circuit, register_ref)
         outputs = ("QA", "QB", "QC", "QD", "QE", "QF", "QG", "QH")
         for position, output in enumerate(outputs):
             _connect(sel_lines[bank * 8 + position], register, output)
