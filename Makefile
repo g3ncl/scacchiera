@@ -17,6 +17,9 @@ export KICAD9_SYMBOL_DIR
 export KICAD_FOOTPRINT_DIR
 
 .PHONY: check footprints schematic-lightbar schematic-matrix schematic-hub \
+	schematic-strip schematic-spine \
+	pcb-strip pcb-strip-reroute pcb-strip-drc pcb-strip-fab \
+	pcb-spine pcb-spine-reroute pcb-spine-drc pcb-spine-fab \
 	pcb-lightbar pcb-lightbar-drc pcb-lightbar-fab \
 	pcb-matrix pcb-matrix-route pcb-matrix-reroute pcb-matrix-drc pcb-matrix-fab \
 	pcb-hub pcb-hub-route pcb-hub-reroute pcb-hub-drc pcb-hub-fab \
@@ -24,7 +27,8 @@ export KICAD_FOOTPRINT_DIR
 	firmware firmware-test firmware-pins firmware-font firmware-target \
 	test-article-matrix clean
 
-check: pcb-lightbar-drc pcb-matrix-drc pcb-hub-drc pcb-power-drc firmware-test
+check: pcb-lightbar-drc pcb-matrix-drc pcb-hub-drc pcb-power-drc \
+	pcb-strip-drc pcb-spine-drc firmware-test
 	$(PYTHON) -m mypy hardware
 	$(PYTHON) -m pytest
 
@@ -67,6 +71,39 @@ schematic-hub: footprints
 
 schematic-power: footprints
 	$(PYTHON) -m hardware.pcb.generate power
+
+# The split sensing plane: one strip design built sixteen times, one spine
+# design built twice. Both place deterministically and import a reviewed
+# route, the same way the matrix board does.
+schematic-strip: footprints
+	$(PYTHON) -m hardware.pcb.generate strip
+
+schematic-spine: footprints
+	$(PYTHON) -m hardware.pcb.generate spine
+
+pcb-strip: schematic-strip
+	/usr/bin/python3 -m hardware.pcb.strip_layout
+
+pcb-strip-reroute: schematic-strip
+	/usr/bin/python3 -m hardware.pcb.strip_layout --reroute
+
+pcb-strip-drc: pcb-strip
+	$(KICAD_CLI) pcb drc --exit-code-violations --schematic-parity --output hardware/pcb/generated/strip/strip-drc.rpt hardware/pcb/generated/strip/strip.kicad_pcb
+
+pcb-strip-fab: schematic-strip
+	$(PYTHON) -m hardware.pcb.fab strip
+
+pcb-spine: schematic-spine
+	/usr/bin/python3 -m hardware.pcb.spine_layout
+
+pcb-spine-reroute: schematic-spine
+	/usr/bin/python3 -m hardware.pcb.spine_layout --reroute
+
+pcb-spine-drc: pcb-spine
+	$(KICAD_CLI) pcb drc --exit-code-violations --schematic-parity --output hardware/pcb/generated/spine/spine-drc.rpt hardware/pcb/generated/spine/spine.kicad_pcb
+
+pcb-spine-fab: schematic-spine
+	$(PYTHON) -m hardware.pcb.fab spine
 
 footprints:
 	$(PYTHON) -m hardware.pcb.footprints
@@ -133,9 +170,11 @@ pcb-lightbar-drc: pcb-lightbar
 pcb-lightbar-fab: schematic-lightbar
 	$(PYTHON) -m hardware.pcb.fab lightbar
 
-# All four boards. The power board was missing here, so `make pcb-fab`
-# produced an incomplete order set.
-pcb-fab: pcb-lightbar-fab pcb-matrix-fab pcb-hub-fab pcb-power-fab
+# Every board design. The strip and spine are the split sensing plane, an
+# alternative to the matrix rather than an addition to it; both are exported
+# because which one ships is not decided until a quote comes back.
+pcb-fab: pcb-lightbar-fab pcb-matrix-fab pcb-hub-fab pcb-power-fab \
+	pcb-strip-fab pcb-spine-fab
 
 # The bare matrix test article. Regenerates only what the release in
 # docs/hardware/test-article-matrix.md needs, so the upload is one file.

@@ -48,6 +48,13 @@ REFLOW_ONLY_FOOTPRINT_MARKERS = (
 HAND_POPULATED_BOARDS = {
     "lightbar": "The lightbar is below JLCPCB's supported assembly size",
     "matrix": "Hand populated to avoid JLCPCB's large-size assembly charge",
+    # Both split-plane boards are 290 mm or longer, so they sit in the same
+    # large-size band the matrix board was quoted in. Whether the surcharge is
+    # smaller for a narrow outline is a live-quote question and is recorded as
+    # open in jlcpcb-sourcing.md; until it is answered the conservative
+    # assumption is the one the matrix already took.
+    "strip": "Hand populated pending a large-size assembly quote for a 300 mm outline",
+    "spine": "Hand populated pending a large-size assembly quote for a 290 mm outline",
 }
 
 

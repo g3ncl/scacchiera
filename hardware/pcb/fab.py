@@ -16,7 +16,7 @@ from hardware.pcb.bom import HAND_POPULATED_BOARDS
 
 KICAD_CLI = "/usr/bin/kicad-cli"
 GENERATED = Path(__file__).parent / "generated"
-BOARDS = ("lightbar", "matrix", "hub", "power")
+BOARDS = ("lightbar", "matrix", "hub", "power", "strip", "spine")
 # Names this export has used before. Deleted on every run so a stale file from
 # an older naming scheme cannot be uploaded by mistake.
 LEGACY_ASSEMBLY_SUFFIXES = (
