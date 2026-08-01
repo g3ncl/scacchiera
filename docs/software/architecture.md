@@ -136,5 +136,54 @@ Two gaps, both recorded rather than assumed away:
   a compile error, it is a board that boots and does the wrong thing.
 
 `firmware-target` is deliberately not part of `make check`, because it needs a 2 GB toolchain
-exported rather than a checkout dependency. `port/` is still empty of drivers; that is the next
-work.
+exported rather than a checkout dependency.
+
+## Drivers
+
+`port/` holds six drivers and the boundary implementation, all compiling for the C6. Boot order is
+not arbitrary; each step depends on the previous one.
+
+| Step | What it establishes |
+| --- | --- |
+| `expander_init` | resets asserted, light-bar rail off, matrix latch idle low |
+| `spi_bus_init` | the one bus shared by reader, both displays and the matrix registers |
+| `matrix_init` | shifts and latches all-deselected, the only path to a known selection |
+| `pn5180_init` | reset, then an EEPROM version read that proves the framing |
+| `display_init` | shared reset, 50 ms settle, init sequence, clear, on |
+| `lightbar_init` | blank the pixels, then enable the rail |
+| `board_hw_storage_init` | NVS for the in-progress snapshot |
+
+Three properties of the wiring shape all of this, and each was read from the netlist rather than
+assumed:
+
+- **The matrix registers have no chip select**, so every byte sent to the reader or a display is
+  also shifted into them. Their outputs only move on a latch edge, so the shift and the latch must
+  be atomic against all other SPI traffic. Every driver that transacts acquires the bus.
+- **The expander's outputs power up high**, so values are written before directions. Otherwise the
+  reader and displays leave reset uncontrolled, the light-bar rail switches on, and the matrix
+  latches random selection.
+- **The matrix cannot be blanked**, so shifting a known pattern is mandatory rather than tidy.
+
+## What is real and what is not
+
+Real: the expander, the matrix selection, the PN5180 framing down to BUSY and single-slot ISO 15693
+inventory, the SSD1362 command path, the light-bar stream, the clock, light cues, NVS persistence,
+and a full sixteen-line sweep joined into a snapshot.
+
+Not real, and deliberately so:
+
+- **The rules engine** is still the stub, per the ordering above.
+- **Display text** is logged rather than rendered. The driver can address any window and push
+  pixels, but there is no glyph source, and generating a font the way `board_pins.h` is generated
+  beats hand-typing a table.
+- **Piece identity.** The scan resolves a square and a UID; mapping a UID to a colour and type is
+  provisioning's job and provisioning does not exist, so a scanned square carries `PIECE_TYPE_NONE`
+  rather than a guess. A host test pins that, so nobody later "fixes" it by defaulting to a pawn.
+- **Sixteen-slot anticollision** and the BitwiseID scheme above it. Single-slot inventory proves the
+  RF path end to end, which is what a first bring-up needs; two tags on one line currently collide
+  and are reported rather than resolved.
+
+The join from sixteen line reads to sixty-four squares lives in `core/scan_join.c`, not in a
+driver, because that is where the ghost-piece and crosstalk faults live and it is testable without
+hardware. Nine tests cover it, including that a tag heard on two lines never becomes a piece and
+that a tag heard on one axis is not placed at a guessed square.

@@ -14,9 +14,13 @@
 #include "nvs_flash.h"
 
 #include "core/hw/clock.h"
+#include "core/hw/scan.h"
+#include "core/scan_join.h"
 #include "core/hw/output.h"
 #include "core/hw/storage.h"
 #include "port/display.h"
+#include "port/matrix.h"
+#include "port/pn5180.h"
 #include "port/lightbar.h"
 
 static const char *TAG = "board_hw";
@@ -144,4 +148,70 @@ esp_err_t board_hw_storage_init(void)
         err = nvs_flash_init();
     }
     return err;
+}
+
+/* One complete sweep: eight rows then eight columns, one single-slot inventory
+ * per line, joined into squares by core/scan_join.c.
+ *
+ * The RF field stays on for the whole sweep rather than being cycled per line.
+ * Switching a line is a shift and a latch on the matrix, which does not
+ * disturb the reader, and cycling the field sixteen times would dominate the
+ * scan time for nothing. */
+static esp_err_t sweep_lines(uint8_t first_line, uint8_t count, line_reading_t *out)
+{
+    for (uint8_t index = 0; index < count; index++) {
+        ESP_RETURN_ON_ERROR(matrix_select((uint8_t)(first_line + index)), TAG, "select");
+
+        uint64_t uid = 0;
+        const esp_err_t err = pn5180_iso15693_inventory(&uid);
+        if (err == ESP_OK) {
+            out[index].present = true;
+            out[index].uid = uid;
+        } else if (err == ESP_ERR_NOT_FOUND) {
+            /* An empty line is the common case, not a failure. */
+            out[index].present = false;
+        } else if (err == ESP_ERR_INVALID_RESPONSE) {
+            /* Two tags answering in one slot collide. Recorded as present with
+             * no usable UID so the join reports it rather than silently
+             * treating the line as empty. */
+            out[index].present = true;
+            out[index].uid = 0;
+        } else {
+            return err;
+        }
+    }
+    return ESP_OK;
+}
+
+bool hw_scan_board(board_snapshot_t *snapshot)
+{
+    line_reading_t rows[SCAN_ROWS] = {0};
+    line_reading_t columns[SCAN_COLUMNS] = {0};
+
+    if (pn5180_load_rf_config(PN5180_RF_TX_ISO15693_ASK100_26,
+                              PN5180_RF_RX_ISO15693_26) != ESP_OK) {
+        return false;
+    }
+    if (pn5180_rf_field(true) != ESP_OK) {
+        return false;
+    }
+
+    esp_err_t err = sweep_lines(0, SCAN_ROWS, rows);
+    if (err == ESP_OK) {
+        err = sweep_lines(SCAN_ROWS, SCAN_COLUMNS, columns);
+    }
+
+    /* Field off and every line deselected before returning, whatever happened.
+     * Leaving one antenna biased and the field up would keep drawing current
+     * between scans and leave the board in a state the next sweep has to undo. */
+    (void)pn5180_rf_field(false);
+    (void)matrix_deselect_all();
+
+    if (err != ESP_OK) {
+        ESP_LOGW(TAG, "sweep failed: %s", esp_err_to_name(err));
+        return false;
+    }
+
+    scan_join(rows, columns, snapshot);
+    return true;
 }

@@ -1,5 +1,7 @@
 #include "port/pn5180.h"
 
+#include <string.h>
+
 #include "driver/gpio.h"
 #include "esp_check.h"
 #include "esp_log.h"
@@ -212,4 +214,130 @@ pn5180_version_t pn5180_product_version(void)
 pn5180_version_t pn5180_firmware_version(void)
 {
     return s_firmware;
+}
+
+esp_err_t pn5180_load_rf_config(uint8_t tx_config, uint8_t rx_config)
+{
+    const uint8_t frame[3] = {PN5180_CMD_LOAD_RF_CONFIG, tx_config, rx_config};
+    ESP_RETURN_ON_ERROR(spi_device_acquire_bus(s_device, portMAX_DELAY), TAG, "acquire");
+    const esp_err_t err = send_instruction(frame, sizeof(frame));
+    spi_device_release_bus(s_device);
+    return err;
+}
+
+esp_err_t pn5180_send_data(const uint8_t *data, uint8_t length, uint8_t valid_bits)
+{
+    if (data == NULL || length == 0u) {
+        return ESP_ERR_INVALID_ARG;
+    }
+    /* Command, the valid-bit count for the last byte, then the payload. */
+    uint8_t frame[3 + 8];
+    if ((size_t)length + 2u > sizeof(frame)) {
+        return ESP_ERR_INVALID_SIZE;
+    }
+    frame[0] = PN5180_CMD_SEND_DATA;
+    frame[1] = valid_bits;
+    memcpy(&frame[2], data, length);
+
+    ESP_RETURN_ON_ERROR(spi_device_acquire_bus(s_device, portMAX_DELAY), TAG, "acquire");
+    const esp_err_t err = send_instruction(frame, (size_t)length + 2u);
+    spi_device_release_bus(s_device);
+    return err;
+}
+
+esp_err_t pn5180_read_data(uint8_t *buffer, uint16_t length)
+{
+    if (buffer == NULL || length == 0u) {
+        return ESP_ERR_INVALID_ARG;
+    }
+    const uint8_t frame[2] = {PN5180_CMD_READ_DATA, 0x00u};
+    return instruction_with_response(frame, sizeof(frame), buffer, length);
+}
+
+esp_err_t pn5180_received_byte_count(uint16_t *count)
+{
+    if (count == NULL) {
+        return ESP_ERR_INVALID_ARG;
+    }
+    uint32_t status = 0;
+    ESP_RETURN_ON_ERROR(pn5180_read_register(PN5180_REG_RX_STATUS, &status), TAG, "rx status");
+    *count = (uint16_t)(status & PN5180_RX_STATUS_BYTES_MASK);
+    return ESP_OK;
+}
+
+/* ISO/IEC 15693 inventory, single slot.
+ *
+ * Flags 0x26 is inventory (bit 2) plus high data rate (bit 1) plus one slot
+ * (bit 5). One slot means every tag in the field answers in the same window,
+ * so two tags collide and the response comes back malformed rather than as
+ * two UIDs. That is reported as INVALID_RESPONSE and is exactly the
+ * RF_CROSSTALK condition the fault table describes. */
+#define ISO15693_FLAGS_INVENTORY_ONE_SLOT 0x26u
+#define ISO15693_CMD_INVENTORY 0x01u
+#define ISO15693_INVENTORY_RESPONSE_BYTES 10u
+
+esp_err_t pn5180_iso15693_inventory(uint64_t *uid)
+{
+    if (uid == NULL) {
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    /* Clearing every IRQ first: a stale RX flag from the previous line would
+     * be read as this line's answer. */
+    ESP_RETURN_ON_ERROR(pn5180_write_register(PN5180_REG_IRQ_CLEAR, 0xFFFFFFFFu),
+                        TAG, "irq clear");
+
+    /* SEND_DATA requires SYSTEM_CONFIG.COMMAND set to TRANSCEIVE beforehand
+     * (datasheet Table 15), left as a read-modify-write so the rest of the
+     * register survives. */
+    uint32_t system_config = 0;
+    ESP_RETURN_ON_ERROR(pn5180_read_register(PN5180_REG_SYSTEM_CONFIG, &system_config),
+                        TAG, "system config");
+    system_config &= ~PN5180_SYSTEM_CONFIG_COMMAND_MASK;
+    system_config |= PN5180_SYSTEM_CONFIG_COMMAND_TRANSCEIVE;
+    ESP_RETURN_ON_ERROR(pn5180_write_register(PN5180_REG_SYSTEM_CONFIG, system_config),
+                        TAG, "transceive");
+
+    const uint8_t inventory[3] = {
+        ISO15693_FLAGS_INVENTORY_ONE_SLOT,
+        ISO15693_CMD_INVENTORY,
+        0x00u, /* mask length zero: no addressing, everyone answers */
+    };
+    ESP_RETURN_ON_ERROR(pn5180_send_data(inventory, sizeof(inventory), 0), TAG, "inventory");
+
+    /* An empty square is the normal case, so a silent field is not an error
+     * path worth logging. The wait covers one slot at 26 kbit/s with margin. */
+    const int64_t deadline = esp_timer_get_time() + 20000;
+    uint32_t irq = 0;
+    do {
+        ESP_RETURN_ON_ERROR(pn5180_read_register(PN5180_REG_IRQ_STATUS, &irq), TAG, "irq");
+        if ((irq & PN5180_IRQ_RX) != 0u) {
+            break;
+        }
+    } while (esp_timer_get_time() < deadline);
+
+    if ((irq & PN5180_IRQ_RX) == 0u) {
+        return ESP_ERR_NOT_FOUND;
+    }
+
+    uint16_t received = 0;
+    ESP_RETURN_ON_ERROR(pn5180_received_byte_count(&received), TAG, "count");
+    if (received != ISO15693_INVENTORY_RESPONSE_BYTES) {
+        /* Flags, DSFID and eight UID bytes is the only well-formed answer.
+         * Anything else is a collision or a corrupted frame, and neither may
+         * become a piece. */
+        return ESP_ERR_INVALID_RESPONSE;
+    }
+
+    uint8_t response[ISO15693_INVENTORY_RESPONSE_BYTES] = {0};
+    ESP_RETURN_ON_ERROR(pn5180_read_data(response, sizeof(response)), TAG, "read data");
+
+    /* response[0] flags, response[1] DSFID, response[2..9] UID least
+     * significant byte first. */
+    uint64_t value = 0;
+    for (int index = 7; index >= 0; index--) {
+        value = (value << 8) | response[2 + index];
+    }
+    *uid = value;
+    return ESP_OK;
 }
