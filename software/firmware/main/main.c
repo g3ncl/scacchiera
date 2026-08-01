@@ -12,6 +12,7 @@
 #include "port/expander.h"
 #include "port/matrix.h"
 #include "port/display.h"
+#include "port/lightbar.h"
 #include "port/pn5180.h"
 #include "port/spi_bus.h"
 
@@ -40,6 +41,7 @@ void app_main(void)
      * expander and its liveness check needs the bus already up. */
     ESP_ERROR_CHECK(pn5180_init());
     ESP_ERROR_CHECK(display_init());
+    ESP_ERROR_CHECK(lightbar_init());
 
     engine_state_t engine;
     engine_init(&engine);
