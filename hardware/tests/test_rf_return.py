@@ -66,15 +66,5 @@ def test_the_return_corridor_is_three_dielectric_thicknesses() -> None:
     assert return_corridor_mm() == pytest.approx(2.79)
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason=(
-        "Open V4 defect recorded in docs/planning.md: the reserve is x 122 to 156 "
-        "but the routed RF run spans x 121.32 to 158.63, and MOSI sits on the back "
-        "layer 0.034 mm from it, inside the return corridor. Widening the reserve "
-        "stops the two-layer route converging, so the fix is not chosen yet. When "
-        "it is, this marker comes off."
-    ),
-)
 def test_nothing_interrupts_the_return_inside_the_corridor() -> None:
     assert nearest_return_interruption_mm() >= return_corridor_mm()
