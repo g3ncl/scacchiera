@@ -45,6 +45,29 @@ The 21 mm die-cut leaves 0.5 mm radial clearance in the 22 mm recess of
 `PHY-TAG-RECESS-DIAMETER` in [criteria.yaml](criteria.yaml) was waiting on. Model the 18 mm coil,
 not the die-cut: using the die-cut would overstate the coupling area by 36 percent.
 
+### Why the pawn bases are oversized
+
+The tag fits the 22 mm recess, but at conventional proportions the recess does not fit a pawn. On
+the 35 mm grid the standard ratios (king base 0.73 to 0.78 of the square, pawn base about 0.586)
+give a 25.6 to 27.3 mm king base and an approximately 20.5 mm pawn base, smaller than the 21 mm
+die-cut. Sixteen of the thirty-two pieces are pawns.
+
+Every ISO 15693 tag small enough for a 20.5 mm pawn base was surveyed and rejected:
+
+| Part | Size | Verdict |
+| --- | --- | --- |
+| AD Miniblock SLIX2 | 18 x 18 mm die-cut, 14.5 mm coil | 25.5 mm across the diagonal, worse than the round Circus |
+| AD Minitrack SLIX2 | 14 x 31 mm | 31 mm long, does not fit any base |
+| HID laundry tag SLIX2 | 16 mm disc | Fits, but EUR 1.64 and a sealed puck rather than a 141 um inlay |
+| SLIX2 on-metal micro | 6 mm disc | EUR 2.50, and anti-metal behavior is prohibited by the functional spec |
+
+Nothing small is comparably priced, and everything small couples worse, because coupling scales
+with coil area and this design is already weakly coupled by construction. So the piece geometry
+moves instead of the tag: `docs/functional/physical.md` now sets a 24 mm minimum base diameter for
+every piece, pawns included, which holds the 22 mm recess with 1 mm of wall per side and the bound
+tag with 1.5 mm. A 35 mm square is already well under FIDE's 50 mm minimum, so the set is
+non-standard regardless; the visible cost is that pawn bases end up close to the king's.
+
 Two gaps, recorded rather than assumed away. Avery Dennison publishes no coil inductance, turn
 count, or resonant frequency, so the tag resonator has to be back-solved against the 23.5 pF or
 measured at V8, and that value is derived, not sourced. NXP publishes no equivalent parallel

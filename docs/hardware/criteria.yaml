@@ -314,6 +314,16 @@ criteria:
     margin: The generation tolerance detects a wrong recess while V7 adds clearance from the selected tag drawing.
     test_ids: [TEST-MECH-PIECE-001]
 
+  PHY-PIECE-BASE-DIAMETER:
+    description: Minimum outside diameter of any piece base, pawns included.
+    requirement_ids: [PHY-PIECE-004]
+    unit: mm
+    limits: {minimum: 24.0}
+    evidence: {class: Derived, source: docs/functional/physical.md, locator: Pieces}
+    operating_conditions: Generated nominal piece geometry before manufacturing variation.
+    margin: 24.0 mm holds the 22.0 mm recess with 1.0 mm of wall per side; the bound tag's 21 mm die-cut leaves 1.5 mm.
+    test_ids: [TEST-MECH-PIECE-001]
+
   IF-DISPLAY-COUNT:
     description: Number of player display modules.
     requirement_ids: [IF-DISPLAY-001]
