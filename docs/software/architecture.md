@@ -65,6 +65,29 @@ The browser client is a separate concern and gets its own directory and its own 
 starts. It mirrors state and configures the board; nothing required by `docs/functional/` depends on
 it being connected.
 
+## Scope for hardware validation
+
+V5 and V6 exist here to de-risk hardware before it is fabricated, not to finish the product. So the
+work is ordered by what a board can teach us and nothing else.
+
+**In scope now**, because it is what exercises the hardware: the PN5180 driver down to SPI framing,
+BUSY, IRQ, reset and inventory; the TCA9535 and everything hanging off it; the display SPI at the
+timing the SSD1362 table fixes; the matrix register chain and its scan; the light-bar data stream;
+the button; the charger and rail signals; power-up, warm reset and the recovery path. These are the
+parts whose failure means a board respin, so they are the parts V6 has to run in simulation against
+behavioural peripheral models.
+
+**Stubbed as TBD**: the chess rules engine. `core/` gets the position type, the typed-snapshot
+interface and a stub that accepts a snapshot and returns "not implemented", enough for the layers
+above and below it to be exercised and for V6 scenarios to drive real scans through real drivers. No
+rule in [functional/gameplay.md](../functional/gameplay.md) can invalidate a PCB, so implementing
+castling before the reader driver works would be effort spent in the wrong order.
+
+The stub is a stub, not a shortcut: V5's definition of done in
+[simulation-workflow.md](../simulation-workflow.md) still requires generated sequences over every
+gameplay behaviour, and that bullet stays open until the engine is real. What this ordering buys is
+that the hardware-facing bullets can close first.
+
 ## Status
 
 Not started. V5 and V6 are open in [planning.md](../planning.md), and this file is the plan they

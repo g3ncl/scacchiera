@@ -163,12 +163,37 @@ scoped test-article order. V0 through V9 permit a final-board order.
 - [ ] V4 layout-derived electromagnetic validation: the hub is two layers again, so the RF front end
   returns through the back copper reserved under it rather than an inner plane. Extraction must use
   that reserved region and confirm the reserve is wide enough, since it is the whole return path.
-  Blocked on tooling as of 2026-08-01: openEMS is in neither the Fedora repositories nor PyPI, so it
-  needs a from-source build of CSXCAD and its Python bindings with system development packages.
-  scikit-rf is installed and covers the Touchstone side once an extraction exists. Substituting a
-  different solver is permitted by the workflow but has to be recorded here with its reason, and no
-  candidate has been shown to produce the same evidence.
-- [ ] V5 firmware host verification
+  The solver is FastHenry rather than openEMS, recorded here as the workflow requires. At 13.56 MHz
+  the wavelength is 22 m and the board is 162 mm, about 0.007 of a wavelength, so nothing on it is
+  electrically large and the question is magnetoquasistatic: what inductance and resistance does the
+  RF run have over its return, and is the return intact. FastHenry solves that directly. openEMS is
+  in neither the Fedora repositories nor PyPI and would need a from-source CSXCAD build, and it
+  would spend hours confirming a quasi-static result. The trade is that this is inductance and
+  resistance evidence, not radiated-emission evidence. FastHenry 3.0.1 is built from the
+  FastFieldSolvers source with `-std=gnu89 -fcommon` for a current GCC, installed at
+  `~/.local/bin/fasthenry`, and `hardware/sim/rf_return.py` finds it through the `FASTHENRY`
+  environment variable. `hardware/tests/test_rf_return.py` checks it against the Grover model
+  already used for the matrix loop before trusting it: 572.6 nH against 584.9 nH and 0.436 against
+  0.473 ohm, agreeing to 2 and 8 percent.
+
+  **The first extraction found a blocking defect and it is open.** The reserve is recorded as x 122
+  to 156, but the routed RF run spans x 121.32 to 158.63, so it leaves the reserve at both ends. In
+  the gap the router laid MOSI on the back layer at x 121.3535, **0.034 mm** from the RF trace and
+  straight through its return. At this frequency the return current sits within roughly three
+  dielectric thicknesses of the trace, 2.8 mm on a 1.0 mm two-layer board, so that copper is inside
+  the corridor the reserve exists to protect. Widening the reserve to x 118 to 161 was tried and the
+  two-layer route stopped converging: three reroutes left 2, 7 and 3 unconnected items where the
+  current reserve reliably reaches zero. The board is therefore left on its committed clean route
+  with the defect recorded rather than half-fixed. Resolving it needs either layout effort to free
+  back-copper channel next to the RF entry, a fourth copper layer, or an extraction of the slotted
+  return to show the coupling is tolerable. That choice is not made yet.
+- [ ] V5 firmware host verification: scoped for hardware validation rather than completeness, per
+  [software/architecture.md](software/architecture.md). The hardware-facing layer comes first,
+  because it is the part whose failure costs a respin: the PN5180 driver, the expander, display SPI,
+  the matrix register chain, the light-bar stream, the button, charger and rail signals, and the
+  power-up and recovery paths. The chess rules engine is stubbed as TBD behind the typed-snapshot
+  interface, so the layers around it can be exercised. V5's generated-gameplay-sequence bullet
+  stays open while that stub stands.
 - [ ] V6 firmware-in-simulation system verification
 - [ ] V7 mechanical and fabrication preflight: no fab quote exists for any board at its final
   dimensions. The hub is 162 x 46 mm and the matrix 300 x 300 mm, both 2-layer; the matrix is

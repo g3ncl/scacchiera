@@ -1023,3 +1023,25 @@ PyPI, so it needs a from-source build of CSXCAD and its Python bindings against 
 packages. scikit-rf is now installed and covers the Touchstone side once an extraction exists. The
 workflow permits an equivalent solver, but the substitution has to be recorded with its reason and
 no candidate has been shown to produce the same evidence.
+
+## [2026-08-01] verify | FastHenry extraction finds a broken RF return
+
+Chose FastHenry over openEMS for V4 and recorded the substitution. At 13.56 MHz the wavelength is
+22 m against a 162 mm board, about 0.007 of a wavelength, so nothing is electrically large and the
+question is magnetoquasistatic rather than radiating. Built FastHenry 3.0.1 from the FastFieldSolvers
+source, which needs `-std=gnu89 -fcommon` under a current GCC, and validated it against the Grover
+model already used for the matrix loop: 572.6 nH against 584.9 and 0.436 against 0.473 ohm, agreeing
+to 2 and 8 percent. A solver that reproduces evidence the project already trusts can be trusted for
+the extraction the analytical model cannot do.
+
+The first extraction refused to run, which was the result. The recorded reserve is x 122 to 156, but
+the routed RF run spans x 121.32 to 158.63, so it leaves the reserve at both ends and FastHenry
+found the source point outside the plane. Measuring from the routed copper then showed MOSI on the
+back layer at x 121.3535, **0.034 mm** from the RF trace, straight through its return. The return
+current sits within about three dielectric thicknesses, 2.8 mm on this 1.0 mm two-layer board, so
+that copper is inside the corridor the reserve exists to protect.
+
+Widening the reserve to x 118 to 161 was tried and the two-layer route stopped converging: three
+reroutes left 2, 7 and 3 unconnected items where the current reserve reliably reaches zero. The
+board is left on its committed clean route with the defect recorded rather than half fixed. The
+regression test carries a strict xfail so it turns red the moment the layout is corrected.
