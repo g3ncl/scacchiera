@@ -174,7 +174,42 @@ the only cost is time, against roughly 82 EUR of PCBA of which 50.47 EUR was pur
 Splitting the matrix into a dumb antenna board plus a small switch daughterboard would also avoid
 the charge, but it puts connector inductance into all 16 resonant tanks, changes the ground return,
 and forces the antenna board through Milestones 1 to 4 again. Hand populating gets the same saving
-with no RF risk, so the split was rejected.
+with no RF risk, so **that** split was rejected.
+
+A different split was not. The objection above is specific to a boundary drawn between a loop and
+its tuning capacitor; the per-line strip in [strip.md](strip.md) keeps the whole tank on the strip
+and puts the connector on the far side of the 100 nF DC block, so the harness loads the shared bus
+instead of joining sixteen resonators. `hardware/sim/strip_rf.py` measures that at 0.46 percent of
+tuning against the same cells with the interconnect removed. The RF objection does not carry over;
+the area and connector cost below is what does.
+
+### Split sensing plane
+
+Not quoted. This is the open item that decides between the two sensing architectures, and it needs
+JLCPCB's live calculator rather than an estimate.
+
+What is known without a quote:
+
+| | matrix | split | note |
+| --- | ---: | ---: | --- |
+| Designs | 1 | 2 | one strip built 16 times, one spine built twice |
+| Substrate | 90,000 mm2 | 174,640 mm2 | 1.94 times, structural |
+| Fitted parts | 4.80 EUR | 15.16 EUR | 10.36 of the 10.36 increase is connectors |
+| Unique JLC parts | baseline | **unchanged** | the split binds no new component type |
+| Placed references | 165 | 200 | hand population gets worse, not better |
+| Minimum useful order | 5 boards | 5 strips | a third of one set, so a respin wastes nothing |
+
+The two effects that could reverse the area penalty are both size-driven and both already visible
+in the matrix quote above: 17.74 EUR of fabrication and 50.47 EUR of assembly large-size charge. A
+300 x 33 mm outline is long but narrow, and whether JLCPCB's size bands price it like a 300 x 300
+board is exactly what nobody here can answer from a catalogue. Both boards are therefore marked
+hand populated in `hardware/pcb/bom.py` pending that quote, which is the conservative direction and
+the same decision the matrix board already took.
+
+Eighteen JST GH cable assemblies (sixteen strip harnesses, two link harnesses) are purchased
+accessories on no board BOM, like the hub's antenna pigtail. An order that forgets them is
+incomplete. The connectors themselves are all SM07B-GHS-TB, C495552, already bound above, so the
+split adds no feeder change.
 
 The stocked JSCJ BAR64-02V replaces the unavailable NXP BAP64-02. Its conservative ngspice model
 uses the JSCJ limits of 2.5 ohm maximum at 10 mA and 0.55 pF maximum at 1 V, 0.35 pF maximum at

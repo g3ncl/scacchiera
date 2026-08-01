@@ -28,11 +28,13 @@ position at that point is that these were accepted knowingly.
 | **A8** | The AD Circus SLIX2 tag coil resonates against the SL2S2602's 23.5 pF input capacitance. | Avery Dennison publishes no coil inductance, turn count or resonant frequency for any converted inlay. The tag coil is back-solved from the resonance condition. | The V4 coupling model is bounded rather than exact. Read range per cell shifts. | V8 assembled RF |
 | **A9** | Loaded tag Q is bounded from the SL2S2602's 40 uW minimum input power. | NXP publishes no equivalent parallel resistance at minimum operating power. | Same as A8. | V8 assembled RF |
 | **A10** | The Harvatek T37K3RGB datasheet's numbers hold. | It is marked **Preliminary**, dated 2025-05-19, the third preliminary document in the build after the display module and its controller. Its bit timings and RGB order are specific enough to be deliberate rather than placeholder. | Wrong bit timings show as flicker or no output at bring-up; a wrong colour order shows as a green illegal-move flash. Both fail visibly and immediately. | First light-bar bring-up |
+| **A11** | A mated JST GH contact pair adds **2 to 8 nH**, used only by the split sensing plane. | JST publishes no contact inductance for the GH series, and no connector vendor at this price does. 2 nH is about a 2 mm straight contact; 8 nH allows the housing's full mated length plus the pad transitions at both boards. | Nothing, and that is demonstrated rather than argued. `hardware/sim/strip_rf.py` sweeps the whole fourfold range and the bus band moves by less than one sweep step, so no criterion in the split depends on the value. This is the cheapest row here. | V8 bus sweep, if the split ships |
 
 ## What this costs at the gate
 
-Ten rows, of which A1, A3, A4, A6, A7 and A10 are low consequence or conservative in the safe
-direction, or fail visibly at first bring-up.
+Eleven rows, of which A1, A3, A4, A6, A7, A10 and A11 are low consequence or conservative in the
+safe direction, or fail visibly at first bring-up. A11 is the only one that has been shown not to
+matter rather than argued to be small: its whole range is swept and nothing moves.
 
 The three that actually matter:
 

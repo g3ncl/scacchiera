@@ -120,6 +120,12 @@ Which is why this is a measurement question. The test article in
 [test-article-matrix.md](test-article-matrix.md) settles read range against off-centre position and
 whether a neighbouring line answers, in one session, and neither can be settled by more solving.
 
+Note what the lever is, though: `LOOP_INSET` is per-line geometry, and the three ways out are one
+sweep of one parameter. That is the argument for the split sensing plane in [strip.md](strip.md),
+where a strip is a fraction of a board order and four inset variants fit on one panel, against four
+separate 59 EUR orders here. The two architectures carry identical copper and identical coupling;
+they differ in what it costs to change them.
+
 ## Switch cell
 
 One cell per line, the single-ended half of the hybrid PIN switch the previous 64-antenna design

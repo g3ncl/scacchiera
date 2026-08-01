@@ -1640,3 +1640,33 @@ fault, not the solver's.
 Still not V4: this is inductive coupling between antennas, not tag coupling, which A8 and A9 record
 as unobtainable from any datasheet, and not capacitance, Q, or radiated emission. The bare matrix
 test article exists to measure what this cannot.
+
+## 2026-08-02 Query: can the sensing plane be one PCB per line antenna?
+
+Filed [[split-sensing-plane]]. Updated [[row-column-antenna-matrix-technique]] to record that the
+technique now has two validated board partitions behind it rather than one.
+
+The question came in as a cost and convenience question and turned out to be an impedance question.
+A connector between a loop and its tuning capacitor joins sixteen resonators and cannot be
+compensated, which is why the earlier antenna-board-plus-daughterboard split was rejected. A
+connector on the bus side of the cell's 100 nF DC block feeds a parallel-resonant branch through
+series inductance, and 142 to 385 nH of it moves the bus by 0.46 percent. Same copper, same parts,
+different boundary, completely different answer.
+
+Two findings worth carrying to other partitioning questions:
+
+**Equal beats short.** Sixteen equal-length harnesses detune sixteen lines together, which one
+capacitor value absorbs. Mixed lengths would spread them, which nothing absorbs, because all
+sixteen strips are one design. The instinct to minimise cable length is the wrong objective here.
+
+**Some costs are structural, not fixable.** The monolith carries two antenna planes on one
+substrate's two faces. Any per-line strip uses one face and wastes the other, so 1.94 times the
+area is inherent to the idea rather than a drawing that could be tightened. Recognising that up
+front saves redrawing it.
+
+The coupling extraction was re-run on the new stackup through the same solver rather than inherited:
+identical self inductance and adjacent-line coupling, worst row-to-column coupling 0.0652 against
+0.0664. Splitting the planes onto separate substrates makes their separation a free parameter for
+the first time, and it was deliberately set to reproduce the monolith so that the board change and
+a coupling change could not arrive together.
+

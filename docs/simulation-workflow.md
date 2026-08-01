@@ -253,8 +253,11 @@ Definition of done:
 
 - The reviewer signs off component pinouts, footprints, power, reset and programming, RF topology,
   protection, connectors, layout, fabrication outputs, and the remaining risk register.
-- The complete clean-build test command passes, including all four board designs, firmware host tests,
-  Wokwi scenarios, ngspice corners, electromagnetic tests, ERC, DRC, and schematic parity.
+- The complete clean-build test command passes, including every board design carried at the time,
+  firmware host tests, Wokwi scenarios, ngspice corners, electromagnetic tests, ERC, DRC, and
+  schematic parity. Where two designs are alternatives rather than both shipping (the monolithic
+  matrix board and the split sensing plane in [hardware/strip.md](hardware/strip.md)), both are
+  held to this gate and the release records which one ships.
 - No critical Assumed evidence, open sourcing conflict, unexplained waiver, or manual-only test
   remains.
 - `docs/planning.md` records the passing evidence, tool versions, test-article identity, release Git
