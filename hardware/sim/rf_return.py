@@ -16,7 +16,7 @@ import os
 import re
 import subprocess
 from dataclasses import dataclass
-from math import hypot, pi
+from math import pi
 from pathlib import Path
 
 from hardware.sim.copper import COPPER_THICKNESS_M, TrackSegment, read_copper
@@ -53,11 +53,19 @@ class ReturnPath:
     resistance_ohm: float
 
 
+PLANE_LAYER = "B.Cu"
+
+
 def rf_segments(board: Path = HUB_BOARD, net: str = "RF_BUS") -> tuple[TrackSegment, ...]:
+    """Every routed segment of the net, on whichever layer it was routed.
+
+    Filtering to one layer here is what made the first version of this module
+    report a path that was not the routed path: RF_BUS drops to the back layer
+    for 18.35 mm, and silently leaving that out produced an inductance for a
+    net that does not exist.
+    """
     return tuple(
-        segment
-        for segment in read_copper(board).segments
-        if segment.net == net and segment.layer == "F.Cu"
+        segment for segment in read_copper(board).segments if segment.net == net
     )
 
 
@@ -83,6 +91,14 @@ def deck(
 ) -> str:
     """A FastHenry input placing the routed trace over the reserved plane."""
     x_min, y_min, x_max, y_max = reserve
+    on_plane = tuple(s for s in segments if s.layer == PLANE_LAYER)
+    if on_plane:
+        raise NotImplementedError(
+            f"{len(on_plane)} segment(s) of this net are routed on {PLANE_LAYER}, "
+            "the same layer as the return plane, so it cannot be modelled as a "
+            "trace over a plane. Slot the plane and place those segments in the "
+            "slot before trusting any number from here."
+        )
     source, sink = _endpoints(segments)
     points = sorted({point for s in segments for point in (s.start, s.end)})
     lines = [
@@ -158,57 +174,6 @@ def return_corridor_mm() -> float:
     thicknesses. That is the width of copper the reserve has to keep intact.
     """
     return 3.0 * DIELECTRIC_MM
-
-
-def _segment_distance_mm(
-    first: tuple[tuple[float, float], tuple[float, float]],
-    second: tuple[tuple[float, float], tuple[float, float]],
-) -> float:
-    def point_to_segment(
-        point: tuple[float, float],
-        start: tuple[float, float],
-        end: tuple[float, float],
-    ) -> float:
-        dx, dy = end[0] - start[0], end[1] - start[1]
-        length_sq = dx * dx + dy * dy
-        t = (
-            0.0
-            if length_sq == 0.0
-            else max(
-                0.0,
-                min(
-                    1.0,
-                    ((point[0] - start[0]) * dx + (point[1] - start[1]) * dy)
-                    / length_sq,
-                ),
-            )
-        )
-        return hypot(point[0] - (start[0] + t * dx), point[1] - (start[1] + t * dy))
-
-    return min(
-        point_to_segment(first[0], *second),
-        point_to_segment(first[1], *second),
-        point_to_segment(second[0], *first),
-        point_to_segment(second[1], *first),
-    )
-
-
-def nearest_return_interruption_mm(board: Path = HUB_BOARD) -> float:
-    """Distance from the RF run to the closest back-copper signal track.
-
-    Anything on the back layer that is not ground is a slot in the return, and
-    a slot inside the corridor forces the return current to detour around it.
-    """
-    back_signal = tuple(
-        segment
-        for segment in read_copper(board).segments
-        if segment.layer == "B.Cu" and segment.net != "GND"
-    )
-    return min(
-        _segment_distance_mm((rf.start, rf.end), (other.start, other.end))
-        for rf in rf_segments(board)
-        for other in back_signal
-    )
 
 
 def routed_return(

@@ -1070,3 +1070,24 @@ and via padstack naming.
 Three ways out, none chosen: move C37, R29 and R30 to the connector end and accept longer receive
 traces; go to four layers on the hub; or extract the slotted return and show the coupling is
 tolerable, which needs the FastHenry slot model to converge and it does not yet.
+
+## [2026-08-01] correction | The RF return defect was an artifact of my own check
+
+Retracting the two entries above it. The check that found it filtered RF_BUS to the front layer and
+then measured its distance to back-layer tracks, so it compared traces on opposite layers. Two
+traces crossing in plan view on different layers read as nearly zero apart, which is ordinary and
+harmless; real same-layer clearance is DRC's job and passes at 0.2 mm. The 0.034 mm MOSI figure, the
+placement root cause built on it, the keepout experiments and the router comparison all descend from
+that number, and none of them stand.
+
+The extraction was also of the wrong net. RF_BUS is routed on both layers, eleven segments on F.Cu
+and two on B.Cu including an 18.35 mm run at x 121.49 with two vias. The layer filter dropped those,
+so the 46.9 nH reported earlier was the inductance of a path that does not exist.
+
+What survives: FastHenry is built, installed and validated against the Grover model at 2 percent on
+inductance and 8 on resistance. The tool is good. What it was pointed at was not.
+
+`deck()` now raises rather than modelling a net that runs on its own return plane, and a test pins
+that refusal. The lesson worth keeping is that the check produced a result surprising enough to
+justify a board respin, and that should have been the cue to validate the check before acting on it,
+not after.

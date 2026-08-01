@@ -5,11 +5,7 @@ from pathlib import Path
 import pytest
 
 from hardware.sim.loop import loop_ac_resistance_ohm, loop_inductance_h
-from hardware.sim.rf_return import (
-    FASTHENRY,
-    nearest_return_interruption_mm,
-    return_corridor_mm,
-)
+from hardware.sim.rf_return import FASTHENRY, PLANE_LAYER, rf_segments, return_corridor_mm
 
 
 needs_fasthenry = pytest.mark.skipif(
@@ -66,5 +62,17 @@ def test_the_return_corridor_is_three_dielectric_thicknesses() -> None:
     assert return_corridor_mm() == pytest.approx(2.79)
 
 
-def test_nothing_interrupts_the_return_inside_the_corridor() -> None:
-    assert nearest_return_interruption_mm() >= return_corridor_mm()
+def test_the_extraction_refuses_a_net_routed_on_its_own_return_layer() -> None:
+    """RF_BUS is routed partly on the back layer, so it has no plane model yet.
+
+    An earlier version of this module filtered the net to the front layer and
+    extracted the remainder, which produced a confident inductance for a path
+    that is not the routed path. Refusing is the honest behaviour until the
+    plane is slotted where the net runs through it.
+    """
+    from hardware.sim.rf_return import deck
+
+    on_plane = [s for s in rf_segments() if s.layer == PLANE_LAYER]
+    assert on_plane, "expected RF_BUS to still have back-layer segments"
+    with pytest.raises(NotImplementedError, match=PLANE_LAYER):
+        deck(rf_segments())

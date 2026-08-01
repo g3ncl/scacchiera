@@ -176,40 +176,30 @@ scoped test-article order. V0 through V9 permit a final-board order.
   already used for the matrix loop before trusting it: 572.6 nH against 584.9 nH and 0.436 against
   0.473 ohm, agreeing to 2 and 8 percent.
 
-  **The first extraction found a blocking defect and it is open.** The reserve is recorded as x 122
-  to 156, but the routed RF run spans x 121.32 to 158.63, so it leaves the reserve at both ends. In
-  the gap the router laid MOSI on the back layer at x 121.3535, **0.034 mm** from the RF trace and
-  straight through its return. At this frequency the return current sits within roughly three
-  dielectric thicknesses of the trace, 2.8 mm on a 1.0 mm two-layer board, so that copper is inside
-  the corridor the reserve exists to protect.
+  **Retracted 2026-08-01: the defect this section previously reported was an artifact of the
+  check, not a property of the board.** `rf_segments()` filtered the net to F.Cu and then measured
+  its distance to B.Cu tracks, so it was comparing traces on opposite layers. Two traces that cross
+  in plan view on different layers read as nearly zero apart, which is normal and harmless; real
+  same-layer clearance is enforced by DRC at 0.2 mm and passes. The reported 0.034 mm MOSI
+  intrusion, the placement root-cause story built on it, the keepout experiments and the router
+  comparison all followed from that number and none of them stand.
 
-  The root cause is placement, not routing. RF_BUS has to reach three points: the match output at
-  C34 and C35 near x 141 to 143, the connector J4 at 150.5, and the receive tap C37 at 121.8, 33.8.
-  C37 sits at the reader deliberately, so the high-impedance receive traces stay short, which
-  obliges the bus to cross a third of the board. Protecting the return corridor of a bus that long
-  is what conflicts with the back copper the rest of the board needs. Two keepout shapes were tried.
-  A wide one, x 118 to 161, stopped the two-layer route converging: three reroutes left 2, 7 and 3
-  unconnected items. A targeted one at the entry cleared that end, moving the nearest back-copper
-  signal from 0.034 to 21 mm, but left the other end open where the run passes x 156, and scored
-  reroutes then gave 0.56, 4.69 and 3.43 mm of clearance against the 2.79 mm requirement with 0, 4
-  and 8 DRC violations. A constraint the router meets on some seeds and not others is not a
-  constraint.
+  The extraction also modelled the wrong net. RF_BUS is routed on both layers: eleven segments on
+  F.Cu and two on B.Cu, including an 18.35 mm run at x 121.49 from y 14.47 to 32.81, with two vias.
+  The old filter dropped those, so the 46.9 nH it reported was for a path that does not exist.
 
-  The board stays on its committed clean route and
-  `hardware/tests/test_rf_return.py::test_nothing_interrupts_the_return_inside_the_corridor` fails
-  rather than being waived. Three ways out, none chosen: move C37, R29 and R30 to the connector end
-  and accept longer high-impedance receive traces, which shortens the bus and its corridor together;
-  go to four copper layers on the hub, which this plan already notes would also shorten the board
-  from 162 mm; or extract the slotted return and show the coupling is tolerable, which needs the
-  FastHenry model to converge with a meshed slot and it does not yet.
+  What is established: FastHenry is built, installed and validated against the Grover model the
+  matrix loop already uses, agreeing to 2 percent on inductance and 8 on resistance. That much is
+  good evidence and stands.
 
-  Cloud and third-party routers were considered and rejected on their own terms. DeepPCB's free tier
-  allows 150 airwires against this board's 254, and is 30 USD an hour beyond it. TopoR Lite is free
-  under 650 pins and does read DSN and write SES, but it is Windows-only with no batch mode, and a
-  manual GUI step in the routing path contradicts the layout-as-code rule in CLAUDE.md. Its session
-  would also not import as-is: `ses_import.py` hardcodes Freerouting's 10 um resolution and via
-  padstack naming. Neither tool addresses the cause, which is that the constraint is unsatisfiable
-  as currently placed rather than merely hard to route.
+  What is open: RF_BUS cannot be modelled as a trace over a plane while part of it runs on the plane
+  layer, so `deck()` now raises instead of returning a number, and a test pins that. Closing V4
+  needs the plane slotted where the net crosses into it, both layers and the vias in the model, and
+  a criterion derived from what matters on two layers, same-layer parallel coupling length and
+  return continuity, rather than a cross-layer distance. Whether the 18.35 mm back-layer run inside
+  the reserved region is itself a problem is not established either way and should not be assumed
+  from the retracted material above.
+
 - [ ] V5 firmware host verification: scoped for hardware validation rather than completeness, per
   [software/architecture.md](software/architecture.md). The hardware-facing layer comes first,
   because it is the part whose failure costs a respin: the PN5180 driver, the expander, display SPI,
