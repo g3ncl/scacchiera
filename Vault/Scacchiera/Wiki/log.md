@@ -1527,3 +1527,28 @@ succeed and do nothing. Documented in `docs/hardware/matrix.md`.
 
 Checked twice against generated netlists before writing any of this down, because the last time a
 check surprised me this much the check was wrong.
+
+## [2026-08-01] correction | Single-slot inventory cannot read a chess position
+
+Correcting my own framing from earlier today. The PN5180 driver's single-slot ISO 15693 inventory
+was described as "enough for a first bring-up". It is enough to prove the RF path end to end, and
+it is not enough to read the board, which is a bigger difference than that wording admitted.
+
+Single slot means every tag in the field answers in the same window, so a line carrying more than
+one tag produces a collision and no UID. The row-and-column architecture guarantees several tags
+per line: sixteen antennas cover sixty-four squares, so each line is shared by eight of them. A
+chess starting position puts eight pieces on rank 1, so row 0 collides on every scan. The board as
+it stands can read a sparse position and cannot read a game.
+
+This is not a surprise to the design, it is the exact problem [[bitwiseid-method]] was researched
+to solve, and [[row-column-antenna-matrix-technique]] already records that every line scan returns
+multiple tags. What was wrong was calling the gap a later refinement rather than the next
+requirement.
+
+The mechanism is confirmed rather than guessed, which is the useful part. Sixteen-slot inventory
+uses flags 0x06 instead of 0x26, and advancing a slot needs an EOF with no data. PN5180 datasheet
+Table 98 gives TX_CONFIG bit 10 as TX_DATA_ENABLE: "If set to 1; transmission of data is enabled
+otherwise only symbols are transmitted." Clearing it and transmitting emits the frame symbols
+alone, which is the EOF. So the next increment is bounded and does not need a supplier.
+
+Recorded in `docs/software/architecture.md` under what is real and what is not.
