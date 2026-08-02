@@ -263,6 +263,7 @@ def export_fab(name: str) -> tuple[Path, Path, Path, Path, Path, Path]:
         HAND_ASSEMBLY_ROUTES if name in HAND_POPULATED_BOARDS else frozenset()
     )
     write_jlc_bom(all_parts_bom_path, bom_path, standard_excluded_routes)
+    hand_populated = name in HAND_POPULATED_BOARDS
     write_jlc_bom(all_parts_bom_path, max_assembly_bom_path, ignore_routes=True)
     write_self_solder_bom(all_parts_bom_path, self_solder_bom_path)
     subprocess.run(
@@ -290,6 +291,16 @@ def export_fab(name: str) -> tuple[Path, Path, Path, Path, Path, Path]:
     validate_assembly_designators(bom_path, cpl_path)
     validate_assembly_designators(max_assembly_bom_path, max_assembly_cpl_path)
 
+    # A hand-populated board's upload pair is a header and no rows, and the
+    # files are named `upload`, so the obvious thing to do with them is the one
+    # thing that cannot work: JLCPCB answers a zero-part list with an opaque
+    # HTTP 500. Delete them rather than ship a trap whose only warning is in a
+    # document. Bare Gerbers are the order for these boards, and the
+    # max-assembly pair is what prices the alternative.
+    if hand_populated:
+        bom_path.unlink(missing_ok=True)
+        cpl_path.unlink(missing_ok=True)
+
     shutil.rmtree(fab_dir)
     return zip_path, bom_path, cpl_path, max_assembly_bom_path, max_assembly_cpl_path, self_solder_bom_path
 
@@ -301,8 +312,14 @@ def main() -> None:
         sys.argv[1]
     )
     print(f"gerbers: {zip_path}")
-    print(f"JLCPCB upload BOM: {bom_path}")
-    print(f"JLCPCB upload CPL: {cpl_path}")
+    if bom_path.exists():
+        print(f"JLCPCB upload BOM: {bom_path}")
+        print(f"JLCPCB upload CPL: {cpl_path}")
+    else:
+        print(
+            f"no upload pair: {sys.argv[1]} is hand populated, so order bare Gerbers.\n"
+            "  To price factory assembly instead, upload the max-assembly pair below."
+        )
     print(f"JLCPCB max-assembly BOM: {max_assembly_bom_path}")
     print(f"JLCPCB max-assembly CPL: {max_assembly_cpl_path}")
     print(f"self-solder BOM: {self_solder_bom_path}")

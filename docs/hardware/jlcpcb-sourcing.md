@@ -24,16 +24,18 @@ soldering, or too repetitive to place economically by hand.
 
 Each fabrication run emits two upload choices. `<board>_jlcpcb_upload_bom.csv` and
 `<board>_jlcpcb_upload_cpl.csv` are the plan actually chosen for that board, so on a hand-populated
-board they are deliberately empty. The matched `<board>_jlcpcb_max_assembly_bom.csv` and
+board there is nothing to upload and **the pair is not written at all**. It used to be written with
+a header and no rows, which is a trap: the files are named `upload`, and JLCPCB answers a zero-part
+list with an opaque HTTP 500 rather than a message naming the problem. The matched `<board>_jlcpcb_max_assembly_bom.csv` and
 `<board>_jlcpcb_max_assembly_cpl.csv` ignore that plan and list everything JLCPCB could place,
 which is what makes them a quote instrument for the road not taken. Upload
 the hybrid pair together when using manual completion, then purchase exactly the rows in
 `<board>_self_solder_bom.csv` elsewhere. Never mix the full BOM with the hybrid CPL or the reverse.
 On the strip, the spine and the matrix the two assembled variants are the same file, because every
 fitted part on them has an LCSC code and none is excluded either way.
-The lightbar is the exception: JLCPCB cannot assemble its 120 by 8.5 mm outline, so both of its
-JLCPCB BOM/CPL pairs are intentionally empty and its hand BOM contains every fitted component.
-Order only its bare PCB Gerbers from JLCPCB.
+The lightbar is the exception: JLCPCB cannot assemble its 120 by 8.5 mm outline, so it has no
+upload pair at all and its hand BOM contains every fitted component. Order only its bare PCB
+Gerbers from JLCPCB.
 
 The upload BOM uses the selected manufacturer's exact MPN in `Comment`, not the schematic value.
 This makes the MPN agree with `LCSC Part #` and prevents JLCPCB's misleading comment mismatch
@@ -311,7 +313,7 @@ the wrong one is a silent and expensive mistake.
 | File | Use |
 | --- | --- |
 | `<board>_bom_all_parts.csv` | Reference. Every part with MPN, supplier, order code, footprint, cost and its assembly classification. The other files are views of this one. |
-| `<board>_jlcpcb_upload_bom.csv` and `_cpl.csv` | **Upload these.** The build plan actually chosen for this board. |
+| `<board>_jlcpcb_upload_bom.csv` and `_cpl.csv` | **Upload these.** The build plan actually chosen for this board. Absent on a hand-populated board, where the plan is bare Gerbers and there is nothing to place. |
 | `<board>_jlcpcb_max_assembly_bom.csv` and `_cpl.csv` | The alternative: everything JLCPCB could place, excluding only parts with no LCSC code. It ignores the board's chosen assembly route on purpose, because its whole job is to price the road not taken. Kept because the economics that made the other choice can change. |
 | `<board>_self_solder_bom.csv` | What you buy and fit yourself. |
 
