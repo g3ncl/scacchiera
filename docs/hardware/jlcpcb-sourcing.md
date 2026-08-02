@@ -195,9 +195,14 @@ Quoted 2026-08-02. This was the open item that decided between the two sensing a
 it is now closed in the split's favour.
 
 **The large-size charge is the whole story.** A 300 x 300 mm matrix board pays **50.47 EUR** of
-large-size assembly charge, 61.5 percent of its PCBA. A 300 x 33 mm strip pays **0.00 EUR**. The
-outline is just as long, so it is width that the size bands price, and the split's narrow strip
-falls outside them entirely. That is the number no catalogue could answer.
+large-size assembly charge, 61.5 percent of its PCBA. A 300 x 33 mm strip pays **0.00 EUR**. That
+is the number no catalogue could answer.
+
+What triggers the band is *not* established by these two points. Both boards are 300 mm long, so
+length alone cannot be it, but width (33 against 300) and area (9,900 against 90,000 mm2) are
+equally consistent with the evidence and nothing here separates them. It matters practically: if
+the rule is area, a four-up strip panel at 148 x 310 mm covers 45,880 mm2 and could reincur the
+charge that four separate strips avoid. Quote a panel before assuming panelisation is free.
 
 Bare PCB, all three at JLCPCB's default 1.6 mm, 2 layers, green, HASL, 2-day build:
 

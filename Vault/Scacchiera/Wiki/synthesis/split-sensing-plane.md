@@ -63,8 +63,10 @@ optimised away, and recognising that early stops a lot of wasted redrawing.
 
 The offsetting effect is a size-driven surcharge rather than area, and it turned out to be larger
 than the penalty. A 300 by 300 mm board pays 50.47 EUR of large-size assembly charge, 61.5 percent
-of its PCBA. A 300 by 33 mm board pays **zero**. The outline is just as long, so it is width the
-size bands price, and a narrow strip falls outside them entirely.
+of its PCBA. A 300 by 33 mm board pays **zero**. Both are 300 mm long, so length alone is not the
+trigger, but two data points cannot separate width from area and no more were bought. The practical
+consequence is that panelising strips may reincur the charge that separate strips avoid, so a panel
+has to be quoted rather than assumed free.
 
 Quoted 2026-08-02: one working sensing plane is 26.92 EUR in bare copper against the monolith's
 58.34, or 101.12 EUR with the strips factory assembled against 141.05. The split is cheaper in both

@@ -1677,8 +1677,10 @@ the substrate would be outweighed by dodging the large-size surcharge, and it is
 expected.
 
 **A 300 by 33 mm board pays zero large-size assembly charge where a 300 by 300 mm one pays
-50.47 EUR.** Both are 300 mm long, so the size bands price width, not the longest dimension. That is
-not something a catalogue states and not something anyone here could have derived.
+50.47 EUR.** Both are 300 mm long, so length alone is not the trigger. Whether it is width or area
+is not separable from two points, and I first wrote it up as width before noticing that. The
+distinction is not academic: if the rule is area, a four-up strip panel reincurs a charge that four
+separate strips avoid.
 
 One working sensing plane: 26.92 EUR bare against 58.34, or 101.12 EUR assembled against 141.05.
 
