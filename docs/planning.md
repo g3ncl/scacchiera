@@ -387,8 +387,11 @@ for any board yet.
 - [x] Split sensing plane defined as an alternative to the matrix board, not an addition to it:
   see [hardware/strip.md](hardware/strip.md). Two more designs, eighteen more physical PCBs, one
   strip built sixteen times and one spine built twice, carrying the identical sixteen loops and
-  sixteen switch cells. Exactly one of the two sensing architectures ships, and which one is a
-  live-quote question recorded in [hardware/jlcpcb-sourcing.md](hardware/jlcpcb-sourcing.md).
+  sixteen switch cells. Exactly one of the two sensing architectures ships. **The 2026-08-02 JLCPCB
+  quote decides it in the split's favour**: one working sensing plane costs 26.92 EUR bare against
+  the matrix board's 58.34, or 101.12 EUR with the strips assembled against 141.05, because a
+  300 by 33 mm outline pays no large-size assembly charge where a 300 by 300 mm one pays 50.47 EUR.
+  Figures and caveats in [hardware/jlcpcb-sourcing.md](hardware/jlcpcb-sourcing.md).
 
 ### M2: Schematic (per board)
 

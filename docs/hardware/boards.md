@@ -60,7 +60,10 @@ What it does not cost is RF: coupling is unchanged to four figures and the whole
 path moves the bus resonance by 0.46 percent.
 
 **Exactly one of the matrix board and the split plane ships.** Both are maintained to the same
-gate, and which one is a live-quote question, not a design one.
+gate. The 2026-08-02 JLCPCB quote answers which: the split, at 26.92 EUR for one working plane in
+bare copper against the matrix board's 58.34, and 101.12 EUR against 141.05 with assembly. A
+300 by 33 mm outline pays no large-size assembly charge where a 300 by 300 mm one pays 50.47 EUR,
+which outweighs the split's 1.94 times substrate.
 
 ### 2. Hub board (controller and power distribution)
 

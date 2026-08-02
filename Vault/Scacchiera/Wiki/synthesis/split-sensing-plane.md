@@ -61,10 +61,18 @@ planes of antenna. Any per-line strip uses one face and wastes the other, so the
 **1.94 times** the area no matter how it is drawn. This is not a layout inefficiency to be
 optimised away, and recognising that early stops a lot of wasted redrawing.
 
-The offsetting effects are all size-driven surcharges rather than area: the matrix quote carried
-17.74 EUR of fabrication and 50.47 EUR of assembly large-size charge. Whether a 300 by 33 mm
-outline is priced like a 300 by 300 one is a vendor-calculator question, not a physics question,
-and it is left open.
+The offsetting effect is a size-driven surcharge rather than area, and it turned out to be larger
+than the penalty. A 300 by 300 mm board pays 50.47 EUR of large-size assembly charge, 61.5 percent
+of its PCBA. A 300 by 33 mm board pays **zero**. The outline is just as long, so it is width the
+size bands price, and a narrow strip falls outside them entirely.
+
+Quoted 2026-08-02: one working sensing plane is 26.92 EUR in bare copper against the monolith's
+58.34, or 101.12 EUR with the strips factory assembled against 141.05. The split is cheaper in both
+regimes despite buying almost twice the substrate.
+
+The second-order effect is the vendor's five-piece minimum, and it is not a detail. It forces four
+unusable 300 by 300 mm boards to get one, where twenty strips is a set plus spares. When a design
+is measurement-bound, the minimum order quantity belongs in the cost model next to the unit price.
 
 ## Plane separation becomes a parameter
 

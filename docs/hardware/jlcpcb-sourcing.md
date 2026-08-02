@@ -191,26 +191,83 @@ the area and connector cost below is what does.
 
 ### Split sensing plane
 
-Not quoted. This is the open item that decides between the two sensing architectures, and it needs
-JLCPCB's live calculator rather than an estimate.
+Quoted 2026-08-02. This was the open item that decided between the two sensing architectures, and
+it is now closed in the split's favour.
 
-What is known without a quote:
+**The large-size charge is the whole story.** A 300 x 300 mm matrix board pays **50.47 EUR** of
+large-size assembly charge, 61.5 percent of its PCBA. A 300 x 33 mm strip pays **0.00 EUR**. The
+outline is just as long, so it is width that the size bands price, and the split's narrow strip
+falls outside them entirely. That is the number no catalogue could answer.
 
-| | matrix | split | note |
-| --- | ---: | ---: | --- |
-| Designs | 1 | 2 | one strip built 16 times, one spine built twice |
-| Substrate | 90,000 mm2 | 174,640 mm2 | 1.94 times, structural |
-| Fitted parts | 4.80 EUR | 15.16 EUR | 10.36 of the 10.36 increase is connectors |
-| Unique JLC parts | baseline | **unchanged** | the split binds no new component type |
-| Placed references | 165 | 200 | hand population gets worse, not better |
-| Minimum useful order | 5 boards | 5 strips | a third of one set, so a respin wastes nothing |
+Bare PCB, all three at JLCPCB's default 1.6 mm, 2 layers, green, HASL, 2-day build:
 
-The two effects that could reverse the area penalty are both size-driven and both already visible
-in the matrix quote above: 17.74 EUR of fabrication and 50.47 EUR of assembly large-size charge. A
-300 x 33 mm outline is long but narrow, and whether JLCPCB's size bands price it like a 300 x 300
-board is exactly what nobody here can answer from a catalogue. Both boards are therefore marked
-hand populated in `hardware/pcb/bom.py` pending that quote, which is the conservative direction and
-the same decision the matrix board already took.
+| Board | Quantity | Price | Per board | Per 1000 mm2 |
+| --- | ---: | ---: | ---: | ---: |
+| strip | 20 | 19.97 EUR | 1.00 EUR | 0.101 EUR |
+| spine | 5 | 6.95 EUR | 1.39 EUR | 0.171 EUR |
+| matrix | 5 | 58.34 EUR | 11.67 EUR | 0.130 EUR |
+
+Strip with assembly, 20 pieces, from `strip_jlcpcb_max_assembly_bom.csv` and its CPL:
+
+| Line | Cost |
+| --- | ---: |
+| PCB, engineering fee | 3.47 EUR |
+| PCB, board | 35.34 EUR |
+| PCBA, setup | 22.19 EUR |
+| PCBA, stencil | 7.13 EUR |
+| PCBA, panel | 0.00 EUR |
+| **PCBA, large size** | **0.00 EUR** |
+| PCBA, components, 10 items | 11.24 EUR |
+| PCBA, feeder loading | 13.28 EUR |
+| PCBA, SMT assembly | 1.08 EUR |
+| PCBA, packaging | 0.43 EUR |
+| **Total** | **94.17 EUR** |
+
+Two things in that table are worth reading twice. Enabling assembly nearly doubled the bare board
+price, 19.97 to 38.81 EUR, because JLCPCB re-specifies the PCB for line handling; that cost is real
+and it is not in the zero-valued panel line. And 42.60 EUR of the 55.36 EUR PCBA is fixed per order
+(setup, stencil, feeders), with only 12.75 EUR scaling across the twenty boards.
+
+#### What one working sensing plane costs
+
+A set is sixteen strips and two spines, or one matrix board. JLCPCB's five-piece minimum is part of
+the comparison rather than an aside, because it forces four unusable matrix boards where twenty
+strips is a set plus four spares.
+
+| Build | Order | Cost | Hand joints |
+| --- | --- | ---: | ---: |
+| Split, bare copper | 20 strips + 5 spines | **26.92 EUR** | about 200 |
+| Split, strips assembled, spines by hand | 20 strips assembled + 5 spines bare | 101.12 EUR | 24 |
+| Matrix, bare copper | 5 boards | 58.34 EUR | 165 |
+| Matrix, assembled | 5 boards | 141.05 EUR | 0 |
+
+**The split is cheaper in both regimes**, less than half the price bare and 40 EUR cheaper
+assembled. The area penalty is real and unchanged at 1.94 times the substrate, but it is outweighed
+by dodging the large-size charge and by not having to buy five sets to get one.
+
+#### Assembly route
+
+The strip stays hand populated in `hardware/pcb/bom.py`, because bare copper at 26.92 EUR is the
+cheapest way to a working board and the packages are all iron-reachable. Buying the labour back
+costs **74.20 EUR** for 220 placements, about 0.34 EUR a joint, and that is a time-versus-money
+call rather than a design one. Flipping it is a one-line change to `HAND_POPULATED_BOARDS`.
+
+The spine stays hand populated for a stronger reason, and quantity is why. Only two are needed per
+product, against a 42.60 EUR fixed PCBA cost that does not care how few you order. Paying roughly
+45 EUR of setup to place twenty-four parts, of which ten are through-hole-scale JST connectors, one
+is an SOIC-16 and one an 0402, is bad value at any quantity anyone would order.
+
+#### Caveats on these figures
+
+- **All three were quoted at 1.6 mm**, JLCPCB's default, where the strip is designed at 0.6 mm and
+  the spine and matrix at 1.0 mm. Two-layer boards are usually the same price across that range, so
+  the ranking is expected to hold, but the thickness the strip actually needs has not been priced.
+  A 0.6 mm board 300 mm long is the specific thing still unverified.
+- The spine was not quoted with assembly. Its route is decided on the fixed-cost structure above
+  rather than on its own quote.
+- The matrix figures are the 2026-07-25 quote already recorded above, not a re-quote on the same
+  day, though its 58.34 EUR bare price against the 59.03 EUR on record confirms the earlier quote
+  was five pieces.
 
 Eighteen JST GH cable assemblies (sixteen strip harnesses, two link harnesses) are purchased
 accessories on no board BOM, like the hub's antenna pigtail. An order that forgets them is

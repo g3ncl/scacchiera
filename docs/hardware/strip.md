@@ -42,8 +42,20 @@ Every figure below comes from a test in the suite, against a limit in
 | Fitted parts | 4.80 EUR | **15.16 EUR** | generated BOMs |
 | Placed references | 165 | **200** | generated BOMs |
 | Substrate area | 90,000 mm2 | **174,640 mm2** | `test_strip.py` |
+| Large-size assembly charge | 50.47 EUR | **0.00 EUR** | 2026-08-02 quote |
+| One working plane, bare | 58.34 EUR | **26.92 EUR** | 2026-08-02 quote |
+| One working plane, assembled | 141.05 EUR | **101.12 EUR** | 2026-08-02 quote |
 
-The electrical cost is small and the mechanical and bill-of-materials cost is not. Both are real.
+The electrical cost is small, the bill-of-materials cost is real, and the fabrication cost turned
+out to favour the split in both build regimes. See [jlcpcb-sourcing.md](jlcpcb-sourcing.md) for the
+quote and its caveats.
+
+The area penalty is genuine and unchanged: 1.94 times the substrate, structural rather than a
+layout inefficiency, because the monolith carries two antenna planes on one substrate's two faces
+and any per-line strip uses one face and wastes the other. What outweighs it is that a 300 by 33 mm
+outline pays no large-size assembly charge where a 300 by 300 mm one pays 50.47 EUR, and that
+JLCPCB's five-piece minimum forces four unusable matrix boards where twenty strips is a set plus
+spares.
 
 ### The interconnect barely detunes anything
 
@@ -169,14 +181,12 @@ price.
 
 ## What is not settled
 
-- **Whether it is actually cheaper.** The substrate goes up 1.94 times, which is structural: the
-  monolith carries two antenna planes on one substrate's two faces, and any per-line strip uses one
-  face and wastes the other. Against that, the matrix quote's 17.74 EUR fabrication and 50.47 EUR
-  assembly large-size charges are both size-driven. Which way the total falls needs a live quote,
-  recorded as open in [jlcpcb-sourcing.md](jlcpcb-sourcing.md).
-- **Hand-population gets worse, not better.** 200 placed references against the monolith's 165.
-  Both boards are 290 mm or longer and so sit in the same large-size assembly band; whether the
-  surcharge is smaller for a narrow outline is part of the same open quote.
+- **The thickness the strip actually needs.** The 2026-08-02 quote priced all three boards at
+  JLCPCB's default 1.6 mm, where the strip is designed at 0.6. Two-layer boards are usually the
+  same price across that range, so the result is expected to hold, but a 0.6 mm board 300 mm long
+  is the one parameter still unpriced. If it is refused or surcharged, the fallback is 1.0 mm
+  strips with `INTERPLANE_GAP` cut to 0.0, which holds the 1.035 mm separation but makes the frame
+  guarantee the gap mechanically instead of with a rib.
 - **The frame.** Sixteen strips at a 35 mm pitch across 280 mm, held coplanar, with the column
   plane on 0.4 mm ribs above the rows. That is print-iteration work and owner-managed per V7, but
   nothing in this repository has drawn it.

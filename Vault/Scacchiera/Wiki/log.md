@@ -1670,3 +1670,24 @@ identical self inductance and adjacent-line coupling, worst row-to-column coupli
 the first time, and it was deliberately set to reproduce the monolith so that the board change and
 a coupling change could not arrive together.
 
+## 2026-08-02 Quote: the split sensing plane is cheaper, and width is why
+
+Updated [[split-sensing-plane]] with the JLCPCB figures. The open question was whether 1.94 times
+the substrate would be outweighed by dodging the large-size surcharge, and it is, by more than
+expected.
+
+**A 300 by 33 mm board pays zero large-size assembly charge where a 300 by 300 mm one pays
+50.47 EUR.** Both are 300 mm long, so the size bands price width, not the longest dimension. That is
+not something a catalogue states and not something anyone here could have derived.
+
+One working sensing plane: 26.92 EUR bare against 58.34, or 101.12 EUR assembled against 141.05.
+
+Two things worth carrying. The vendor's five-piece minimum is part of the cost model rather than an
+aside, because it forces four unusable boards to get one usable monolith while twenty strips is a
+set plus spares. And fixed PCBA cost decides assembly route more than unit price does: 42.60 EUR of
+the strip's 55.36 EUR PCBA is setup, stencil and feeder loading, which is why the spine, needed
+twice per product, stays hand populated while the strip, needed sixteen times, is a real choice.
+
+Also filed: enabling assembly nearly doubled the bare board price, 19.97 to 38.81 EUR, because the
+vendor re-specifies the PCB for line handling. That cost appears in no line item named for it.
+
