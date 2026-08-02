@@ -23,10 +23,14 @@ reviewing the JLCPCB match; `JLCPCB` means the part is Basic, too small or hidde
 soldering, or too repetitive to place economically by hand.
 
 Each fabrication run emits two upload choices. `<board>_jlcpcb_upload_bom.csv` and
-`<board>_jlcpcb_upload_cpl.csv` ask JLCPCB to place every fitted part. The matched
-`<board>_jlcpcb_max_assembly_bom.csv` and `<board>_jlcpcb_max_assembly_cpl.csv` omit every `Hand` row. Upload
+`<board>_jlcpcb_upload_cpl.csv` are the plan actually chosen for that board, so on a hand-populated
+board they are deliberately empty. The matched `<board>_jlcpcb_max_assembly_bom.csv` and
+`<board>_jlcpcb_max_assembly_cpl.csv` ignore that plan and list everything JLCPCB could place,
+which is what makes them a quote instrument for the road not taken. Upload
 the hybrid pair together when using manual completion, then purchase exactly the rows in
 `<board>_self_solder_bom.csv` elsewhere. Never mix the full BOM with the hybrid CPL or the reverse.
+On the strip, the spine and the matrix the two assembled variants are the same file, because every
+fitted part on them has an LCSC code and none is excluded either way.
 The lightbar is the exception: JLCPCB cannot assemble its 120 by 8.5 mm outline, so both of its
 JLCPCB BOM/CPL pairs are intentionally empty and its hand BOM contains every fitted component.
 Order only its bare PCB Gerbers from JLCPCB.
