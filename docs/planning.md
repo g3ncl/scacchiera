@@ -385,12 +385,13 @@ for any board yet.
   designs, five physical PCBs: light bar (x2), matrix, hub and power. The power board is fabricated
   on the light-bar panel.
 - [x] Split sensing plane defined as an alternative to the matrix board, not an addition to it:
-  see [hardware/strip.md](hardware/strip.md). Two more designs, eighteen more physical PCBs, one
-  strip built sixteen times and one spine built twice, carrying the identical sixteen loops and
-  sixteen switch cells. Exactly one of the two sensing architectures ships. **The 2026-08-02 JLCPCB
-  quote decides it in the split's favour**: one working sensing plane costs 26.92 EUR bare against
-  the matrix board's 58.34, or 101.12 EUR with the strips assembled against 141.05, because a
-  300 by 33 mm outline pays no large-size assembly charge where a 300 by 300 mm one pays 50.47 EUR.
+  see [hardware/quad.md](hardware/quad.md). One more design, four more physical PCBs, four lanes
+  each, carrying the identical sixteen loops and sixteen switch cells. A sixteen-strip layout was
+  designed first and superseded: it needed thirty-six connectors and two spine boards to do the
+  same job. Exactly one of the two sensing architectures ships. **The 2026-08-02 JLCPCB
+  quote decides it in the split's favour**: one working sensing plane costs 20.92 EUR bare against
+  the matrix board's 58.34, because a 300 by 140 mm outline pays no large-size assembly charge
+  where a 300 by 300 mm one pays 50.47 EUR.
   Figures and caveats in [hardware/jlcpcb-sourcing.md](hardware/jlcpcb-sourcing.md).
 
 ### M2: Schematic (per board)
@@ -409,10 +410,9 @@ against the functional requirement it serves.
   an iron can reach, and the count dropped 17 to 14 because that package is wider.
 - [x] Matrix board schematic: `hardware/pcb/matrix.py`, ERC clean, BOM 4.80 EUR in parts, spec
   in [hardware/matrix.md](hardware/matrix.md).
-- [x] Split sensing plane schematics: `hardware/pcb/strip.py` and `hardware/pcb/spine.py`, both
-  ERC clean, BOM 0.55 EUR per strip and 3.16 EUR per spine, 15.16 EUR for the set against the
-  matrix board's 4.80. The increase is thirty-six connectors and nothing else, and the split binds
-  no new component type. Spec in [hardware/strip.md](hardware/strip.md).
+- [x] Split sensing plane schematic: `hardware/pcb/quad.py`, ERC clean, BOM 1.82 EUR per board and
+  7.28 EUR for the set against the matrix board's 4.80. The increase is eight connectors and four
+  registers, and the split binds no new component type. Spec in [hardware/quad.md](hardware/quad.md).
 - [x] Hub board schematic: `hardware/pcb/hub.py` accepts a purchased power module's regulated 5 V
   against the contract in [hardware/power-module-interface.md](hardware/power-module-interface.md),
   implements the AP63203 buck and the independent analog cell-temperature cutoff, and distributes
@@ -450,12 +450,13 @@ evidence is an analytical formula; it needs a passing simulation.
   resonates at 13.54 MHz, loaded 16-line bus at 12.93 MHz, off/on suppression 65.6 dB, steering
   bias 10.326 mA, all inside [hardware/criteria.yaml](hardware/criteria.yaml) with exact Diodes
   vendor MOSFET models.
-- [x] Split sensing plane SPICE validation: `hardware/tests/test_sim_strip.py` runs the same
-  sixteen `matrix_cell` objects through one testbench with and without the harness and spine path,
-  so the difference is the interconnect and nothing else. Every line resonates between 12.836 and
-  12.875 MHz against a 12.895 MHz interconnect-free reference, 0.46 percent of tuning, with a
-  0.31 percent line-to-line spread against a 2 percent limit. Swept over the whole 2 to 8 nH
-  bounding range of assumption A11, which moves the band by less than one sweep step.
+- [x] Split sensing plane SPICE validation: `hardware/tests/test_sim_quad.py` runs the same sixteen
+  `matrix_cell` objects through one testbench with and without the harness-and-chain path, so the
+  difference is the interconnect and nothing else. Every line resonates between 12.767 and
+  12.865 MHz against a 12.895 MHz interconnect-free reference, at most 0.99 percent of tuning, with
+  a 0.77 percent line-to-line spread against a 2 percent limit. Every figure is a bound rather than
+  a nominal, because the on-board bus is autorouted and each line is modelled at the whole net's
+  routed length. Swept over the whole 2 to 8 nH bounding range of assumption A11.
 - [ ] Hub board SPICE validation: the existing RF-only bench still drives the 16-cell bus
   through the PN5180 TX path; the selected loop's field peaks at 13.86 MHz at 60 mA per volt of
   drive and preserves useful RF evidence. The 68 pF series match value came from this bench.
@@ -522,14 +523,12 @@ DoD: the layout is generated from code, DRC is clean, and it fits the board's en
   and both-face ground pours. The reviewed route session excludes four deterministic serial nets,
   and the Q24 rail escape is deterministic as well. `make pcb-matrix-drc` is reproducibly clean:
   0 violations, 0 unconnected, and 0 schematic parity issues.
-- [x] Split sensing plane layouts: `hardware/pcb/strip_layout.py` and
-  `hardware/pcb/spine_layout.py`. The strip keeps the loop on front copper with every component on
-  the back and a keepout barring track or via over the 276 mm of antenna; the spine draws its 3 mm
-  RF bus deterministically so the simulation reads inductance off a real geometry. Both import a
-  reviewed route. `make pcb-strip-drc` and `make pcb-spine-drc` are both clean: 0 violations,
-  0 unconnected, 0 schematic parity issues.
-- [x] Split sensing plane antenna extraction: `hardware/tests/test_strip_stack.py` re-solves all
-  sixteen loops on the stacked-strip stackup through the same FastHenry model as the monolith.
+- [x] Split sensing plane layout: `hardware/pcb/quad_layout.py` keeps the four loops on front
+  copper with all fifty-two components on the back and a keepout barring track or via over the
+  276 mm of antenna. It imports a reviewed route. `make pcb-quad-drc` is clean from a wiped tree:
+  0 violations, 0 unconnected, 0 schematic parity issues.
+- [x] Split sensing plane antenna extraction: `hardware/tests/test_quad_stack.py` re-solves all
+  sixteen loops on the stacked-board stackup through the same FastHenry model as the monolith.
   Self inductance and adjacent-line coupling are identical to four figures, and worst row-to-column
   coupling falls from 0.0664 to 0.0652 because the two planes end up 1.035 mm apart against
   0.965 mm. The split spends no coupling margin.

@@ -1,20 +1,26 @@
-"""What the harnesses and the spines do to the shared bus.
+"""What the harnesses and the board-to-board chain do to the shared bus.
 
 The monolithic matrix board's sixteen cells hang off one node. The split puts a
-harness and a length of spine between the reader and every one of them, and this
-deck is the only place that says how much that costs.
+harness and a length of on-board bus between the reader and every one of them,
+and this deck is the only place that says how much that costs.
 
 Two things are being asked, and they are not the same question:
 
-1. **Does the bus still resonate in band at all?** The harness is common to all
-   sixteen lines by construction (equal-length harnesses, see
-   `strip_geometry.HARNESS_LENGTH_MM`), so it detunes every line together, which
-   is what a tuning capacitor is for.
-2. **How far apart do the sixteen lines end up?** The spine ladder is *not*
-   common: line 0 taps the bus beside the feed and line 15 taps it two spines
-   away. That spread cannot be tuned out with one capacitor value, and the
-   answer decides whether the DNP trim pads already on every strip are enough or
-   whether the topology has to change.
+1. **Does the bus still resonate in band at all?** Each harness is the same
+   length by construction (`quad_geometry.HARNESS_LENGTH_MM`), so a board's four
+   lanes are detuned together, which is what a tuning capacitor is for.
+2. **How far apart do the sixteen lines end up?** The chain is *not* common: the
+   first board taps the bus one harness from the reader and the fourth taps it
+   four harnesses and three boards away. That spread cannot be tuned out with
+   one capacitor value, and the answer decides whether the DNP trim pads already
+   on every lane are enough or whether the topology has to change.
+
+The on-board bus is autorouted rather than drawn, so its length is **bounded
+from the routed board** rather than derived from a placement: no path between
+two taps on one board can be longer than the whole net's routed copper, which
+`ROUTED_BUS_LENGTH_MM` records. Every line is then modelled at that bound, which
+makes all four lanes of a board identical and the whole result pessimistic. A
+criterion that passes here passes on the real board.
 
 The cells themselves are the same `matrix_cell` objects the matrix board and its
 own SPICE deck build, so nothing about the switch is being re-modelled here.
@@ -29,15 +35,11 @@ from pathlib import Path
 from skidl import Circuit, Net
 
 from hardware.pcb.matrix import matrix_cell
-from hardware.pcb.matrix_geometry import LINE_COUNT, ROW_COUNT
-from hardware.pcb.strip_geometry import (
+from hardware.pcb.matrix_geometry import LINE_COUNT
+from hardware.pcb.quad_geometry import (
     HARNESS_LENGTH_MM,
-    SPINE_LINK_IN_X,
-    SPINE_LINK_LENGTH_MM,
-    SPINE_RF_PIN_OFFSET,
-    SPINE_RF_WIDTH,
-    spine_bus_span_mm,
-    spine_bus_tap_x,
+    LANES_PER_BOARD,
+    QUAD_THICKNESS,
 )
 from hardware.sim.cell_metrics import SweepPoint, parse_wrdata, resonance_dip
 from hardware.sim.interconnect import (
@@ -50,11 +52,16 @@ from hardware.sim.interconnect import (
 from hardware.sim.spice import DIODE_MODELS, MODELS, emit_subckt, model_includes
 
 
-GENERATED_DIR = Path(__file__).parent / "generated" / "strip"
-BUS_SUBCKT = "strip_bus16"
+GENERATED_DIR = Path(__file__).parent / "generated" / "quad"
+BUS_SUBCKT = "quad_bus16"
 BIAS_RAIL_V = 3.3
-# The spine's back copper is a solid pour 1.0 mm under its bus.
-SPINE_DIELECTRIC_MM = 1.0
+# Freerouting's track width on this board, over the back-copper pour one
+# substrate below.
+ROUTED_BUS_WIDTH_MM = 0.2
+# Total routed length of RF_BUS on one quad board, measured from the routed
+# copper. A path between any two taps is a subset of the net, so this bounds
+# every one of them. `test_sim_quad.py` re-measures it against the board.
+ROUTED_BUS_LENGTH_MM = 150.4
 
 # 0.115 percent per grid step, an order of magnitude finer than the spread.
 SWEEP_POINTS_PER_DECADE = 3000
@@ -95,30 +102,25 @@ class SplitBusResult:
         return (self.highest_hz - self.lowest_hz) / mean
 
 
-def spine_segment_inductance_h(length_mm: float) -> float:
-    return microstrip_inductance_per_mm(SPINE_RF_WIDTH, SPINE_DIELECTRIC_MM) * length_mm
+def onboard_bus_bound_h() -> float:
+    """Upper bound on the bus inductance a signal meets crossing one board."""
+    return (
+        microstrip_inductance_per_mm(ROUTED_BUS_WIDTH_MM, QUAD_THICKNESS)
+        * ROUTED_BUS_LENGTH_MM
+    )
 
 
 def series_inductance_h(line: int, connector_inductance_h: float) -> float:
-    """Everything in series between the reader and one strip's DC block.
+    """Everything in series between the reader and one lane's DC block.
 
-    The path is: hub link, then along the first spine to the socket, and for the
-    upper eight lines the whole of the first spine plus the spine-to-spine link
-    as well, then the strip's own harness.
+    The path is one harness and one board crossing per board between the reader
+    and this one, the last crossing being partial. Both terms are taken at their
+    bound, so every lane on a board reads the same and the answer is pessimistic
+    rather than nominal.
     """
-    link = harness_inductance_h(SPINE_LINK_LENGTH_MM, connector_inductance_h)
+    board = line // LANES_PER_BOARD
     harness = harness_inductance_h(HARNESS_LENGTH_MM, connector_inductance_h)
-    socket = line % ROW_COUNT
-    # Tap positions, not placement positions. Pin 2 sits 2.5 mm off a housing's
-    # centre, and the link out is rotated, so a centre-to-centre reading would
-    # under-count the drawn bus by 5 mm.
-    feed = SPINE_LINK_IN_X - SPINE_RF_PIN_OFFSET
-    along = spine_segment_inductance_h(spine_bus_tap_x(socket) - feed)
-    total = link + along + harness
-    if line >= ROW_COUNT:
-        # Through the whole of the first spine and the link to the second.
-        total += spine_segment_inductance_h(spine_bus_span_mm()) + link
-    return total
+    return (board + 1) * (harness + onboard_bus_bound_h())
 
 
 def _build_bus() -> tuple[Circuit, tuple[Net, ...]]:
@@ -161,7 +163,7 @@ def bus_deck(
     tap_nodes = " ".join(f"tap{index}" for index in range(LINE_COUNT))
     sel_nodes = " ".join(f"sel{index}" for index in range(LINE_COUNT))
     lines = [
-        f"Split sensing plane, line {selected} selected",
+        f"Quad sensing plane, line {selected} selected",
         _includes(),
         subckt_text.rstrip("\n"),
         f"X1 {tap_nodes} vbias {sel_nodes} {BUS_SUBCKT}",

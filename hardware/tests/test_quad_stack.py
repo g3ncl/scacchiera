@@ -17,8 +17,8 @@ import yaml
 from hardware.pcb.matrix_geometry import LINE_COUNT, ROW_COUNT
 from hardware.sim.antenna_coupling import Coupling
 from hardware.sim.antenna_coupling import extract as extract_monolith
-from hardware.sim.strip_stack import extract as extract_split
-from hardware.sim.strip_stack import plane_separation_mm
+from hardware.sim.quad_stack import extract as extract_split
+from hardware.sim.quad_stack import plane_separation_mm
 
 
 CRITERIA = yaml.safe_load(
@@ -57,30 +57,30 @@ def _worst_crossing(coupling: Coupling) -> float:
 
 
 def test_the_planes_land_where_the_stackup_says() -> None:
-    """TEST-STRIP-RF-001."""
+    """TEST-QUAD-RF-001."""
     separation = plane_separation_mm()
-    assert _limit("STRIP-PLANE-SEPARATION", "minimum") <= separation <= _limit(
-        "STRIP-PLANE-SEPARATION", "maximum"
+    assert _limit("QUAD-PLANE-SEPARATION", "minimum") <= separation <= _limit(
+        "QUAD-PLANE-SEPARATION", "maximum"
     )
 
 
 def test_a_row_and_a_column_stay_decoupled(split: Coupling) -> None:
-    """TEST-STRIP-RF-002.
+    """TEST-QUAD-RF-002.
 
     The claim the whole architecture rests on, re-established on the split
     stackup rather than inherited from the monolith's.
     """
-    assert _worst_crossing(split) <= _limit("STRIP-ROW-COLUMN-COUPLING", "maximum")
+    assert _worst_crossing(split) <= _limit("QUAD-ROW-COLUMN-COUPLING", "maximum")
 
 
 def test_adjacent_lines_are_no_worse_than_the_monolith(split: Coupling, monolith: Coupling) -> None:
-    """TEST-STRIP-RF-003.
+    """TEST-QUAD-RF-003.
 
     Adjacent lines share a plane, so separating the planes cannot move this.
     Asserting equality rather than a bound is what would catch the split having
     quietly changed the in-plane geometry, which is the failure that matters.
     """
-    assert _worst_adjacent(split) <= _limit("STRIP-ADJACENT-LINE-COUPLING", "maximum")
+    assert _worst_adjacent(split) <= _limit("QUAD-ADJACENT-LINE-COUPLING", "maximum")
     assert _worst_adjacent(split) == pytest.approx(_worst_adjacent(monolith), abs=1e-4)
 
 

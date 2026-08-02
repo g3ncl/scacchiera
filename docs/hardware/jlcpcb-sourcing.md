@@ -183,9 +183,9 @@ and forces the antenna board through Milestones 1 to 4 again. Hand populating ge
 with no RF risk, so **that** split was rejected.
 
 A different split was not. The objection above is specific to a boundary drawn between a loop and
-its tuning capacitor; the per-line strip in [strip.md](strip.md) keeps the whole tank on the strip
+its tuning capacitor; the four-lane board in [quad.md](quad.md) keeps the whole tank on the board
 and puts the connector on the far side of the 100 nF DC block, so the harness loads the shared bus
-instead of joining sixteen resonators. `hardware/sim/strip_rf.py` measures that at 0.46 percent of
+instead of joining sixteen resonators. `hardware/sim/quad_rf.py` measures that at under 1 percent of
 tuning against the same cells with the interconnect removed. The RF objection does not carry over;
 the area and connector cost below is what does.
 
@@ -212,7 +212,7 @@ Bare PCB, all three at JLCPCB's default 1.6 mm, 2 layers, green, HASL, 2-day bui
 | spine | 5 | 6.95 EUR | 1.39 EUR | 0.171 EUR |
 | matrix | 5 | 58.34 EUR | 11.67 EUR | 0.130 EUR |
 
-Strip with assembly, 20 pieces, from `strip_jlcpcb_max_assembly_bom.csv` and its CPL:
+Strip with assembly, 20 pieces, from `strip_jlcpcb_max_assembly_bom.csv` and its CPL, superseded by the four-lane board below:
 
 | Line | Cost |
 | --- | ---: |

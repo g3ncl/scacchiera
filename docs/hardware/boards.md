@@ -45,25 +45,21 @@ here only as interfaces, not as boards.
 #### 1b. Split sensing plane (alternative to the matrix board)
 
 Not a fifth board so much as a different way of cutting the first one. The same sixteen loops and
-the same sixteen switch cells go onto sixteen identical 300 x 33 mm strips, stacked crosswise in
-two planes, cabled to two 290 x 28 mm spines carrying the two 74HC595s and the shared bus. Spec in
-[strip.md](strip.md).
+the same sixteen switch cells go onto four identical 300 x 140 mm boards, four lanes each, stacked
+crosswise in two planes and chained to the hub. Spec in [quad.md](quad.md).
 
 It exists because the matrix board is the acknowledged architectural risk and its open question,
 `LOOP_INSET`, is a single-parameter sweep on per-line geometry. A respin of the monolith is five
-300 x 300 mm boards; a respin of a strip is a fraction of one set, and several inset variants can
-share one panel. That is what the split buys.
-
-What it costs is recorded rather than argued: 1.94 times the substrate, 200 placed references
-against 165, and 15.16 EUR of parts against 4.80, essentially all of it the thirty-six connectors.
-What it does not cost is RF: coupling is unchanged to four figures and the whole harness-and-spine
-path moves the bus resonance by 0.46 percent.
+300 x 300 mm boards; a respin of the split is five 300 x 140 mm ones for a third of the price.
 
 **Exactly one of the matrix board and the split plane ships.** Both are maintained to the same
-gate. The 2026-08-02 JLCPCB quote answers which: the split, at 26.92 EUR for one working plane in
-bare copper against the matrix board's 58.34, and 101.12 EUR against 141.05 with assembly. A
-300 by 33 mm outline pays no large-size assembly charge where a 300 by 300 mm one pays 50.47 EUR,
-which outweighs the split's 1.94 times substrate.
+gate. The 2026-08-02 JLCPCB quote answers which: 20.92 EUR for one working plane against the matrix
+board's 58.34, because a 300 by 140 mm outline pays no large-size assembly charge where a
+300 by 300 mm one pays 50.47 EUR. That outweighs the split's 1.87 times substrate.
+
+The RF cost is small and measured: coupling is unchanged to four figures and the whole
+harness-and-chain path moves the bus resonance by at most 0.99 percent. The real cost is a firmware
+change, because four chained registers make the selection shift 32 bits rather than 16.
 
 ### 2. Hub board (controller and power distribution)
 

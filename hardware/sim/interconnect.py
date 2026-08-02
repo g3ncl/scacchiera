@@ -47,15 +47,18 @@ def two_wire_inductance_per_mm(
 
 
 def microstrip_inductance_per_mm(width_mm: float, height_mm: float) -> float:
-    """Inductance per mm of a wide microstrip over a solid return plane.
+    """Inductance per mm of a microstrip over a solid return plane.
 
-    Wheeler's wide-strip form, valid for width over height at or above 1, which
-    is the regime the spine's 3 mm bus over 1.0 mm FR4 sits in by construction.
+    Wheeler's two forms, selected on width over height. Both are needed here: a
+    deliberately drawn bus is wider than the dielectric is thick, and an
+    autorouted 0.2 mm track on 0.6 mm stock is not. The narrow form gives about
+    twice the inductance per mm, which is exactly why a bus worth caring about
+    gets drawn rather than routed.
     """
     ratio = width_mm / height_mm
-    if ratio < 1.0:
-        raise ValueError(f"wide-strip form needs width/height >= 1, got {ratio:.3f}")
-    return (MU0 / (ratio + 1.393 + 0.667 * log(ratio + 1.444))) * 1e-3
+    if ratio >= 1.0:
+        return (MU0 / (ratio + 1.393 + 0.667 * log(ratio + 1.444))) * 1e-3
+    return (MU0 / (2.0 * pi)) * log(8.0 / ratio + ratio / 4.0) * 1e-3
 
 
 def harness_inductance_h(

@@ -256,7 +256,7 @@ Definition of done:
 - The complete clean-build test command passes, including every board design carried at the time,
   firmware host tests, Wokwi scenarios, ngspice corners, electromagnetic tests, ERC, DRC, and
   schematic parity. Where two designs are alternatives rather than both shipping (the monolithic
-  matrix board and the split sensing plane in [hardware/strip.md](hardware/strip.md)), both are
+  matrix board and the split sensing plane in [hardware/quad.md](hardware/quad.md)), both are
   held to this gate and the release records which one ships.
 - No critical Assumed evidence, open sourcing conflict, unexplained waiver, or manual-only test
   remains.

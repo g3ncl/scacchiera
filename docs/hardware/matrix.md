@@ -121,9 +121,8 @@ Which is why this is a measurement question. The test article in
 whether a neighbouring line answers, in one session, and neither can be settled by more solving.
 
 Note what the lever is, though: `LOOP_INSET` is per-line geometry, and the three ways out are one
-sweep of one parameter. That is the argument for the split sensing plane in [strip.md](strip.md),
-where a strip is a fraction of a board order and four inset variants fit on one panel, against four
-separate 59 EUR orders here. The two architectures carry identical copper and identical coupling;
+sweep of one parameter. That is the argument for the split sensing plane in [quad.md](quad.md),
+where a set is a third of a board order, against 59 EUR an attempt here. The two architectures carry identical copper and identical coupling;
 they differ in what it costs to change them.
 
 ## Switch cell

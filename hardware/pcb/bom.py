@@ -48,13 +48,11 @@ REFLOW_ONLY_FOOTPRINT_MARKERS = (
 HAND_POPULATED_BOARDS = {
     "lightbar": "The lightbar is below JLCPCB's supported assembly size",
     "matrix": "Hand populated to avoid JLCPCB's large-size assembly charge",
-    # Both split-plane boards are 290 mm or longer, so they sit in the same
-    # large-size band the matrix board was quoted in. Whether the surcharge is
-    # smaller for a narrow outline is a live-quote question and is recorded as
-    # open in jlcpcb-sourcing.md; until it is answered the conservative
-    # assumption is the one the matrix already took.
-    "strip": "Hand populated pending a large-size assembly quote for a 300 mm outline",
-    "spine": "Hand populated pending a large-size assembly quote for a 290 mm outline",
+    # The quad board's 300 by 140 mm outline pays no size charge at all, so
+    # bare copper at 20.92 EUR the set is the cheapest way to a working board
+    # and every package on it is iron-reachable. Buying the labour back is a
+    # live option rather than a blocked one; see jlcpcb-sourcing.md.
+    "quad": "Hand populated; the outline pays no size charge, so bare copper is cheapest",
 }
 
 

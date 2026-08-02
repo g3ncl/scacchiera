@@ -1,7 +1,7 @@
-"""Coupling of the sixteen line antennas once they are on sixteen strips.
+"""Coupling of the sixteen line antennas once they are on four boards.
 
 The split moves the two antenna planes off one substrate's two faces and onto
-two stacked substrates. Every x and y stays where it was, so the only thing that
+two stacked pairs of substrates. Every x and y stays where it was, so the only thing that
 can change is what the plane separation does to the coupling, and that is the
 one number the whole partition has to be judged on.
 
@@ -10,7 +10,7 @@ with nothing but the plane height substituted. Two extractions from one model is
 what makes the comparison a comparison rather than two independent claims.
 
 The monolith separates its planes by one 1.0 mm substrate less both claddings,
-0.965 mm. The strips separate theirs by one 0.6 mm substrate plus the frame's
+0.965 mm. The split boards separate theirs by one 0.6 mm substrate plus the frame's
 0.4 mm rib plus one cladding, 1.035 mm, so the split ends up 7 percent further
 apart and couples slightly less. That is a consequence of the stackup rather
 than a target: `INTERPLANE_GAP` was chosen to reproduce the monolith, because a
@@ -19,7 +19,7 @@ criteria.yaml at the same time as changing the board.
 """
 
 from hardware.pcb.matrix_geometry import ROW_COUNT
-from hardware.pcb.strip_geometry import INTERPLANE_GAP, STRIP_THICKNESS
+from hardware.pcb.quad_geometry import INTERPLANE_GAP, QUAD_THICKNESS
 from hardware.sim.antenna_coupling import COPPER_THICKNESS_MM, Coupling, deck, solve
 
 
@@ -27,7 +27,7 @@ from hardware.sim.antenna_coupling import COPPER_THICKNESS_MM, Coupling, deck, s
 # frame floor. Columns are the upper plane, the same board on ribs above, so the
 # column loop faces the pieces exactly as the monolith's front-copper rows did.
 ROW_PLANE_Z_MM = 0.0
-COLUMN_PLANE_Z_MM = COPPER_THICKNESS_MM + INTERPLANE_GAP + STRIP_THICKNESS
+COLUMN_PLANE_Z_MM = COPPER_THICKNESS_MM + INTERPLANE_GAP + QUAD_THICKNESS
 
 
 def plane_z(line: int) -> float:
@@ -38,18 +38,18 @@ def plane_separation_mm() -> float:
     return COLUMN_PLANE_Z_MM - ROW_PLANE_Z_MM
 
 
-def strip_deck() -> str:
+def quad_deck() -> str:
     return deck(
         plane_z,
         title=(
-            f"two stacked {STRIP_THICKNESS} mm strips, planes "
+            f"two stacked {QUAD_THICKNESS} mm boards, planes "
             f"{plane_separation_mm():.3f} mm apart"
         ),
     )
 
 
 def extract() -> Coupling:
-    return solve(strip_deck(), name="strip_stack")
+    return solve(quad_deck(), name="quad_stack")
 
 
 if __name__ == "__main__":

@@ -344,65 +344,65 @@ criteria:
     margin: The extraction returns 0.1398 at a converged mesh, identical to four figures across the whole mesh study and uniform across every adjacent pair, falling to 0.017 at two lanes and 0.001 across the board. This is the dominant coupling on the board and the path a tag reading on the wrong line would take, so the bound is a recorded ceiling rather than a demonstration of adequacy. V8 must measure it.
     test_ids: [TEST-MATRIX-RF-007, TEST-V8-RF-002]
 
-  STRIP-PLANE-SEPARATION:
+  QUAD-PLANE-SEPARATION:
     description: Copper-to-copper distance between the row plane and the column plane of the split sensing assembly.
     requirement_ids: [PHY-RF-001]
     unit: mm
     limits: {minimum: 0.90, maximum: 1.20}
-    evidence: {class: Derived, source: hardware/pcb/strip_geometry.py, locator: STRIP_THICKNESS plus INTERPLANE_GAP plus one cladding}
-    operating_conditions: Row strips on the frame floor, column strips on 0.4 mm ribs above them, both loops on their strip's top copper.
+    evidence: {class: Derived, source: hardware/pcb/quad_geometry.py, locator: QUAD_THICKNESS plus INTERPLANE_GAP plus one cladding}
+    operating_conditions: Row boards on the frame floor, column boards on 0.4 mm ribs above them, both loops on their board's top copper.
     margin: The stackup gives 1.035 mm against the monolith's 0.965 mm, 7 percent further apart. The window is centred on the monolith deliberately, because every coupling figure below was extracted at that separation, and a split that moved it would have invalidated them at the same time as changing the board. Its far plane sits 0.07 mm deeper than the monolith's, which is 2 percent of the 3.0 mm read budget in functional/physical.md.
-    test_ids: [TEST-STRIP-RF-001]
+    test_ids: [TEST-QUAD-RF-001]
 
-  STRIP-ROW-COLUMN-COUPLING:
+  QUAD-ROW-COLUMN-COUPLING:
     description: Worst inductive coupling coefficient between any row and any column, with the two planes on separate substrates.
     requirement_ids: [PHY-RF-001]
     unit: fraction
     limits: {maximum: 0.10}
-    evidence: {class: Simulated, source: hardware/sim/strip_stack.py, locator: Off-diagonal row-to-column terms of the sixteen-port matrix}
-    operating_conditions: All sixteen loops solved together at 13.56 MHz on the stacked-strip stackup, no tag present.
+    evidence: {class: Simulated, source: hardware/sim/quad_stack.py, locator: Off-diagonal row-to-column terms of the sixteen-port matrix}
+    operating_conditions: All sixteen loops solved together at 13.56 MHz on the stacked-board stackup, no tag present.
     margin: The extraction returns 0.0652 against the monolith's 0.0664 from the same solver and the same loop path, so the split couples 1.8 percent less. Same limit as MATRIX-ROW-COLUMN-COUPLING because it is the same claim about the same copper; only the substrate under it changed.
-    test_ids: [TEST-STRIP-RF-002]
+    test_ids: [TEST-QUAD-RF-002]
 
-  STRIP-ADJACENT-LINE-COUPLING:
+  QUAD-ADJACENT-LINE-COUPLING:
     description: Inductive coupling coefficient between adjacent same-axis lines of the split plane.
     requirement_ids: [PHY-RF-001]
     unit: fraction
     limits: {maximum: 0.20}
-    evidence: {class: Simulated, source: hardware/sim/strip_stack.py, locator: Off-diagonal terms at a lane spacing of one}
-    operating_conditions: All sixteen loops solved together at 13.56 MHz on the stacked-strip stackup, no tag present.
+    evidence: {class: Simulated, source: hardware/sim/quad_stack.py, locator: Off-diagonal terms at a lane spacing of one}
+    operating_conditions: All sixteen loops solved together at 13.56 MHz on the stacked-board stackup, no tag present.
     margin: The extraction returns 0.1401, identical to the monolith. Adjacent lines are in the same plane, so plane separation cannot move this and the split neither helps nor hurts it. It remains the dominant coupling on the board and a recorded ceiling rather than a demonstration of adequacy; V8 must measure it.
-    test_ids: [TEST-STRIP-RF-003]
+    test_ids: [TEST-QUAD-RF-003]
 
-  STRIP-BUS-RESONANCE:
+  QUAD-BUS-RESONANCE:
     description: Selected-line resonance on the split bus, with the harness and spine interconnect in place.
     requirement_ids: [PHY-RF-001]
     unit: MHz
     limits: {minimum: 12.5, maximum: 15.0}
-    evidence: {class: Derived, source: hardware/sim/strip_rf.py, locator: Source-current dip with one line selected and fifteen deselected}
-    operating_conditions: One selected and fifteen deselected nominal cells, each behind its own harness and spine path, no tag.
-    margin: Every line lands between 12.836 and 12.875 MHz against the same sixteen cells with the interconnect removed at 12.895 MHz, so the whole harness-and-spine path costs 0.46 percent of tuning. Same window as MATRIX-BUS-RESONANCE, and for the same reason. The DNP trim only adds capacitance, so the window reserves adjustment around 13.56 MHz.
-    test_ids: [TEST-STRIP-RF-004]
+    evidence: {class: Derived, source: hardware/sim/quad_rf.py, locator: Source-current dip with one line selected and fifteen deselected}
+    operating_conditions: One selected and fifteen deselected nominal cells, each behind its board's place in the harness chain, no tag.
+    margin: Every line lands between 12.767 and 12.865 MHz against the same sixteen cells with the interconnect removed at 12.895 MHz, so the whole harness-and-chain path costs at most 0.99 percent of tuning. That is a bound rather than a nominal, because the on-board bus is autorouted and every line is modelled at the whole net's routed length. Same window as MATRIX-BUS-RESONANCE, and for the same reason. The DNP trim only adds capacitance, so the window reserves adjustment around 13.56 MHz.
+    test_ids: [TEST-QUAD-RF-004]
 
-  STRIP-LINE-RESONANCE-SPREAD:
+  QUAD-LINE-RESONANCE-SPREAD:
     description: Peak-to-peak spread of resonance across the sixteen lines of the split plane.
     requirement_ids: [PHY-RF-001]
     unit: fraction
     limits: {maximum: 0.02}
-    evidence: {class: Derived, source: hardware/sim/strip_rf.py, locator: Highest less lowest line resonance over the mean}
+    evidence: {class: Derived, source: hardware/sim/quad_rf.py, locator: Highest less lowest line resonance over the mean}
     operating_conditions: All sixteen lines swept individually, over the bounding connector-inductance corners of A11.
-    margin: The extraction returns 0.0031 worst case. This is the one thing a single tuning-capacitor value cannot absorb, because the spine path is different for every socket where the harness is common to all sixteen by construction, so it is the criterion the partition actually had to earn. It sits 6.5 times inside the limit, and A11's 2 to 8 nH connector range moves it by less than one sweep step, which is what pays that assumption down.
-    test_ids: [TEST-STRIP-RF-005]
+    margin: The extraction returns 0.0077 worst case, against a bound that gives all four lanes of a board the same series inductance and so overstates three of them. This is the one thing a single tuning-capacitor value cannot absorb, because a board's place in the chain differs where its four harnesses are equal by construction, so it is the criterion the partition actually had to earn. It sits 2.6 times inside the limit even at the bound, and A11's 2 to 8 nH connector range moves it by one sweep step.
+    test_ids: [TEST-QUAD-RF-005]
 
-  STRIP-PANEL-AREA-RATIO:
+  QUAD-PANEL-AREA-RATIO:
     description: Substrate area of the split sensing plane against the monolithic matrix board.
     requirement_ids: [PHY-RF-001]
     unit: fraction
     limits: {maximum: 2.10}
-    evidence: {class: Derived, source: hardware/pcb/strip_geometry.py, locator: Sixteen strip outlines plus two spine outlines over one matrix outline}
+    evidence: {class: Derived, source: hardware/pcb/quad_geometry.py, locator: Four board outlines over one matrix outline}
     operating_conditions: Bare outlines, excluding panelisation rails.
-    margin: The split buys 1.94 times the substrate. That is structural rather than a layout inefficiency, because the monolith carries two planes of antenna on the two faces of one substrate, and any per-line strip uses one face and wastes the other. Recorded as a ceiling so a widened strip or spine cannot quietly make the trade worse without the number moving.
-    test_ids: [TEST-STRIP-COST-001]
+    margin: The split buys 1.87 times the substrate. That is structural rather than a layout inefficiency, because the monolith carries two planes of antenna on the two faces of one substrate, and any per-line strip uses one face and wastes the other. Recorded as a ceiling so a widened strip or spine cannot quietly make the trade worse without the number moving.
+    test_ids: [TEST-QUAD-COST-001]
 
   PHY-TAG-RECESS-DIAMETER:
     description: Nominal centered NFC tag recess diameter in each piece.
