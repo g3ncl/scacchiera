@@ -74,32 +74,61 @@ def _is_assembled(row: dict[str, str], excluded_routes: frozenset[str] = frozens
 
 
 def assembly_references(
-    bom_path: Path, excluded_routes: frozenset[str] = frozenset()
+    bom_path: Path,
+    excluded_routes: frozenset[str] = frozenset(),
+    *,
+    ignore_routes: bool = False,
 ) -> frozenset[str]:
-    """Read the purchased assembly designators from the engineering BOM."""
+    """Read the purchased assembly designators from the engineering BOM.
+
+    `ignore_routes` mirrors `write_jlc_bom`. The two have to agree exactly or
+    `validate_assembly_designators` rejects the pair, which is what caught this
+    when only the BOM side had been widened.
+    """
     with bom_path.open(encoding="utf-8", newline="") as bom_file:
         reader = csv.DictReader(bom_file)
-        required_columns = {"Designator", "MPN", "Fitted"}
+        required_columns = {"Designator", "MPN", "Fitted", "LCSC Part #"}
         if reader.fieldnames is None or not required_columns.issubset(reader.fieldnames):
             raise ValueError(f"{bom_path} is not a project BOM export")
         return frozenset(
             reference
             for row in reader
-            if _is_assembled(row, excluded_routes)
+            if _is_assembled(row, frozenset() if ignore_routes else excluded_routes)
+            and (row["LCSC Part #"] if ignore_routes else True)
             for reference in row["Designator"].split(",")
         )
 
 
 def write_jlc_bom(
-    source: Path, destination: Path, excluded_routes: frozenset[str] = frozenset()
+    source: Path,
+    destination: Path,
+    excluded_routes: frozenset[str] = frozenset(),
+    *,
+    ignore_routes: bool = False,
 ) -> None:
-    """Convert the engineering BOM into JLCPCB's assembly BOM layout."""
+    """Convert the engineering BOM into JLCPCB's assembly BOM layout.
+
+    `ignore_routes` takes every fitted part JLCPCB could place, whatever the
+    board's chosen assembly route says. That is what the max-assembly pair is
+    for: it prices the alternative to the plan, and on a hand-populated board
+    the plan routes everything to Hand, so honouring it emitted a header and no
+    rows. The lightbar and matrix files were empty for exactly that reason,
+    against a sourcing doc that says they show what the alternative would cost.
+
+    A part with no LCSC code is still excluded, because that one really cannot
+    be factory placed rather than merely being planned otherwise.
+    """
     with source.open(encoding="utf-8", newline="") as source_file:
         reader = csv.DictReader(source_file)
         required_columns = {*JLC_BOM_COLUMNS, "MPN", "Fitted"}
         if reader.fieldnames is None or not required_columns.issubset(reader.fieldnames):
             raise ValueError(f"{source} is not a project BOM export")
-        rows = tuple(row for row in reader if _is_assembled(row, excluded_routes))
+        rows = tuple(
+            row
+            for row in reader
+            if _is_assembled(row, frozenset() if ignore_routes else excluded_routes)
+            and (row["LCSC Part #"] if ignore_routes else True)
+        )
 
     with destination.open("w", encoding="utf-8", newline="") as destination_file:
         writer = csv.DictWriter(destination_file, fieldnames=JLC_BOM_COLUMNS)
@@ -234,7 +263,7 @@ def export_fab(name: str) -> tuple[Path, Path, Path, Path, Path, Path]:
         HAND_ASSEMBLY_ROUTES if name in HAND_POPULATED_BOARDS else frozenset()
     )
     write_jlc_bom(all_parts_bom_path, bom_path, standard_excluded_routes)
-    write_jlc_bom(all_parts_bom_path, max_assembly_bom_path, HAND_ASSEMBLY_ROUTES)
+    write_jlc_bom(all_parts_bom_path, max_assembly_bom_path, ignore_routes=True)
     write_self_solder_bom(all_parts_bom_path, self_solder_bom_path)
     subprocess.run(
         [
@@ -256,7 +285,7 @@ def export_fab(name: str) -> tuple[Path, Path, Path, Path, Path, Path]:
     write_jlc_cpl(
         raw_cpl_path,
         max_assembly_cpl_path,
-        assembly_references(all_parts_bom_path, HAND_ASSEMBLY_ROUTES),
+        assembly_references(all_parts_bom_path, ignore_routes=True),
     )
     validate_assembly_designators(bom_path, cpl_path)
     validate_assembly_designators(max_assembly_bom_path, max_assembly_cpl_path)

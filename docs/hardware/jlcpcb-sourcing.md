@@ -308,7 +308,7 @@ the wrong one is a silent and expensive mistake.
 | --- | --- |
 | `<board>_bom_all_parts.csv` | Reference. Every part with MPN, supplier, order code, footprint, cost and its assembly classification. The other files are views of this one. |
 | `<board>_jlcpcb_upload_bom.csv` and `_cpl.csv` | **Upload these.** The build plan actually chosen for this board. |
-| `<board>_jlcpcb_max_assembly_bom.csv` and `_cpl.csv` | The alternative: everything JLCPCB could place, excluding only what must be hand-fitted. Kept because the economics that made the other choice can change. |
+| `<board>_jlcpcb_max_assembly_bom.csv` and `_cpl.csv` | The alternative: everything JLCPCB could place, excluding only parts with no LCSC code. It ignores the board's chosen assembly route on purpose, because its whole job is to price the road not taken. Kept because the economics that made the other choice can change. |
 | `<board>_self_solder_bom.csv` | What you buy and fit yourself. |
 
 BOM and CPL always come as a pair: the BOM says which part goes on each designator, the CPL says
@@ -316,6 +316,6 @@ where it sits and at what rotation. `validate_assembly_designators` fails the ex
 disagree, which is the classic assembly failure.
 
 The two JLCPCB pairs differ only where a board is hand-populated. For the hub and the power board
-they are nearly the same file. For the light bar, which is below JLCPCB's assembly size, and the
+they differ only by the Extended low-quantity rows that were planned for hand fitting. For the light bar, which is below JLCPCB's assembly size, and the
 matrix, where the large-size assembly charge exceeded the rest of its PCBA, the upload pair is bare
 copper and the max-assembly pair shows what the alternative would cost.
