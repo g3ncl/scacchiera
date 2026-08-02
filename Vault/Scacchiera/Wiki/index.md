@@ -280,4 +280,4 @@ Query answers filed back into the wiki. See [[wiki/synthesis]] pages.
 | [[quick-charge-module-evaluation]] | Can a cheap purchased board de-risk quick charging? | 2026-07-26 |
 | [[commercial-power-subsystem-selection]] | Which purchased subsystem should own the battery and charging? | 2026-07-26 |
 | [[er-oledm3-12-1w-display-current]] | Is the display 320 mA or 2 mA? | 2026-08-01 |
-| [[split-sensing-plane]] | Where may a board boundary cut a resonant sensing plane? | 2026-08-02 |
+| [[split-sensing-plane]] | Where may a board boundary cut a resonant sensing plane, and into how many pieces? | 2026-08-02 |

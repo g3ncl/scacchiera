@@ -1693,3 +1693,29 @@ twice per product, stays hand populated while the strip, needed sixteen times, i
 Also filed: enabling assembly nearly doubled the bare board price, 19.97 to 38.81 EUR, because the
 vendor re-specifies the PCB for line handling. That cost appears in no line item named for it.
 
+## 2026-08-02 Repartition: sixteen boards to four, on connector count
+
+Updated [[split-sensing-plane]]. The sixteen-strip design was electrically fine and was superseded
+anyway, which is the interesting part.
+
+Sixteen strips needed sixteen connectors plus two spine boards carrying twenty more. Thirty-six
+connectors was the entire parts-cost increase over the monolith, so the partition's cost was almost
+purely its **interface**, not its content. Four boards of four lanes need eight connectors, delete
+the spine design outright, and quote at 20.92 EUR the set against the strips' 26.92 and the
+monolith's 58.34.
+
+**When a partition's unit cost is dominated by the interface rather than the content, block size is
+set by connector count, not by how finely the content divides.** Nothing in the electrical argument
+distinguishes sixteen from four; the RF result survived the repartition untouched because the
+boundary relative to the tank never moved and the loops never moved.
+
+Three constraints in three different units, and the answer sits where they cross: connectors want
+few boards, the fabricator's size charge wants boards under some width (280 mm is out, 140 is in),
+and the five-piece minimum wants a board count that divides the set. Four satisfies all three.
+
+Two things filed as costs of the choice. The on-board bus is autorouted where the spine's was drawn,
+so its inductance is now a **bound** taken from the whole net's routed length rather than a value
+read off a drawn geometry; the criteria pass at the bound, which is the honest way to keep it. And
+four chained eight-bit registers make the selection a 32-bit shift where two made it 16, so a block
+size chosen on fabrication economics reached back into firmware.
+
