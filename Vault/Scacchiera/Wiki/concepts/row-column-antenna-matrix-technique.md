@@ -63,8 +63,9 @@ extracted coupling is the same to four figures either way, because it is set by 
 and the plane separation, neither of which the partition changes. A sixteen-strip variant was
 designed and superseded, and its extraction was identical too, which is the point.
 
-What the partition decides is cost of change, not electrical behaviour. See
-[[split-sensing-plane]].
+What the partition decides is cost of change and fabrication price, not electrical behaviour. The
+four-board partition is the one this project ships, decided 2026-08-02 on a quote rather than on
+any electrical argument. See [[split-sensing-plane]].
 
 ## Related
 

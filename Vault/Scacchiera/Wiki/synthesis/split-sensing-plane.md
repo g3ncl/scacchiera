@@ -12,9 +12,10 @@ smaller ones. Two questions turned out to be hiding in that, and they have diffe
 **where the board boundary is allowed to fall** electrically, and **how many pieces to cut it
 into** economically.
 
-The design that came out of this is
-[[../../../../docs/hardware/quad.md|docs/hardware/quad.md]], four boards of four lanes; the monolith
-it is an alternative to is [[../../../../docs/hardware/matrix.md|docs/hardware/matrix.md]].
+**Settled 2026-08-02: four boards of four lanes ship.** The design is
+[[../../../../docs/hardware/quad.md|docs/hardware/quad.md]]; the monolith it replaced is
+[[../../../../docs/hardware/matrix.md|docs/hardware/matrix.md]], retained as the measured baseline
+rather than as an option. Nothing electrical decided it. A quote did.
 
 ## The rule the two splits differ on
 
@@ -32,9 +33,13 @@ at, per unit, with no compensation available. This is the split
 block, so the harness is series impedance between the reader and a *parallel*-resonant branch. At resonance that branch is a high impedance, and adding series reactance in front of a
 high impedance barely moves where the peak sits.
 
-The measured difference: 142 to 385 nH of harness and spine, depending on line and corner, moves
-the bus resonance by **0.46 percent**. The same sixteen cells with the interconnect deleted sit at
-12.895 MHz; with it they span 12.836 to 12.875 MHz.
+The measured difference on the shipping four-board design: 181 to 773 nH of harness and on-board
+bus, depending on line and corner, moves the bus resonance by at most **0.99 percent**. The same
+sixteen cells with the interconnect deleted sit at 12.895 MHz; with it they span 12.767 to
+12.865 MHz. The superseded sixteen-strip design measured 142 to 385 nH and 0.46 percent, so
+quadrupling the interconnect inductance roughly doubled a sub-percent error. That is the shape of
+the argument: the term is small because of where the boundary is, not because of how long the
+cable is.
 
 The generalisation worth keeping: **a partition is cheap exactly where the circuit already has a
 high impedance or a series blocking element, and expensive where it has a resonator.** Look for the
@@ -133,8 +138,8 @@ is the one that decides.
 ## What the split does not fix
 
 The 74HC595 `SRCLR_N` trap survives intact: the seven-conductor hub link has no spare conductor and
-the hub does not route the net to its connector anyway. Shifting a known sixteen-bit pattern remains
-the driver's mandatory first action.
+the hub does not route the net to its connector anyway. Shifting a known pattern remains the
+driver's mandatory first action, and it is now thirty-two bits rather than sixteen.
 
 Hand population gets slightly worse, 176 placed references against 165, and the parts bill rises
 4.80 to 7.28 EUR, almost all of it connectors and the four registers.

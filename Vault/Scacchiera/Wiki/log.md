@@ -1719,3 +1719,260 @@ read off a drawn geometry; the criteria pass at the bound, which is the honest w
 four chained eight-bit registers make the selection a 32-bit shift where two made it 16, so a block
 size chosen on fabrication economics reached back into firmware.
 
+
+## 2026-08-02 The split wins and the monolith is retired
+
+Closed the branch that had been carrying two sensing architectures. The four-lane board ships, the
+300 by 300 mm matrix board becomes a recorded baseline, and the strip-and-spine design that
+preceded both is deleted from the tree.
+
+Corrected a stale figure in [[split-sensing-plane]]: the interconnect cost quoted there was the
+sixteen-strip design's, 142 to 385 nH and 0.46 percent. The shipping four-board design is 181 to
+773 nH and at most 0.99 percent. **Quadrupling the interconnect inductance roughly doubled a
+sub-percent error**, which is the argument itself rather than a detail: the term is small because
+of where the boundary sits relative to the tank, not because the cable is short. A number that
+survives a fourfold change in its input is measuring the topology, not the geometry.
+
+A second thing filed from the cleanup, and it is the more transferable one. **Retiring a design is
+not the same as deleting it.** The quad instantiates the monolith's `matrix_cell` and its loop
+geometry unchanged, and every quad figure is a delta against a matrix figure, so deleting the
+matrix would have destroyed both the shared source and the baseline that justifies the choice. It
+stays generated and in `make check` for exactly that reason. What was retired is the outline, the
+stackup and the order path, and the documentation now says which of those three things it means.
+
+Also: the repartition removed a fabrication risk nobody was tracking as a benefit. The matrix used
+0.2 mm via drills into 0.4 mm pads, the tightest geometry in the product, on the largest and most
+expensive board, where a fabricator tier change would have cost the most to discover. The quad is
+0.3 into 0.6, the same standard tier as every other board. **A change made for one reason cleared a
+risk filed under another**, which is worth checking for deliberately rather than noticing later.
+
+## 2026-08-02 What the product actually costs, and the hole in the middle of it
+
+First whole-product electronics cost model, filed as `docs/hardware/cost.md`. Roughly 155 to 165
+EUR plus shipping and tax, **plus two display modules that have no price anywhere in this
+repository or this vault**.
+
+That is the finding. The sensing plane was the assumed dominant cost, the branch cut it to 28.20
+EUR all in, and the exercise of totalling everything else revealed that the largest remaining line
+item is the one nobody had ever quoted. A cost model is worth building early not because the total
+is useful but because **it finds the unpriced item**, and an unpriced item hides best when
+attention is on the one being optimised.
+
+Two levers came out of it that were not visible from any single board:
+
+- **Fixed assembly cost is charged per order, so it is a function of how many orders you place.**
+  The hub and the power board are the only two boards going to factory assembly, both are 1.0 mm
+  and 2 layers, and they currently go as two orders paying setup and stencil twice. One panel is
+  about 9 EUR of fees and one shipment. `panel.py` already builds a panel from routed boards, so
+  this is a change of which boards it takes.
+- **Feeder fees are charged per unique Extended part, so panelising two boards that share no
+  Extended parts saves nothing on feeders and everything else halves.** The corollary is that
+  panelising boards that *do* share Extended parts is worth more, which is a reason to prefer the
+  same part across boards beyond the usual inventory argument.
+
+Also recorded: the register's 18.88 EUR of hub feeder fees is stale by four placements. The current
+hub has four Extended factory parts, not seven, because the plan moved everything iron-reachable to
+hand fitting. The saving was designed in months ago and has never appeared in a quote.
+
+## 2026-08-02 The partition reached into firmware, and the map is not linear
+
+Implemented the 32-bit selection chain the four-board sensing plane needs, which had been specified
+and left undone. `software/firmware/port/matrix_encoding.h` and its host test.
+
+The interesting part is not the width. It is that **half of every shift register drives nothing**,
+because a board carries four lanes and the part has eight outputs, so the line-to-bit map is a
+stride of 8 with a lane count of 4 rather than the linear map two full registers gave. Line n sits
+at bit `8 * (n / 4) + (n % 4)`.
+
+**A stride of 4 would have been wrong and would have looked right on any single board.** It only
+fails once two boards are in the chain, which is the sort of defect that survives bench bring-up
+and appears as a transposed board. Pinned with a test that spells the bytes out literally rather
+than deriving them from the same expression the header uses, since deriving them would test
+nothing.
+
+Filed as a general shape: **when a partition leaves part of a component unused, the address map
+stops being arithmetic on the index and starts being arithmetic on the packaging.** Worth checking
+whenever a block size and a part's granularity disagree.
+
+The encoding also had to fix something no board records: which board is which. The four are
+identical, so chain order against plane (boards 0 and 1 the rows, 2 and 3 the columns) is an
+assembly convention, and the firmware is now the place it is written down. That is a dependency on
+the frame, which nothing in the repository has drawn yet.
+
+## 2026-08-02 Mirrored the fee-free catalog, and it closed the substitution question
+
+Ingested `Clippings/jlcpcb/economic-parts-2026-08-02.csv` as
+[[jlcpcb-economic-parts-2026-08-02]]. 2004 rows, 1586 live, from lrks/jlcpcb-economic-parts, which
+republishes JLCPCB's Basic and Preferred Extended lists weekly.
+
+**First correction: the fee-free set is wider than "Basic".** JLCPCB waives the feeder-loading fee
+for Preferred Extended parts too, so the question was never Basic-versus-Extended, it was *economic
+catalog or not*. The vault had been treating the capture as a Basic list; it is 351 Basic plus 1235
+Preferred Extended, and both classes are free.
+
+**Second, the catalog answered the open substitution question outright, by category count rather
+than by argument.** Of 1586 live parts, 1482 are diodes, protection, resistors, capacitors and
+transistors. **Connectors: zero. Modules: zero.** Seven crystals, none at 27.12 MHz, though two are
+in the exact 3225 footprint. So the project's seven feeder-fee parts are not merely hard to
+replace: for the USB-C connector and the ESP32 module no fee-free part of that *class* exists at
+all. An earlier analysis had named the USB-C connector a viable candidate; that is withdrawn.
+
+The transferable move: **when a per-item search keeps failing, count the categories instead.** A
+histogram of the candidate set answered in one query what part-by-part comparison had been
+answering slowly and wrongly, and it converted "we could not find one" into "there is none", which
+is a different and much more durable claim.
+
+The one part with a real pool, the reverse-polarity FET, has sixteen fee-free candidates and all
+sixteen are SOT-23 at 33 to 45 milliohm. At 4.442 A RMS that is 0.65 to 0.89 W in a 1.2 to 1.5 W
+package. The pool exists and is uniformly the wrong class of part, which is its own kind of answer.
+
+**Membership did not drift.** All 2004 rows match the 2026-07-24 capture; only price, stock and
+lastSeen moved. Worth recording because it sets the recheck interval: this is a question to revisit
+per quarter, not per order.
+
+Deliberately did not mirror the full 700k-part catalog. It is large and every question this project
+asks is about the fee-free subset. Interactive whole-catalog search stays at yaqwsx.github.io/jlcparts.
+
+## 2026-08-02 One order is impossible, and the reason is regulatory
+
+Filed the ordering plan in `docs/hardware/cost.md`. Four parcels is the floor, not one.
+
+**LCSC and JLCPCB will merge two orders into one shipment**, which is the win: it puts all five
+board designs and all 270 hand-fit parts in a single parcel and a single customs event. Place both,
+then ask support to combine, or bind the JLCPCB order during LCSC checkout. Same currency and
+customer ID required, and **once combined the orders cannot be split**, so it has to happen before
+either ships.
+
+What cannot join them is more interesting than what can. The displays exist only at the
+manufacturer, the NFC inlays only at a tag distributor, and the protected cell is blocked by
+**UN 38.3 lithium transport rules** rather than by any commercial fact. A constraint that looks like
+a sourcing inconvenience is actually a shipping-class one, and no amount of supplier consolidation
+moves it.
+
+Generalises as: **before optimising the number of orders, check which items are legally
+un-consolidatable.** Those set the floor, and the remaining freedom is only over everything else.
+
+## 2026-08-02 The upload pair was quoting the road not taken
+
+Found while preparing order artifacts, and it would have cost real money quietly. The generated
+`<board>_jlcpcb_upload_bom.csv` excluded hand-routed parts **only on boards that were entirely hand
+populated**. On the hub and the power board, the two that actually go to assembly, the upload pair
+was byte-identical to the max-assembly pair: 19 Extended rows offered to the factory where the build
+plan plans four.
+
+At 2.70 EUR a feeder change that is **67.50 EUR across the two boards**, against a hub assembly bill
+of about 30. The plan to hand-fit every iron-reachable Extended part had been designed, documented
+and costed months earlier, and the file you upload did not implement it.
+
+**The failure mode is worth naming: a plan that lives only in a column.** The engineering BOM
+carried an `Assembly Route` column saying `Hand`, and the sourcing register described the hybrid
+plan in prose, and the exported artifact ignored both. Nothing was inconsistent enough to fail a
+test, because the tests checked BOM-against-CPL agreement and both files were wrong together.
+
+Fixed by excluding Hand routes from the upload pair on every board, which is what "the plan actually
+chosen" already claimed to mean. The max-assembly pair still ignores routes on purpose, because its
+job is to price the alternative.
+
+Generalises as: **an intent expressed as metadata is not implemented until something consumes it.**
+Worth checking, for any column that encodes a decision, which artifact actually reads it.
+
+## 2026-08-02 Cell survey: the supplier decides the answer
+
+Surveyed 18650batterystore.com per the owner's constraint. Eighteen 21700 cells, **one protected**:
+Nitecore NL2150HP, 5000 mAh, 15 A, USD 24.95.
+
+The acceptance table in `docs/hardware/cell-assembly.md` selected the candidate by itself, which is
+the point of having written it. It also produced a clean fail nobody had anticipated: the cell is
+**button top with no leads**, against a requirement for 18 AWG into a Molex housing. Bridging that
+means a holder, which inserts 10 to 30 milliohm of spring contact into the highest-current path in
+the product, or spot-welded tabs onto an already-protected cell.
+
+Two things filed. **A protected cell and a wired pack are different products**, and an acceptance
+spec written around wire gauge silently assumes the second. And **the constraint that decides
+availability may not be electrical at all**: the retailer is in Atlanta, and shipping lithium cells
+to Italy is governed by UN 38.3 and refused by many carriers, which can invalidate the entire survey
+independently of any cell's specification.
+
+## 2026-08-02 Thin stock is free, and the escape route stays on the shelf
+
+0.6 mm on a 300 mm outline priced against 0.8 and 1.0 mm at the same outline and quantity: **all
+three the same price**. That was the last open fabrication risk on the shipping sensing board and it
+is closed.
+
+Worth keeping the sequence rather than just the answer. An earlier revision asserted "quoted and
+accepted" when the quote had been at the fabricator's default 1.6 mm; the claim was withdrawn as
+unverified; the thickness was then actually priced and the withdrawn claim turned out correct. **A
+guess that happens to be right is still not evidence**, and the cost of insisting on that was one
+extra line on a quote request.
+
+The contingency built beforehand is now unused and stays documented: separation is
+`QUAD_THICKNESS + INTERPLANE_GAP`, so 0.8 mm board with a 0.2 mm rib would have given the identical
+1.0 mm. That optionality is a dividend of the partition nobody designed for, since the monolith's
+plane separation *was* its board thickness and it had no such move available.
+
+## 2026-08-02 A panel needs its own CPL, and the reason is geometry
+
+`make panel-fab` now emits `panel_jlcpcb_upload_bom.csv` and `panel_jlcpcb_upload_cpl.csv`.
+
+The gap was structural rather than an oversight. **A CPL is board-relative**, so a constituent
+board's pair cannot be uploaded against the panel: every placement would sit at the wrong
+coordinate. The panel is what a fabricator makes, so the panel is what needs a pair, and the docs
+had been describing the panel as the fabrication unit while the tooling could not export one.
+
+Two details made it tractable. Only one board on the panel is assembled, since both light bars are
+hand populated, so the panel's assembly job *is* the power board's with an offset. And `panel.py`
+already suffixed every reference on copy, for an unrelated reason (two J1 pads on one panel confuse
+assembly and DRC), which happened to supply exactly the unique designators an assembly upload
+requires. **A constraint solved for one reason turned out to be the precondition for another.**
+
+The suffix map travels as a JSON manifest rather than being inferred, because `panel.py` runs under
+the system interpreter for pcbnew and `fab.py` under the venv, so they cannot import each other.
+Verified as a rigid translation: identical placement count, identical rotations and layers, one
+uniform offset.
+
+## 2026-08-02 Constraining the supplier did not change the cell
+
+The owner accepted reverting to the wired Keeppower pack after the 18650batterystore.com survey,
+and the acceptance table in `docs/hardware/cell-assembly.md` made that a one-comparison decision
+rather than a debate: worse capacity, twice the price, and no leads.
+
+The durable finding is the distinction the survey exposed. **"Protected cell" and "wired pack" are
+different products**, and an acceptance specification written around wire gauge, terminal insulation
+limits and connector re-termination silently assumes the second. Every requirement below the
+electrical table depends on leads existing. A bare protected cell, however good, restarts that part
+of the design, and no row in the electrical table would have caught it.
+
+## 2026-08-02 The display blocker was answered in a document we already had
+
+Three artifacts arrived for the display: the module datasheet, an ESP32 tutorial, and the SSD1362
+controller datasheet. Only one was new.
+
+The **module datasheet** is byte-identical to the copy filed on 2026-08-01. The **SSD1362** is
+revision 0.20 "Product Preview", Aug 2014, watermarked confidential to a third party, and is
+**superseded** by the revision 1.0 "Advance Information" already in `Datasheets/`. Neither was
+filed; the duplicate and the older revision were discarded rather than added. Only the **ESP32
+tutorial** was new, and it is now in `Clippings/buydisplay/`.
+
+**And the open V1 blocker turned out to be answered by the revision already filed.** The record said
+the interface-select configuration "is documented nowhere", which was true of the *module*
+datasheet and false of the *controller* datasheet sitting next to it since 2026-07-30. SSD1362
+Table 6-2: four-wire SPI is BS[2:0] = 000, the module's default 8080 parallel is 110, and the
+0-ohm jumper pairs on the module's back are what strap those pins.
+
+**The transferable lesson is about where a question gets filed.** The blocker was recorded against
+the module, so it was searched for in the module's document. A module is a controller plus a panel
+plus a carrier board, and a question about the controller's configuration was never going to be
+answered by the carrier's datasheet. **When a document does not answer a question, check whether it
+is the document that should.**
+
+Two smaller results. Table 7-1 requires D2 to be tied low in four-wire SPI, so this design's
+ten-pin ground list is right and **the vendor's own tutorial, which grounds nine and omits D2, is
+the one in error** — a reminder that manufacturer example code is not manufacturer specification.
+And section 7.1.3 allows only write operations in serial mode, so no driver may read the controller
+back, which is cheaper to know now than at bring-up.
+
+What remains open is narrower and now checkable: which strap state a shipped module has. It cannot
+be fixed after delivery, because module datasheet 7.3 forbids modifying the board and 7.7 excludes
+it from warranty. So the plan to inspect and re-strap on arrival is withdrawn and replaced by a
+purchase condition: **supply configured for four-wire SPI, BS[2:0] = 000.** A vague technical
+unknown became a precise line on an order.

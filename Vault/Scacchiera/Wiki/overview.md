@@ -1,6 +1,6 @@
 ---
 type: overview
-date_updated: 2026-07-30
+date_updated: 2026-08-02
 tags:
   - wiki/overview
 ---
@@ -9,7 +9,7 @@ tags:
 
 High level synthesis of everything the wiki knows. This page is regenerated as
 the big picture changes during ingestion. Start here for the shape of the
-knowledge base, then follow [[wikilinks]] into [[index|the index]] and the
+knowledge base, then follow wikilinks into [[index|the index]] and the
 individual pages.
 
 ## Verification state
@@ -33,8 +33,8 @@ or 3.0 A sources without a PD contract. Invalid or changing readings retain the 
 [[v1-component-proof|V1]] audits the exact fitted tuples with no fitted-part sourcing blocker. The
 power inductor is now exact [[dfe252012f-1r0m-p2]]. V1 remains open on the
 [[er-oledm3-12-1w]] documentation conflict and its cable definition; a purchased power module is
-only an optional replacement, not a fitted dependency. [[v2-static-connectivity|V2]] passes on all four board designs, and all
-four are two copper layers. The
+only an optional replacement, not a fitted dependency. [[v2-static-connectivity|V2]] passes on all five board designs, and all
+five are two copper layers. The
 hub reached that by growing to 162 x 46 mm rather than by adding layers, since the rail it lives in
 has length to spare and a four-layer panel costs a multiple of a two-layer one.
 
@@ -140,6 +140,13 @@ CPL.
 The follow-up [[jlcpcb-matrix-live-stock-2026-07-25|live inventory capture]] confirms that every
 matrix line is available from JLCPCB's public Basic or Extended library above the five-board order
 requirement. Pre-Order and Global Sourcing remain fallback paths, not current requirements.
+
+The sensing plane those figures were bound against is now the four-lane split rather than the
+monolith, decided 2026-08-02 on a quote and written up in [[split-sensing-plane]]. Every part above
+carries over unchanged, which is why the matrix sourcing work was not wasted; what changed is the
+outline. [[pcba-cost-structure]] totals the whole product on top of that and finds the cost model
+is dominated by per-order fixed charges rather than by the bill of materials, and that the largest
+single line item, the two display modules, has no filed price.
 
 [[schemalyzer-jlcpcb-design-rules-2025|Schemalyzer's captured JLCPCB DFM guide]] adds a general
 fabrication and release checklist. It is deliberately treated as secondary guidance: the project

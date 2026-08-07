@@ -38,7 +38,7 @@ concepts already captured from the white paper.
 
 ## Sources
 
-One [[wiki/source]] summary per ingested raw source. Factual, no interpretation.
+One `wiki/source` summary per ingested raw source. Factual, no interpretation.
 
 | Page | Type | Updated |
 | --- | --- | --- |
@@ -48,6 +48,7 @@ One [[wiki/source]] summary per ingested raw source. Factual, no interpretation.
 | [[nfcgameboard-software]] | nfcgameboard.com page | 2026-07-24 |
 | [[bitwiseid-whitepaper]] | white paper (PDF, transcribed) | 2026-07-24 |
 | [[jlcpcb-economic-parts-2026-07-24]] | economic-parts catalog snapshot | 2026-07-24 |
+| [[jlcpcb-economic-parts-2026-08-02]] | economic-parts catalog snapshot (fee-free subset, 1586 live parts) | 2026-08-02 |
 | [[jlcpcb-matrix-live-stock-2026-07-25]] | matrix live JLCPCB inventory | 2026-07-25 |
 | [[schemalyzer-jlcpcb-design-rules-2025]] | third-party JLCPCB DFM guide | 2026-07-25 |
 | [[esp32-c6-mini-1u-datasheet]] | component datasheet | 2026-07-25 |
@@ -81,7 +82,7 @@ One [[wiki/source]] summary per ingested raw source. Factual, no interpretation.
 
 ## Entities
 
-People, tools, orgs, repos. See [[wiki/entity]] pages.
+People, tools, orgs, repos. See `wiki/entity` pages.
 
 | Page | source_count | Updated |
 | --- | --- | --- |
@@ -245,7 +246,7 @@ One exact source summary per purchased fitted MPN. The structured audit is
 <!-- V1-COMPONENT-CATALOG:END -->
 ## Concepts
 
-Ideas, patterns, techniques. See [[wiki/concept]] pages.
+Ideas, patterns, techniques. See `wiki/concept` pages.
 
 | Page                                    | Confidence | source_count | Updated    |
 | --------------------------------------- | ---------- | ------------ | ---------- |
@@ -263,7 +264,7 @@ Ideas, patterns, techniques. See [[wiki/concept]] pages.
 
 ## Synthesis
 
-Query answers filed back into the wiki. See [[wiki/synthesis]] pages.
+Query answers filed back into the wiki. See `wiki/synthesis` pages.
 
 | Page | Question | Updated |
 | --- | --- | --- |
@@ -281,3 +282,4 @@ Query answers filed back into the wiki. See [[wiki/synthesis]] pages.
 | [[commercial-power-subsystem-selection]] | Which purchased subsystem should own the battery and charging? | 2026-07-26 |
 | [[er-oledm3-12-1w-display-current]] | Is the display 320 mA or 2 mA? | 2026-08-01 |
 | [[split-sensing-plane]] | Where may a board boundary cut a resonant sensing plane, and into how many pieces? | 2026-08-02 |
+| [[pcba-cost-structure]] | What actually drives assembly cost at one-unit quantity, and where are the remaining savings? | 2026-08-02 |

@@ -73,13 +73,87 @@ pins 2 and 3. Per display, twice.
 An adapter PCB was designed for this and then discarded as over-built: commoning ten adjacent pins
 is a soldering job, not a routing job. It stays documented below only as a fallback.
 
-### First, find out whether any of this is needed
+### Confirmed by the manufacturer's own ESP32 example
 
-The strap list above assumes the module does nothing for itself, and that assumption is not
-verified. The interface-select jumpers on the module's back (R3/R9, R5/R8, R10/R11/R12) plausibly
-already drive R/W and E/RD low when four-wire SPI is selected, since that is what selecting the
-mode means. If they do, the required list collapses, and pins 11 to 16 are only *recommended* low
-rather than mandatory.
+EastRising's `ER-OLEDM3.12-1_ESP32_Tutorial`, captured 2026-08-02 in
+`Vault/Scacchiera/Clippings/buydisplay/`, ships working four-wire SPI code for an ESP32 and states
+its wiring in the sketch header:
+
+```
+*1. VDD -> 3.3   *2,3,7,8,12-16. GND -> GND   *4. RES -> 8
+*5. CS  -> 10    *6. DC -> 9                  *9. SCL -> SCK   *10. SDI -> MOSI
+```
+
+**That is this contract's pin map exactly**, and it is the first evidence for it that comes from
+the manufacturer rather than from reading the pin table. It also confirms the straps are real work:
+the vendor grounds pins 7 and 8 externally too, so the interface-select jumpers do **not** do it for
+you.
+
+One difference, and this design keeps its own choice. The vendor grounds nine pins and omits
+**pin 11 (D2)**; this contract grounds ten. Section 4.1 recommends tying every unused D0 to D7 pin
+low, and D2 is unused in serial mode, so grounding it is datasheet-compliant and the more
+conservative reading. The likely reason for the vendor's omission is that D2 carries an I2C role
+(tied to D1 as SDAout/SDAin), which does not apply here. Leaving a CMOS input floating next to a
+switching bus is the failure this avoids.
+
+### How the interface is actually selected: BS[2:0]
+
+**This was in the vault all along, in the wrong document.** The module datasheet documents no way to
+select an interface, which is what the open V1 item recorded. The *controller* datasheet does, and
+it has been filed since 2026-07-30. `Datasheets/SSD1362_SOLOMON.pdf` revision 1.0, Table 6-2:
+
+| BS[2:0] | Interface |
+| --- | --- |
+| **000** | **4-wire SPI** |
+| 001 | 3-wire SPI |
+| 110 | 8-bit 8080 parallel |
+| 100 | 8-bit 6800 parallel |
+| 010 | I2C |
+
+`0` means the pin is tied to VSS and `1` to VDDIO. **Four-wire SPI is BS2, BS1 and BS0 all tied
+low**, and the module's default 8080 parallel is `110`, so converting one means moving BS2 and BS1
+from VDDIO to VSS. That is precisely what the R3/R9, R5/R8 and R10/R11/R12 jumper pairs on the
+module's back do; the module datasheet just never says so.
+
+The same document's Table 7-1 settles the strap list independently of EastRising's example, and
+it **confirms this contract against the vendor's own tutorial**: in the 4-wire SPI row, D7 through
+**D2** are all "Tie LOW", with D1 as SDIN and D0 as SCLK, and E and R/W# tied low. So grounding
+module pin 11 is required by the controller datasheet, not merely recommended, and the vendor
+tutorial's nine-pin ground list is the one that is short.
+
+One firmware consequence, recorded here because it is easy to discover late: section 7.1.3 states
+that **under serial mode only write operations are allowed.** There is no register readback over
+SPI, so nothing in the driver may depend on reading the controller.
+
+### What is settled, and what is not
+
+**Settled: the module must not be reworked into SPI, so the interface has to be an order-time
+selection.** Module datasheet section 7.3 is explicit: *"Do not damage or modify the pattern writing
+on the printed circuit board"* and *"Except for soldering the interface, do not make any alterations
+or modifications with a soldering iron."* Moving the BS straps is exactly that kind of alteration,
+so the earlier plan of inspecting and re-strapping them on arrival is **withdrawn**: it is outside
+the manufacturer's handling instructions and inside the warranty exclusion in 7.7.
+
+**Not settled: which strap state a shipped module actually has.** The product listing says the
+module is *"8080 8-bit Parallel interface with no pin header connection by default"*. So the
+question to put to EastRising is now a precise, checkable purchasing one rather than a vague
+technical one:
+
+> Supply ER-OLEDM3.12-1W configured for **four-wire SPI, BS[2:0] = 000**.
+
+A module strapped `110` will not talk to the hub, and per 7.3 it cannot legitimately be converted
+after delivery.
+
+**Also worth knowing before assembly:** "no pin header connection by default" means the 2 x 8 header
+is very likely not fitted. That suits this design, because the strap work below is easier on bare
+plated holes than on a mated header, but it means the header is the builder's part. Section 7.5
+fixes how to solder it: **280 +/- 10 degrees C, 3 to 4 seconds, eutectic solder**, and the panel and
+board must not be detached more than three times.
+
+### The strap list assumed the module does nothing for itself
+
+That assumption is now confirmed correct by the vendor's own wiring above, which grounds 7 and 8
+externally. The table below is kept as the reasoning that got there.
 
 | If the jumpers... | Work needed |
 | --- | --- |

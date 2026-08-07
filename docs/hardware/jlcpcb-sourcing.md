@@ -1,7 +1,9 @@
 # JLCPCB assembly sourcing
 
-This register records the project's JLCPCB part selections for the three boards and the parts that
-need a deliberate follow-up. The supporting catalog capture and live-stock evidence live in the
+This register records the project's JLCPCB part selections for every board and the parts that
+need a deliberate follow-up. The sensing plane is the four-lane [quad board](quad.md); the
+[matrix board](matrix.md) section is kept as the superseded baseline it was priced against, not as
+a shipping option. The supporting catalog capture and live-stock evidence live in the
 vault. The complete bound BOM was checked live again on 2026-07-25. Stock and prices remain
 time-sensitive.
 
@@ -17,25 +19,37 @@ remain current.
 intentional unresolved items, not permission to select a substitute during ordering.
 
 The engineering BOM also records `JLC Library`, `Assembly Route`, `Hand Method`, and
-`Assembly Reason`. These columns are planning guidance. They do not silently remove parts from the
-JLCPCB upload. `Hand` identifies a practical candidate to buy elsewhere and omit deliberately when
-reviewing the JLCPCB match; `JLCPCB` means the part is Basic, too small or hidden for reliable iron
-soldering, or too repetitive to place economically by hand.
+`Assembly Reason`. `Hand` identifies a part an iron can reach, bought elsewhere and fitted by the
+builder; `JLCPCB` means the part is Basic, too small or hidden for reliable iron soldering, or too
+repetitive to place economically by hand. **The `Assembly Route` column governs the upload pair**:
+a `Hand` row is absent from it, on every board.
+
+That was not always true, and the correction is worth reading before trusting an older quote.
+Until 2026-08-02 the exclusion applied only to boards that were populated by hand *in their
+entirety*, so on the hub and the power board, the two that actually go to assembly, the upload pair
+was identical to the max-assembly pair: nineteen Extended rows offered to the factory where the
+plan intends four. At 2.70 EUR a feeder change that is **67.50 EUR across the two boards** of fees
+the design never meant to pay. The plan existed in this column and in this document, and the
+exported file ignored both.
 
 Each fabrication run emits two upload choices. `<board>_jlcpcb_upload_bom.csv` and
-`<board>_jlcpcb_upload_cpl.csv` are the plan actually chosen for that board, so on a hand-populated
-board there is nothing to upload and **the pair is not written at all**. It used to be written with
-a header and no rows, which is a trap: the files are named `upload`, and JLCPCB answers a zero-part
-list with an opaque HTTP 500 rather than a message naming the problem. The matched `<board>_jlcpcb_max_assembly_bom.csv` and
-`<board>_jlcpcb_max_assembly_cpl.csv` ignore that plan and list everything JLCPCB could place,
-which is what makes them a quote instrument for the road not taken. Upload
-the hybrid pair together when using manual completion, then purchase exactly the rows in
-`<board>_self_solder_bom.csv` elsewhere. Never mix the full BOM with the hybrid CPL or the reverse.
-On the strip, the spine and the matrix the two assembled variants are the same file, because every
-fitted part on them has an LCSC code and none is excluded either way.
-The lightbar is the exception: JLCPCB cannot assemble its 120 by 8.5 mm outline, so it has no
-upload pair at all and its hand BOM contains every fitted component. Order only its bare PCB
-Gerbers from JLCPCB.
+`<board>_jlcpcb_upload_cpl.csv` are the plan actually chosen for that board, so on a fully
+hand-populated board there is nothing to upload and **the pair is not written at all**. It used to
+be written with a header and no rows, which is a trap: the files are named `upload`, and JLCPCB
+answers a zero-part list with an opaque HTTP 500 rather than a message naming the problem. The
+matched `<board>_jlcpcb_max_assembly_bom.csv` and `<board>_jlcpcb_max_assembly_cpl.csv` ignore the
+plan and list everything JLCPCB could place, which is what makes them a quote instrument for the
+road not taken. Never mix a BOM from one pair with the CPL from the other.
+
+The quad, the matrix and the lightbar have no upload pair, because all three are populated
+entirely by hand; only their max-assembly pairs exist, to price the alternative. The lightbar has a
+second reason: JLCPCB cannot assemble its 120 by 8.5 mm outline at all.
+
+**The panel has a pair of its own**, `panel_jlcpcb_upload_bom.csv` and `panel_jlcpcb_upload_cpl.csv`.
+A CPL is board-relative, so the power board's own pair cannot be uploaded against the panel: every
+placement would sit at the wrong coordinate. The panel pair is the power board's plan translated
+into panel coordinates, under the suffixed references `panel.py` gives each copy, and it is what to
+upload when ordering the panel assembled. See [ordering.md](ordering.md).
 
 The upload BOM uses the selected manufacturer's exact MPN in `Comment`, not the schematic value.
 This makes the MPN agree with `LCSC Part #` and prevents JLCPCB's misleading comment mismatch
@@ -61,7 +75,8 @@ each route, so "hand" here always means a joint an iron tip can reach.
 | Board | Prefer JLCPCB | Hand fitted |
 | --- | --- | --- |
 | Lightbar | none, the board is below JLCPCB's supported assembly size | everything; the LED was changed to a legs-outside-body package so an iron reaches all four joints |
-| Matrix | none, see below | all 165 references |
+| Quad (sensing) | none by choice, see below | all 176 references across the four boards |
+| Matrix, superseded | none, see below | all 165 references |
 | Hub, historical MCP73871 design | QFN, SON, SOT563, USB-C, the crystal, and the ESP32 module | JST connectors, switch, SOT-23 devices, inductors, 0402 C0G RF and timing capacitors, and the 0.65 mm TSSOP expander |
 
 Packages classified reflow-only are those with pads under the body or a pitch no tip can reach:
@@ -69,8 +84,8 @@ QFN, SON, SOT563, USB-C, the 3225 crystal, and the ESP32 module. **0402, SOD-523
 0.65 mm TSSOP are deliberately not on that list.** They are tedious but every joint is reachable,
 and the plan hand-fits them, which is what removes their feeder fees.
 
-The lightbar and the matrix are now both fully hand populated, so only the hub goes to assembly.
-Order bare Gerbers for the other two. The hub leaves **seven** Extended lines for factory placement,
+The lightbar and the sensing plane are both fully hand populated, so only the hub and the power
+board go to assembly. Order bare Gerbers for the other two. The hub leaves **seven** Extended lines for factory placement,
 all genuinely reflow-only: J1 (USB-C), U1 (MCP73871 QFN-20), U2 (TPS63802 SON-10), U3 (PN5180
 QFN-40), U4 (ESP32-C6-MINI-1U), U5 (TPS61023 SOT563) and Y1 (the 3225 crystal). Everything else
 Extended on the hub is hand fitted from `hub_self_solder_bom.csv`.
@@ -140,7 +155,11 @@ Every bound code below was checked against live JLCPCB stock above the five-boar
   channel and an 800 kHz protocol. The observed stock was 53, enough for two bars plus attrition.
   This closes the unresolved C5200774 catalog and pinout conflict without changing the rail budget.
 
-### Matrix
+### Matrix, superseded baseline
+
+**Superseded by the quad board below on the 2026-08-02 quote.** This section stays because every
+part in it is the part the quad uses, the live-stock evidence is the same evidence, and the pricing
+here is what the split is measured against. Do not order from it.
 
 The matrix upload is fully bound. Its 11 BOM rows contain 165 placed references, every row has an
 exact JLC code, and the CPL contains the same 165 references. PCB copper loops L2/L4 through L32,
@@ -189,30 +208,69 @@ instead of joining sixteen resonators. `hardware/sim/quad_rf.py` measures that a
 tuning against the same cells with the interconnect removed. The RF objection does not carry over;
 the area and connector cost below is what does.
 
-### Split sensing plane
+### Split sensing plane (the shipping sensing board)
 
 Quoted 2026-08-02. This was the open item that decided between the two sensing architectures, and
-it is now closed in the split's favour.
+it is now closed in the split's favour. The four-lane board in [quad.md](quad.md) is what ships;
+the matrix section above is retained as the superseded baseline it was measured against.
 
 **The large-size charge is the whole story.** A 300 x 300 mm matrix board pays **50.47 EUR** of
-large-size assembly charge, 61.5 percent of its PCBA. A 300 x 33 mm strip pays **0.00 EUR**. That
-is the number no catalogue could answer.
+large-size assembly charge, 61.5 percent of its PCBA. A 300 mm board narrow enough to stay out of
+the band pays **0.00 EUR**. That is the number no catalogue could answer.
 
-What triggers the band is *not* established by these two points. Both boards are 300 mm long, so
-length alone cannot be it, but width (33 against 300) and area (9,900 against 90,000 mm2) are
-equally consistent with the evidence and nothing here separates them. It matters practically: if
-the rule is area, a four-up strip panel at 148 x 310 mm covers 45,880 mm2 and could reincur the
-charge that four separate strips avoid. Quote a panel before assuming panelisation is free.
+What triggers the band is *not* established by the quoted points. Every board quoted here is
+300 mm long, so length alone cannot be it, but width and area are equally consistent with the
+evidence and nothing here separates them. It matters practically: a panel that gangs four 140 mm
+boards is 560 mm of width or 168,000 mm2 of area, either of which could reincur the charge that
+four separate boards avoid. **Quote a panel before assuming panelisation is free.**
 
-Bare PCB, all three at JLCPCB's default 1.6 mm, 2 layers, green, HASL, 2-day build:
+Bare PCB, quoted at JLCPCB's default 1.6 mm, 2 layers, green, HASL, 2-day build:
 
-| Board | Quantity | Price | Per board | Per 1000 mm2 |
-| --- | ---: | ---: | ---: | ---: |
-| strip | 20 | 19.97 EUR | 1.00 EUR | 0.101 EUR |
-| spine | 5 | 6.95 EUR | 1.39 EUR | 0.171 EUR |
-| matrix | 5 | 58.34 EUR | 11.67 EUR | 0.130 EUR |
+| Board | Outline | Quantity | Price | Per board | Per 1000 mm2 |
+| --- | --- | ---: | ---: | ---: | ---: |
+| **quad** | 300 x 140 mm | 5 | **20.92 EUR** | 4.18 EUR | 0.100 EUR |
+| matrix | 300 x 300 mm | 5 | 58.34 EUR | 11.67 EUR | 0.130 EUR |
+| strip, superseded | 300 x 33 mm | 20 | 19.97 EUR | 1.00 EUR | 0.101 EUR |
+| spine, superseded | design deleted | 5 | 6.95 EUR | 1.39 EUR | 0.171 EUR |
 
-Strip with assembly, 20 pieces, from `strip_jlcpcb_max_assembly_bom.csv` and its CPL, superseded by the four-lane board below:
+The quad prices at the same EUR per square millimetre as the 33 mm strip, so 140 mm of width is
+still outside whatever the band measures, and the matrix's 0.130 against 0.100 is a **separate**
+area premium in bare fabrication, about 30 percent, on top of the assembly charge. Two distinct
+effects that respond to different changes, and worth not conflating.
+
+**Be precise about what is quoted here.** The quad's 0.00 EUR large-size charge is inferred from
+the 33 mm strip's assembly quote, because the quad itself was quoted bare only. That inference
+carries no weight in the decision: the choice between the two architectures rests on the bare
+prices, 20.92 against 58.34, and both of those are direct quotes.
+
+#### What one working sensing plane costs
+
+A set is four quad boards, or one matrix board. JLCPCB's five-piece minimum is part of the
+comparison rather than an aside: it forces four unusable matrix boards to get one usable plane,
+where five quads is a complete set plus one spare.
+
+| Build | Order | Cost | Hand joints |
+| --- | --- | ---: | ---: |
+| **Quad, bare copper** | 5 boards (one set + spare) | **20.92 EUR** | 176 |
+| Matrix, bare copper | 5 boards (one set, four wasted) | 58.34 EUR | 165 |
+| Matrix, assembled | 5 boards | 141.05 EUR | 0 |
+| Strip + spine, bare, superseded | 20 strips + 5 spines | 26.92 EUR | about 200 |
+
+**The quad is the cheapest route to a working plane, by 37.42 EUR against the monolith**, and it
+buys a spare board where the monolith buys four scrap ones. The area penalty is real and unchanged
+at 1.87 times the substrate; the size charge and the minimum order quantity both outweigh it.
+
+#### Assembly route
+
+The quad stays hand populated in `hardware/pcb/bom.py`. Bare copper at 20.92 EUR the set is the
+cheapest way to a working board, every package on it is iron-reachable (0402, 0603, 0805, SOT-23,
+SOD-523, SOIC-16, one JST), and unlike the matrix this is a preference rather than a forced choice:
+the outline pays no size charge, so factory assembly is available if the labour is worth buying.
+Flipping it is a one-line change to `HAND_POPULATED_BOARDS`.
+
+What buying it back would cost is not quoted for the quad, but the superseded strip quote fixes the
+structure, and the structure is what decides. Strip with assembly, 20 pieces, retained for that
+reason only:
 
 | Line | Cost |
 | --- | ---: |
@@ -228,53 +286,28 @@ Strip with assembly, 20 pieces, from `strip_jlcpcb_max_assembly_bom.csv` and its
 | PCBA, packaging | 0.43 EUR |
 | **Total** | **94.17 EUR** |
 
-Two things in that table are worth reading twice. Enabling assembly nearly doubled the bare board
-price, 19.97 to 38.81 EUR, because JLCPCB re-specifies the PCB for line handling; that cost is real
-and it is not in the zero-valued panel line. And 42.60 EUR of the 55.36 EUR PCBA is fixed per order
-(setup, stencil, feeders), with only 12.75 EUR scaling across the twenty boards.
-
-#### What one working sensing plane costs
-
-A set is sixteen strips and two spines, or one matrix board. JLCPCB's five-piece minimum is part of
-the comparison rather than an aside, because it forces four unusable matrix boards where twenty
-strips is a set plus four spares.
-
-| Build | Order | Cost | Hand joints |
-| --- | --- | ---: | ---: |
-| Split, bare copper | 20 strips + 5 spines | **26.92 EUR** | about 200 |
-| Split, strips assembled, spines by hand | 20 strips assembled + 5 spines bare | 101.12 EUR | 24 |
-| Matrix, bare copper | 5 boards | 58.34 EUR | 165 |
-| Matrix, assembled | 5 boards | 141.05 EUR | 0 |
-
-**The split is cheaper in both regimes**, less than half the price bare and 40 EUR cheaper
-assembled. The area penalty is real and unchanged at 1.94 times the substrate, but it is outweighed
-by dodging the large-size charge and by not having to buy five sets to get one.
-
-#### Assembly route
-
-The strip stays hand populated in `hardware/pcb/bom.py`, because bare copper at 26.92 EUR is the
-cheapest way to a working board and the packages are all iron-reachable. Buying the labour back
-costs **74.20 EUR** for 220 placements, about 0.34 EUR a joint, and that is a time-versus-money
-call rather than a design one. Flipping it is a one-line change to `HAND_POPULATED_BOARDS`.
-
-The spine stays hand populated for a stronger reason, and quantity is why. Only two are needed per
-product, against a 42.60 EUR fixed PCBA cost that does not care how few you order. Paying roughly
-45 EUR of setup to place twenty-four parts, of which ten are through-hole-scale JST connectors, one
-is an SOIC-16 and one an 0402, is bad value at any quantity anyone would order.
+Two things in that table are worth reading twice, and both carry to the quad. Enabling assembly
+nearly doubled the bare board price, 19.97 to 38.81 EUR, because JLCPCB re-specifies the PCB for
+line handling; that cost is real and it is in no line item named for it. And 42.60 EUR of the
+55.36 EUR PCBA is fixed per order (setup, stencil, feeders), with only 12.75 EUR scaling across the
+twenty boards. **Fixed cost decides the route on a five-piece order far more than unit price does.**
 
 #### Caveats on these figures
 
-- **All three were quoted at 1.6 mm**, JLCPCB's default, where the strip is designed at 0.6 mm and
-  the spine and matrix at 1.0 mm. Two-layer boards are usually the same price across that range, so
-  the ranking is expected to hold, but the thickness the strip actually needs has not been priced.
-  A 0.6 mm board 300 mm long is the specific thing still unverified.
-- The spine was not quoted with assembly. Its route is decided on the fixed-cost structure above
-  rather than on its own quote.
-- The matrix figures are the 2026-07-25 quote already recorded above, not a re-quote on the same
-  day, though its 58.34 EUR bare price against the 59.03 EUR on record confirms the earlier quote
-  was five pieces.
+- **The bare prices above were quoted at 1.6 mm**, JLCPCB's default, where the quad is designed at
+  0.6 mm and the matrix at 1.0 mm. **0.6 mm has since been priced separately and costs the same as
+  0.8 and 1.0 mm** at this outline and quantity, so the thickness the design wants is free and the
+  ranking holds. That was the last open fabrication risk on the shipping sensing board.
+- The quad was not quoted with assembly. Its route is decided on the fixed-cost structure above
+  rather than on its own quote, which is safe only because the decision is to buy no assembly.
+- The matrix bare figure is a 2026-08-02 re-quote; its 58.34 EUR against the 59.03 EUR recorded on
+  2026-07-25 confirms the earlier quote was five pieces.
+- **No capture of the 2026-08-02 quote is filed in `Vault/Scacchiera/Clippings/jlcpcb/`.** The
+  2026-07-25 stock and parts captures are; this one is not, so these figures rest on the quote as
+  transcribed rather than on an immutable capture. File it before the numbers are used to release
+  an order.
 
-Eighteen JST GH cable assemblies (sixteen strip harnesses, two link harnesses) are purchased
+Four JST GH cable assemblies (one per board, equal length by construction) are purchased
 accessories on no board BOM, like the hub's antenna pigtail. An order that forgets them is
 incomplete. The connectors themselves are all SM07B-GHS-TB, C495552, already bound above, so the
 split adds no feeder change.
@@ -366,6 +399,45 @@ must state:
 For the NFC reader and ESP32 in particular, a different package, protocol, RF architecture, or
 firmware target is a redesign, not a purchasing substitution. Bring a concrete candidate to this
 register before it is introduced.
+
+### Open candidate: a hand-fittable power-only USB-C for J1
+
+Raised 2026-08-02, **not bound**. J1 is currently USB4105-GF-A, a 16-pin USB 2.0 receptacle at
+0.5 mm pitch, factory-placed and Extended, so it costs one 2.70 EUR feeder change. The hub is a
+power-only sink and six of its sixteen contacts (A6, A7, A8, B6, B7, B8) are already deliberate
+no-connects, so a smaller power-only part would carry every signal the design uses.
+
+**The contact count is six, not four.** VBUS, GND, **CC1 and CC2**, plus the shield. CC1 and CC2
+cannot be merged into one contact, for three independent reasons:
+
+1. Each carries its own mandatory 5.1 kohm Rd to ground. Tying them together puts two 5.1 k in
+   parallel, 2.55 k, outside the sink termination the Type-C specification requires, and a
+   compliant source may refuse to deliver anything or misread the sink as an accessory.
+2. The connector is reversible, so exactly one CC is connected through the cable at a time. The
+   design has to terminate whichever one that is.
+3. Each is separately low-passed through 10 k and 100 nF into its own ESP32 ADC input (pins 12 and
+   13) to read the source's current advertisement. That is the whole basis of the 5 V input current
+   limit, and it needs two independent readings.
+
+**A part with no CC contacts breaks the product completely**, not subtly: with no Rd, a compliant
+source delivers no VBUS at all.
+
+That is the risk, and it is live. Many parts sold as "Type-C 6P" are VBUS and GND only. LCSC
+C7507406 (SHOU HAN TYPE-C 6PIN, 39,550 in stock, about USD 0.05 at 10+) is a plausible candidate,
+and **its catalog page does not publish a pinout**, which is precisely the case
+[the datasheet rule](../../CLAUDE.md) exists for. Fetch and file the datasheet in `Datasheets/`
+before this is bound, and confirm CC1 and CC2 appear as separate contacts.
+
+**What it is worth.** The feeder fee is the small half. The larger argument is repairability: a
+USB-C receptacle is the most mechanically abused part in the product, and the 6-pin power-only
+variants typically carry through-hole shield legs that are mechanically stronger than the current
+top-mount SMD part while being reachable with an iron. That turns a damaged connector into an iron
+job rather than a hot-air job on a populated hub.
+
+**What it costs.** A different footprint means regenerating and rerouting a board that is currently
+DRC-clean, and rerunning the eighteen focused connectivity and Type-C tests, including both CC
+orientations and the advertisement thresholds. **Bundle this with a hub relayout rather than doing
+it on its own**; 2.70 EUR does not justify a reroute by itself.
 
 ## Generated order files
 
