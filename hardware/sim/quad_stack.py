@@ -23,7 +23,7 @@ from hardware.pcb.quad_geometry import INTERPLANE_GAP, QUAD_THICKNESS
 from hardware.sim.antenna_coupling import COPPER_THICKNESS_MM, Coupling, deck, solve
 
 
-# Rows are the lower plane, their loop on the strip's top copper, sitting on the
+# Rows are the lower plane, their loop on the board's top copper, sitting on the
 # frame floor. Columns are the upper plane, the same board on ribs above, so the
 # column loop faces the pieces exactly as the monolith's front-copper rows did.
 ROW_PLANE_Z_MM = 0.0

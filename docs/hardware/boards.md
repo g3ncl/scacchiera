@@ -20,42 +20,38 @@ shared 13.56 MHz bus, while reverse-biased PIN diodes stay under a picofarad.
 
 ## The boards
 
-Four custom board designs, five physical PCBs. The two OLED displays are purchased
+Four custom board designs, eight physical PCBs. The two OLED displays are purchased
 ER-OLEDM3.12-1W modules (fixed by [interface.md](../functional/interface.md)), so they appear
 here only as interfaces, not as boards.
 
-### 1. Matrix board (sensing)
+### 1. Quad board (sensing), x4, one design
 
 - **Responsibility:** carry the 8+8 line antennas under the whole 280 x 280 mm play area and the
   per-line PIN diode switches, so exactly one line at a time couples to the shared RF bus. No
   intelligence: it is copper geometry plus switching, with every component on the underside so the
   top face stays flat against the controlled air gap in
-  [physical.md](../functional/physical.md).
-- **Interfaces:**
-  - one shared 13.56 MHz RF feed from the hub (short controlled-impedance link, board-to-board
-    connector);
-  - line-select control from the hub (serial shift register driving 16 bias steers, so the
-    inter-board cable stays small);
-  - PIN reverse-bias rail and ground from the hub.
-- **Envelope:** about 300 x 300 mm, 2-layer. Mounts independently of the top surface per the
-  functional spec, metal-free zone maintained under the play area.
-- **Cost target:** 25 EUR (area-dominated fab around 15 EUR, plus 16 PIN diodes, shift
-  registers, and passives).
+  [physical.md](../functional/physical.md). Four identical boards carry four lanes each and stack
+  crosswise in two planes: two butted end to end are the row plane, the same two rotated a quarter
+  turn are the column plane. Spec in [quad.md](quad.md).
+- **Interfaces:** two seven-conductor JST GH links per board, in and out, carrying the shared
+  13.56 MHz bus, the serial line-select chain, the PIN reverse-bias rail and ground. The four
+  boards chain, so the hub sees one link and its interface is the same one the monolith presented.
+- **Envelope:** 300 x 140 mm each, 2-layer, 0.6 mm, with the column plane on 0.4 mm ribs above the
+  rows. Mounts independently of the top surface per the functional spec, metal-free zone maintained
+  under the play area.
+- **Cost:** 20.92 EUR for five bare boards, a complete set plus a spare, plus 7.28 EUR of parts per
+  set. Hand populated, 176 joints.
 
-#### 1b. Split sensing plane (alternative to the matrix board)
+**This replaces the monolithic 300 x 300 mm matrix board**, which is kept as the recorded baseline
+in [matrix.md](matrix.md) rather than as a shipping option. The 2026-08-02 JLCPCB quote decided it:
+20.92 EUR for one working plane against 58.34, because a 300 by 140 mm outline pays no large-size
+assembly charge where a 300 by 300 mm one pays 50.47 EUR, and because a five-piece minimum turns
+into a set plus a spare rather than one set and four scrap boards. That outweighs the split's
+1.87 times substrate.
 
-Not a fifth board so much as a different way of cutting the first one. The same sixteen loops and
-the same sixteen switch cells go onto four identical 300 x 140 mm boards, four lanes each, stacked
-crosswise in two planes and chained to the hub. Spec in [quad.md](quad.md).
-
-It exists because the matrix board is the acknowledged architectural risk and its open question,
-`LOOP_INSET`, is a single-parameter sweep on per-line geometry. A respin of the monolith is five
-300 x 300 mm boards; a respin of the split is five 300 x 140 mm ones for a third of the price.
-
-**Exactly one of the matrix board and the split plane ships.** Both are maintained to the same
-gate. The 2026-08-02 JLCPCB quote answers which: 20.92 EUR for one working plane against the matrix
-board's 58.34, because a 300 by 140 mm outline pays no large-size assembly charge where a
-300 by 300 mm one pays 50.47 EUR. That outweighs the split's 1.87 times substrate.
+It also makes the board cheap to change, which matters more than it sounds: the sensing plane's
+open question, `LOOP_INSET`, is a single-parameter sweep on per-line geometry, and an attempt costs
+20.92 EUR instead of 58.34.
 
 The RF cost is small and measured: coupling is unchanged to four figures and the whole
 harness-and-chain path moves the bus resonance by at most 0.99 percent. The real cost is a firmware
@@ -103,6 +99,10 @@ Bought parts that appear on no board BOM but without which the product does not 
 for the same reason the display modules are: an order that forgets them is incomplete.
 
 - **Two ER-OLEDM3.12-1W display modules**, fixed by [interface.md](../functional/interface.md).
+- **Four seven-conductor JST GH cable assemblies** chaining the hub to the four quad boards, all at
+  `quad_geometry.HARNESS_LENGTH_MM`. Equal length is a design requirement rather than tidiness: a
+  common detuning term is absorbed by the nominal 220 pF, a per-board one is not (see
+  [quad.md](quad.md)).
 - **One 2.4 GHz antenna with pigtail** for the hub's ESP32-C6-MINI-1U. The module has an external
   antenna connector rather than a PCB antenna, which makes the antenna replaceable for about a euro
   instead of a hub respin. The connector is **MHF3 / W.FL / IPEX3**, not U.FL: a U.FL pigtail is
@@ -127,8 +127,8 @@ for the same reason the display modules are: an order that forgets them is incom
 
 ## Why this split
 
-- The matrix board is large but cheap and dumb; the hub is small but dense. Separating them means
-  a controller respin never pays for 900 square centimeters of fab, and the big board has no
+- The sensing plane is large but cheap and dumb; the hub is small but dense. Separating them means
+  a controller respin never pays for the sensing area's fab, and the sensing boards have no
   fine-pitch assembly.
 - The functional spec already forces the split physically: the hub and shields sit under the
   rails, the commercial battery subsystem sits in a rear service cassette, and the sensing plane
@@ -136,12 +136,15 @@ for the same reason the display modules are: an order that forgets them is incom
 - The light bars are separate because they live in a different mechanical position (behind the
   rail diffusers) and are trivially small; folding them into the hub would tie the hub's outline
   to the diffuser geometry.
-- Rough total per unit in custom parts and fab remains to be regenerated, with the power module,
-  its cell and the two display modules counted as purchased accessories.
+- Total per unit in custom parts, fab and assembly is in [cost.md](cost.md): roughly 155 to 165 EUR
+  plus shipping and tax, plus the two display modules, which have no filed price and are probably
+  the largest single line item in the product.
 
 ## Build order
 
 Light bar first (smallest board, stands up the schematic-ERC-BOM-simulation-layout pipeline end to
-end), then the matrix board (the architectural risk, and its SPICE validation needs layout-derived
+end), then the sensing plane (the architectural risk, and its SPICE validation needs layout-derived
 antenna values, so its layout comes before its simulation per the plan), then the hub (its RF
-front end must match the measured matrix, so it goes last).
+front end must match the measured sensing plane, so it goes last). The quad board inherited that
+work rather than repeating it: it instantiates the same switch cell and the same loop geometry the
+monolith was validated on, which is why the repartition cost a re-extraction and not a redesign.

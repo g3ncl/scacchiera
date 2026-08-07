@@ -73,11 +73,18 @@ scoped test-article order. V0 through V9 permit a final-board order.
   discarded as over-built; it stays documented as a fallback only. V1 stays open on two display
   items. The datasheet revision 1.0 is
   **preliminary** (2025-08-07), a release blocker on its own terms. And the module's
-  interface-select configuration is documented nowhere in it: every pin description is conditioned
-  on "when serial interface mode is selected" while the back view shows paired 0-ohm jumpers
-  R3/R9, R5/R8 and R10/R11/R12, so which combination gives four-wire SPI and which the module
-  ships in must come from EastRising. A module strapped for parallel will not talk to the hub and
-  no adapter fixes that. The Micro-Fit mating housings and 18 AWG female terminals
+  interface-select configuration is documented nowhere in it. **That gap is now closed from the
+  controller datasheet rather than the module's**: SSD1362 revision 1.0 Table 6-2 gives
+  BS[2:0] = 000 for four-wire SPI against 110 for the 8-bit 8080 parallel the module ships in, and
+  the paired 0-ohm jumpers R3/R9, R5/R8 and R10/R11/R12 on the module's back are what strap those
+  pins. Table 7-1 independently confirms the whole strap list, including that D2 must be tied low,
+  which the vendor's own ESP32 example omits. The 2026-08-02 ESP32 tutorial capture supplies working
+  four-wire SPI code whose wiring matches this design pin for pin. What remains open is only which
+  strap state a shipped module has, and it is now a checkable purchase condition: **supply
+  configured for four-wire SPI, BS[2:0] = 000**. It cannot be corrected after delivery, because
+  module datasheet section 7.3 forbids modifying the printed circuit board and 7.7 excludes it from
+  warranty, so the earlier plan to inspect and re-strap on arrival is withdrawn. A module strapped
+  for parallel will not talk to the hub and no adapter fixes that. The Micro-Fit mating housings and 18 AWG female terminals
   are now exact, but the protected cell assembly, wire, qualified crimp or pre-crimped leads, color
   coding, and assembled harness are not yet bound;
   [hardware/harnesses.md](hardware/harnesses.md) now inventories every cable with its worst-case
@@ -140,9 +147,12 @@ scoped test-article order. V0 through V9 permit a final-board order.
   items and parity issues, mypy passed on 92 source files, and all 168 tests passed on 2026-08-01.
 - [x] V2 connectivity and static electrical checks: clean generation runs full SKiDL and KiCad ERC,
   imports reviewed deterministic routing sessions, and runs PCB DRC with schematic parity on all
-  four boards. [verification/v2-static.yaml](verification/v2-static.yaml) records the four
+  **five designs**, the four shipping boards plus the retained matrix baseline.
+  [verification/v2-static.yaml](verification/v2-static.yaml) records the four
   reviewed generated-schematic warning classes, every datasheet-traced no-connect, and the zero
-  finding board results. All four boards are 2-layer. The hub is 162 x 46 mm: it briefly went to
+  finding board results. All five are 2-layer. The quad's entry was added on 2026-08-02 with its
+  envelope, 0.6 mm thickness, antenna keepout, single-side assembly rule and the four deliberately
+  unused register outputs. The hub is 162 x 46 mm: it briefly went to
   four copper layers when a 110 mm two-layer route would not converge, and came back to two by
   buying length instead, which the 310 mm player rail has to spare. Its reviewed route keeps the
   code-owned USB shield and 0.5 mm VBUS safety distribution; the inner-layer SCLK and comparator
@@ -249,7 +259,7 @@ scoped test-article order. V0 through V9 permit a final-board order.
   loops together with FastHenry at the carrier and returns the full port-to-port matrix, from the
   same `matrix_geometry.py` constants the footprint generator and the layout use, so it cannot
   drift from the board. `hardware/tests/test_antenna_coupling.py` checks it against
-  [criteria.yaml](criteria.yaml).
+  [hardware/criteria.yaml](hardware/criteria.yaml).
 
   | Quantity | Value | Status |
   | --- | --- | --- |
@@ -336,36 +346,46 @@ scoped test-article order. V0 through V9 permit a final-board order.
   service access and the display cradle's hard stops, is a print-iteration matter and is not
   tracked here.
 
-  Fabrication artifacts now generate for **all four**
-  boards. `make pcb-fab` previously omitted the power board, so the aggregate target produced an
-  incomplete order set; that is fixed. Each board emits gerbers, drills, a JLCPCB BOM and CPL, a
-  hybrid pair and a hand-assembly BOM. Geometry extracted from the routed boards:
+  Fabrication artifacts now generate for **all five designs**. `make pcb-fab` previously omitted
+  the power board, so the aggregate target produced an incomplete order set; that is fixed. Each
+  board emits gerbers, drills, a JLCPCB BOM and CPL, a hybrid pair and a hand-assembly BOM.
+  Geometry extracted from the routed boards:
 
   | Board | Outline | Layers | Min copper track | Min drill | Min via pad |
   | --- | --- | --- | --- | --- | --- |
   | lightbar | 120.0 x 8.5 mm | 2 | 0.200 mm | 0.300 mm | 0.600 mm |
-  | matrix | 300.0 x 300.0 mm | 2 | 0.200 mm | 0.200 mm | 0.400 mm |
+  | **quad (sensing)** | 300.0 x 140.0 mm | 2 | 0.200 mm | 0.300 mm | 0.600 mm |
   | hub | 162.0 x 46.0 mm | 2 | 0.200 mm | 0.300 mm | 0.600 mm |
   | power | 90.0 x 32.0 mm | 2 | 0.200 mm | 0.300 mm | 0.600 mm |
+  | matrix, superseded baseline | 300.0 x 300.0 mm | 2 | 0.200 mm | 0.200 mm | 0.400 mm |
 
-  Two things to settle before ordering. The **matrix uses 0.2 mm via drills into 0.4 mm pads**,
-  tighter than the 0.3/0.6 the other three boards use, and tight enough that it may fall outside a
-  fabricator's standard tier and into a priced-up one. That is the largest and most expensive board,
-  so it is the worst place to discover a tier change. And **no quote exists for any board at its
-  final dimensions**, which is the original V7 blocker and still open. The rest of the definition of
-  done, STEP fit against the enclosure and a rendered review package, is untouched because no
-  enclosure model exists.
+  **Every shipping board is now on the same 0.2/0.3/0.6 tier.** The 0.2 mm via drills into 0.4 mm
+  pads that were the standing worry here belonged to the matrix, the largest and most expensive
+  board and so the worst place to discover a fabricator tier change; retiring it removed the
+  exposure rather than resolving it.
 
-- [ ] **Scoped test-article release, bare matrix board.** Documented in
-  [hardware/test-article-matrix.md](hardware/test-article-matrix.md) and buildable with
-  `make test-article-matrix`. Bare copper, unpopulated, which is the "copper antenna sample" the
+  What is still open is the quote. The sensing plane, the hub and the power board are quoted bare
+  only at JLCPCB's default 1.6 mm, where the quad needs 0.6 mm and the hub and power boards have
+  not been re-quoted since their outlines settled, so **no board is quoted at its final
+  dimensions**. That is the original V7 blocker and it stands. The rest of the definition of done,
+  STEP fit against the enclosure and a rendered review package, is untouched because no enclosure
+  model exists.
+
+- [ ] **Scoped test-article release, bare quad boards.** Documented in
+  [hardware/test-article-quad.md](hardware/test-article-quad.md) and buildable with
+  `make test-article-quad`. Bare copper, unpopulated, which is the "copper antenna sample" the
   workflow prefers over an assembled set, and which carries none of the electrical risk V3 covers
   or the assembly risk V7's BOM and CPL bullets cover. It exists to make V4 possible: assumptions
   A8 and A9 record that no published datasheet gives the tag coil inductance or the chip's
   equivalent parallel resistance, so the tag resonator cannot be sourced by further simulation and
-  only a measurement settles it. Three items must be confirmed at upload: the matrix's 0.2 mm via
-  drills against the fabricator's standard tier, copper weight and surface finish which the board
-  file does not specify, and quantity against 900 cm2 of area.
+  only a measurement settles it. Five boards, 20.92 EUR, which is a complete two-plane set plus a
+  spare rather than the matrix article's one set and four scrap boards, so it can measure the real
+  row-against-column geometry and the butt joint between two boards. Two items must be confirmed at
+  upload: copper weight and surface finish, which the board file does not specify. **0.6 mm on a
+  300 mm outline is settled**: priced 2026-08-02 against 0.8 and 1.0 mm at the same outline and
+  quantity, all three the same price, closing the last open fabrication risk on this board. The matrix article's third item is gone with the board: the quad's smallest via is
+  0.3 mm into a 0.6 mm pad, the same standard tier as every other board in the product, where the
+  matrix used 0.2 into 0.4.
 - [ ] V8 test-article measurement and model calibration
 - [ ] V9 independent review and final release
 
@@ -384,15 +404,22 @@ for any board yet.
 - [x] Board inventory complete: see [hardware/boards.md](hardware/boards.md). Four custom
   designs, five physical PCBs: light bar (x2), matrix, hub and power. The power board is fabricated
   on the light-bar panel.
-- [x] Split sensing plane defined as an alternative to the matrix board, not an addition to it:
-  see [hardware/quad.md](hardware/quad.md). One more design, four more physical PCBs, four lanes
-  each, carrying the identical sixteen loops and sixteen switch cells. A sixteen-strip layout was
-  designed first and superseded: it needed thirty-six connectors and two spine boards to do the
-  same job. Exactly one of the two sensing architectures ships. **The 2026-08-02 JLCPCB
-  quote decides it in the split's favour**: one working sensing plane costs 20.92 EUR bare against
-  the matrix board's 58.34, because a 300 by 140 mm outline pays no large-size assembly charge
-  where a 300 by 300 mm one pays 50.47 EUR.
+- [x] **Sensing plane settled 2026-08-02: the four-lane [quad board](hardware/quad.md) ships and
+  the matrix board is retired to a recorded baseline.** Four identical 300 x 140 mm boards, four
+  lanes each, carrying the identical sixteen loops and sixteen switch cells, so the inventory is
+  still four custom designs but now eight physical PCBs. A sixteen-strip layout was designed first
+  and superseded: it needed thirty-six connectors and two spine boards to do the same job, and its
+  code is deleted. **The 2026-08-02 JLCPCB quote decides between the survivors**: one working
+  sensing plane costs 20.92 EUR bare against the matrix board's 58.34, because a 300 by 140 mm
+  outline pays no large-size assembly charge where a 300 by 300 mm one pays 50.47 EUR, and because
+  a five-piece minimum yields a set plus a spare rather than one set and four scrap boards.
   Figures and caveats in [hardware/jlcpcb-sourcing.md](hardware/jlcpcb-sourcing.md).
+
+  What retirement means concretely: `hardware/pcb/matrix.py` and `matrix_layout.py` stay, generate,
+  and stay in `make check`, because the quad instantiates their `matrix_cell` and their loop
+  geometry and because every quad figure is a delta against a matrix figure. What is retired is the
+  outline, the stackup and the order path. No release artifact should be taken from the matrix
+  again.
 
 ### M2: Schematic (per board)
 
@@ -548,6 +575,15 @@ verification workflow, not evidence that a board is final or safe to order. Fina
 in [simulation-workflow.md](simulation-workflow.md).
 
 ## Status
+
+Revised 2026-08-02: the sensing plane is settled. The four-lane quad board ships, the matrix board
+is a retired baseline, and the strip-and-spine layout that preceded both is deleted. `make check`
+regenerates and DRCs all five designs at zero violations, unconnected items and parity issues, mypy
+passes, and the whole hardware suite passes. The plane costs 20.92 EUR bare against 58.34, spends
+no coupling margin (worst row-to-column coupling improves 0.0664 to 0.0652), and costs at most
+0.99 percent of tuning in interconnect. It owes software one thing, recorded rather than
+discovered: the selection chain is four registers deep, so a scan shifts 32 bits where the monolith
+shifted 16.
 
 Revised 2026-07-29. V0 passes with ordinary 5 V/2 A charging and bounded recharge time included.
 The custom power board implements the written module interface, and a purchased replacement remains

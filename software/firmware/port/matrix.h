@@ -6,7 +6,8 @@
 #include "esp_err.h"
 
 /* The sixteen line antennas: eight rows then eight columns, selected one at a
- * time by two daisy-chained 74HC595 registers on the matrix board.
+ * time by four daisy-chained 74HC595 registers, one per board of the four-lane
+ * sensing plane (docs/hardware/quad.md).
  *
  * Two properties of the wiring drive this whole driver.
  *
@@ -19,9 +20,11 @@
  * across it.
  *
  * The registers also cannot be cleared: SRCLR_N is tied high and OE_N low on
- * the matrix board, and the hub's SEL_SRCLR_N reaches nothing. So the outputs
- * are live with undefined content from power-up, and shifting a known pattern
- * is matrix_init's job rather than a convenience. See docs/hardware/matrix.md.
+ * every sensing board, and the hub's SEL_SRCLR_N reaches nothing. The split
+ * did not fix this and could not, because the seven-conductor link has no
+ * spare conductor. So the outputs are live with undefined content from
+ * power-up, and shifting a known pattern is matrix_init's job rather than a
+ * convenience. See docs/hardware/quad.md.
  */
 
 #define MATRIX_LINE_COUNT 16

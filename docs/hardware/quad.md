@@ -57,7 +57,7 @@ tunable, measurable, second-order effect, rather than a term inside sixteen reso
 | Bus resonance, all sixteen lines | 12.895 MHz | 12.767 to 12.865 MHz | `hardware/sim/quad_rf.py` |
 | Line-to-line resonance spread | 0 | **0.77 percent** | same |
 | Series interconnect per line | 0 | 181 to 773 nH | same |
-| Large-size assembly charge | 50.47 EUR | **0.00 EUR** | 2026-08-02 quote |
+| Large-size assembly charge | 50.47 EUR | **0.00 EUR** | quoted for the monolith, inferred for the split |
 | Placed references per set | 165 | 176 | generated BOM |
 | Substrate area | 90,000 mm2 | **168,000 mm2** | `test_quad.py` |
 
@@ -119,7 +119,24 @@ reproduce the monolith at 1.035 mm against 0.965 mm rather than to exploit that 
 deliberately so. Moving it would have changed every coupling figure in
 [criteria.yaml](criteria.yaml) at the same time as changing the board.
 
-0.6 mm on a 300 mm outline was the open fabrication risk and it is now quoted and accepted.
+**0.6 mm on a 300 mm outline is confirmed and costs nothing extra.** Priced 2026-08-02 against 0.8
+and 1.0 mm at the same outline and quantity: all three are the same price, so the stock the design
+wants is free. This was the last open fabrication risk on the board and it is now closed.
+
+It does carry one consequence worth stating here rather than only in the order: **HASL is not
+offered at 0.6 mm**, so the finish is OSP or ENIG. This board takes **OSP**, and on RF grounds
+rather than cost. ENIG's nickel underplate is roughly forty times copper's resistivity and magnetic,
+and at 13.56 MHz the skin depth in it is comparable to its own thickness, so antenna current would
+partly run in the lossy layer and spend loop Q. See [ordering.md](ordering.md).
+
+Worth recording how it stood before, because the sequence matters. An earlier revision asserted
+"quoted and accepted" when the quote had been taken at JLCPCB's default 1.6 mm; that claim was
+withdrawn as unverified, and the thickness was then actually priced. The conclusion is the same as
+the premature claim, and it is now evidence rather than assumption.
+
+The escape route this made unnecessary is still worth keeping in mind, because it is the freedom
+the split bought: row-to-column separation is `QUAD_THICKNESS + INTERPLANE_GAP`, so if thin stock
+had priced badly, 0.8 mm board with a 0.2 mm rib would have given the identical 1.0 mm separation.
 
 ## The board
 
@@ -157,9 +174,18 @@ in, its QH' leaves on the link out, the next board takes that as its serial in. 
 the same seven conductors, so one pinout serves both directions and **the hub interface is
 unchanged**.
 
-**It does cost a firmware change.** The chain is four registers deep, so a scan shifts 32 bits with
-the one-hot bit in the low nibble of each, where the matrix board shifts 16. That is the one thing
-this partition asks of software, and it is recorded here rather than discovered at bring-up.
+**It does cost a firmware change, and it is done.** The chain is four registers deep, so a scan
+shifts 32 bits with the one-hot bit in the low nibble of each, where the matrix board shifts 16.
+That was the one thing this partition asked of software.
+`software/firmware/port/matrix_encoding.h` implements it and
+`software/firmware/test/test_matrix_encoding.c` pins it.
+
+The subtlety worth stating, because it is where a plausible implementation goes wrong: **the
+line-to-bit map is not linear.** A board uses QA to QD and leaves QE to QH open, so line n lands on
+bit `8 * (n / 4) + (n % 4)`, not bit n. A stride of 4 would alias two boards onto each other and
+would look correct on any single board. The mapping also fixes an assembly convention nothing on
+the boards themselves records: boards 0 and 1 in chain order are the row plane, 2 and 3 the column
+plane, since the four are identical.
 
 ### The registers still cannot be cleared
 
@@ -182,7 +208,7 @@ new bound parts. `test_quad.py::test_the_split_introduces_no_new_component_type`
 
 - **The frame.** Four boards at a 35 mm lane pitch, held coplanar, with the column plane on 0.4 mm
   ribs above the rows. Far easier than sixteen loose strips, but nothing in this repository has
-  drawn it. Print-iteration work, owner-managed per V7.
-- **The firmware.** The 32-bit chain above is specified but not implemented.
+  drawn it. Print-iteration work, owner-managed per V7. It is also what fixes chain order against
+  plane, which the firmware's encoding now assumes.
 - **Everything V8 already had to measure.** The split changes none of it. Coupling remains a
   recorded ceiling rather than a demonstration of adequacy, and A8 and A9 still stand.

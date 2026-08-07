@@ -163,6 +163,12 @@ assumed:
   reader and displays leave reset uncontrolled, the light-bar rail switches on, and the matrix
   latches random selection.
 - **The matrix cannot be blanked**, so shifting a known pattern is mandatory rather than tidy.
+- **The selection chain is four eight-bit registers, one per sensing board**, so a scan shifts 32
+  bits and only the low nibble of each byte reaches a lane. Half of every register drives nothing
+  ([hardware/quad.md](../hardware/quad.md)), which makes the line-to-bit map a stride of 8 with a
+  lane count of 4 rather than the linear map the two-register monolith had. That is the one thing
+  the sensing-plane repartition asked of software, and `test_matrix_encoding.c` pins both the
+  stride and the byte order so a refactor cannot transpose the board.
 
 ## What is real and what is not
 

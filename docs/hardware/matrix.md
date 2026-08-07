@@ -1,4 +1,12 @@
-# Matrix board
+# Matrix board (superseded baseline)
+
+**Superseded 2026-08-02 by the four-lane [quad board](quad.md), which ships.** This file stays
+because it is not dead weight: the quad instantiates this board's `matrix_cell` sixteen times and
+inherits its loop geometry unchanged, so everything below about the antennas, the tag, the switch
+cell and the tuning is the shipping design's documentation too. What is superseded is the outline,
+the single-substrate stackup and the fabrication economics. The board still generates and still
+passes DRC, and it stays that way deliberately: it is the measured baseline every figure in
+`quad.md` is a delta against.
 
 The sensing board: 8 row and 8 column line antennas under the 280 x 280 mm play area, one shared
 13.56 MHz bus, and the switching that couples exactly one line at a time. A piece's square is the
@@ -117,13 +125,14 @@ better and the inset can grow. The third interacts with the 24 mm minimum alread
 [functional/physical.md](../functional/physical.md).
 
 Which is why this is a measurement question. The test article in
-[test-article-matrix.md](test-article-matrix.md) settles read range against off-centre position and
+[test-article-quad.md](test-article-quad.md) settles read range against off-centre position and
 whether a neighbouring line answers, in one session, and neither can be settled by more solving.
 
 Note what the lever is, though: `LOOP_INSET` is per-line geometry, and the three ways out are one
-sweep of one parameter. That is the argument for the split sensing plane in [quad.md](quad.md),
-where a set is a third of a board order, against 59 EUR an attempt here. The two architectures carry identical copper and identical coupling;
-they differ in what it costs to change them.
+sweep of one parameter. That was the argument for the split sensing plane in [quad.md](quad.md),
+and it is why that board rather than this one ships: an attempt costs 20.92 EUR there against 58.34
+here. The two architectures carry identical copper and identical coupling; they differ in what it
+costs to change them.
 
 ## Switch cell
 

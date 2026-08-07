@@ -11,8 +11,8 @@
 static const char *TAG = "matrix";
 
 /* 1 MHz, set by the interconnect rather than the part. The registers sit at
- * the far end of an unterminated 7-way cable to a 300 mm board, and 16 bits
- * still take only 16 us. The 74HC595's own limit is far above this; the
+ * the far end of an unterminated 7-way cable to a 300 mm board, and 32 bits
+ * still take only 32 us. The 74HC595's own limit is far above this; the
  * datasheet characterises 2.0, 4.5 and 6.0 V and the rail here is 3.3 V, so
  * quoting an exact fmax would mean interpolating a figure the design does not
  * need. */
@@ -20,16 +20,18 @@ static const char *TAG = "matrix";
 
 static spi_device_handle_t s_device;
 
-static esp_err_t shift_and_latch(uint16_t pattern)
+static esp_err_t shift_and_latch(uint32_t pattern)
 {
-    /* MSB first, so the first bit clocked out travels furthest along the
-     * chain and lands on SEL15. See matrix_encoding.h. */
-    const uint8_t frame[2] = {
-        (uint8_t)(pattern >> 8),
+    /* MSB first, so the first byte clocked out travels furthest along the
+     * chain and settles in board 3. See matrix_encoding.h. */
+    const uint8_t frame[4] = {
+        (uint8_t)(pattern >> 24),
+        (uint8_t)((pattern >> 16) & 0xFFu),
+        (uint8_t)((pattern >> 8) & 0xFFu),
         (uint8_t)(pattern & 0xFFu),
     };
     spi_transaction_t transaction = {
-        .length = 16,
+        .length = 32,
         .tx_buffer = frame,
     };
 

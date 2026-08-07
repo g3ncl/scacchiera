@@ -13,7 +13,7 @@ this file is the open list. Board-side pin orders live with each board:
 | Cell to power board | Molex Micro-Fit 3.0, 2-circuit, 430250200 with 430300038 | 1 pair | **5.871 A** |
 | Power module to hub (J3) | Micro-Fit 3.0, 8-circuit, 430250800 with 430300038 | 2 supply, 2 ground, 3 signal, 1 NC | 1.0 A |
 | Hub to power module (J2) | JST GH 1.25, 7-way | 3 supply, 4 ground | 0.67 A |
-| Hub to matrix (J4) | JST GH 1.25, 7-way | 1 RF, 1 supply, 2 ground, 3 signal | below 0.1 A |
+| Hub to sensing plane, and board to board, four off (hub J4, then each board's J2 to the next board's J1) | JST GH 1.25, 7-way | 1 RF, 1 supply, 2 ground, 3 signal | below 0.1 A |
 | Hub to display, two off (J5, J6) | JST GH 1.25, 7-way | 1 supply, 1 ground, 5 signal | 0.32 A |
 | Hub to light bar, two off (J7, J8) | JST GH 1.25, 4-way | 1 supply, 1 ground, 2 data | 0.224 A |
 | Hub UART service (J9) | JST GH 1.25, 4-way | 1 supply, 1 ground, 2 signal | below 0.1 A |
@@ -22,6 +22,12 @@ this file is the open list. Board-side pin orders live with each board:
 
 The two harnesses that carry real current are the cell link and the module output. Everything else
 is signal or a few hundred milliamps.
+
+**The four sensing harnesses have a requirement no other cable here has: they must all be the same
+length**, `quad_geometry.HARNESS_LENGTH_MM`, currently 100 mm. This is electrical rather than tidy.
+A common detuning term across the four boards is absorbed by the nominal 220 pF; a per-board one is
+not, because the four boards are one design and cannot be tuned individually. See
+[quad.md](quad.md). Equal beats short here, which is the opposite of the usual instinct.
 
 Two derivations worth keeping, because both looked like problems and are not:
 

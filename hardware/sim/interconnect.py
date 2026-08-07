@@ -1,13 +1,13 @@
-"""Series inductance of the cabling and spine copper the split plane adds.
+"""Series inductance of the cabling and on-board bus copper the split plane adds.
 
 The monolithic matrix board has one shared bus on one substrate. Splitting it
-puts a harness and a length of spine between the reader and every tank, and that
-inductance lands in series with the loop. It is the whole electrical cost of the
-split, so it is modelled from geometry here rather than guessed at once in a
+puts a harness and a length of routed bus between the reader and every tank, and
+that inductance lands in series with the loop. It is the whole electrical cost of
+the split, so it is modelled from geometry here rather than guessed at once in a
 deck.
 
 Two closed forms, both standard and both magnetoquasistatic, which is the right
-regime: at 13.56 MHz a 300 mm spine is 0.014 of a wavelength.
+regime: at 13.56 MHz a 300 mm bus run is 0.014 of a wavelength.
 
 **The connector term is an assumption, not a datasheet value.** JST publishes no
 contact inductance for the GH series, and no connector vendor at this price

@@ -1,5 +1,5 @@
 version: 1
-reviewed_on: 2026-07-29
+reviewed_on: 2026-08-02
 gate: V2
 
 reviewed_erc_warning_classes:
@@ -48,6 +48,17 @@ matrix_no_connects:
     datasheet: Vault/Scacchiera/Datasheets/74HC595D-118_C5947.pdf
     locator: SO16 pin 9 Q7S serial output; deliberately open at the end of the register chain.
 
+quad_no_connects:
+  U1:
+    pins: ['4', '5', '6', '7']
+    datasheet: Vault/Scacchiera/Datasheets/74HC595D-118_C5947.pdf
+    locator: >-
+      SO16 pins 4 to 7, outputs Q4 to Q7. A board carries four lanes and the register has eight
+      outputs, so half of it is deliberately unused. The waste is bought knowingly, because the
+      part is Basic at 0.20 EUR and the alternative is eight lanes per board and a 280 mm outline
+      back inside the fabricator's size charges. Q7S on pin 9 is used here, unlike the matrix,
+      because every board chains into the next.
+
 power_no_connects:
   U1:
     pins: ['2', '3', '4', '7', '12']
@@ -64,9 +75,26 @@ power_no_connects:
 
 board_results:
   lightbar: {drc_violations: 0, unconnected_items: 0, schematic_parity_issues: 0}
-  matrix: {drc_violations: 0, unconnected_items: 0, schematic_parity_issues: 0}
+  quad: {drc_violations: 0, unconnected_items: 0, schematic_parity_issues: 0}
   hub: {drc_violations: 0, unconnected_items: 0, schematic_parity_issues: 0}
   power: {drc_violations: 0, unconnected_items: 0, schematic_parity_issues: 0}
+  matrix: {drc_violations: 0, unconnected_items: 0, schematic_parity_issues: 0}
+
+quad_layout:
+  envelope_mm: [300, 140]
+  copper_layers: 2
+  board_thickness_mm: 0.6
+  reviewed_route: hardware/pcb/routes/quad.ses
+  rationale: The sensing plane that ships. Four identical boards of four lanes replace one
+    300 x 300 mm monolith, on the 2026-08-02 quote; the matrix entry above is the retained
+    baseline, not a second option.
+  antenna_keepout: No track or via crosses the 276 mm of loop copper. Enforced as a board rule
+    rather than left to the router, so the four loops cannot acquire a crossing on a reroute.
+  assembly_side: Loops on F.Cu, all 52 fitted components on B.Cu, so the top face stays flat
+    against the controlled air gap.
+  fabrication_tier: 0.200 mm minimum track, 0.300 mm minimum drill, 0.600 mm minimum via pad, the
+    same standard tier as the lightbar, hub and power boards. The matrix's 0.200/0.400 vias were
+    the tightest geometry in the product and left with it.
 
 power_layout:
   envelope_mm: [90, 32]
@@ -97,6 +125,7 @@ hub_layout:
 
 commands:
   static_gate: make check
+  fresh_autoroute_quad: make pcb-quad-reroute
   fresh_autoroute_matrix: make pcb-matrix-reroute
   fresh_autoroute_hub: make pcb-hub-reroute
   fresh_autoroute_power: make pcb-power-reroute

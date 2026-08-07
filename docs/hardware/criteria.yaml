@@ -375,7 +375,7 @@ criteria:
     test_ids: [TEST-QUAD-RF-003]
 
   QUAD-BUS-RESONANCE:
-    description: Selected-line resonance on the split bus, with the harness and spine interconnect in place.
+    description: Selected-line resonance on the split bus, with the harness and chained on-board bus interconnect in place.
     requirement_ids: [PHY-RF-001]
     unit: MHz
     limits: {minimum: 12.5, maximum: 15.0}
@@ -401,7 +401,7 @@ criteria:
     limits: {maximum: 2.10}
     evidence: {class: Derived, source: hardware/pcb/quad_geometry.py, locator: Four board outlines over one matrix outline}
     operating_conditions: Bare outlines, excluding panelisation rails.
-    margin: The split buys 1.87 times the substrate. That is structural rather than a layout inefficiency, because the monolith carries two planes of antenna on the two faces of one substrate, and any per-line strip uses one face and wastes the other. Recorded as a ceiling so a widened strip or spine cannot quietly make the trade worse without the number moving.
+    margin: The split buys 1.87 times the substrate. That is structural rather than a layout inefficiency, because the monolith carries two planes of antenna on the two faces of one substrate, and any split uses one face per board and wastes the other. Recorded as a ceiling so a widened board or an added one cannot quietly make the trade worse without the number moving.
     test_ids: [TEST-QUAD-COST-001]
 
   PHY-TAG-RECESS-DIAMETER:

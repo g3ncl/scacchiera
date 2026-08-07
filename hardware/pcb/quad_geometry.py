@@ -8,8 +8,8 @@ in two planes, each carrying four lanes and its own selection register.
 Four is the block size the fabricator's pricing and minimum order picked. A
 narrow outline escapes the size charges a 300 by 300 mm one pays (measured, not
 assumed: 140 mm wide prices at the same EUR per square millimetre as a 33 mm
-strip), and four boards is exactly one set where the five-piece minimum leaves a
-single spare. One board per line would be more flexible per experiment and cost
+outline did), and four boards is exactly one set where the five-piece minimum
+leaves a single spare. One board per line would be more flexible per experiment and cost
 thirty-six connectors to get there; four is where the curve turns.
 
 The loop copper itself does not change. A board's long axis carries its loops at

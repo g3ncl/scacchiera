@@ -21,9 +21,9 @@ export KICAD_FOOTPRINT_DIR
 	pcb-lightbar pcb-lightbar-drc pcb-lightbar-fab \
 	pcb-matrix pcb-matrix-route pcb-matrix-reroute pcb-matrix-drc pcb-matrix-fab \
 	pcb-hub pcb-hub-route pcb-hub-reroute pcb-hub-drc pcb-hub-fab \
-	pcb-power pcb-power-reroute pcb-power-drc pcb-power-fab power-rail-fit panel pcb-fab \
+	pcb-power pcb-power-reroute pcb-power-drc pcb-power-fab power-rail-fit panel panel-fab pcb-fab \
 	firmware firmware-test firmware-pins firmware-font firmware-target \
-	test-article-matrix clean
+	test-article-quad clean
 
 check: pcb-lightbar-drc pcb-matrix-drc pcb-hub-drc pcb-power-drc \
 	pcb-quad-drc firmware-test
@@ -141,6 +141,12 @@ power-rail-fit:
 panel: pcb-lightbar pcb-power
 	/usr/bin/python3 -m hardware.pcb.panel
 
+# Bare-fabrication artifacts for the panel. No BOM or CPL: the panel is built
+# from routed boards, not from a netlist, so it has no schematic to derive them
+# from. Order it bare; price the power board's assembly from its own pair.
+panel-fab: panel
+	$(PYTHON) -m hardware.pcb.fab panel
+
 # Layout runs under the system interpreter: pcbnew ships with the native
 # KiCad install and is not importable from the venv.
 pcb-lightbar: schematic-lightbar
@@ -152,17 +158,18 @@ pcb-lightbar-drc: pcb-lightbar
 pcb-lightbar-fab: schematic-lightbar
 	$(PYTHON) -m hardware.pcb.fab lightbar
 
-# Every board design. The quad and the matrix are alternative sensing planes
-# rather than both shipping; both are exported because the matrix remains the
-# recorded baseline the quad is measured against.
+# Every board design. The quad is the sensing plane that ships; the matrix is
+# still exported because it remains the recorded baseline the quad is measured
+# against, and an unexported baseline rots.
 pcb-fab: pcb-lightbar-fab pcb-matrix-fab pcb-hub-fab pcb-power-fab pcb-quad-fab
 
-# The bare matrix test article. Regenerates only what the release in
-# docs/hardware/test-article-matrix.md needs, so the upload is one file.
-test-article-matrix: pcb-matrix-drc pcb-matrix-fab
+# The bare sensing-plane test article. Regenerates only what the release in
+# docs/hardware/test-article-quad.md needs, so the upload is one file.
+test-article-quad: pcb-quad-drc pcb-quad-fab
 	@echo
-	@echo "Upload: hardware/pcb/generated/matrix/matrix_gerbers.zip"
-	@echo "Spec and pre-upload checks: docs/hardware/test-article-matrix.md"
+	@echo "Upload: hardware/pcb/generated/quad/quad_gerbers.zip"
+	@echo "Order five, at 0.6 mm. Four is a plane, the fifth is the spare."
+	@echo "Spec and pre-upload checks: docs/hardware/test-article-quad.md"
 
 clean:
 	rm -rf hardware/pcb/generated hardware/sim/generated hardware/cad/generated \

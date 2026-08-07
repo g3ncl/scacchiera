@@ -182,8 +182,8 @@ def matrix_cell(
 
 
 def shift_register(circuit: Circuit, ref: str) -> Part:
-    """The one-hot selection register. Shared with the split plane's spine,
-    which needs one of these per eight lines exactly as this board needs two."""
+    """The one-hot selection register. Shared with the quad board, which needs
+    one per four lanes where this board needs two for sixteen."""
     names = (
         "QB", "QC", "QD", "QE", "QF", "QG", "QH", "GND",
         "QH_SERIAL", "SRCLR_N", "SRCLK", "RCLK", "OE_N", "SER", "QA", "VCC",

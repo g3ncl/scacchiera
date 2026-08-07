@@ -18,6 +18,7 @@ from hardware.pcb.generate import NO_CONNECTS as SCHEMATIC_NO_CONNECTS
 from hardware.pcb.hub import NO_CONNECTS, build_hub
 from hardware.pcb.lightbar import build_lightbar
 from hardware.pcb.matrix import build_matrix
+from hardware.pcb.quad import build_quad
 
 
 ROOT = Path(__file__).parents[2]
@@ -139,6 +140,21 @@ def test_board_to_board_connectors_match_at_both_ends() -> None:
     )
     assert _pin_map(hub, "J4", 7) == (
         "GND", "RF_BUS", "GND", "3V3", "MOSI", "SCLK", "SEL_RCLK"
+    )
+
+    # The sensing plane that ships. Its link in must present the same seven
+    # conductors in the same order as the monolith did, because that is what
+    # keeps the hub interface unchanged across the repartition, and its link
+    # out must present them again so the four boards chain with one pinout in
+    # both directions. Only the serial conductor differs between the two ends,
+    # carrying this board's QH' outward where the link in carried the previous
+    # board's.
+    quad = build_quad()
+    assert _pin_map(quad, "J1", 7) == (
+        "GND", "RF_BUS", "GND", "3V3", "SEL_SER", "SEL_SRCLK", "SEL_RCLK"
+    )
+    assert _pin_map(quad, "J2", 7) == (
+        "GND", "RF_BUS", "GND", "3V3", "SEL_CHAIN", "SEL_SRCLK", "SEL_RCLK"
     )
 
     bar_link = ("LED_5V", "GND", "DATA_IN", "DATA_OUT")
