@@ -13,6 +13,16 @@ from hardware.pcb.netlist import ComponentRecord, Netlist
 __all__ = ["BoardBuilder", "Placement", "Position"]
 
 
+def _named_field(footprint: pcbnew.FOOTPRINT, name: str) -> pcbnew.PCB_FIELD:
+    # The by-name field lookup is GetFieldByName in current pcbnew bindings and
+    # an overload of GetField in older ones; the desktop and CI carry different
+    # point releases, so both spellings must resolve.
+    getter = getattr(footprint, "GetFieldByName", None)
+    if getter is not None:
+        return getter(name)
+    return footprint.GetField(name)
+
+
 class BoardBuilder:
     """Build a deterministic board from a checked SKiDL netlist."""
 
@@ -55,8 +65,8 @@ class BoardBuilder:
         footprint.SetValue(component.value)
         footprint.SetAttributes(footprint.GetAttributes() & ~pcbnew.FP_EXCLUDE_FROM_BOM)
         footprint.SetFPIDAsString(component.footprint)
-        footprint.GetField("Description").SetText(component.description)
-        footprint.GetField("Datasheet").SetText(component.datasheet)
+        _named_field(footprint, "Description").SetText(component.description)
+        _named_field(footprint, "Datasheet").SetText(component.datasheet)
         schematic_path = pcbnew.KIID_PATH()
         schematic_path.push_back(pcbnew.KIID(component.schematic_id))
         footprint.SetPath(schematic_path)
