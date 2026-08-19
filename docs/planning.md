@@ -198,9 +198,11 @@ and the range to 125 degrees includes that rise, so hub L1 tolerates 108.8 degre
 and power L1 tolerates 120.1 at 4.5 A. The hot winding moves the buck's dropout from 3.513 to
 3.520 V, 7 mV of the 487 mV in hand.
 
-> **Open:** Diodes publishes the AP63203's switch resistance as a typical with no limits and no
-> temperature coefficient, so a hot dropout cannot be closed from any filed document. The fitted
-> capacitor bank's ESR needs a V8 measurement.
+> **Open, sharpened by a 2026-08-19 vendor-document search:** the current AP63203 datasheet
+> (Rev. 3-2) adds a typical RDS(on)-versus-temperature curve (Figure 9), so a typical hot-dropout
+> estimate is now supportable, but it still publishes no maximum RDS(on), no temperature
+> coefficient and no cornered value, so worst-case hot dropout remains unprovable from documents.
+> The fitted capacitor bank's ESR needs a V8 measurement.
 
 **Startup and transients.** Soft-start inrush, dropout and hold-up are derived, as are warm reset,
 power-off discharge and repeated brownout. A warm reset reaches no peripheral, and the ten
@@ -214,8 +216,12 @@ measurements.
 **Coincident loads.** The corrected worst case is 1.48 A against a 5 V, 2 A interface. The fitted
 BQ25895 and TPS61088 path is swept at the full 10 W obligation.
 
-> **Open:** radio and reader current steps as transients. The load-transient response needs the
-> buck's compensation network, which Diodes does not publish.
+> **Open, corrected 2026-08-19:** radio and reader current steps as transients. Diodes does
+> publish the buck's nominal internal loop values (7.6 nF, 18 kOhm, 20 kOhm, slope compensation
+> 0.84 V/T, current-sense ratio 0.2 V/A, block diagram of Rev. 3-2), so a nominal transient model
+> is constructible and is now open work rather than impossible; what stays missing is any
+> tolerance or corner for those internals, so the result will be nominal evidence, not
+> worst-case.
 
 **Faults.** Light-bar short circuit on the vendor model, input-switch limit derived, sensor open and
 short in the charge gate, averaged power-board missing, depleted and shorted cell cases, a stuck
@@ -243,14 +249,20 @@ Sequencing is done. Five hub signals cross between rails, read from the schemati
 LED_DATA, LED_EN and LED_FAULT_N land on pins their datasheets rate against ground, so being driven
 before their own rail exists is a non-event, and CHARGE_TEMP_OK shares a supply with its driver.
 
-> **Open, and recorded as a finding rather than a pass:** Diodes gives the AP22811 no absolute
-> maximum for its fault flag at all while rating the enable against VIN, so holding
-> CHARGE_INPUT_FAULT_N at 3.3 V on battery with USB absent is unspecified rather than permitted. R15
-> bounds the exposure at 33 uA, smaller than the leakages the same sheet specifies, but that bounds
-> the condition instead of clearing it. It stays a vendor or V8 question.
+> **Open, and recorded as a finding rather than a pass:** the AP22811's FLG pin has published
+> characterization at VFLG = 5 V (60 Ohm maximum sink resistance at 10 mA, 1 uA maximum
+> off-current), but no absolute maximum and no recommended operating voltage, and the design's
+> condition of VIN = 0 V with FLG at 3.3 V appears nowhere (the VIN = 0 characterization covers
+> VOUT, a different pin). A test condition is not a rating: R15's 33 uA bounds the exposure
+> without clearing the condition. It stays a vendor or V8 question.
 >
-> **Open:** guaranteed stability, overshoot and undershoot. TI specifies the error-amplifier
-> transconductance only typically, so the plus or minus 30 percent sweep is not release evidence.
+> **Open:** guaranteed stability, overshoot and undershoot. The TPS61088's GEA is published as
+> 190 uA/V typical at 25 degrees with no MIN or MAX (the -Q1 table that formats it as a minimum
+> governs a different part), and TI states the application-section loop equations are not part of
+> the component specification. The published equations make the nominal loop model fully
+> constructible, which the 4,374-corner sensitivity sweep exercises, but the plus or minus 30
+> percent GEA range remains assumed, so the 22 nF selection and its 54.6 degree phase margin are
+> nominal and sensitivity evidence, not guaranteed worst-case.
 
 **Waveform integrity.** I2C, the light-bar data line, the matrix serial link and the filtered Type-C
 CC current advertisement are bounded against their sources. The display SPI segment is bounded too:

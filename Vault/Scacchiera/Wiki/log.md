@@ -1990,3 +1990,19 @@ short window before trusting the fall, and the facts it rests on are filed where
 V6 model can check them. The IRQ table also records RX_SC_DET (bit 15), the subcarrier-detection
 path that would decide an empty inventory slot in a third of a millisecond instead of six; wiring
 that in stays a bench-measured change, but the register bit is no longer unfiled.
+
+
+## 2026-08-19 The four V3 vendor gaps, re-searched against current documents
+
+Updated [[ap63203wu-7-datasheet]], [[ap22811aw5-7-datasheet]] and [[tps61088rhlr-datasheet]] with
+a targeted search of the current manufacturer documents, and sharpened the four V3 open items in
+planning to match what actually exists. Two statements were too strong and are corrected: the
+AP63203's compensation network is not unpublished, its nominals are on the Rev. 3-2 block diagram
+(7.6 nF, 18 kOhm, 20 kOhm, slope compensation and current-sense ratio), and a typical
+RDS(on)-versus-temperature curve exists as Figure 9. What no document provides, for any of the
+four, is tolerance or corner information: no maximum RDS(on), no FLG rating at all on the AP22811
+(a 5 V test condition is not a rating), and a TPS61088 GEA that is typical-only with TI excluding
+its own application equations from the specification. So the gaps stand for worst-case release
+evidence, but a nominal AP63203 transient model moved from impossible to open work, and every gap
+now states precisely which number is missing, which is what a vendor query or a V8 measurement
+plan needs.

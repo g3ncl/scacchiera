@@ -3,7 +3,7 @@ type: source-summary
 tags:
   - wiki/source
   - wiki/component
-date_updated: 2026-08-01
+date_updated: 2026-08-19
 source_file: "Datasheets/AP22811AW5-7_C3001660.pdf"
 source_title: "AP22811AW5-7 manufacturer datasheet"
 publisher: "Diodes Incorporated"
@@ -37,3 +37,22 @@ The hub does exactly that: R15 pulls the flag to 3.3 V and the board runs from t
 USB absent. The condition is unspecified rather than violating a stated limit. R15 bounds the pin
 at 33 uA, which is smaller than leakages this sheet specifies elsewhere, but the gap is real and
 belongs to the vendor or to a V8 measurement.
+
+## FLG pin characterization, read 2026-08-19
+
+A targeted search for the fault flag's missing absolute maximum confirmed the gap is real and
+sharpened what is known around it.
+
+- Absolute Maximum Ratings list VIN (-0.3 to +6.0 V), VOUT and VEN (both -0.3 to VIN + 0.3 V);
+  there is no VFLG rating and no recommended operating range for the pin. [locator::Absolute
+  Maximum Ratings]
+- FLG is an open-drain fault output with published characterization: RFLG 40 Ohm typical, 60 Ohm
+  maximum at 10 mA sink, and off-state leakage IFOH 0.01 uA typical, 1 uA maximum measured at
+  VFLG = 5 V. [locator::Electrical Characteristics] The 5 V test point shows the pin was
+  characterized at that voltage, but a test condition is neither an absolute maximum nor a
+  recommended operating condition.
+- The design's specific condition, VIN = 0 V with FLG pulled to 3.3 V on battery, appears nowhere:
+  the datasheet's VIN = 0 characterization covers VOUT reverse leakage, a different pin. R15
+  bounds the injected current to 33 uA, which bounds the exposure without establishing that the
+  pin's internal structures are rated for the condition. The gap stays a vendor question or a V8
+  measurement.

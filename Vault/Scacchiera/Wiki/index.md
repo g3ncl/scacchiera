@@ -71,7 +71,7 @@ One `wiki/source` summary per ingested raw source. Factual, no interpretation.
 | [[er-oledm3-12-1w-manufacturer-evidence]] | component manufacturer evidence | 2026-08-01 |
 | [[bq25619rtwr-datasheet]] | component datasheet | 2026-07-29 |
 | [[bq25895rtwr-datasheet]] | component datasheet | 2026-07-31 |
-| [[tps61088rhlr-datasheet]] | component datasheet | 2026-07-31 |
+| [[tps61088rhlr-datasheet]] | component datasheet | 2026-08-19 |
 | [[micro-fit-3-0-mating-evidence]] | connector manufacturer evidence | 2026-07-29 |
 | [[usb-type-c-r2-current-advertisement]] | USB Type-C specification scoped extract | 2026-07-29 |
 | [[ssd1362-datasheet]] | component datasheet | 2026-07-30 |
@@ -141,8 +141,8 @@ One exact source summary per purchased fitted MPN. The structured audit is
 | [[74hc595d-118-datasheet]] | Nexperia | 2026-07-26 |
 | [[7m27100009-datasheet]] | TXC | 2026-07-26 |
 | [[a1257wr-s-4p-datasheet]] | CJT | 2026-07-26 |
-| [[ap22811aw5-7-datasheet]] | Diodes Incorporated | 2026-08-01 |
-| [[ap63203wu-7-datasheet]] | Diodes Incorporated | 2026-07-31 |
+| [[ap22811aw5-7-datasheet]] | Diodes Incorporated | 2026-08-19 |
+| [[ap63203wu-7-datasheet]] | Diodes Incorporated | 2026-08-19 |
 | [[bar64-02v-datasheet]] | Jiangsu Changjing Electronics Technology | 2026-07-26 |
 | [[bat54h-datasheet]] | Jiangsu Changjing Electronics Technology | 2026-07-29 |
 | [[bq25895rtwr-datasheet]] | Texas Instruments | 2026-07-31 |
