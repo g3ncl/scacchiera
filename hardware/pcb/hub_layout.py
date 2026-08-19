@@ -247,7 +247,12 @@ def generate_board(output: Path = OUTPUT / "hub.kicad_pcb") -> None:
         placement = placements.get(component.reference)
         if placement is not None:
             builder.add_component(component, placement)
-    shield_pads = sorted(builder.pad_positions("J1", "SH"), key=lambda point: (point.y, point.x))
+    # The receptacle's four shield pads share one pad number, spelled SH in
+    # some footprint-library releases and S1 in others.
+    shield_pads = sorted(
+        builder.pad_positions("J1", "SH") or builder.pad_positions("J1", "S1"),
+        key=lambda point: (point.y, point.x),
+    )
     top_left, top_right, bottom_left, bottom_right = shield_pads
     builder.add_track(
         "USB_SHIELD",

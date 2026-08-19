@@ -41,8 +41,25 @@ NO_CONNECTS: dict[str, tuple[str, ...]] = {
 }
 
 
+# Pin names that differ between KiCad symbol-library releases, resolved at
+# lookup so the schematic binds by meaning rather than by whichever spelling
+# the installed library carries. The USB-C receptacle's shield pin is "SH" in
+# some releases and "SHIELD" in others.
+_PIN_ALIASES: dict[str, tuple[str, ...]] = {"SH": ("SHIELD",), "SHIELD": ("SH",)}
+
+
+def _resolve_pin_name(part: Part, pin: str) -> str:
+    names = {p.name for p in part.pins} | {p.num for p in part.pins}
+    if pin in names:
+        return pin
+    for alias in _PIN_ALIASES.get(pin, ()):
+        if alias in names:
+            return alias
+    raise KeyError(f"{part.ref} has no pin named {pin} or an alias of it")
+
+
 def _connect(net: Net, part: Part, pin: str) -> None:
-    net += part[pin]
+    net += part[_resolve_pin_name(part, pin)]
 
 
 def _pin_net(circuit: Circuit, name: str, part: Part, pin: str) -> Net:

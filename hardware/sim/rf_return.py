@@ -144,12 +144,20 @@ def solve(text: str, name: str) -> ReturnPath:
         raise FileNotFoundError(
             f"fasthenry not found at {FASTHENRY}; set FASTHENRY to its path"
         )
-    subprocess.run(
+    # FastHenry's exit status is undefined: its K&R main falls off the end, so
+    # the code varies with build and deck. Success is judged by the artifact:
+    # a fresh impedance matrix that parses, not a register's leftovers.
+    matrix_path = GENERATED_DIR / "Zc.mat"
+    matrix_path.unlink(missing_ok=True)
+    completed = subprocess.run(
         (FASTHENRY, deck_path.name),
         cwd=GENERATED_DIR,
-        check=True,
+        check=False,
         capture_output=True,
     )
+    if not matrix_path.is_file():
+        tail = completed.stdout.decode(errors="replace")[-400:]
+        raise RuntimeError(f"fasthenry produced no impedance matrix: {tail}")
     matrix = (GENERATED_DIR / "Zc.mat").read_text(encoding="utf-8")
     match = None
     for line in matrix.splitlines():

@@ -205,7 +205,12 @@ class BoardBuilder:
         # Vias stay legal: ground stitching between the two pours is wanted here,
         # and a via is only useful to the router if it can leave on a track.
         zone.SetDoNotAllowVias(False)
-        zone.SetDoNotAllowZoneFills(False)
+        # The copper-fill exclusion setter is SetDoNotAllowCopperPour in current
+        # pcbnew bindings and SetDoNotAllowZoneFills in older ones.
+        setter = getattr(zone, "SetDoNotAllowCopperPour", None)
+        if setter is None:
+            setter = zone.SetDoNotAllowZoneFills
+        setter(False)
         outline = zone.Outline()
         outline.NewOutline()
         for corner in corners:

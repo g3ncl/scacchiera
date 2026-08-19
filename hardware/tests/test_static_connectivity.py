@@ -15,7 +15,7 @@ from skidl import Circuit, Part
 from hardware.pcb.erc import REVIEWED_WARNINGS
 from hardware.pcb.fab import copper_layers, gerber_layers
 from hardware.pcb.generate import NO_CONNECTS as SCHEMATIC_NO_CONNECTS
-from hardware.pcb.hub import NO_CONNECTS, build_hub
+from hardware.pcb.hub import NO_CONNECTS, _resolve_pin_name, build_hub
 from hardware.pcb.lightbar import build_lightbar
 from hardware.pcb.matrix import build_matrix
 from hardware.pcb.quad import build_quad
@@ -46,7 +46,8 @@ def _part(circuit: Circuit, reference: str) -> Part:
 
 
 def _net(circuit: Circuit, reference: str, pin: str) -> str:
-    return str(_part(circuit, reference)[pin].net.name)
+    part = _part(circuit, reference)
+    return str(part[_resolve_pin_name(part, pin)].net.name)
 
 
 def _pin_map(circuit: Circuit, reference: str, count: int) -> tuple[str, ...]:
