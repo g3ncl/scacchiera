@@ -10,7 +10,7 @@ from hardware.pcb.fab import (
     assembly_references,
     gerber_layers,
     validate_assembly_designators,
-    write_hand_bom,
+    write_self_solder_bom,
     write_jlc_bom,
     write_jlc_cpl,
 )
@@ -118,7 +118,7 @@ def test_hybrid_exports_split_hand_assembly_without_mismatching_cpl(tmp_path: Pa
     )
 
     write_jlc_bom(engineering, hybrid_bom, HAND_ASSEMBLY_ROUTES)
-    write_hand_bom(engineering, hand_bom)
+    write_self_solder_bom(engineering, hand_bom)
 
     with hybrid_bom.open(encoding="utf-8", newline="") as bom_file:
         hybrid_rows = list(csv.DictReader(bom_file))

@@ -1,14 +1,13 @@
 """Coincident worst-case load the hub presents to its power module.
 
-The power-module interface obliges a module to supply 1.3 A. That number was an
-estimate when it was written. This is the derivation, from filed data sheets,
+The power-module interface obliges a module to supply 2.0 A. This is the
+derivation, from filed manufacturer evidence,
 with every part assumed to be doing its worst at the same moment: the radio
 transmitting, the reader driving its field, both light bars white, and the
 matrix biased.
 
-One input is not sourced. The two display modules are fixed by the functional
-specification but have no filed data sheet and no V1 record, so their current is
-an allowance rather than a value, marked below and generous on purpose.
+The display supplier publishes contradictory active-current claims. The formal
+electrical table's larger value is used until the supplier resolves the conflict.
 """
 
 from dataclasses import dataclass
@@ -30,11 +29,11 @@ READER_VBAT_A = 0.020
 MATRIX_BIAS_A = 0.014
 MATRIX_LOGIC_A = 0.005
 
-# ASSUMED. The ER-OLEDM3.12-1W modules are purchased accessories with no filed
-# data sheet, so this is an allowance, not a datum: 100 mA each is generous for
-# a 256 by 64 monochrome panel and is used only to make the total pessimistic.
-# Filing their data sheet is an open V1 action and would replace this.
-DISPLAY_ALLOWANCE_EACH_A = 0.100
+# ER-OLEDM3.12-1 section 4.3: 320 mA maximum at 3.3 V with 100 percent
+# display area on. The product page instead calls 2 mA the active maximum,
+# contradicting the same data sheet's 2 mA sleep row. The larger value is the
+# only safe basis while that V1 conflict is open.
+DISPLAY_MAX_EACH_A = 0.320
 DISPLAY_COUNT = 2
 
 # docs/hardware/lightbar.md: 14 pixels at 16 mA per bar, both bars white. This
@@ -63,7 +62,7 @@ class LoadBudget:
             + READER_VBAT_A
             + MATRIX_BIAS_A
             + MATRIX_LOGIC_A
-            + DISPLAY_ALLOWANCE_EACH_A * DISPLAY_COUNT
+            + DISPLAY_MAX_EACH_A * DISPLAY_COUNT
         )
 
     @property
@@ -76,6 +75,6 @@ class LoadBudget:
         return self.rail_3v3_reflected_a + LIGHTBAR_A
 
     @property
-    def assumed_fraction(self) -> float:
-        """How much of the 3.3 V rail rests on the unsourced display allowance."""
-        return DISPLAY_ALLOWANCE_EACH_A * DISPLAY_COUNT / self.rail_3v3_a
+    def display_fraction(self) -> float:
+        """How much of the 3.3 V rail belongs to the two displays."""
+        return DISPLAY_MAX_EACH_A * DISPLAY_COUNT / self.rail_3v3_a

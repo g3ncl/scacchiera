@@ -10,6 +10,7 @@ translated into place, and appended whole, so a panel can never disagree with
 the board it came from. Re-run it after any board changes.
 """
 
+import json
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -53,7 +54,7 @@ def _board_extent(board: pcbnew.BOARD) -> tuple[float, float]:
 def placements() -> tuple[Placement, ...]:
     """Two bars stacked above the power board, all left-aligned.
 
-    The bars are 120 mm long and the power board 46 mm, so stacking rather than
+    The bars are 120 mm long and the power board 90 mm, so stacking rather than
     tiling keeps the panel at the bars' length instead of three times it.
     """
     lightbar_height = 8.5
@@ -197,6 +198,29 @@ def build_panel(output: Path = OUTPUT / "panel.kicad_pcb") -> None:
     output.parent.mkdir(parents=True, exist_ok=True)
     if not pcbnew.SaveBoard(str(output), panel):
         raise OSError(f"could not save panel {output}")
+
+    # Which suffix belongs to which board, written down rather than inferred.
+    # fab.py builds the panel's assembly BOM and CPL from a constituent board's
+    # own pair, and it needs to know that the power board's U1 is U1_3 here. It
+    # runs under the venv interpreter and cannot import this module, since
+    # pcbnew only exists in the system one, so the mapping travels as data.
+    manifest = output.parent / "panel_manifest.json"
+    manifest.write_text(
+        json.dumps(
+            {
+                "size_mm": [round(panel_width, 3), round(panel_height, 3)],
+                # A list, not a map keyed by board: the light bar appears twice
+                # and a map would silently keep one of them.
+                "placements": [
+                    {"board": placement.board, "suffix": f"_{index + 1}"}
+                    for index, placement in enumerate(placements())
+                ],
+            },
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
     print(f"panel {panel_width:.1f} x {panel_height:.1f} mm -> {output}")
 
 

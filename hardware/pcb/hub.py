@@ -33,9 +33,10 @@ from hardware.pcb.parts import (
 
 NO_CONNECTS: dict[str, tuple[str, ...]] = {
     "J1": ("A6", "A7", "A8", "B6", "B7", "B8"),
+    "J3": ("8",),
     "J8": ("4",),
     "U3": ("2", "11", "14", "20", "23", "24", "31", "32", "33", "34", "35", "40"),
-    "U4": ("4", "7", "10", "15", "16", "17", "18", "19", "20", "21", "32", "33", "34", "35"),
+    "U4": ("4", "7", "10", "15", "17", "18", "20", "21", "32", "33", "34", "35"),
     "U6": ("1", "13", "14", "15", "18", "19", "20"),
 }
 
@@ -66,6 +67,19 @@ def _connector(circuit: Circuit, ref: str, names: tuple[str, ...], mpn: str, cos
         mpn=mpn,
         description="Keyed service connector",
         unit_cost_eur=cost,
+    )
+
+
+def _microfit8(circuit: Circuit, ref: str, names: tuple[str, ...]) -> Part:
+    return component(
+        circuit,
+        ref,
+        "430450800",
+        "Connector_Molex:Molex_Micro-Fit_3.0_43045-0800_2x04_P3.00mm_Horizontal",
+        tuple(PinDefinition(str(index), name) for index, name in enumerate(names, start=1)),
+        mpn="430450800",
+        description="8.5 A per-contact locking power connector",
+        unit_cost_eur=0.66,
     )
 
 
@@ -184,10 +198,22 @@ def _build_power(circuit: Circuit, nets: dict[str, Net]) -> None:
     for pin in ("A4", "A9", "B4", "B9"):
         _connect(nets["USB_VBUS"], usb, pin)
     _no_connect(circuit, usb, NO_CONNECTS["J1"])
-    for index, pin in (("1", "A5"), ("2", "B5")):
+    for index, pin in ((1, "A5"), (2, "B5")):
         rd = _rc(circuit, f"R{index}", "5.1k", "0603WAF5101T5E")
-        _connect(_pin_net(circuit, f"USB_CC{index}", usb, pin), rd, "1")
+        cc = _pin_net(circuit, f"USB_CC{index}", usb, pin)
+        _connect(cc, rd, "1")
         _connect(nets["GND"], rd, "2")
+        # A 10k and 100 nF low-pass presents the CC advertisement to the MCU
+        # without changing the mandatory 5.1k Rd termination. USB Type-C R2.0
+        # Table 4-36 puts the highest valid sink-side level at 2.04 V, below
+        # the 3.3 V ADC supply. Firmware treats any ambiguous reading as the
+        # default-current case and raises the charger limit only after debounce.
+        sense_resistor = _rc(circuit, f"R{index + 33}", "10k", "0603WAF1002T5E")
+        _connect(cc, sense_resistor, "1")
+        _connect(nets[f"USB_CC{index}_ADC"], sense_resistor, "2")
+        sense_capacitor = _rc(circuit, f"C{index + 37}", "100n", "CL05B104KO5NNNC")
+        _connect(nets[f"USB_CC{index}_ADC"], sense_capacitor, "1")
+        _connect(nets["GND"], sense_capacitor, "2")
 
     shield_resistor = _rc(circuit, "R3", "1M", "0603WAF1004T5E")
     shield_capacitor = two_pin(
@@ -313,6 +339,15 @@ def _build_power(circuit: Circuit, nets: dict[str, Net]) -> None:
         _connect(nets[net], capacitor, "1")
         _connect(nets["GND"], capacitor, "2")
 
+    # Nothing else discharges this rail. The AP63203 is the fixed-output part,
+    # so there is no feedback divider, it has no output discharge, and every
+    # other pull on the board ends on a high-impedance node. Without this
+    # resistor the rail decays only through unspecified leakage, and the
+    # TCA9535 needs to see below its VPORF before it will power-on reset.
+    bleeder = _rc(circuit, "R36", "10k", "0603WAF1002T5E")
+    _connect(nets["3V3"], bleeder, "1")
+    _connect(nets["GND"], bleeder, "2")
+
 
 def _build_led_rail(circuit: Circuit, nets: dict[str, Net]) -> Net:
     led_limiter = _led_limiter(circuit)
@@ -358,6 +393,12 @@ def _build_led_rail(circuit: Circuit, nets: dict[str, Net]) -> Net:
     led_data_pulldown = _rc(circuit, "R19", "100k", "0603WAF1003T5E")
     _connect(nets["LED_DATA"], led_data_pulldown, "1")
     _connect(nets["GND"], led_data_pulldown, "2")
+    # The second bar's data input arrives from the first bar's output, so with
+    # the first bar unplugged it has no driver at all. Both bars stay powered
+    # from the same limiter, which leaves a pixel input floating at 5 V.
+    led_return_pulldown = _rc(circuit, "R37", "100k", "0603WAF1003T5E")
+    _connect(nets["LED_RETURN"], led_return_pulldown, "1")
+    _connect(nets["GND"], led_return_pulldown, "2")
     return led_data_5v
 
 
@@ -382,7 +423,7 @@ def _build_mcu(circuit: Circuit, nets: dict[str, Net]) -> None:
     # which also makes IO9 the download-mode recovery pin.
     mcu_connections = {
         "5": "TEMP_SENSE_ADC", "6": "NFC_BUSY", "9": "BAT_SENSE_ADC",
-        "12": "LED_DATA", "13": "NFC_IRQ",
+        "12": "USB_CC1_ADC", "13": "USB_CC2_ADC", "16": "NFC_IRQ", "19": "LED_DATA",
         "22": "I2C_SCL", "23": "I2C_SDA",
         "24": "OLED2_CS_N", "25": "SCLK", "26": "MOSI", "27": "MISO",
         "28": "NFC_CS_N", "29": "OLED1_CS_N", "30": "UART_RX", "31": "UART_TX",
@@ -391,9 +432,9 @@ def _build_mcu(circuit: Circuit, nets: dict[str, Net]) -> None:
         _connect(nets[name], mcu, pin)
     # Pins 4, 7, 21 and 32 to 35 are datasheet NC. Native USB pins 17 and 18
     # stay open because J1 is power-only. IO15 (pin 20) stays unused because it
-    # is the JTAG-source strapping pin. Table 3-1 puts ADC1 on IO0 to IO6, so
-    # the two analog taps take IO2 (pin 5, CH2) and IO4 (pin 9, CH4); neither is
-    # a strapping pin, and IO5 and IO6 stay free as the remaining ADC channels.
+    # is the JTAG-source strapping pin. IO0 and IO1 are ADC1_CH0 and ADC1_CH1
+    # and have no boot-strapping role, so they read CC1 and CC2. The LED and
+    # reader interrupt move to IO14 and IO7 to free those two analog channels.
     _no_connect(circuit, mcu, NO_CONNECTS["U4"])
     # Espressif requires bulk plus high-frequency decoupling at the module's
     # 3V3 pin. The regulator's own output caps are centimetres away, and WiFi
@@ -606,7 +647,10 @@ def _build_reader(circuit: Circuit, nets: dict[str, Net]) -> None:
     _connect(rxp, rx_series_r, "2")
     rx_bias = _rc(circuit, "R30", "1k", "0603WAF1001T5E")
     _connect(rxn, rx_bias, "1")
-    _connect(_pin_net(circuit, "NFC_VMID_TAP", reader, "17"), rx_bias, "2")
+    # The same pin the stabilizer sits on. Naming a second net here made SKiDL
+    # merge two names onto one net and pick between them by build order, so the
+    # board's net name flipped and a fresh route could not be applied.
+    _connect(reader["17"].net, rx_bias, "2")
 
 
 def build_hub() -> Circuit:
@@ -615,6 +659,7 @@ def build_hub() -> Circuit:
         "GND", "USB_VBUS", "CHARGE_5V", "MODULE_5V", "3V3", "LED_5V", "LED_FAULT_N",
         "THERM_SENSE", "THERM_COLD_REF", "THERM_HOT_REF", "CHARGE_TEMP_OK",
         "CHARGE_INPUT_FAULT_N", "TEMP_SENSE_ADC", "BAT_RAW", "BAT_SENSE_ADC",
+        "USB_CC1_ADC", "USB_CC2_ADC",
         "SCLK", "MOSI", "MISO", "NFC_CS_N", "NFC_IRQ", "NFC_BUSY", "NFC_RESET_N", "NFC_GPO1",
         "I2C_SCL", "I2C_SDA", "OLED1_CS_N", "OLED2_CS_N", "OLED_DC", "OLED_RESET_N",
         "LED_DATA", "LED_RETURN", "SEL_RCLK", "SEL_SRCLR_N", "RF_BUS", "BUTTON_N",
@@ -632,10 +677,10 @@ def build_hub() -> Circuit:
     _build_mcu(circuit, nets)
     _build_reader(circuit, nets)
 
-    # Every GH and 1.25 mm wafer contact in this design is rated 1.0 A, and both
-    # halves of the module link carry the whole board on it. J2 additionally
-    # carries charge current on top of the system load while an adapter is
-    # connected, so its supply is spread over three contacts and J3's over two.
+    # J2 carries charge current on top of the system load while an adapter is
+    # connected, so its 1.0 A GH contacts are paralleled. J3 uses Micro-Fit
+    # contacts rated above the complete 10 W load, with paired power contacts
+    # retained for lower harness loss and compatibility with the power board.
     charge_pins = ("CHARGE_5V", "CHARGE_5V", "CHARGE_5V", "GND", "GND", "GND", "GND")
     charge_output = _connector(circuit, "J2", charge_pins, "SM07B-GHS-TB(LF)(SN)", 0.35)
     for connector_pin, name in enumerate(charge_pins, start=1):
@@ -644,11 +689,12 @@ def build_hub() -> Circuit:
     # module's own state registers are undocumented, so the level the product
     # reports comes from a voltage this board measures itself.
     module_pins = (
-        "MODULE_5V", "MODULE_5V", "GND", "GND", "I2C_SCL", "I2C_SDA", "BAT_RAW",
+        "MODULE_5V", "MODULE_5V", "GND", "GND", "I2C_SCL", "I2C_SDA", "BAT_RAW", "NC",
     )
-    module_return = _connector(circuit, "J3", module_pins, "SM07B-GHS-TB(LF)(SN)", 0.35)
-    for connector_pin, name in enumerate(module_pins, start=1):
+    module_return = _microfit8(circuit, "J3", module_pins)
+    for connector_pin, name in enumerate(module_pins[:-1], start=1):
         _connect(nets[name], module_return, str(connector_pin))
+    _no_connect(circuit, module_return, NO_CONNECTS["J3"])
 
     # Matrix link, mirroring the matrix board's J1. The registers share the
     # SPI wires; SEL_RCLK latches from the expander after a 16-bit shift.

@@ -2,6 +2,14 @@
 
 from hardware.verification.criteria import load_criterion
 from hardware.verification.signal_integrity import (
+    DISPLAY_SPI_DATA_HOLD_MIN_NS,
+    DISPLAY_SPI_DATA_SETUP_MIN_NS,
+    DISPLAY_SPI_DC_HOLD_MIN_NS,
+    DISPLAY_SPI_EDGE_LIMIT_NS,
+    DISPLAY_SPI_HIGH_MIN_NS,
+    DISPLAY_SPI_LOAD_BOUND_PF,
+    DISPLAY_SPI_LOW_MIN_NS,
+    DisplaySpiBudget,
     I2C_RISE_LIMIT_FAST_NS,
     I2cBusBudget,
     LedSignalBudget,
@@ -63,3 +71,42 @@ def test_the_serial_edge_is_a_third_of_a_half_period_at_the_cable_bound() -> Non
     """
     budget = SerialLinkBudget()
     assert 0.3 < budget.edge_fraction_of_half_period < 0.4
+
+
+def test_display_spi_edges_fit_the_controller_limit() -> None:
+    budget = DisplaySpiBudget()
+    limit = load_criterion("HUB-DISPLAY-SPI-EDGE-TIME").limits
+    assert budget.edge_time_s * 1e9 <= limit["maximum"]
+    assert budget.edge_time_s * 1e9 <= DISPLAY_SPI_EDGE_LIMIT_NS
+    assert budget.maximum_load_pf > DISPLAY_SPI_LOAD_BOUND_PF
+
+
+def test_display_spi_clock_and_write_windows_fit() -> None:
+    budget = DisplaySpiBudget()
+    limit = load_criterion("HUB-DISPLAY-SPI-WRITE-TIMING").limits
+    period_ns = budget.clock_period_s * 1e9
+    window_ns = budget.timing_window_s * 1e9
+    assert period_ns >= limit["period_minimum"]
+    assert window_ns >= limit["high_minimum"]
+    assert window_ns >= limit["low_minimum"]
+    assert window_ns >= limit["data_setup_minimum"]
+    assert window_ns >= limit["data_hold_minimum"]
+    assert window_ns >= DISPLAY_SPI_HIGH_MIN_NS
+    assert window_ns >= DISPLAY_SPI_LOW_MIN_NS
+    assert window_ns >= DISPLAY_SPI_DATA_SETUP_MIN_NS
+    assert window_ns >= DISPLAY_SPI_DATA_HOLD_MIN_NS
+
+
+def test_display_spi_control_framing_fits() -> None:
+    budget = DisplaySpiBudget()
+    limit = load_criterion("HUB-DISPLAY-SPI-CONTROL-TIMING").limits
+    framing_ns = budget.control_framing_s * 1e9
+    for obligation in limit.values():
+        assert framing_ns >= obligation
+    assert budget.control_obligation_ns == DISPLAY_SPI_DC_HOLD_MIN_NS
+
+
+def test_display_spi_margin_shrinks_with_load_or_clock_rate() -> None:
+    nominal = DisplaySpiBudget()
+    assert DisplaySpiBudget(load_pf=55.0).timing_window_s < nominal.timing_window_s
+    assert DisplaySpiBudget(clock_hz=5e6).timing_window_s < nominal.timing_window_s

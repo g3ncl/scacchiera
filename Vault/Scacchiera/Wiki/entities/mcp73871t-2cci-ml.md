@@ -3,15 +3,13 @@ type: entity
 tags:
   - wiki/entity
   - wiki/component
-date_updated: 2026-07-26
+date_updated: 2026-07-29
 source_count: 1
 ---
 
 # MCP73871T-2CCI/ML
 
-Exact fitted component from Microchip Technology, historically used by hub U1. The quick-charge
-redesign superseded it with the [[bq25638]] final target; it remains in the wiki because the last
-generated hub still contains it until V2 regeneration.
+Exact fitted component from Microchip Technology, used by power U1 (MCP73871T-2CCI/ML).
 
 [mpn::MCP73871T-2CCI/ML] [supplier::JLCPCB]
 [order_code::C511310] [category::semiconductor]

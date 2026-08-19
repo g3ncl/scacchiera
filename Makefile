@@ -17,14 +17,46 @@ export KICAD9_SYMBOL_DIR
 export KICAD_FOOTPRINT_DIR
 
 .PHONY: check footprints schematic-lightbar schematic-matrix schematic-hub \
+	schematic-quad pcb-quad pcb-quad-reroute pcb-quad-drc pcb-quad-fab \
 	pcb-lightbar pcb-lightbar-drc pcb-lightbar-fab \
 	pcb-matrix pcb-matrix-route pcb-matrix-reroute pcb-matrix-drc pcb-matrix-fab \
 	pcb-hub pcb-hub-route pcb-hub-reroute pcb-hub-drc pcb-hub-fab \
-	pcb-power pcb-power-reroute pcb-power-drc pcb-power-fab panel pcb-fab clean
+	pcb-power pcb-power-reroute pcb-power-drc pcb-power-fab power-rail-fit panel panel-fab pcb-fab \
+	firmware firmware-test firmware-pins firmware-font firmware-target \
+	test-article-quad clean
 
-check: pcb-lightbar-drc pcb-matrix-drc pcb-hub-drc pcb-power-drc
+check: pcb-lightbar-drc pcb-matrix-drc pcb-hub-drc pcb-power-drc \
+	pcb-quad-drc firmware-test
 	$(PYTHON) -m mypy hardware
 	$(PYTHON) -m pytest
+
+# Host firmware gate for V5. Warnings are errors, gcc's analyzer runs, and
+# the sanitizers are enabled when their runtimes are installed.
+FIRMWARE_DIR := software/firmware
+FIRMWARE_BUILD := $(FIRMWARE_DIR)/build
+
+# Regenerate the firmware pin map from the hub netlist. Run after any hub
+# schematic change; test_firmware_pins.py fails if the committed copy drifts.
+firmware-pins:
+	$(PYTHON) -m hardware.pcb.firmware_pins
+
+# Regenerate the glyph table from the drawn art in the generator.
+firmware-font:
+	$(PYTHON) software/firmware/tools/generate_font.py
+
+firmware:
+	cmake -S $(FIRMWARE_DIR) -B $(FIRMWARE_BUILD) -DCMAKE_BUILD_TYPE=Debug
+	cmake --build $(FIRMWARE_BUILD)
+
+firmware-test: firmware
+	ctest --test-dir $(FIRMWARE_BUILD) --output-on-failure
+
+# The ESP32-C6 image. Not part of `check`, because it needs ESP-IDF exported
+# and that is a 2 GB toolchain rather than a checkout dependency.
+IDF_EXPORT ?= $(HOME)/esp/esp-idf-v5.5.5/export.sh
+
+firmware-target: firmware-pins
+	bash -c '. $(IDF_EXPORT) >/dev/null && cd $(FIRMWARE_DIR)/target && idf.py build'
 
 schematic-lightbar: footprints
 	$(PYTHON) -m hardware.pcb.generate lightbar
@@ -37,6 +69,23 @@ schematic-hub: footprints
 
 schematic-power: footprints
 	$(PYTHON) -m hardware.pcb.generate power
+
+# The split sensing plane: one four-lane board built four times, replacing the
+# monolithic matrix board's single 300 by 300 mm outline.
+schematic-quad: footprints
+	$(PYTHON) -m hardware.pcb.generate quad
+
+pcb-quad: schematic-quad
+	/usr/bin/python3 -m hardware.pcb.quad_layout
+
+pcb-quad-reroute: schematic-quad
+	/usr/bin/python3 -m hardware.pcb.quad_layout --reroute
+
+pcb-quad-drc: pcb-quad
+	$(KICAD_CLI) pcb drc --exit-code-violations --schematic-parity --output hardware/pcb/generated/quad/quad-drc.rpt hardware/pcb/generated/quad/quad.kicad_pcb
+
+pcb-quad-fab: schematic-quad
+	$(PYTHON) -m hardware.pcb.fab quad
 
 footprints:
 	$(PYTHON) -m hardware.pcb.footprints
@@ -83,11 +132,20 @@ pcb-power-drc: pcb-power
 pcb-power-fab: schematic-power
 	$(PYTHON) -m hardware.pcb.fab power
 
+power-rail-fit:
+	$(PYTHON) -m hardware.cad.power_rail_fit
+
 # One fabricated panel holding both light bars and the power board, snapped
 # apart after delivery. Built from the routed boards, so re-run it after any
 # of them changes.
 panel: pcb-lightbar pcb-power
 	/usr/bin/python3 -m hardware.pcb.panel
+
+# Bare-fabrication artifacts for the panel. No BOM or CPL: the panel is built
+# from routed boards, not from a netlist, so it has no schematic to derive them
+# from. Order it bare; price the power board's assembly from its own pair.
+panel-fab: panel
+	$(PYTHON) -m hardware.pcb.fab panel
 
 # Layout runs under the system interpreter: pcbnew ships with the native
 # KiCad install and is not importable from the venv.
@@ -100,7 +158,19 @@ pcb-lightbar-drc: pcb-lightbar
 pcb-lightbar-fab: schematic-lightbar
 	$(PYTHON) -m hardware.pcb.fab lightbar
 
-pcb-fab: pcb-lightbar-fab pcb-matrix-fab pcb-hub-fab
+# Every board design. The quad is the sensing plane that ships; the matrix is
+# still exported because it remains the recorded baseline the quad is measured
+# against, and an unexported baseline rots.
+pcb-fab: pcb-lightbar-fab pcb-matrix-fab pcb-hub-fab pcb-power-fab pcb-quad-fab
+
+# The bare sensing-plane test article. Regenerates only what the release in
+# docs/hardware/test-article-quad.md needs, so the upload is one file.
+test-article-quad: pcb-quad-drc pcb-quad-fab
+	@echo
+	@echo "Upload: hardware/pcb/generated/quad/quad_gerbers.zip"
+	@echo "Order five, at 0.6 mm. Four is a plane, the fifth is the spare."
+	@echo "Spec and pre-upload checks: docs/hardware/test-article-quad.md"
 
 clean:
-	rm -rf hardware/pcb/generated hardware/sim/generated hardware/cad/generated
+	rm -rf hardware/pcb/generated hardware/sim/generated hardware/cad/generated \
+		software/firmware/build software/firmware/target/build

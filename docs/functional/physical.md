@@ -58,3 +58,11 @@ steel washer or any metal immediately above the tag is prohibited; if an existin
 metal, remove it or redesign the base rather than adding an anti-metal tag with different RF
 behavior. The tag identifies the piece (see [gameplay.md](gameplay.md) for provisioning and the piece
 record); the tag type and the reader are an implementation choice, not fixed here.
+
+Every base is at least 24 mm across, pawns included. This overrides conventional chess proportions
+deliberately. At the 35 mm grid a conventional pawn base is about 20.5 mm (0.586 of the square),
+smaller than the recess it has to contain, and the smaller tags that would fit such a base cost
+three to five times as much, are sold as sealed pucks or anti-metal discs rather than thin inlays,
+and couple far more weakly because coupling scales with coil area. Buying the tag margin is worth
+more here than matching a traditional silhouette. The visible cost is that pawn bases end up close
+to the king's, so the set reads as more uniform at the base than a classic Staunton.

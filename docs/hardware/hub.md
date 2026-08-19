@@ -9,14 +9,22 @@ layout in `hardware/pcb/hub_layout.py`.
 
 ## Power
 
-The hub receives regulated 5 V from a purchased power module. Which module is a separate decision,
+The hub receives regulated 5 V from the custom power board or an optional purchased replacement,
 bounded by the contract in [power-module-interface.md](power-module-interface.md) and recorded in
 [power-subsystem.md](power-subsystem.md); the hub is built against the contract, not against a
 product, so the module can be swapped without touching this board. The custom hub never charges the
 cell and never connects to it except through a 2 Mohm divider.
 
-The product's power-only USB-C inlet presents passive Type-C sink resistors and accepts only a
-qualified fixed 5 V/2 A adapter. AP22811AW5-7 gates that input to the module and adds current
+The product's power-only USB-C inlet presents one 5.1 kohm Rd sink resistor on each CC pin. A USB-C
+Power Delivery charger therefore enables its ordinary 5 V output without a PD contract. The board
+has no mechanism to request a higher voltage and every downstream input remains specified for 5 V.
+Each CC pin also reaches a separate MCU ADC through a 10 kohm and 100 nF low-pass. The Rd
+terminations remain directly on CC, so sensing does not alter attachment. Firmware measures both
+plug orientations and applies the USB Type-C sink thresholds: default current at or below 0.66 V,
+1.5 A above 0.66 V, and 3.0 A above 1.23 V. A reading outside the valid 0.25 to 2.04 V connected
+range is not permission to raise the BQ25895 input limit. This lets a laptop PD charger advertise
+enough current for the 10 W input while the connection itself stays at 5 V.
+AP22811AW5-7 gates that input to the module and adds current
 limiting, short-circuit protection, output discharge, thermal protection, and reverse current
 blocking. Its enable is the wired result of both TLV7042DGKR comparisons around a cell-bonded
 NTCLE317E4103SBA sensor. A 10 kohm sensor bias, a 39k/100k cold reference, and a 300k/200k hot
@@ -30,10 +38,9 @@ buck uses the data sheet's 10 uF input, two 22 uF output, and 100 nF bootstrap n
 bars use managed 5 V directly through the TPS2553 latch-off current limiter, with their data driven
 through an AHCT buffer at 5 V logic.
 
-Both halves of the module link are seven-way, because every contact in these connector families is
-rated 1.0 A and both halves carry the whole board. J2 spreads the qualified output over three
-contacts, since it carries charge current and system load together while an adapter is connected;
-J3 spreads the return over two.
+J2 is seven-way JST GH and spreads the qualified USB input over three supply contacts. J3 is
+eight-way Molex Micro-Fit and uses two contacts each for regulated 5 V and ground, followed by I2C,
+raw cell voltage, and one reserved no-connect.
 
 Battery level is measured here rather than read from the module. R32 and R33 divide the cell
 arriving on J3 pin 7 into IO4 (ADC1_CH4), filtered by C18. A 4.2 V cell reads 2.1 V, below the 2.5 V
@@ -57,7 +64,9 @@ IO2 provides ADC1_CH2 for independent cell-temperature telemetry. SPI uses nearb
 through the GPIO matrix to keep the reader route short. I2C stays on pins 22 and 23 because IO8 and
 IO9 are the C6 boot strapping pins and the
 4.7 k bus pullups hold them high for SPI boot, which also makes IO9 the download-mode recovery pin.
-IO15 is left unused because it is the JTAG-source strapping pin.
+IO0 and IO1 read CC1 and CC2 on ADC1_CH0 and ADC1_CH1. The displaced reader interrupt and LED data
+signals use IO7 and IO14, neither of which is a boot strap. IO15 is left unused because it is the
+JTAG-source strapping pin.
 
 C27 (10 uF) and C28 (100 nF) decouple the module locally at pin 3: WiFi TX peaks at 382 mA
 (Table 6-4) and the regulator's own output capacitors are centimetres away. TP1, TP2 and TP3 expose
@@ -80,10 +89,10 @@ trades field strength the 3 mm read budget does not need for one less rail).
 Y1 is a TXC 7M27100009, 27.12 MHz in a 3225 package. 27.12 divided by two is the 13.56 MHz carrier,
 so the value is fixed by the protocol, and the ESP32 module's own 40 MHz crystal cannot serve it.
 Every value clears the reader's Table 142: 10 pF load against 10 pF typ, 60 ohm ESR against 100 ohm
-max, +/-10 ppm and +/-15 ppm over temperature against +/-100 ppm. C31 and C32 are 15 pF, not the
-10 pF used before: two equal caps present C/2 plus stray, so 15 pF lands near the required 10 pF
-while 10 pF presented only 8 pF and spent about 41 ppm of the budget on load error alone. The 3225
-package replaced a 2016 part JLCPCB could not stock, and its larger pads are also reworkable.
+max, +/-10 ppm and +/-15 ppm over temperature against +/-100 ppm. C31 and C32 are 15 pF: two equal caps present C/2
+plus stray, so 15 pF lands near the required 10 pF, where 10 pF would present only 8 pF and spend
+about 41 ppm of the budget on load error alone. The 3225 package is stocked where the 2016
+equivalent is not, and its larger pads are reworkable.
 
 TX1 drives the single-ended matrix bus through a 470 nH / 220 pF EMC low-pass and a 68 pF series
 match with a DNP trim; TX2 carries the mirrored EMC filter into ground so the push-pull driver
@@ -92,15 +101,16 @@ stays balanced. RX taps the bus through 100 pF and 1 k into RXP, with RXN refere
 ## Interfaces
 
 All low-voltage harnesses use locking connectors: the 7-pin matrix link (RF bus between grounds,
-3V3, serial selection), two 7-pin display connectors (3V3 SPI plus DC and reset), two 4-pin light
+3V3, serial selection), two 7-pin display connectors (3V3 SPI plus DC and reset, contract in
+[display-interface.md](display-interface.md)), two 4-pin light
 bar connectors chained through LED_RETURN, a 7-pin qualified 5 V output to the power module, a
 7-pin module return carrying 5 V, optional I2C and the cell tap, the 2-pin cell thermistor, a 4-pin
 UART service connector, and the 2-pin button. The cell itself never lands on this board.
 
 ## Board
 
-The board is 162 x 46 mm, 1.0 mm thick, two copper layers. Every board in the product is now two
-layers. The length buys the layer count: the service volume is a 310 mm player rail with only the
+The board is 162 x 46 mm, 1.0 mm thick, two copper layers, as is every board in the product. The
+length buys the layer count: the service volume is a 310 mm player rail with only the
 hub in it, so 162 mm costs nothing mechanically, while a four-layer panel costs a multiple of a
 two-layer one at every fab. Width stays at 46 mm because that is what fits under a 50 mm rail.
 
@@ -112,10 +122,10 @@ decoupling stays beside the pin it serves.
 The back copper is reserved under the reader's match and the run to the matrix connector, where the
 13.56 MHz return flows: no tracks, vias allowed, and the routed board has zero signal segments
 inside it. The reserve starts clear of the reader itself, because a QFN-40 in a 6 mm body needs both
-faces to escape its pins. Elsewhere B.Cu carries 256 signal segments against 819 on F.Cu.
+faces to escape its pins. Elsewhere B.Cu carries 307 signal segments against 557 on F.Cu.
 
-The reviewed Specctra session is versioned, with the 2 A USB entry, the safety-window VBUS
-distribution and its reference branch, and the USB shield owned deterministically by code.
+The reviewed Specctra session is versioned, with both CC sense paths, the 2 A USB entry, the
+safety-window VBUS distribution and its reference branch, and the USB shield owned deterministically by code.
 `make pcb-hub-drc` reproduces 0 violations, 0 unconnected items, and 0 schematic-parity issues. The
 fabrication export reads the stack from the board, so a later layer-count change cannot ship a
 Gerber set missing copper.
@@ -203,12 +213,68 @@ continuous and a fault in current limit is not, since the part dissipates about 
 its thermal protection intervenes in milliseconds, so this is a V8 measurement rather than a static
 violation. A test pins the 0.2 A overshoot so it cannot quietly grow.
 
+`hardware/tests/test_fault_response.py` covers the light-bar limiter's latch and what an unplugged
+harness does. The limiter is the latch-off suffix, so its 5 to 10 ms deglitch matters in both
+directions. A cold start into both bars' 202.9 uF draws 1.45 A on the soft-start ramp alone, above
+the limit, so the rail charges at the 610 mA limit floor instead and takes 1.66 ms to reach 5 V,
+a third of the 5 ms window that would latch it off. The rail could carry 610 uF before a normal
+power-on became a fault. A real short is bounded the other way: 36.7 mJ over at most 10 ms.
+
+`hardware/tests/test_rail_sequencing.py` asks what a signal does while the rail at its far end is
+still down, which on this board is a real interval: the module's 5 V arrives first, the buck's
+3.3 V follows its soft start, the light-bar rail waits for firmware, and USB's 5 V may never come.
+Five signals cross between rails, read from the schematic rather than listed. LED_DATA, LED_EN and
+LED_FAULT_N land on pins whose absolute maximums are written against ground, minus 0.5 to 7 V for
+the buffer input and minus 0.3 to 7 V for the limiter's enable and flag, so driving them before
+their own rail exists is a non-event. CHARGE_TEMP_OK is supply-referenced but safe by construction,
+since both it and its driver hang off USB_VBUS.
+
+CHARGE_INPUT_FAULT_N is the exception and is recorded as a finding rather than a pass. Diodes lists
+VIN, VOUT and VEN in the AP22811's absolute maximum table and gives the fault flag no row at all,
+while the enable it does list is rated against VIN. Running on battery with USB unplugged holds that
+flag at 3.3 V with VIN at zero, which no filed document permits. R15 bounds what can reach the pin
+at 33 uA, below the leakages the same sheet specifies elsewhere, so the exposure is about 0.1 mW
+into whatever clamp is inside. That bounds the condition; it does not make it specified, and it
+stays a question for the vendor or for V8.
+
+`hardware/tests/test_temperature_corners.py` corners the two inductors from the single point their
+data sheets fix: rated RMS current is the current giving a 40 degree rise from a 20 degree ambient,
+and the range to 125 degrees includes that rise. Hub L1 at 2.1 A rises 16.2 degrees and so tolerates
+108.8 degrees of ambient. The same heating takes its winding from 34 to 39.5 mOhm at the 45 degree
+allowance, which moves the dropout figure from 3.513 to 3.520 V: 7 mV of the 487 mV the 4.0 V
+interface floor holds. The converter's own contribution to that number is not cornered, because
+Diodes publishes its switch resistance as a typical with neither limits nor a temperature
+coefficient.
+
+The open-cable case turned up one defect. LED_RETURN carries the first bar's data output to the
+second bar's input, and both bars stay powered from the same limiter, so unplugging the first bar
+left a pixel input floating at 5 V. R37, 100 k to ground, defines it. The check that found it reads
+the schematic for nets that appear only on connectors, so it keeps looking rather than restating a
+list. An open load itself stays invisible to the limiter, which reports overcurrent and reverse
+voltage and nothing else.
+
 The rail's transient behaviour is in `hardware/tests/test_rail_budget.py`, derived for the same
 reason as the switch: what is left after handover and loop response are excluded is bounded by
 conduction and charge. Soft start draws 36 mA into the output capacitors over its 4 ms ramp, so cold
 start needs no inrush limiting. The rail holds 3.3 V until the module's output falls to 3.51 V at the
-1.3 A the interface obliges, which is where that contract's 4.0 V floor comes from. Hold-up is about
+1.34 A on the 3.3 V rail, which is where the interface contract's 4.0 V floor comes from. Hold-up is about
 five microseconds, so the rail follows its input and riding out a source change is the module's job.
+
+`hardware/tests/test_rail_transients.py` covers the two cases that do not end with the rail in
+regulation. A warm reset does not reach any peripheral: MCU_EN goes to its pull-up, its delay
+capacitor and the recovery pad and nowhere else, so nothing on the board resets with the MCU. The
+TCA9535 has no reset pin either, so its ten driven nets, LED_EN and the two peripheral resets among
+them, come back at the level firmware last wrote rather than at the level their passive pulls give
+at cold start. That list is enumerated from the schematic and is what V6 firmware has to restore.
+
+A power cycle only resets those peripherals if the rail actually gets low enough, and the TCA9535
+will not reset again until its supply has been below VPORF. Nothing else on the board discharges
+3V3: the AP63203 is the fixed-output part, so it has no feedback divider and no output discharge,
+and every other pull ends on a high-impedance node. R36, 10 k across the rail, is what turns the
+decay into a specified number: 1.46 s to the 0.75 V floor with 97.7 uF on the rail, including a
+20 uF allowance for each unbound display module, for 333 uA while the board runs and nothing at all
+while it is off. That time is also the off-time a power cycle needs, which is what makes repeated
+brownout a bounded case.
 
 `hardware/tests/test_signal_integrity.py` covers the two buses that leave the board on a cable. The
 light-bar data line is self-clocked, so a uniform delay costs nothing and only the buffer's asymmetry
@@ -226,8 +292,15 @@ decision rather than an accident.
 
 Not everything V3 asks of this board is done, and `docs/planning.md` lists what is not against the
 workflow's own six cases rather than against effort spent. The largest remaining gaps here are
-temperature corners, capacitor ESR, junction-temperature estimates, and the fault cases beyond short
-circuit and a lost sensor.
+temperature corners, capacitor ESR, and the fault cases beyond short circuit and a lost sensor.
+
+Junction temperature is in `hardware/tests/test_junction_temperature.py`, stated as the highest
+ambient each part tolerates rather than as one temperature, because the air inside the enclosure has
+not been measured. The buck's 85 percent efficiency floor puts 0.78 W into a TSOT26 at 89 degrees
+per watt, so it reaches its junction limit at 81.0 degrees ambient; the light-bar limiter, whose
+loss is nothing but 135 mOhm of conduction at 448 mA, reaches its at 145.1. The allowance both are
+judged against is 45 degrees, the specification's 25 degree room plus a 20 degree enclosure rise
+that V8 has to confirm.
 
 What cannot be closed here at all is not board-side. Uninterrupted handover and source insertion
 belong to the power module and are V8 measurements; transient response and stability belong to a
@@ -236,11 +309,11 @@ them. Both are recorded as such rather than left looking unfinished.
 
 ## Cost
 
-The engineering BOM is 13.768 EUR in estimated custom-board parts across 39 fitted lines, up
-0.366 EUR from the four-layer revision: J2 and J3 became seven-way to spread their supply across
-1.0 A contacts, and the cell divider added three passives with values already in the BOM. No new
-part type entered the design, so the four fee-bearing Extended lines and their 10.80 EUR of feeder
-charges are unchanged.
+The engineering BOM is 14.090 EUR in estimated custom-board parts across 40 fitted lines. J2 is
+seven-way and J3 eight-way Micro-Fit so that each spreads its supply across 1.0 A contacts, and the
+cell divider costs three passives whose values were already in the BOM, as do R36 and R37, the 3V3
+bleeder and the light-bar data pulldown. Four Extended lines are factory-placed and carry 10.80 EUR
+of feeder charges: J1, U3, U4 and Y1.
 
 This is not a factory quote and excludes assembly fees, the power module, its cell, sensor and cable
 assemblies. The purchased subsystem belongs in complete-product cost, not the JLCPCB BOM. Two copper

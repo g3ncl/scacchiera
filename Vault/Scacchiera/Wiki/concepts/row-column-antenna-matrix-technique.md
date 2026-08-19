@@ -1,6 +1,6 @@
 ---
 type: concept
-date_updated: 2026-07-24
+date_updated: 2026-08-02
 source_count: 4
 confidence: high
 tags:
@@ -54,8 +54,22 @@ prototyped by us).
 - [[nfcgameboard-pcb]]
 - [[nfcgameboard-software]]
 
+## Two board partitions, one technique
+
+The technique says nothing about how many PCBs carry the antennas, and both answers have now been
+built and validated in this project. One 300 by 300 mm board puts rows on front copper and columns
+on back; four boards of four lanes, stacked crosswise, put four lines on each substrate. The
+extracted coupling is the same to four figures either way, because it is set by the loop geometry
+and the plane separation, neither of which the partition changes. A sixteen-strip variant was
+designed and superseded, and its extraction was identical too, which is the point.
+
+What the partition decides is cost of change and fabrication price, not electrical behaviour. The
+four-board partition is the one this project ships, decided 2026-08-02 on a quote rather than on
+any electrical argument. See [[split-sensing-plane]].
+
 ## Related
 
+- [[split-sensing-plane]]
 - [[nfc-game-board-project]]
 - [[bitwiseid-method]]
 - [[bitwisexy-method]]

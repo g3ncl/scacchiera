@@ -15,6 +15,8 @@ from hardware.pcb.matrix import build_matrix
 from hardware.pcb.power import NO_CONNECTS as POWER_NO_CONNECTS
 from hardware.pcb.power import build_power
 from hardware.pcb.schematic_placement import install_nonoverlap_placer
+from hardware.pcb.quad import NO_CONNECTS as QUAD_NO_CONNECTS
+from hardware.pcb.quad import build_quad
 
 
 OUTPUT = Path(__file__).parent / "generated"
@@ -23,13 +25,23 @@ DESIGNS: dict[str, Callable[[], Circuit]] = {
     "matrix": build_matrix,
     "hub": build_hub,
     "power": build_power,
+    "quad": build_quad,
 }
-SCHEMATIC_SEEDS = {"lightbar": 0, "matrix": 6, "hub": 3, "power": 9}
+SCHEMATIC_SEEDS = {
+    "lightbar": 0, "matrix": 6, "hub": 3, "power": 9, "quad": 2,
+}
 # Pins reviewed as legitimately unused, per design. Matrix U2:9 is the end of
 # the selection daisy chain; the hub pins are the SKiDL no-connects (module
 # spares, reader n.c. pins, unused expander ports) that KiCad still reports.
 NO_CONNECTS: dict[str, frozenset[str]] = {
     "matrix": frozenset({"U2:9"}),
+    # The quad board's register drives four lanes from an eight-bit part, so
+    # QE through QH are reviewed as legitimately unused. The chain still runs
+    # through all eight stages to QH', which is what makes the four boards a
+    # 32-bit shift.
+    "quad": frozenset(
+        f"U1:{pin}" for pins in QUAD_NO_CONNECTS.values() for pin in pins
+    ),
     "power": frozenset(
         f"{reference}:{pin}"
         for reference, pins in POWER_NO_CONNECTS.items()
@@ -71,7 +83,7 @@ def generate_design(name: str, circuit: Circuit) -> None:
             design_dir / f"{name}.kicad_sch", design_dir / f"{name}-erc.rpt", reviewed
         )
     run_reviewed_erc(design_dir / f"{name}.kicad_sch", design_dir / f"{name}_erc.rpt")
-    write_bom(circuit, design_dir / f"{name}_engineering_bom.csv")
+    write_bom(circuit, design_dir / f"{name}_bom_all_parts.csv")
     missing = missing_manufacturer_parts(circuit)
     if missing:
         raise RuntimeError(f"fitted parts without an MPN in {name}: {', '.join(missing)}")

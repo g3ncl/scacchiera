@@ -20,27 +20,42 @@ shared 13.56 MHz bus, while reverse-biased PIN diodes stay under a picofarad.
 
 ## The boards
 
-Three custom board designs, four physical PCBs. The two OLED displays are purchased
+Four custom board designs, eight physical PCBs. The two OLED displays are purchased
 ER-OLEDM3.12-1W modules (fixed by [interface.md](../functional/interface.md)), so they appear
 here only as interfaces, not as boards.
 
-### 1. Matrix board (sensing)
+### 1. Quad board (sensing), x4, one design
 
 - **Responsibility:** carry the 8+8 line antennas under the whole 280 x 280 mm play area and the
   per-line PIN diode switches, so exactly one line at a time couples to the shared RF bus. No
   intelligence: it is copper geometry plus switching, with every component on the underside so the
   top face stays flat against the controlled air gap in
-  [physical.md](../functional/physical.md).
-- **Interfaces:**
-  - one shared 13.56 MHz RF feed from the hub (short controlled-impedance link, board-to-board
-    connector);
-  - line-select control from the hub (serial shift register driving 16 bias steers, so the
-    inter-board cable stays small);
-  - PIN reverse-bias rail and ground from the hub.
-- **Envelope:** about 300 x 300 mm, 2-layer. Mounts independently of the top surface per the
-  functional spec, metal-free zone maintained under the play area.
-- **Cost target:** 25 EUR (area-dominated fab around 15 EUR, plus 16 PIN diodes, shift
-  registers, and passives).
+  [physical.md](../functional/physical.md). Four identical boards carry four lanes each and stack
+  crosswise in two planes: two butted end to end are the row plane, the same two rotated a quarter
+  turn are the column plane. Spec in [quad.md](quad.md).
+- **Interfaces:** two seven-conductor JST GH links per board, in and out, carrying the shared
+  13.56 MHz bus, the serial line-select chain, the PIN reverse-bias rail and ground. The four
+  boards chain, so the hub sees one link and its interface is the same one the monolith presented.
+- **Envelope:** 300 x 140 mm each, 2-layer, 0.6 mm, with the column plane on 0.4 mm ribs above the
+  rows. Mounts independently of the top surface per the functional spec, metal-free zone maintained
+  under the play area.
+- **Cost:** 20.92 EUR for five bare boards, a complete set plus a spare, plus 7.28 EUR of parts per
+  set. Hand populated, 176 joints.
+
+**This replaces the monolithic 300 x 300 mm matrix board**, which is kept as the recorded baseline
+in [matrix.md](matrix.md) rather than as a shipping option. The 2026-08-02 JLCPCB quote decided it:
+20.92 EUR for one working plane against 58.34, because a 300 by 140 mm outline pays no large-size
+assembly charge where a 300 by 300 mm one pays 50.47 EUR, and because a five-piece minimum turns
+into a set plus a spare rather than one set and four scrap boards. That outweighs the split's
+1.87 times substrate.
+
+It also makes the board cheap to change, which matters more than it sounds: the sensing plane's
+open question, `LOOP_INSET`, is a single-parameter sweep on per-line geometry, and an attempt costs
+20.92 EUR instead of 58.34.
+
+The RF cost is small and measured: coupling is unchanged to four figures and the whole
+harness-and-chain path moves the bus resonance by at most 0.99 percent. The real cost is a firmware
+change, because four chained registers make the selection shift 32 bits rather than 16.
 
 ### 2. Hub board (controller and power distribution)
 
@@ -68,12 +83,26 @@ here only as interfaces, not as boards.
   [lightbar.md](lightbar.md)).
 - **Cost target:** 5 EUR per bar including fab.
 
+### 4. Power board
+
+- **Responsibility:** connect a protected 1S cell, isolate reversed polarity, charge it from the
+  qualified 5 V input, manage source handover, and deliver a regulated 5 V at 2 A to the hub using
+  BQ25895 and TPS61088.
+- **Interfaces:** qualified charge input, regulated 5 V return and raw cell sense through the same
+  [power module contract](power-module-interface.md) a purchased replacement would implement.
+- **Envelope:** 90 x 32 mm, 2-layer. It is a snap-off part of the panel carrying both light bars.
+- **Cost target:** fabrication rides on the light-bar panel; component cost remains to be quoted.
+
 ### Purchased accessories (not boards)
 
 Bought parts that appear on no board BOM but without which the product does not work. Recorded here
 for the same reason the display modules are: an order that forgets them is incomplete.
 
 - **Two ER-OLEDM3.12-1W display modules**, fixed by [interface.md](../functional/interface.md).
+- **Four seven-conductor JST GH cable assemblies** chaining the hub to the four quad boards, all at
+  `quad_geometry.HARNESS_LENGTH_MM`. Equal length is a design requirement rather than tidiness: a
+  common detuning term is absorbed by the nominal 220 pF, a per-board one is not (see
+  [quad.md](quad.md)).
 - **One 2.4 GHz antenna with pigtail** for the hub's ESP32-C6-MINI-1U. The module has an external
   antenna connector rather than a PCB antenna, which makes the antenna replaceable for about a euro
   instead of a hub respin. The connector is **MHF3 / W.FL / IPEX3**, not U.FL: a U.FL pigtail is
@@ -82,10 +111,15 @@ for the same reason the display modules are: an order that forgets them is incom
   antenna PCB was considered and rejected: its radiation pattern is the one thing in this project
   that no ngspice test can validate, and per-attempt iteration costs a fabrication run rather than
   a euro.
-- **One power board and its cell.** As of 2026-07-29 this is a custom design,
-  [power.md](power.md), built to the same [power-module-interface.md](power-module-interface.md) a
-  bought module would satisfy, and fabricated as a snap-off piece of the light-bar panel. A purchased
-  module remains a drop-in alternative.
+- **One protected 1S cell assembly** for the custom [power board](power.md), against the acceptance
+  specification in [cell-assembly.md](cell-assembly.md). A cylindrical cell may lie lengthwise in
+  the player rail. The leading candidate is a Keeppower wired 1S1P 21700 6000 mAh protected pack at
+  about EUR 11; the bare Molicel M65A remains a higher-capacity feasibility reference. Neither is
+  bound, because no candidate publishes its protection thresholds.
+- **Micro-Fit mating hardware:** two Molex 430250800 eight-circuit receptacle housings for the
+  hub-to-power harness, one 430250200 two-circuit housing for the battery, and 430300038 female
+  terminals for 18 AWG wire (see [harnesses.md](harnesses.md)). Exact wire, pre-crimped leads or qualified crimp process, color coding,
+  and strain relief remain open.
 - **Superseded option, one purchased power module**, meeting [power-module-interface.md](power-module-interface.md).
   It provides charging, protection, the UPS power path and the regulated 5 V output. No product is
   bound yet; the contract caps it at 46 mm across the rail, cell included, so that it fits the
@@ -94,8 +128,8 @@ for the same reason the display modules are: an order that forgets them is incom
 
 ## Why this split
 
-- The matrix board is large but cheap and dumb; the hub is small but dense. Separating them means
-  a controller respin never pays for 900 square centimeters of fab, and the big board has no
+- The sensing plane is large but cheap and dumb; the hub is small but dense. Separating them means
+  a controller respin never pays for the sensing area's fab, and the sensing boards have no
   fine-pitch assembly.
 - The functional spec already forces the split physically: the hub and shields sit under the
   rails, the commercial battery subsystem sits in a rear service cassette, and the sensing plane
@@ -103,12 +137,16 @@ for the same reason the display modules are: an order that forgets them is incom
 - The light bars are separate because they live in a different mechanical position (behind the
   rail diffusers) and are trivially small; folding them into the hub would tie the hub's outline
   to the diffuser geometry.
-- Rough total per unit in custom parts and fab remains to be regenerated, with the power module,
-  its cell and the two display modules counted as purchased accessories.
+- Total per unit is in [cost.md](cost.md): 205.77 EUR at listed prices, of which 99.58 is quoted,
+  and a realistic 270 to 300 EUR delivered once shipping and Italian IVA are added. No single
+  component dominates that total. What dominates is per-order fixed cost, which is why the cost
+  levers are mostly about consolidating orders rather than choosing cheaper parts.
 
 ## Build order
 
 Light bar first (smallest board, stands up the schematic-ERC-BOM-simulation-layout pipeline end to
-end), then the matrix board (the architectural risk, and its SPICE validation needs layout-derived
+end), then the sensing plane (the architectural risk, and its SPICE validation needs layout-derived
 antenna values, so its layout comes before its simulation per the plan), then the hub (its RF
-front end must match the measured matrix, so it goes last).
+front end must match the measured sensing plane, so it goes last). The quad board inherited that
+work rather than repeating it: it instantiates the same switch cell and the same loop geometry the
+monolith was validated on, which is why the repartition cost a re-extraction and not a redesign.

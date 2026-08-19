@@ -5,6 +5,7 @@ Runs entirely through `kicad-cli`, so it uses whatever board already sits in
 """
 
 import csv
+import json
 import re
 import shutil
 import subprocess
@@ -16,12 +17,20 @@ from hardware.pcb.bom import HAND_POPULATED_BOARDS
 
 KICAD_CLI = "/usr/bin/kicad-cli"
 GENERATED = Path(__file__).parent / "generated"
-BOARDS = ("lightbar", "matrix", "hub", "power")
+BOARDS = ("lightbar", "matrix", "hub", "power", "quad")
+# Names this export has used before. Deleted on every run so a stale file from
+# an older naming scheme cannot be uploaded by mistake.
 LEGACY_ASSEMBLY_SUFFIXES = (
     "_bom.csv",
     "_cpl.csv",
     "_jlc_bom.csv",
     "_jlc_cpl.csv",
+    "_jlcpcb_bom.csv",
+    "_jlcpcb_cpl.csv",
+    "_jlcpcb_hybrid_bom.csv",
+    "_jlcpcb_hybrid_cpl.csv",
+    "_hand_bom.csv",
+    "_engineering_bom.csv",
 )
 
 GERBER_NON_COPPER_LAYERS = (
@@ -66,32 +75,61 @@ def _is_assembled(row: dict[str, str], excluded_routes: frozenset[str] = frozens
 
 
 def assembly_references(
-    bom_path: Path, excluded_routes: frozenset[str] = frozenset()
+    bom_path: Path,
+    excluded_routes: frozenset[str] = frozenset(),
+    *,
+    ignore_routes: bool = False,
 ) -> frozenset[str]:
-    """Read the purchased assembly designators from the engineering BOM."""
+    """Read the purchased assembly designators from the engineering BOM.
+
+    `ignore_routes` mirrors `write_jlc_bom`. The two have to agree exactly or
+    `validate_assembly_designators` rejects the pair, which is what caught this
+    when only the BOM side had been widened.
+    """
     with bom_path.open(encoding="utf-8", newline="") as bom_file:
         reader = csv.DictReader(bom_file)
-        required_columns = {"Designator", "MPN", "Fitted"}
+        required_columns = {"Designator", "MPN", "Fitted", "LCSC Part #"}
         if reader.fieldnames is None or not required_columns.issubset(reader.fieldnames):
             raise ValueError(f"{bom_path} is not a project BOM export")
         return frozenset(
             reference
             for row in reader
-            if _is_assembled(row, excluded_routes)
+            if _is_assembled(row, frozenset() if ignore_routes else excluded_routes)
+            and (row["LCSC Part #"] if ignore_routes else True)
             for reference in row["Designator"].split(",")
         )
 
 
 def write_jlc_bom(
-    source: Path, destination: Path, excluded_routes: frozenset[str] = frozenset()
+    source: Path,
+    destination: Path,
+    excluded_routes: frozenset[str] = frozenset(),
+    *,
+    ignore_routes: bool = False,
 ) -> None:
-    """Convert the engineering BOM into JLCPCB's assembly BOM layout."""
+    """Convert the engineering BOM into JLCPCB's assembly BOM layout.
+
+    `ignore_routes` takes every fitted part JLCPCB could place, whatever the
+    board's chosen assembly route says. That is what the max-assembly pair is
+    for: it prices the alternative to the plan, and on a hand-populated board
+    the plan routes everything to Hand, so honouring it emitted a header and no
+    rows. The lightbar and matrix files were empty for exactly that reason,
+    against a sourcing doc that says they show what the alternative would cost.
+
+    A part with no LCSC code is still excluded, because that one really cannot
+    be factory placed rather than merely being planned otherwise.
+    """
     with source.open(encoding="utf-8", newline="") as source_file:
         reader = csv.DictReader(source_file)
         required_columns = {*JLC_BOM_COLUMNS, "MPN", "Fitted"}
         if reader.fieldnames is None or not required_columns.issubset(reader.fieldnames):
             raise ValueError(f"{source} is not a project BOM export")
-        rows = tuple(row for row in reader if _is_assembled(row, excluded_routes))
+        rows = tuple(
+            row
+            for row in reader
+            if _is_assembled(row, frozenset() if ignore_routes else excluded_routes)
+            and (row["LCSC Part #"] if ignore_routes else True)
+        )
 
     with destination.open("w", encoding="utf-8", newline="") as destination_file:
         writer = csv.DictWriter(destination_file, fieldnames=JLC_BOM_COLUMNS)
@@ -107,8 +145,8 @@ def write_jlc_bom(
         )
 
 
-def write_hand_bom(source: Path, destination: Path) -> None:
-    """Write the externally sourced parts recommended for manual fitting."""
+def write_self_solder_bom(source: Path, destination: Path) -> None:
+    """The parts you buy and fit yourself, not the ones JLCPCB places."""
     with source.open(encoding="utf-8", newline="") as source_file:
         reader = csv.DictReader(source_file)
         required_columns = {*HAND_BOM_COLUMNS, "Fitted", "Assembly Route"}
@@ -173,17 +211,113 @@ def validate_assembly_designators(bom_path: Path, cpl_path: Path) -> None:
         )
 
 
-def export_fab(name: str) -> tuple[Path, Path, Path, Path, Path, Path]:
+def export_panel_assembly(assembled_board: str = "power") -> tuple[Path, Path]:
+    """The panel's own uploadable BOM and CPL.
+
+    A CPL is board-relative, so a constituent board's pair cannot be uploaded
+    against the panel: every placement would be at the wrong coordinate. The
+    panel is the thing a fabricator makes, so it needs its own pair.
+
+    Only one board on the panel is assembled. The two light bars are hand
+    populated and place nothing, so the panel's assembly job is exactly the
+    power board's, at panel coordinates, under the suffixed references
+    `panel.py` gives each copy so that two J1 pads cannot collide.
+    """
+    panel_dir = GENERATED / "panel"
+    panel_pcb = panel_dir / "panel.kicad_pcb"
+    manifest_path = panel_dir / "panel_manifest.json"
+    if not panel_pcb.exists() or not manifest_path.exists():
+        raise SystemExit("panel not built, run `make panel` first")
+
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    suffixes = [
+        entry["suffix"]
+        for entry in manifest["placements"]
+        if entry["board"] == assembled_board
+    ]
+    if len(suffixes) != 1:
+        raise SystemExit(
+            f"expected exactly one {assembled_board} on the panel, found {len(suffixes)}"
+        )
+    suffix = suffixes[0]
+
+    board_dir = GENERATED / assembled_board
+    source_bom = board_dir / f"{assembled_board}_jlcpcb_upload_bom.csv"
+    if not source_bom.exists():
+        raise SystemExit(f"{source_bom} does not exist, run `make pcb-{assembled_board}-fab`")
+
+    bom_path = panel_dir / "panel_jlcpcb_upload_bom.csv"
+    with source_bom.open(encoding="utf-8", newline="") as source_file:
+        rows = tuple(csv.DictReader(source_file))
+    with bom_path.open("w", encoding="utf-8", newline="") as bom_file:
+        writer = csv.DictWriter(bom_file, fieldnames=JLC_BOM_COLUMNS)
+        writer.writeheader()
+        for row in rows:
+            designators = ",".join(
+                f"{reference}{suffix}" for reference in row["Designator"].split(",")
+            )
+            writer.writerow({**row, "Designator": designators})
+
+    fab_dir = panel_dir / "fab-pos"
+    if fab_dir.exists():
+        shutil.rmtree(fab_dir)
+    fab_dir.mkdir(parents=True)
+    raw_cpl_path = fab_dir / "panel.pos.csv"
+    subprocess.run(
+        [
+            KICAD_CLI, "pcb", "export", "pos",
+            "--output", str(raw_cpl_path),
+            "--format", "csv",
+            "--units", "mm",
+            "--side", "both",
+            "--exclude-dnp",
+            str(panel_pcb),
+        ],
+        check=True,
+    )
+    cpl_path = panel_dir / "panel_jlcpcb_upload_cpl.csv"
+    placed = frozenset(
+        f"{reference}{suffix}"
+        for reference in assembly_references(
+            board_dir / f"{assembled_board}_bom_all_parts.csv", HAND_ASSEMBLY_ROUTES
+        )
+    )
+    write_jlc_cpl(raw_cpl_path, cpl_path, placed)
+    shutil.rmtree(fab_dir)
+
+    validate_assembly_designators(bom_path, cpl_path)
+    return bom_path, cpl_path
+
+
+def export_gerbers_only(name: str) -> Path:
+    """Gerbers and drills for a board with no schematic behind it.
+
+    The panel is the only one: it is assembled from routed boards rather than
+    generated from a netlist, so it has no BOM and no CPL of its own and the
+    full export would have nothing to build them from. It still has to be
+    orderable, because the panel and not its three constituent boards is the
+    thing a fabricator makes.
+    """
     board_dir = GENERATED / name
     pcb_file = board_dir / f"{name}.kicad_pcb"
     if not pcb_file.exists():
-        raise SystemExit(f"{pcb_file} does not exist, generate and route the board first")
+        raise SystemExit(f"{pcb_file} does not exist, generate it first")
 
     fab_dir = board_dir / "fab"
     if fab_dir.exists():
         shutil.rmtree(fab_dir)
     fab_dir.mkdir(parents=True)
+    _export_copper_and_drills(pcb_file, fab_dir)
 
+    zip_path = board_dir / f"{name}_gerbers.zip"
+    with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as archive:
+        for gerber_file in sorted(p for p in fab_dir.iterdir() if p.suffix != ".csv"):
+            archive.write(gerber_file, arcname=gerber_file.name)
+    shutil.rmtree(fab_dir)
+    return zip_path
+
+
+def _export_copper_and_drills(pcb_file: Path, fab_dir: Path) -> None:
     subprocess.run(
         [
             KICAD_CLI, "pcb", "export", "gerbers",
@@ -207,6 +341,20 @@ def export_fab(name: str) -> tuple[Path, Path, Path, Path, Path, Path]:
         check=True,
     )
 
+
+def export_fab(name: str) -> tuple[Path, Path, Path, Path, Path, Path]:
+    board_dir = GENERATED / name
+    pcb_file = board_dir / f"{name}.kicad_pcb"
+    if not pcb_file.exists():
+        raise SystemExit(f"{pcb_file} does not exist, generate and route the board first")
+
+    fab_dir = board_dir / "fab"
+    if fab_dir.exists():
+        shutil.rmtree(fab_dir)
+    fab_dir.mkdir(parents=True)
+
+    _export_copper_and_drills(pcb_file, fab_dir)
+
     gerber_files = sorted(p for p in fab_dir.iterdir() if p.suffix != ".csv")
     zip_path = board_dir / f"{name}_gerbers.zip"
     with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as archive:
@@ -214,20 +362,28 @@ def export_fab(name: str) -> tuple[Path, Path, Path, Path, Path, Path]:
             archive.write(gerber_file, arcname=gerber_file.name)
 
     raw_cpl_path = fab_dir / f"{name}.pos.csv"
-    cpl_path = board_dir / f"{name}_jlcpcb_cpl.csv"
-    engineering_bom_path = board_dir / f"{name}_engineering_bom.csv"
-    bom_path = board_dir / f"{name}_jlcpcb_bom.csv"
-    hybrid_bom_path = board_dir / f"{name}_jlcpcb_hybrid_bom.csv"
-    hybrid_cpl_path = board_dir / f"{name}_jlcpcb_hybrid_cpl.csv"
-    hand_bom_path = board_dir / f"{name}_hand_bom.csv"
+    cpl_path = board_dir / f"{name}_jlcpcb_upload_cpl.csv"
+    all_parts_bom_path = board_dir / f"{name}_bom_all_parts.csv"
+    bom_path = board_dir / f"{name}_jlcpcb_upload_bom.csv"
+    max_assembly_bom_path = board_dir / f"{name}_jlcpcb_max_assembly_bom.csv"
+    max_assembly_cpl_path = board_dir / f"{name}_jlcpcb_max_assembly_cpl.csv"
+    self_solder_bom_path = board_dir / f"{name}_self_solder_bom.csv"
     for suffix in LEGACY_ASSEMBLY_SUFFIXES:
         (board_dir / f"{name}{suffix}").unlink(missing_ok=True)
-    standard_excluded_routes = (
-        HAND_ASSEMBLY_ROUTES if name in HAND_POPULATED_BOARDS else frozenset()
-    )
-    write_jlc_bom(engineering_bom_path, bom_path, standard_excluded_routes)
-    write_jlc_bom(engineering_bom_path, hybrid_bom_path, HAND_ASSEMBLY_ROUTES)
-    write_hand_bom(engineering_bom_path, hand_bom_path)
+    # The upload pair is the plan actually chosen, so a part the plan hand-fits
+    # is not in it, on every board rather than only on the fully hand-populated
+    # ones. This used to exclude Hand rows only when the whole board was hand
+    # populated, which made the hub and power upload pairs identical to their
+    # max-assembly pairs: 19 Extended rows offered to the factory where the plan
+    # plans four. At 2.70 EUR a feeder change that is a quote roughly 40 EUR
+    # above the design's own intent, on the one board whose assembly cost
+    # dominates the product. The engineering BOM still lists every part; it is
+    # the upload that follows the plan.
+    standard_excluded_routes = HAND_ASSEMBLY_ROUTES
+    write_jlc_bom(all_parts_bom_path, bom_path, standard_excluded_routes)
+    hand_populated = name in HAND_POPULATED_BOARDS
+    write_jlc_bom(all_parts_bom_path, max_assembly_bom_path, ignore_routes=True)
+    write_self_solder_bom(all_parts_bom_path, self_solder_bom_path)
     subprocess.run(
         [
             KICAD_CLI, "pcb", "export", "pos",
@@ -243,32 +399,59 @@ def export_fab(name: str) -> tuple[Path, Path, Path, Path, Path, Path]:
     write_jlc_cpl(
         raw_cpl_path,
         cpl_path,
-        assembly_references(engineering_bom_path, standard_excluded_routes),
+        assembly_references(all_parts_bom_path, standard_excluded_routes),
     )
     write_jlc_cpl(
         raw_cpl_path,
-        hybrid_cpl_path,
-        assembly_references(engineering_bom_path, HAND_ASSEMBLY_ROUTES),
+        max_assembly_cpl_path,
+        assembly_references(all_parts_bom_path, ignore_routes=True),
     )
     validate_assembly_designators(bom_path, cpl_path)
-    validate_assembly_designators(hybrid_bom_path, hybrid_cpl_path)
+    validate_assembly_designators(max_assembly_bom_path, max_assembly_cpl_path)
+
+    # A hand-populated board's upload pair is a header and no rows, and the
+    # files are named `upload`, so the obvious thing to do with them is the one
+    # thing that cannot work: JLCPCB answers a zero-part list with an opaque
+    # HTTP 500. Delete them rather than ship a trap whose only warning is in a
+    # document. Bare Gerbers are the order for these boards, and the
+    # max-assembly pair is what prices the alternative.
+    if hand_populated:
+        bom_path.unlink(missing_ok=True)
+        cpl_path.unlink(missing_ok=True)
 
     shutil.rmtree(fab_dir)
-    return zip_path, bom_path, cpl_path, hybrid_bom_path, hybrid_cpl_path, hand_bom_path
+    return zip_path, bom_path, cpl_path, max_assembly_bom_path, max_assembly_cpl_path, self_solder_bom_path
 
 
 def main() -> None:
+    if len(sys.argv) == 2 and sys.argv[1] == "panel":
+        print(f"gerbers: {export_gerbers_only('panel')}")
+        bom_path, cpl_path = export_panel_assembly()
+        print(f"JLCPCB upload BOM: {bom_path}")
+        print(f"JLCPCB upload CPL: {cpl_path}")
+        print(
+            "  The panel places the power board only; both light bars are hand\n"
+            "  populated. References carry the panel suffix, so upload this pair\n"
+            "  rather than the power board's own."
+        )
+        return
     if len(sys.argv) != 2 or sys.argv[1] not in BOARDS:
-        raise SystemExit(f"Usage: python -m hardware.pcb.fab {{{'|'.join(BOARDS)}}}")
-    zip_path, bom_path, cpl_path, hybrid_bom_path, hybrid_cpl_path, hand_bom_path = export_fab(
+        raise SystemExit(f"Usage: python -m hardware.pcb.fab {{{'|'.join(BOARDS)}|panel}}")
+    zip_path, bom_path, cpl_path, max_assembly_bom_path, max_assembly_cpl_path, self_solder_bom_path = export_fab(
         sys.argv[1]
     )
     print(f"gerbers: {zip_path}")
-    print(f"JLCPCB BOM: {bom_path}")
-    print(f"JLCPCB CPL: {cpl_path}")
-    print(f"hybrid JLCPCB BOM: {hybrid_bom_path}")
-    print(f"hybrid JLCPCB CPL: {hybrid_cpl_path}")
-    print(f"hand assembly BOM: {hand_bom_path}")
+    if bom_path.exists():
+        print(f"JLCPCB upload BOM: {bom_path}")
+        print(f"JLCPCB upload CPL: {cpl_path}")
+    else:
+        print(
+            f"no upload pair: {sys.argv[1]} is hand populated, so order bare Gerbers.\n"
+            "  To price factory assembly instead, upload the max-assembly pair below."
+        )
+    print(f"JLCPCB max-assembly BOM: {max_assembly_bom_path}")
+    print(f"JLCPCB max-assembly CPL: {max_assembly_cpl_path}")
+    print(f"self-solder BOM: {self_solder_bom_path}")
 
 
 if __name__ == "__main__":

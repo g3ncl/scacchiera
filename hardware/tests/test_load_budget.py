@@ -20,10 +20,5 @@ def test_the_budget_is_a_sum_of_its_rails_not_a_single_load() -> None:
     assert budget.rail_3v3_reflected_a < budget.rail_3v3_a
 
 
-def test_the_unsourced_share_is_visible() -> None:
-    """The display allowance is an assumption, so its weight is asserted.
-
-    If it ever grows past a third of the 3.3 V rail, the budget is resting on a
-    number nobody has filed and the display data sheet stops being optional.
-    """
-    assert LoadBudget().assumed_fraction < 0.34
+def test_the_display_share_is_visible() -> None:
+    assert 0.45 < LoadBudget().display_fraction < 0.50

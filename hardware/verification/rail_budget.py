@@ -34,8 +34,9 @@ MCU_SUPPLY_MIN_V = 3.0
 OUTPUT_CAPACITANCE_F = 44e-6
 OUTPUT_CAPACITANCE_BOUND_F = 22e-6
 
-# The load the power-module interface obliges a module to supply.
-INTERFACE_LOAD_A = 1.3
+# Rounded-up coincident load on the 3.3 V rail. The light bars are excluded
+# because they remain on the module's 5 V output and never cross this buck.
+INTERFACE_LOAD_A = 1.34
 
 
 @dataclass(frozen=True)

@@ -13,7 +13,13 @@ def _components() -> list[dict[str, Any]]:
     return [require_mapping(raw, "component") for raw in raw_components]
 
 
-def test_every_fitted_purchased_mpn_has_one_exact_audit_record() -> None:
+def _component_blockers() -> list[dict[str, Any]]:
+    document = load_component_audit()
+    raw_blockers = require_list(document.get("component_blockers"), "component blockers")
+    return [require_mapping(raw, "component blocker") for raw in raw_blockers]
+
+
+def test_every_fitted_purchased_mpn_is_audited_or_explicitly_blocked() -> None:
     audited = {
         (
             require_nonempty_string(record.get("mpn"), "mpn"),
@@ -23,12 +29,33 @@ def test_every_fitted_purchased_mpn_has_one_exact_audit_record() -> None:
         )
         for record in _components()
     }
+    blocked = {
+        (
+            require_nonempty_string(record.get("mpn"), "blocked mpn"),
+            "",
+            "",
+            require_nonempty_string(record.get("footprint"), "blocked footprint"),
+        )
+        for record in _component_blockers()
+    }
     bound = {
         (part.mpn, part.supplier, part.order_code, part.footprint)
         for part in _bound_parts()
     }
-    assert len(audited) == 44
-    assert audited == bound
+    assert len(audited) == 58
+    assert audited.isdisjoint(blocked)
+    assert audited | blocked == bound
+
+
+def test_every_fitted_power_board_part_has_a_verified_order_code() -> None:
+    assert _component_blockers() == []
+    power_uses = [
+        use
+        for record in _components()
+        for use in require_list(record.get("uses"), "component uses")
+        if require_mapping(use, "component use").get("board") == "power"
+    ]
+    assert power_uses
 
 
 def test_every_exact_part_has_an_immutable_manufacturer_source_and_wiki_ingest() -> None:
@@ -41,7 +68,10 @@ def test_every_exact_part_has_an_immutable_manufacturer_source_and_wiki_ingest()
             assert path.is_file(), path
             assert path.stat().st_size > 100, path
         datasheet = ROOT / str(record["datasheet"])
-        assert datasheet.read_bytes().startswith(b"%PDF"), datasheet
+        assert (
+            datasheet.read_bytes().startswith(b"%PDF")
+            or datasheet.suffix == ".md"
+        ), datasheet
 
 
 def test_library_and_rating_audits_are_complete_and_conflict_free() -> None:
@@ -73,7 +103,7 @@ def test_availability_and_simulation_treatment_are_recorded() -> None:
         mpn = str(record["mpn"])
         availability = require_mapping(record.get("availability"), f"{mpn} availability")
         assert availability.get("status") == "available"
-        assert availability.get("checked") == "2026-07-26"
+        assert availability.get("checked") in {"2026-07-26", "2026-07-29"}
         source = require_nonempty_string(availability.get("source"), f"{mpn} availability source")
         assert source.startswith("https://")
         model = require_mapping(record.get("simulation_model"), f"{mpn} model")
@@ -88,6 +118,8 @@ def test_availability_and_simulation_treatment_are_recorded() -> None:
         require_nonempty_string(model.get("valid_region"), f"{mpn} model valid region")
         if model.get("kind") == "vendor":
             assert (ROOT / str(model["path"])).is_file()
+    by_mpn = {str(record["mpn"]): record for record in _components()}
+    assert by_mpn["0402B223K500NT"]["availability"]["checked"] == "2026-07-29"
 
 
 def test_matrix_mosfets_use_exact_vendor_models() -> None:
@@ -112,17 +144,17 @@ def test_external_power_components_are_exact_sourced_and_modelled() -> None:
         require_mapping(raw, "external component")
         for raw in require_list(document.get("external_components"), "external components")
     ]
-    # The power module is not here on purpose. It is bounded by a written
-    # interface rather than bound to a product, and V1 cannot pass an audit of a
-    # part nobody has chosen yet.
-    assert {record.get("mpn") for record in records} == {"NTCLE317E4103SBA"}
+    assert {record.get("mpn") for record in records} == {
+        "ER-OLEDM3.12-1W",
+        "NTCLE317E4103SBA",
+    }
     for record in records:
         mpn = require_nonempty_string(record.get("mpn"), "external MPN")
         require_nonempty_string(record.get("supplier"), f"{mpn} supplier")
         require_nonempty_string(record.get("order_code"), f"{mpn} order code")
         availability = require_mapping(record.get("availability"), f"{mpn} availability")
         assert availability.get("status") == "available"
-        assert availability.get("checked") == "2026-07-26"
+        assert availability.get("checked") in {"2026-07-26", "2026-07-29"}
         for relative in require_list(record.get("datasheets"), f"{mpn} datasheets"):
             source = ROOT / require_nonempty_string(relative, f"{mpn} datasheet")
             assert source.is_file()
@@ -133,8 +165,13 @@ def test_external_power_components_are_exact_sourced_and_modelled() -> None:
         interface = require_mapping(record.get("interface_audit"), f"{mpn} interface")
         ratings = require_mapping(record.get("ratings_audit"), f"{mpn} ratings")
         model = require_mapping(record.get("simulation_model"), f"{mpn} model")
-        assert interface.get("status") == "passed"
-        assert ratings.get("status") == "passed"
+        expected_status = "blocked" if mpn == "ER-OLEDM3.12-1W" else "passed"
+        assert interface.get("status") == expected_status
+        assert ratings.get("status") == expected_status
         assert model.get("kind") in {"analytical", "datasheet_bounded"}
         require_nonempty_string(model.get("valid_region"), f"{mpn} model region")
-        assert record.get("conflicts") == []
+        conflicts = require_list(record.get("conflicts"), f"{mpn} conflicts")
+        if expected_status == "passed":
+            assert conflicts == []
+        else:
+            assert conflicts

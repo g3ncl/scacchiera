@@ -1,5 +1,5 @@
 version: 1
-reviewed_on: 2026-07-29
+reviewed_on: 2026-08-02
 gate: V2
 
 reviewed_erc_warning_classes:
@@ -21,6 +21,10 @@ no_connects:
     pins: [A6, A7, A8, B6, B7, B8]
     datasheet: Vault/Scacchiera/Datasheets/USB4105-GF-A_C3020560.pdf
     locator: USB Type-C pin assignment; D+, D-, SBU1 and SBU2 are unused by the power-only sink.
+  J3:
+    pins: ['8']
+    datasheet: Vault/Scacchiera/Datasheets/430450800_C122422.md
+    locator: Eight-position header pin numbering; pin 8 is the reserved module-contract position.
   J8:
     pins: ['4']
     datasheet: Vault/Scacchiera/Datasheets/A1257WR-S-4P_C225127.pdf
@@ -30,9 +34,9 @@ no_connects:
     datasheet: Vault/Scacchiera/Datasheets/PN5180A0HN-C3E_C1526287.pdf
     locator: HVQFN40 pin description, pins marked DNC or unused optional interfaces.
   U4:
-    pins: ['4', '7', '10', '15', '16', '17', '18', '19', '20', '21', '32', '33', '34', '35']
+    pins: ['4', '7', '10', '15', '17', '18', '20', '21', '32', '33', '34', '35']
     datasheet: Vault/Scacchiera/Datasheets/ESP32-C6-MINI-1U-N4_C7558096.pdf
-    locator: Table 3-1 pin definitions; reserved pins, unused GPIOs, and unused native USB pins.
+    locator: Table 3-1 pin definitions; reserved pins, two unused GPIOs, and unused native USB pins. IO0 and IO1 are fitted as the CC voltage ADC inputs, with IO7 and IO14 carrying the displaced digital signals.
   U6:
     pins: ['1', '13', '14', '15', '18', '19', '20']
     datasheet: Vault/Scacchiera/Datasheets/TCA9535PWR_C130204.pdf
@@ -44,10 +48,60 @@ matrix_no_connects:
     datasheet: Vault/Scacchiera/Datasheets/74HC595D-118_C5947.pdf
     locator: SO16 pin 9 Q7S serial output; deliberately open at the end of the register chain.
 
+quad_no_connects:
+  U1:
+    pins: ['4', '5', '6', '7']
+    datasheet: Vault/Scacchiera/Datasheets/74HC595D-118_C5947.pdf
+    locator: >-
+      SO16 pins 4 to 7, outputs Q4 to Q7. A board carries four lanes and the register has eight
+      outputs, so half of it is deliberately unused. The waste is bought knowingly, because the
+      part is Basic at 0.20 EUR and the alternative is eight lanes per board and a 280 mm outline
+      back inside the fabricator's size charges. Q7S on pin 9 is used here, unlike the matrix,
+      because every board chains into the next.
+
+power_no_connects:
+  U1:
+    pins: ['2', '3', '4', '7', '12']
+    datasheet: Vault/Scacchiera/Datasheets/BQ25895RTWR_C80200.pdf
+    locator: RTW pin table; D+ and D- are absent at the module boundary, STAT and INT are unused status outputs, and QON may remain at its internal pullup.
+  U2:
+    pins: ['13']
+    datasheet: Vault/Scacchiera/Datasheets/TPS61088RHLR_C87357.pdf
+    locator: RHL pin table; floating MODE selects PFM operation at light load.
+  J2:
+    pins: ['8']
+    datasheet: Vault/Scacchiera/Datasheets/430450800_C122422.md
+    locator: Eight-position header pin numbering; pin 8 is reserved by the module contract.
+
 board_results:
   lightbar: {drc_violations: 0, unconnected_items: 0, schematic_parity_issues: 0}
-  matrix: {drc_violations: 0, unconnected_items: 0, schematic_parity_issues: 0}
+  quad: {drc_violations: 0, unconnected_items: 0, schematic_parity_issues: 0}
   hub: {drc_violations: 0, unconnected_items: 0, schematic_parity_issues: 0}
+  power: {drc_violations: 0, unconnected_items: 0, schematic_parity_issues: 0}
+  matrix: {drc_violations: 0, unconnected_items: 0, schematic_parity_issues: 0}
+
+quad_layout:
+  envelope_mm: [300, 140]
+  copper_layers: 2
+  board_thickness_mm: 0.6
+  reviewed_route: hardware/pcb/routes/quad.ses
+  rationale: The sensing plane that ships. Four identical boards of four lanes replace one
+    300 x 300 mm monolith, on the 2026-08-02 quote; the matrix entry above is the retained
+    baseline, not a second option.
+  antenna_keepout: No track or via crosses the 276 mm of loop copper. Enforced as a board rule
+    rather than left to the router, so the four loops cannot acquire a crossing on a reroute.
+  assembly_side: Loops on F.Cu, all 52 fitted components on B.Cu, so the top face stays flat
+    against the controlled air gap.
+  fabrication_tier: 0.200 mm minimum track, 0.300 mm minimum drill, 0.600 mm minimum via pad, the
+    same standard tier as the lightbar, hub and power boards. The matrix's 0.200/0.400 vias were
+    the tightest geometry in the product and left with it.
+
+power_layout:
+  envelope_mm: [90, 32]
+  copper_layers: 2
+  reviewed_route: hardware/pcb/routes/power.ses
+  reverse_cell_stage: J3 CELL_POS reaches only Q1 drains and the divided comparator sense; Q1 sources feed protected BAT_RAW, and U4 plus D1 have exact pin-level connectivity assertions.
+  custom_rule: The 0.15 mm clearance applies only between Q1 pads, matching TI's DQG manufacturer land pattern; every other copper pair retains the board-wide 0.2 mm rule.
 
 hub_layout:
   envelope_mm: [162, 46]
@@ -58,6 +112,7 @@ hub_layout:
   placement_method: Functional zones slide right by fixed amounts so the crossings between clusters open while the geometry inside a cluster is untouched.
   deterministic_routes:
   - USB shield tabs and bleed network
+  - filtered CC1 and CC2 source-current sensing
   - 0.5 mm USB VBUS entry, safety-window distribution, and reference branch
   rf_ground_reserve:
     layer: B.Cu
@@ -65,13 +120,15 @@ hub_layout:
     rule: No tracks, vias permitted.
     reason: The reader's match and the run to the matrix connector return through this copper at 13.56 MHz, so it stays a plane instead of whatever the router leaves between traces. It starts clear of the reader itself, whose QFN-40 needs both faces to escape.
     measured_signal_segments_inside: 0
-  back_copper_use: 256 non-ground segments on B.Cu outside the reserve, against 819 on F.Cu.
+  back_copper_use: 307 non-ground segments on B.Cu outside the reserve, against 557 on F.Cu.
   fabrication_layers: Read from the board's own layer table by hardware/pcb/fab.py, so a board that changes layer count cannot ship a Gerber set missing copper.
 
 commands:
   static_gate: make check
+  fresh_autoroute_quad: make pcb-quad-reroute
   fresh_autoroute_matrix: make pcb-matrix-reroute
   fresh_autoroute_hub: make pcb-hub-reroute
+  fresh_autoroute_power: make pcb-power-reroute
 evidence:
   hub_drc_command: make pcb-hub-drc
-  static_tests: 7 passed on 2026-07-29, including the on-board battery measurement and the recorded two-layer stackup and envelope
+  static_tests: 18 focused connectivity and Type-C tests passed on 2026-07-29, including both CC orientations, the on-board battery measurement, exact reverse-cell pin maps, and the recorded two-layer stackup and envelope

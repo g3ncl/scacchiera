@@ -1,6 +1,6 @@
 ---
 type: synthesis
-date_updated: 2026-07-26
+date_updated: 2026-07-29
 tags:
   - wiki/synthesis
 ---
@@ -18,7 +18,7 @@ from their symbols, and plated mounting holes existed only on the PCB side. The 
 owned serial-register escape nets that it completed differently between runs. These were corrected
 in the schematics and generation code, not waived in reports.
 
-Normal matrix and hub builds now import reviewed Specctra sessions from versioned route files. The
+Normal matrix, hub and power builds now import reviewed Specctra sessions from versioned route files. The
 four matrix serial nets, its Q24 power escape, the hub USB shield tabs, and its 0.5 mm VBUS
 distribution and reference branch are deterministic code-owned geometry. Fresh autorouter output is
 available only through explicit reroute targets and must be reviewed before replacing a passing
@@ -30,14 +30,15 @@ volume is a 310 mm player rail holding only that board, so length is the cheap d
 are not. The comparator branch and SCLK bridge that four layers had needed were removed rather than
 pushed onto the back copper, where they would have cut the return path they were meant to protect.
 
-The gate checks both sides of the matrix and light-bar cables, every hub service connector, exact
+The gate checks both sides of the matrix, light-bar and power cables, every hub service connector, exact
 USB-C pad identities, all enumerated no-connects, boot and power-off pulls, MCU reset and recovery,
 and both IC exposed pads. Full KiCad PCB DRC runs with schematic parity. Each board reports zero
 violations, zero unconnected items, and zero parity issues.
 
-The rebuilt hub result is reproducible through `make pcb-hub-drc`. Seven focused static tests pass,
-including the power-module boundary, the independent hardware temperature gate, the on-board battery
-measurement, and the recorded stackup and envelope.
+The hub and power results are reproducible through `make pcb-hub-drc` and `make pcb-power-drc`.
+Seven focused static tests pass, including both ends of the power-module boundary, its optional I2C
+no-connects, the independent hardware temperature gate, the on-board battery measurement, and the
+recorded hub stackup and envelope.
 
 On two layers the back copper is both the ground return and the router's second routing layer, so
 the region under the reader's match and the run to the matrix connector is reserved: no tracks, vias

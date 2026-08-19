@@ -105,6 +105,8 @@ def _placements() -> dict[str, Placement]:
         "J1": Placement(Position(6.0, 23.0), rotation=90.0),
         "R3": Placement(Position(12.0, 17.5)),
         "C12": Placement(Position(12.65, 20.0)),
+        "R34": Placement(Position(10.0, 6.5), rotation=90.0),
+        "R35": Placement(Position(12.4, 6.5), rotation=90.0),
         "U2": Placement(Position(19.0, 23.0)),
         "U1": Placement(Position(29.0, 23.0)),
         # Input decoupling under the VBUS spine that runs between the comparator
@@ -113,11 +115,11 @@ def _placements() -> dict[str, Placement]:
         # close on two layers.
         "C13": Placement(Position(26.0, 26.8), rotation=90.0),
         "C16": Placement(Position(28.6, 26.8), rotation=90.0),
-        # J2 and J3 are seven-way because their supply is spread over several
-        # 1.0 A contacts, so the bottom edge is spaced for two wide shells.
+        # The module return uses an 8-pin Micro-Fit shell sized for the 10 W
+        # path. Keep both power harnesses accessible along the bottom edge.
         "J2": Placement(Position(14.0, 42.5)),
-        "J11": Placement(Position(25.0, 42.5)),
-        "J3": Placement(Position(36.0, 42.5)),
+        "J11": Placement(Position(37.0, 42.5)),
+        "J3": Placement(Position(33.9, 36.0), rotation=180.0),
         # Managed 5 V returns through J3. Keep the buck switching loop compact
         # and away from the reader front end at the opposite side of the board.
         "U5": Placement(Position(42.0, 27.0)),
@@ -128,6 +130,8 @@ def _placements() -> dict[str, Placement]:
         "U4": Placement(Position(65.0, 29.5)),
         "C28": Placement(Position(56.0, 32.0)),
         "C27": Placement(Position(56.0, 28.5), rotation=90.0),
+        "C38": Placement(Position(59.0, 26.0), rotation=90.0, back=True),
+        "C39": Placement(Position(61.2, 26.0), rotation=90.0, back=True),
         "U6": Placement(Position(63.0, 12.0), rotation=90.0),
         # Reader.
         "U3": Placement(Position(84.0, 28.0)),
@@ -183,6 +187,10 @@ def _placements() -> dict[str, Placement]:
     placements.update(_grid(("C14", "C15", "C17"), (24.0, 30.0), 3, (3.6, 3.8), 90.0))
     # Buck and protected LED rail support.
     placements.update(_grid(("C1", "C2", "C3", "C4"), (39.0, 32.5), 2, (4.0, 3.8), 90.0))
+    # The 3V3 bleeder sits with the output capacitors it discharges, and the
+    # light-bar data pulldown with the buffer and connectors it defines.
+    placements.update(_grid(("R36",), (47.0, 36.3), 1, (2.2, 3.4), 90.0))
+    placements.update(_grid(("R37",), (57.0, 25.0), 1, (2.2, 3.4), 90.0))
     placements.update(_grid(("C10", "C11", "C6"), (48.0, 10.0), 3, (2.6, 3.4), 90.0))
     # MCU support: strapping, I2C, button, latch resistors.
     placements.update(
@@ -316,6 +324,16 @@ def generate_board(output: Path = OUTPUT / "hub.kicad_pcb") -> None:
     )
     builder.add_via("USB_VBUS", vbus_window_via, diameter=0.8, drill=0.4)
     builder.add_track("USB_VBUS", (vbus_window_via, vbus_pullup), 0.5)
+    comparator_supply = builder.pad_position("U2", "8")
+    comparator_supply_via = Position(comparator_supply.x + 1.0, comparator_supply.y)
+    builder.add_track("USB_VBUS", (comparator_supply, comparator_supply_via), 0.25)
+    builder.add_via("USB_VBUS", comparator_supply_via, diameter=0.6, drill=0.3)
+    builder.add_track(
+        "USB_VBUS",
+        (comparator_supply_via, vbus_window_via),
+        0.25,
+        pcbnew.B_Cu,
+    )
     vbus_reference = builder.pad_position("R4", "1")
     vbus_reference_via = Position(15.5, 7.0)
     builder.add_track(
@@ -337,6 +355,32 @@ def generate_board(output: Path = OUTPUT / "hub.kicad_pcb") -> None:
     builder.add_track(
         "USB_VBUS",
         (vbus_reference, builder.pad_position("R5", "1")),
+        0.5,
+    )
+    # U1's input capacitors sit below its right edge. Escape pin 5 outside the
+    # package before turning down, then join both capacitors with one short
+    # branch. This is the power switch input loop, not a router-dependent
+    # signal route.
+    switch_input = builder.pad_position("U1", "5")
+    input_capacitor = builder.pad_position("C16", "1")
+    bulk_input = builder.pad_position("C13", "1")
+    builder.add_via("USB_VBUS", bulk_input, diameter=0.6, drill=0.3)
+    builder.add_track(
+        "USB_VBUS",
+        (comparator_supply_via, bulk_input),
+        0.25,
+        pcbnew.B_Cu,
+    )
+    input_escape_x = switch_input.x + 1.2
+    builder.add_track(
+        "USB_VBUS",
+        (
+            switch_input,
+            Position(input_escape_x, switch_input.y),
+            Position(input_escape_x, input_capacitor.y),
+            input_capacitor,
+            bulk_input,
+        ),
         0.5,
     )
     # The comparator supply branch and the reader-to-MCU SCLK bridge used to be
@@ -376,11 +420,7 @@ def route_board(
             check=True,
         )
     board = pcbnew.LoadBoard(str(board_path))
-    apply_session(
-        board,
-        session_path.read_text(encoding="utf-8"),
-        net_aliases={"NFC_VMID_TAP": "NFC_VMID"},
-    )
+    apply_session(board, session_path.read_text(encoding="utf-8"))
     _postroute_fixups(board)
     if not pcbnew.SaveBoard(str(board_path), board):
         raise OSError(f"could not save routed board {board_path}")

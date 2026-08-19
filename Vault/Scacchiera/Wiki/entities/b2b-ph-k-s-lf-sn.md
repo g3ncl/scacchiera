@@ -3,13 +3,13 @@ type: entity
 tags:
   - wiki/entity
   - wiki/component
-date_updated: 2026-07-25
+date_updated: 2026-07-29
 source_count: 1
 ---
 
 # B2B-PH-K-S(LF)(SN)
 
-Exact fitted component from JST, used by hub J2 (B2B-PH-K-S(LF)(SN)), hub J3 (B2B-PH-K-S(LF)(SN)).
+Exact fitted component from JST, used by power J3 (B2B-PH-K-S(LF)(SN)).
 
 [mpn::B2B-PH-K-S(LF)(SN)] [supplier::JLCPCB]
 [order_code::C131337] [category::connector]

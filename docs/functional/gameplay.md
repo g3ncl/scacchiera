@@ -55,6 +55,7 @@ guessed legal move.
 | `RF_CROSSTALK` | One tag is read in more than one place in the same scan (for example a piece coupling to two adjacent sensing lines) | Recenter the piece, then run RF diagnostics. |
 | `SQUARE_UNSTABLE` | A square repeatedly changes between present, absent, or unreadable | Hold the position still and inspect that square. |
 | `BOARD_MISMATCH` | Saved game and complete physical snapshot differ after restart | Use guided resynchronization or start a new game. |
+| `SQUARE_CONFLICT` | Two different tags resolve to the same square (for example two pieces standing within one square's footprint) | Inspect that square and remove the extra piece. |
 
 ## Piece provisioning
 

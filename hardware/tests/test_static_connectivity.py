@@ -1,5 +1,7 @@
 """V2 connector, no-connect, startup, programming, and stackup checks."""
 
+from functools import cache
+import json
 import os
 import re
 import subprocess
@@ -16,6 +18,7 @@ from hardware.pcb.generate import NO_CONNECTS as SCHEMATIC_NO_CONNECTS
 from hardware.pcb.hub import NO_CONNECTS, build_hub
 from hardware.pcb.lightbar import build_lightbar
 from hardware.pcb.matrix import build_matrix
+from hardware.pcb.quad import build_quad
 
 
 ROOT = Path(__file__).parents[2]
@@ -50,10 +53,34 @@ def _pin_map(circuit: Circuit, reference: str, count: int) -> tuple[str, ...]:
     return tuple(_net(circuit, reference, str(pin)) for pin in range(1, count + 1))
 
 
+def _assert_filed_source(path: Path) -> None:
+    assert path.is_file()
+    if path.suffix == ".pdf":
+        assert path.read_bytes().startswith(b"%PDF")
+    else:
+        assert path.suffix == ".md"
+        assert path.read_text(encoding="utf-8").strip()
+
+
 def _evidence() -> dict[str, Any]:
     document = yaml.safe_load(EVIDENCE.read_text(encoding="utf-8"))
     assert isinstance(document, dict)
     return document
+
+
+@cache
+def _power_connectivity() -> dict[str, dict[str, list[str]]]:
+    result = subprocess.run(
+        (sys.executable, "-m", "hardware.verification.power_connectivity"),
+        check=True,
+        cwd=ROOT,
+        env=os.environ,
+        capture_output=True,
+        text=True,
+    )
+    snapshot = json.loads(result.stdout)
+    assert isinstance(snapshot, dict)
+    return snapshot
 
 
 def test_reviewed_no_connects_are_exact_traced_and_applied() -> None:
@@ -77,8 +104,7 @@ def test_reviewed_no_connects_are_exact_traced_and_applied() -> None:
         for pin in pins:
             assert _net(circuit, reference, pin) == "__NOCONNECT"
         datasheet = ROOT / str(records[reference]["datasheet"])
-        assert datasheet.is_file()
-        assert datasheet.read_bytes().startswith(b"%PDF")
+        _assert_filed_source(datasheet)
         assert str(records[reference]["locator"]).strip()
 
     matrix_records = evidence["matrix_no_connects"]
@@ -86,8 +112,21 @@ def test_reviewed_no_connects_are_exact_traced_and_applied() -> None:
     assert SCHEMATIC_NO_CONNECTS["matrix"] == frozenset({"U2:9"})
     assert _part(matrix, "U2")["9"].net is None
     matrix_datasheet = ROOT / str(matrix_records["U2"]["datasheet"])
-    assert matrix_datasheet.is_file()
-    assert matrix_datasheet.read_bytes().startswith(b"%PDF")
+    _assert_filed_source(matrix_datasheet)
+
+    power_records = evidence["power_no_connects"]
+    power_no_connects = {"U1": ("2", "3", "4", "7", "12"), "U2": ("13",), "J2": ("8",)}
+    assert SCHEMATIC_NO_CONNECTS["power"] == frozenset(
+        f"{reference}:{pin}"
+        for reference, pins in power_no_connects.items()
+        for pin in pins
+    )
+    snapshot = _power_connectivity()["no_connects"]
+    for reference, pins in power_no_connects.items():
+        assert snapshot[reference] == ["__NOCONNECT"] * len(pins)
+        datasheet = ROOT / str(power_records[reference]["datasheet"])
+        _assert_filed_source(datasheet)
+        assert str(power_records[reference]["locator"]).strip()
     assert str(matrix_records["U2"]["locator"]).strip()
 
 
@@ -103,10 +142,45 @@ def test_board_to_board_connectors_match_at_both_ends() -> None:
         "GND", "RF_BUS", "GND", "3V3", "MOSI", "SCLK", "SEL_RCLK"
     )
 
+    # The sensing plane that ships. Its link in must present the same seven
+    # conductors in the same order as the monolith did, because that is what
+    # keeps the hub interface unchanged across the repartition, and its link
+    # out must present them again so the four boards chain with one pinout in
+    # both directions. Only the serial conductor differs between the two ends,
+    # carrying this board's QH' outward where the link in carried the previous
+    # board's.
+    quad = build_quad()
+    assert _pin_map(quad, "J1", 7) == (
+        "GND", "RF_BUS", "GND", "3V3", "SEL_SER", "SEL_SRCLK", "SEL_RCLK"
+    )
+    assert _pin_map(quad, "J2", 7) == (
+        "GND", "RF_BUS", "GND", "3V3", "SEL_CHAIN", "SEL_SRCLK", "SEL_RCLK"
+    )
+
     bar_link = ("LED_5V", "GND", "DATA_IN", "DATA_OUT")
     assert _pin_map(lightbar, "J1", 4) == bar_link
     assert _pin_map(hub, "J7", 4) == ("LED_5V", "GND", "LED_DATA_5V", "LED_RETURN")
     assert _pin_map(hub, "J8", 3) == ("LED_5V", "GND", "LED_RETURN")
+
+    power_connectors = _power_connectivity()["connectors"]
+    assert tuple(power_connectors["J1"]) == _pin_map(hub, "J2", 7)
+    assert tuple(power_connectors["J2"]) == (
+        "MODULE_5V", "MODULE_5V", "GND", "GND", "I2C_SCL", "I2C_SDA", "BAT_RAW", "__NOCONNECT"
+    )
+    assert _pin_map(hub, "J3", 8) == (
+        "MODULE_5V", "MODULE_5V", "GND", "GND", "I2C_SCL", "I2C_SDA", "BAT_RAW", "__NOCONNECT"
+    )
+    assert tuple(power_connectors["J3"]) == ("CELL_POS", "GND")
+
+    reverse = _power_connectivity()["reverse_protection"]
+    assert tuple(reverse["Q1"]) == (
+        "CELL_POS", "CELL_POS", "CELL_POS", "BAT_REVERSE_GATE",
+        "BAT_RAW", "BAT_RAW", "BAT_RAW", "BAT_RAW",
+    )
+    assert tuple(reverse["U4"]) == (
+        "BAT_REVERSE_GATE", "GND", "BAT_REVERSE_REF", "BAT_REVERSE_SENSE", "BAT_RAW",
+    )
+    assert tuple(reverse["D1"]) == ("BAT_REVERSE_SENSE", "GND")
 
 
 def test_hub_connectors_and_usb_use_the_reviewed_pin_order() -> None:
@@ -120,13 +194,13 @@ def test_hub_connectors_and_usb_use_the_reviewed_pin_order() -> None:
     assert _pin_map(hub, "J9", 4) == ("3V3", "GND", "UART_TX", "UART_RX")
     assert _pin_map(hub, "J10", 2) == ("BUTTON_N", "GND")
     assert _pin_map(hub, "J11", 2) == ("THERM_SENSE", "GND")
-    # Both halves of the power-module link carry the whole board across 1.0 A
-    # contacts, so the supply is spread over several of them by design.
+    # The GH charge-input contacts are paralleled. The return uses Micro-Fit
+    # contacts sized for the complete 10 W load.
     assert _pin_map(hub, "J2", 7) == (
         "CHARGE_5V", "CHARGE_5V", "CHARGE_5V", "GND", "GND", "GND", "GND"
     )
-    assert _pin_map(hub, "J3", 7) == (
-        "MODULE_5V", "MODULE_5V", "GND", "GND", "I2C_SCL", "I2C_SDA", "BAT_RAW"
+    assert _pin_map(hub, "J3", 8) == (
+        "MODULE_5V", "MODULE_5V", "GND", "GND", "I2C_SCL", "I2C_SDA", "BAT_RAW", "__NOCONNECT"
     )
 
     expected_usb = {
@@ -144,6 +218,10 @@ def test_hub_connectors_and_usb_use_the_reviewed_pin_order() -> None:
 def test_startup_defaults_exposed_pads_and_recovery_are_defined() -> None:
     hub = build_hub()
     expected_resistors = {
+        "R1": ({"USB_CC1", "GND"}, "5.1k"),
+        "R2": ({"USB_CC2", "GND"}, "5.1k"),
+        "R34": ({"USB_CC1", "USB_CC1_ADC"}, "10k"),
+        "R35": ({"USB_CC2", "USB_CC2_ADC"}, "10k"),
         "R12": ({"CHARGE_TEMP_OK", "USB_VBUS"}, "100k"),
         "R15": ({"CHARGE_INPUT_FAULT_N", "3V3"}, "100k"),
         "R19": ({"LED_DATA", "GND"}, "100k"),
@@ -162,6 +240,10 @@ def test_startup_defaults_exposed_pads_and_recovery_are_defined() -> None:
         assert str(part.value) == value
 
     assert _net(hub, "U4", "8") == "MCU_EN"
+    assert _net(hub, "U4", "12") == "USB_CC1_ADC"
+    assert _net(hub, "U4", "13") == "USB_CC2_ADC"
+    assert _net(hub, "U4", "16") == "NFC_IRQ"
+    assert _net(hub, "U4", "19") == "LED_DATA"
     assert _net(hub, "U3", "41") == "GND"
     assert (_net(hub, "TP1", "1"), _net(hub, "TP2", "1"), _net(hub, "TP3", "1")) == (
         "I2C_SDA", "MCU_EN", "GND"

@@ -44,14 +44,114 @@ criteria:
     margin: V3 must predict at least 11 hours so capacity aging and conversion uncertainty do not consume the ten-hour product requirement; V8 measures the exact profile.
     test_ids: [TEST-POWER-RUNTIME-001, TEST-V8-RUNTIME-001]
 
+  POWER-MODULE-OUTPUT-POWER:
+    description: Minimum regulated power available from the battery subsystem.
+    requirement_ids: [POWER-OUTPUT-001]
+    unit: W
+    limits: {minimum: 10.0}
+    evidence: {class: Derived, source: docs/functional/power.md, locator: Peak output}
+    operating_conditions: Qualified battery assembly across its permitted discharge-voltage and temperature range, USB absent, regulated module output at 5 V.
+    margin: The 2 A interface rating is 35 percent above the current 1.48 A coincident-load derivation; converter and interconnect corners must still demonstrate the full 10 W rating.
+    test_ids: [TEST-POWER-OUTPUT-001, TEST-V8-POWER-OUTPUT-001]
+
+  POWER-BOOST-OUTPUT-VOLTAGE:
+    description: Regulated output range set by the TPS61088 reference and feedback-divider corners.
+    requirement_ids: [POWER-OUTPUT-001]
+    unit: V
+    limits: {minimum: 4.75, maximum: 5.25}
+    evidence: {class: Datasheet, source: Vault/Scacchiera/Datasheets/TPS61088RHLR_C87357.pdf, locator: "Electrical Characteristics, VREF; section 9.2.2.2, output-voltage equation"}
+    operating_conditions: Both 1 percent feedback resistors and the feedback-reference voltage at their independent worst-case limits.
+    margin: The calculated 4.909 to 5.215 V range remains inside the 5 V rail's 4.75 to 5.25 V acceptance band before V8 load and thermal measurements.
+    test_ids: [TEST-POWER-OUTPUT-001]
+
+  POWER-BOOST-RIPPLE:
+    description: Maximum peak-to-peak ripple on the power board's regulated 5 V output.
+    requirement_ids: [POWER-OUTPUT-001]
+    unit: V
+    limits: {maximum: 0.15}
+    evidence: {class: Datasheet, source: Vault/Scacchiera/Datasheets/TPS61088RHLR_C87357.pdf, locator: "Section 9.2.2, switching frequency and output-capacitor selection"}
+    operating_conditions: Cell at 2.87, 3.6, and 4.2 V; 0.1, 1, and 2 A load; inductor from minus 30 to plus 20 percent; three 22 uF plus one 1 uF output capacitors at nominal and combined initial-tolerance, X5R temperature, and 50 percent DC-bias bounds; and output-bank ESR from ideal to 15 milliohm.
+    margin: The 162-corner switching-stage sweep reaches 0.138 V. V8 measures the assembled rail because ceramic-capacitor bias and layout parasitics are bounded rather than claimed exact at V3.
+    test_ids: [TEST-POWER-OUTPUT-001]
+
+  POWER-BOOST-OUTPUT-ESR:
+    description: Maximum assembled output-capacitor-bank ESR at the 500 kHz boost switching frequency.
+    requirement_ids: [POWER-OUTPUT-001]
+    unit: ohm
+    limits: {maximum: 0.015}
+    evidence: {class: Simulated, source: hardware/sim/power_boost.py, locator: OUTPUT_ESR_OHM and the full power-stage corner sweep}
+    operating_conditions: The complete three by 22 uF plus 1 uF bank measured in circuit at 500 kHz, including PCB interconnect; every other power-stage variable at its independent corner.
+    margin: A 15 milliohm bank produces 0.138 V peak-to-peak against the 0.150 V rail limit. The Samsung sheet specifies dissipation factor only at 120 Hz, so V8 must measure rather than infer this value.
+    test_ids: [TEST-POWER-OUTPUT-001, TEST-V8-POWER-OUTPUT-001]
+
+  POWER-BOOST-PHASE-MARGIN:
+    description: Minimum TPS61088 boost-loop phase margin in the preliminary small-signal sensitivity sweep.
+    requirement_ids: [POWER-OUTPUT-001]
+    unit: degree
+    limits: {minimum: 45.0}
+    evidence: {class: Derived, source: hardware/sim/power_loop.py, locator: "TI equations 13 through 17 and all declared tolerance and sensitivity corners"}
+    operating_conditions: Cell at 2.87, 3.6, and 4.2 V; 0.1, 1, and 2 A load; declared inductor, output-capacitance, output-ESR, compensation-resistor, and compensation-capacitor corners; and TPS61088 error-amplifier transconductance at typical plus or minus 30 percent.
+    margin: The 22 nF compensation capacitor clears 45 degrees in the declared sweep. The transconductance range is a sensitivity assumption because TI publishes only a typical value, so V3 remains open for guaranteed model evidence and V8 loop measurement.
+    test_ids: [TEST-POWER-OUTPUT-001, TEST-V8-POWER-OUTPUT-001]
+
+  POWER-BOOST-GAIN-MARGIN:
+    description: Minimum TPS61088 boost-loop gain margin in the preliminary small-signal sensitivity sweep.
+    requirement_ids: [POWER-OUTPUT-001]
+    unit: dB
+    limits: {minimum: 10.0}
+    evidence: {class: Derived, source: hardware/sim/power_loop.py, locator: "TI equations 13 through 17 and all declared tolerance and sensitivity corners"}
+    operating_conditions: The same independent component, line, load, and transconductance sensitivity corners as POWER-BOOST-PHASE-MARGIN.
+    margin: Every declared corner is checked against TI's 10 dB guidance. The result is preliminary because the transconductance range is not guaranteed and the vendor transient model does not switch in ngspice.
+    test_ids: [TEST-POWER-OUTPUT-001, TEST-V8-POWER-OUTPUT-001]
+
+  POWER-BOOST-INDUCTOR-PEAK:
+    description: Maximum boost-inductor peak current below the guaranteed TPS61088 current-limit floor.
+    requirement_ids: [POWER-OUTPUT-001]
+    unit: A
+    limits: {maximum: 6.502}
+    evidence: {class: Datasheet, source: Vault/Scacchiera/Datasheets/TPS61088RHLR_C87357.pdf, locator: "Section 8.3.10 and equation 5, switch current limit"}
+    operating_conditions: Full power-stage corner sweep with the 100 and 51 kohm ILIM resistors at plus 1 percent, which produces the lowest threshold.
+    margin: The 80 percent efficiency bound reaches 5.871 A, below the 6.502 A guaranteed threshold, the BQ25895 9 A overcurrent threshold, and the inductor's 12.2 A saturation rating.
+    test_ids: [TEST-POWER-OUTPUT-001]
+
+  POWER-BOOST-INDUCTOR-RMS:
+    description: Maximum boost-inductor RMS current, also bounded against the charger's BATFET discharge rating.
+    requirement_ids: [POWER-OUTPUT-001]
+    unit: A
+    limits: {maximum: 6.0}
+    evidence: {class: Datasheet, source: Vault/Scacchiera/Datasheets/BQ25895RTWR_C80200.pdf, locator: "Recommended Operating Conditions, discharging current with internal MOSFET up to 6 A continuous"}
+    operating_conditions: Full power-stage corner sweep, including 2 A output at the 2.87 V supervisor floor and minimum effective inductance and capacitance.
+    margin: The 80 percent efficiency bound reaches less than 4.5 A RMS, clearing the 6 A continuous BATFET path rating and the inductor's 12.9 A thermal rating.
+    test_ids: [TEST-POWER-OUTPUT-001]
+
+  POWER-CELL-PASS-FET-LOSS:
+    description: Maximum hot reverse-protection pass-FET loss at the conservative full-load RMS current.
+    requirement_ids: [POWER-OUTPUT-001]
+    unit: W
+    limits: {maximum: 0.35}
+    evidence: {class: Datasheet, source: Vault/Scacchiera/Datasheets/CSD25404Q3_C2865523.pdf, locator: "Electrical Characteristics, RDS(on); Figure 8, normalized on-state resistance versus temperature"}
+    operating_conditions: 4.442 A RMS battery-path current, 12.1 milliohm maximum at minus 2.5 V gate drive, and a 1.4 hot-resistance multiplier read conservatively from the published temperature curve.
+    margin: The bound is 0.334 W. V8 measures case temperature and voltage drop because the temperature multiplier is a typical curve rather than a guaranteed maximum.
+    test_ids: [TEST-POWER-OUTPUT-001, TEST-V8-POWER-OUTPUT-001]
+
+  POWER-CELL-REVERSE-ISOLATION:
+    description: Minimum protected BAT_RAW voltage during reversed-cell insertion.
+    requirement_ids: [POWER-SAFETY-004]
+    unit: V
+    limits: {minimum: -0.3}
+    evidence: {class: Datasheet, source: Vault/Scacchiera/Datasheets/BQ25895RTWR_C80200.pdf, locator: "Absolute Maximum Ratings, BAT and SYS with converter not switching"}
+    operating_conditions: A reversed 4.2 V cell, both with USB absent and with the charger-side BAT node already held at 4.2 V; TLV7021 offset, hysteresis, 20 us power-on reset and the CSD25404Q3 body diode are bounded in ngspice.
+    margin: The USB-absent simulation reaches only minus 5.8 mV at BAT_RAW, and the already-powered case stays at positive 4.2 V. Both remain clear of the charger's minus 0.3 V absolute limit.
+    test_ids: [TEST-POWER-REVERSE-001, TEST-V8-BATTERY-PROTECTION-001]
+
   POWER-CHARGE-10-80:
     description: Maximum time to charge from 10 to 80 percent state of charge.
     requirement_ids: [POWER-CHARGE-001]
     unit: minute
     limits: {maximum: 240.0}
     evidence: {class: Derived, source: docs/functional/power.md, locator: USB-C charging}
-    operating_conditions: Idle board, any power module meeting the interface in docs/hardware/power-module-interface.md with a 5 Ah cell, compliant 5 V 2 A USB source and cable, and cell temperature from 20 to 25 degrees Celsius.
-    margin: A 1 A constant-current phase supplies 70 percent of a 5 Ah cell in 210 minutes, leaving 30 minutes for control transitions and the module's own charge profile before V8 measurement.
+    operating_conditions: Idle board with the 6.5 Ah Molicel candidate in its qualified protected assembly, compliant 5 V 2 A USB source and cable, and cell temperature from 20 to 25 degrees Celsius.
+    margin: A 1.5 A constant-current phase supplies 70 percent of 6.5 Ah in 182 minutes, leaving 58 minutes for control transitions and the constant-voltage profile before V8 measurement.
     test_ids: [TEST-POWER-CHARGE-001, TEST-V8-CHARGE-001]
 
   POWER-CHARGE-10-FULL:
@@ -60,9 +160,19 @@ criteria:
     unit: minute
     limits: {maximum: 360.0}
     evidence: {class: Derived, source: docs/functional/power.md, locator: USB-C charging}
-    operating_conditions: Idle board, any power module meeting the interface in docs/hardware/power-module-interface.md with a 5 Ah cell, compliant 5 V 2 A USB source and cable, and cell temperature from 20 to 25 degrees Celsius.
-    margin: The limit leaves 120 minutes beyond the ideal 210-minute constant-current interval for the constant-voltage taper, which does not scale down with charge current; V8 measures termination time.
+    operating_conditions: Idle board with the 6.5 Ah Molicel candidate in its qualified protected assembly, compliant 5 V 2 A USB source and cable, and cell temperature from 20 to 25 degrees Celsius.
+    margin: Charging 90 percent of 6.5 Ah at 1.5 A takes 234 ideal minutes, leaving 126 minutes for the constant-voltage taper and control transitions; V8 measures termination time.
     test_ids: [TEST-POWER-CHARGE-002, TEST-V8-CHARGE-001]
+
+  HUB-TYPEC-CURRENT-ADVERTISEMENT:
+    description: Sink-side CC voltage thresholds used to limit input current without a USB Power Delivery contract.
+    requirement_ids: [POWER-CHARGE-004, POWER-CHARGE-005]
+    unit: V
+    limits: {connect_minimum: 0.25, default_maximum: 0.66, current_1_5_maximum: 1.23, connected_maximum: 2.04}
+    evidence: {class: Standard, source: Vault/Scacchiera/Clippings/usb-type-c-r2-current-advertisement-extract.pdf, locator: "USB Type-C Cable and Connector Specification Release 2.0, Table 4-36"}
+    operating_conditions: Both CC pins retain independent 5.1 kohm Rd terminations and are sampled after the 10 kohm, 100 nF filters; a classification change is debounced before the charger input limit changes.
+    margin: The 1 ms analog filter settles inside the standard's 10 to 20 ms tRpValueChange debounce. Undefined voltage gaps resolve to the lower current class, and invalid readings never authorize an increase.
+    test_ids: [TEST-POWER-CHARGE-004, TEST-HUB-USB-C-SINK-001]
 
   POWER-CHARGE-TEMPERATURE-MIN:
     description: Lowest cell temperature at which charging may proceed.
@@ -194,6 +304,106 @@ criteria:
     margin: No reduction is allowed without measured V8 evidence.
     test_ids: [TEST-PHY-RF-002]
 
+  MATRIX-ANTENNA-INDUCTANCE:
+    description: Self inductance of one line antenna at the carrier, from the routed geometry.
+    requirement_ids: [PHY-RF-001]
+    unit: nH
+    limits: {minimum: 500.0, maximum: 650.0}
+    evidence: {class: Simulated, source: hardware/sim/antenna_coupling.py, locator: FastHenry extraction of all sixteen loops at 13.56 MHz}
+    operating_conditions: 1 mm trace, 35 um copper, 276 by 31 mm single turn, rows on front copper and columns on back of a 1.0 mm board.
+    margin: FastHenry returns 566.5 nH at a converged mesh against 590 nH from Grover's formula in hardware/sim/loop.py, two independent methods agreeing to 4 percent. A mesh study over nhinc 1 to 7 and nwinc 9 to 13 moves it by 0.04 percent, so the value is converged. The band survives the method spread and still catches a geometry drift. V8 measures the real value with a VNA.
+    test_ids: [TEST-MATRIX-RF-004, TEST-V8-RF-001]
+
+  MATRIX-ANTENNA-UNIFORMITY:
+    description: Fractional spread of self inductance and resistance across the sixteen lines.
+    requirement_ids: [PHY-RF-001]
+    unit: fraction
+    limits: {maximum: 0.02}
+    evidence: {class: Simulated, source: hardware/sim/antenna_coupling.py, locator: Diagonal of the sixteen-port impedance matrix}
+    operating_conditions: All sixteen loops solved together at 13.56 MHz.
+    margin: The extraction returns 0.0005 on inductance and 0.003 on resistance. Both are spreads across identically meshed lines, so the resistance spread stays meaningful even though its absolute value is not converged. A scan treats every line identically, so a spread here would make one square read differently from its neighbour for reasons unrelated to the piece on it.
+    test_ids: [TEST-MATRIX-RF-005]
+
+  MATRIX-ROW-COLUMN-COUPLING:
+    description: Worst inductive coupling coefficient between any row and any column.
+    requirement_ids: [PHY-RF-001]
+    unit: fraction
+    limits: {maximum: 0.10}
+    evidence: {class: Simulated, source: hardware/sim/antenna_coupling.py, locator: Off-diagonal row-to-column terms of the sixteen-port matrix}
+    operating_conditions: All sixteen loops solved together at 13.56 MHz, no tag present.
+    margin: The extraction returns 0.0665 at a converged mesh, at the four board corners where two loops cross near their open ends; the best crossing, at the board centre, is 0.0066, a tenfold variation. This is the claim the row-and-column architecture rests on and it is inductive coupling between antennas, not tag coupling, which A8 and A9 record as unmeasurable from datasheets.
+    test_ids: [TEST-MATRIX-RF-006, TEST-V8-RF-002]
+
+  MATRIX-ADJACENT-LINE-COUPLING:
+    description: Inductive coupling coefficient between adjacent same-axis lines.
+    requirement_ids: [PHY-RF-001]
+    unit: fraction
+    limits: {maximum: 0.20}
+    evidence: {class: Simulated, source: hardware/sim/antenna_coupling.py, locator: Off-diagonal terms at a lane spacing of one}
+    operating_conditions: All sixteen loops solved together at 13.56 MHz, no tag present.
+    margin: The extraction returns 0.1398 at a converged mesh, identical to four figures across the whole mesh study and uniform across every adjacent pair, falling to 0.017 at two lanes and 0.001 across the board. This is the dominant coupling on the board and the path a tag reading on the wrong line would take, so the bound is a recorded ceiling rather than a demonstration of adequacy. V8 must measure it.
+    test_ids: [TEST-MATRIX-RF-007, TEST-V8-RF-002]
+
+  QUAD-PLANE-SEPARATION:
+    description: Copper-to-copper distance between the row plane and the column plane of the split sensing assembly.
+    requirement_ids: [PHY-RF-001]
+    unit: mm
+    limits: {minimum: 0.90, maximum: 1.20}
+    evidence: {class: Derived, source: hardware/pcb/quad_geometry.py, locator: QUAD_THICKNESS plus INTERPLANE_GAP plus one cladding}
+    operating_conditions: Row boards on the frame floor, column boards on 0.4 mm ribs above them, both loops on their board's top copper.
+    margin: The stackup gives 1.035 mm against the monolith's 0.965 mm, 7 percent further apart. The window is centred on the monolith deliberately, because every coupling figure below was extracted at that separation, and a split that moved it would have invalidated them at the same time as changing the board. Its far plane sits 0.07 mm deeper than the monolith's, which is 2 percent of the 3.0 mm read budget in functional/physical.md.
+    test_ids: [TEST-QUAD-RF-001]
+
+  QUAD-ROW-COLUMN-COUPLING:
+    description: Worst inductive coupling coefficient between any row and any column, with the two planes on separate substrates.
+    requirement_ids: [PHY-RF-001]
+    unit: fraction
+    limits: {maximum: 0.10}
+    evidence: {class: Simulated, source: hardware/sim/quad_stack.py, locator: Off-diagonal row-to-column terms of the sixteen-port matrix}
+    operating_conditions: All sixteen loops solved together at 13.56 MHz on the stacked-board stackup, no tag present.
+    margin: The extraction returns 0.0652 against the monolith's 0.0664 from the same solver and the same loop path, so the split couples 1.8 percent less. Same limit as MATRIX-ROW-COLUMN-COUPLING because it is the same claim about the same copper; only the substrate under it changed.
+    test_ids: [TEST-QUAD-RF-002]
+
+  QUAD-ADJACENT-LINE-COUPLING:
+    description: Inductive coupling coefficient between adjacent same-axis lines of the split plane.
+    requirement_ids: [PHY-RF-001]
+    unit: fraction
+    limits: {maximum: 0.20}
+    evidence: {class: Simulated, source: hardware/sim/quad_stack.py, locator: Off-diagonal terms at a lane spacing of one}
+    operating_conditions: All sixteen loops solved together at 13.56 MHz on the stacked-board stackup, no tag present.
+    margin: The extraction returns 0.1401, identical to the monolith. Adjacent lines are in the same plane, so plane separation cannot move this and the split neither helps nor hurts it. It remains the dominant coupling on the board and a recorded ceiling rather than a demonstration of adequacy; V8 must measure it.
+    test_ids: [TEST-QUAD-RF-003]
+
+  QUAD-BUS-RESONANCE:
+    description: Selected-line resonance on the split bus, with the harness and chained on-board bus interconnect in place.
+    requirement_ids: [PHY-RF-001]
+    unit: MHz
+    limits: {minimum: 12.5, maximum: 15.0}
+    evidence: {class: Derived, source: hardware/sim/quad_rf.py, locator: Source-current dip with one line selected and fifteen deselected}
+    operating_conditions: One selected and fifteen deselected nominal cells, each behind its board's place in the harness chain, no tag.
+    margin: Every line lands between 12.767 and 12.865 MHz against the same sixteen cells with the interconnect removed at 12.895 MHz, so the whole harness-and-chain path costs at most 0.99 percent of tuning. That is a bound rather than a nominal, because the on-board bus is autorouted and every line is modelled at the whole net's routed length. Same window as MATRIX-BUS-RESONANCE, and for the same reason. The DNP trim only adds capacitance, so the window reserves adjustment around 13.56 MHz.
+    test_ids: [TEST-QUAD-RF-004]
+
+  QUAD-LINE-RESONANCE-SPREAD:
+    description: Peak-to-peak spread of resonance across the sixteen lines of the split plane.
+    requirement_ids: [PHY-RF-001]
+    unit: fraction
+    limits: {maximum: 0.02}
+    evidence: {class: Derived, source: hardware/sim/quad_rf.py, locator: Highest less lowest line resonance over the mean}
+    operating_conditions: All sixteen lines swept individually, over the bounding connector-inductance corners of A11.
+    margin: The extraction returns 0.0077 worst case, against a bound that gives all four lanes of a board the same series inductance and so overstates three of them. This is the one thing a single tuning-capacitor value cannot absorb, because a board's place in the chain differs where its four harnesses are equal by construction, so it is the criterion the partition actually had to earn. It sits 2.6 times inside the limit even at the bound, and A11's 2 to 8 nH connector range moves it by one sweep step.
+    test_ids: [TEST-QUAD-RF-005]
+
+  QUAD-PANEL-AREA-RATIO:
+    description: Substrate area of the split sensing plane against the monolithic matrix board.
+    requirement_ids: [PHY-RF-001]
+    unit: fraction
+    limits: {maximum: 2.10}
+    evidence: {class: Derived, source: hardware/pcb/quad_geometry.py, locator: Four board outlines over one matrix outline}
+    operating_conditions: Bare outlines, excluding panelisation rails.
+    margin: The split buys 1.87 times the substrate. That is structural rather than a layout inefficiency, because the monolith carries two planes of antenna on the two faces of one substrate, and any split uses one face per board and wastes the other. Recorded as a ceiling so a widened board or an added one cannot quietly make the trade worse without the number moving.
+    test_ids: [TEST-QUAD-COST-001]
+
   PHY-TAG-RECESS-DIAMETER:
     description: Nominal centered NFC tag recess diameter in each piece.
     requirement_ids: [PHY-PIECE-001]
@@ -202,6 +412,16 @@ criteria:
     evidence: {class: Derived, source: docs/functional/physical.md, locator: Pieces}
     operating_conditions: Generated nominal piece geometry before manufacturing variation.
     margin: The generation tolerance detects a wrong recess while V7 adds clearance from the selected tag drawing.
+    test_ids: [TEST-MECH-PIECE-001]
+
+  PHY-PIECE-BASE-DIAMETER:
+    description: Minimum outside diameter of any piece base, pawns included.
+    requirement_ids: [PHY-PIECE-004]
+    unit: mm
+    limits: {minimum: 24.0}
+    evidence: {class: Derived, source: docs/functional/physical.md, locator: Pieces}
+    operating_conditions: Generated nominal piece geometry before manufacturing variation.
+    margin: 24.0 mm holds the 22.0 mm recess with 1.0 mm of wall per side; the bound tag's 21 mm die-cut leaves 1.5 mm.
     test_ids: [TEST-MECH-PIECE-001]
 
   IF-DISPLAY-COUNT:
@@ -550,9 +770,9 @@ criteria:
     unit: V
     limits: {maximum: 4.0}
     evidence: {class: Datasheet, source: Vault/Scacchiera/Datasheets/AP63203WU-7_C780769.pdf, locator: "Electrical Characteristics, RDS(ON)1 high-side switch on-resistance 125 mOhm, with the inductor's 34 mOhm from its own data sheet"}
-    operating_conditions: The 1.3 A the power-module interface obliges a module to supply, with the converter in dropout holding its high-side switch on.
-    margin: Derived, because in dropout the converter stops switching and the path is two resistances. The 3.51 V result is what sets the minimum output the interface may accept from a module, and the 4.0 V limit keeps half a volt in hand for cable and connector drops that are not in this figure.
-    test_ids: [TEST-HUB-3V3-002]
+    operating_conditions: The rounded-up 1.34 A coincident 3.3 V rail load, with the converter in dropout holding its high-side switch on; the 5 V light bars do not cross this buck.
+    margin: Derived, because in dropout the converter stops switching and the path is two resistances. The 3.51 V result is what sets the minimum output the interface may accept from a module, and the 4.0 V limit keeps half a volt in hand for cable and connector drops that are not in this figure. With the coil hot at the 45 degree ambient allowance its resistance rises from 34 to 39.5 mOhm and the figure moves to 3.52 V, so the coil's temperature costs 7 mV of the 487 mV in hand. The switch's own temperature behaviour is not in that number, because Diodes publishes only a typical.
+    test_ids: [TEST-HUB-3V3-002, TEST-THERMAL-INDUCTOR-001]
 
   HUB-3V3-STARTUP-INRUSH:
     description: Current the 3.3 V output capacitors draw during the converter's soft start.
@@ -564,14 +784,84 @@ criteria:
     margin: The 4 ms ramp is what makes cold start uneventful. At 36 mA the capacitor charge is a twentieth of the converter's rating and disappears into the load, so startup needs no inrush limiting of its own.
     test_ids: [TEST-HUB-3V3-002]
 
+  HUB-SEQUENCING-PIN-INJECTION:
+    description: Current into any cross-rail pin whose absolute maximum does not cover being driven with its own rail down.
+    requirement_ids: [POWER-CHARGE-003]
+    unit: A
+    limits: {maximum: 100.0e-6}
+    evidence: {class: Datasheet, source: Vault/Scacchiera/Datasheets/AP22811AW5-7_C3001660.pdf, locator: "Absolute Maximum Ratings, which list VIN, VOUT and VEN and no row for the fault flag, with VEN itself given as -0.3 V to VIN + 0.3 V"}
+    operating_conditions: The board running from the battery with USB absent, so 3V3 is up while USB_VBUS is at zero and R15 holds CHARGE_INPUT_FAULT_N at 3.3 V against an unpowered AP22811. The other four hub crossings are rated against ground and inject nothing.
+    margin: 33 uA, a third of the ceiling and smaller than the leakage currents the same data sheets specify elsewhere, so a clamp conducting it dissipates about 0.1 mW. This bounds an unspecified condition rather than clearing a specified one, so it stays a question for the vendor or for V8 rather than a closed result.
+    test_ids: [TEST-HUB-SEQUENCING-001]
+
+  THERMAL-INDUCTOR-AMBIENT:
+    description: Highest ambient each inductor tolerates once its own self heating is counted.
+    requirement_ids: [POWER-OUTPUT-001, POWER-CHARGE-003]
+    unit: degrees Celsius
+    limits: {minimum: 45.0}
+    evidence: {class: Datasheet, source: Vault/Scacchiera/Datasheets/NR6045S4R7MT_C42370396.pdf, locator: "Operating temperature range -40 to +125 C including self temperature rise, with note 4 defining Irms as the DC current giving a 40 C rise from 20 C ambient; CDMC8D28NP-1R2MC_C17268233.pdf states both the same way in its note 3"}
+    operating_conditions: Hub L1 at 2.1 A, the converter's 2.0 A maximum swept load plus the ripple its 2.5 A peak limit allows, against a 3.30 A rating. Power L1 at the 4.5 A RMS bound the boost records at the full 10 W obligation, against a 12.9 A rating. Rise scales with the square of the current from the one point each data sheet fixes.
+    margin: 108.8 and 120.1 degrees against a 45 degree allowance. Both coils are so far inside their ratings that self heating is not what limits either board; the boost controller's junction is, at 53.0 degrees.
+    test_ids: [TEST-THERMAL-INDUCTOR-001]
+
+  HUB-LED-RAIL-STARTUP-CURRENT-LIMIT:
+    description: How long a cold start holds the light-bar limiter in current limit, against its latch-off deglitch.
+    requirement_ids: [IF-LIGHTBAR-001]
+    unit: ms
+    limits: {maximum: 2.5}
+    evidence: {class: Datasheet, source: Vault/Scacchiera/Datasheets/TPS2553DBVR-1_C111738.pdf, locator: "Electrical Characteristics, FAULT deglitch 5 ms minimum for an overcurrent condition, with the section 9.5.1 IOSmin formula at the board's 39 kOhm ILIM resistor"}
+    operating_conditions: Both bars' nominal 202.9 uF charged from zero at the 610 mA minimum limit current, the pessimistic end because less current takes longer. The bars' inrush on the soft-start ramp alone would be 1.45 A, above the limit, so the rail charges at the limit rather than on the ramp.
+    margin: 1.66 ms against a 2.5 ms limit and the 5 ms minimum deglitch the part guarantees, so a normal power-on finishes in a third of the window that would latch it off. The rail may carry 610 uF before a startup latches, three times what it does carry.
+    test_ids: [TEST-HUB-LED-RAIL-002]
+
+  HUB-LED-RAIL-LATCH-LATENCY:
+    description: Longest a short on the light-bar rail stays energised before the limiter latches off.
+    requirement_ids: [IF-LIGHTBAR-001]
+    unit: ms
+    limits: {maximum: 20.0}
+    evidence: {class: Datasheet, source: Vault/Scacchiera/Datasheets/TPS2553DBVR-1_C111738.pdf, locator: "Electrical Characteristics, FAULT deglitch 10 ms maximum for an overcurrent condition, with the latch-off behaviour of the -1 suffix"}
+    operating_conditions: A dead short on LED_5V with the rail enabled, at the 734 mA maximum limit current the 39 kOhm ILIM resistor sets.
+    margin: The fault is bounded at 10 ms and 36.7 mJ, half the 20 ms the product's fault reporting is allowed. What that energy does to the part's own junction in 10 ms is a transient its data sheet does not tabulate, so V8 measures it.
+    test_ids: [TEST-HUB-LED-RAIL-002]
+
+  THERMAL-JUNCTION-AMBIENT:
+    description: Highest ambient each dissipating part tolerates before its junction reaches its data sheet limit.
+    requirement_ids: [POWER-OUTPUT-001, POWER-CHARGE-003]
+    unit: degrees Celsius
+    limits: {minimum: 45.0}
+    evidence: {class: Derived, source: Vault/Scacchiera/Wiki/sources/, locator: "The Thermal data sections of ap63203wu-7, tps2553dbvr-1, tps61088rhlr, bq25895rtwr and csd25404q3: 89, 182.6, 38.8, 31.8 and 55 C/W, the last also 160 C/W on minimum pad copper, all against a 150 C junction limit"}
+    operating_conditions: Each part at its worst-case dissipation bound, with the whole stage's accepted efficiency floor charged to the controller for the two switching converters. The 45 degree allowance is the functional specification's 25 degree room plus a 20 degree enclosure rise, which is an acceptance limit on the enclosure rather than a measured value.
+    margin: The light-bar limiter, charger, reverse FET and buck reach 145.1, 103.5, 96.5 and 81.0 degrees. The boost is the tightest at 53.0 degrees, 8 degrees over the allowance, because charging it the complete 20 percent stage loss also hands it the inductor's share. V8 must measure both the boost and the enclosure rise before that 8 degrees is treated as real margin.
+    test_ids: [TEST-THERMAL-JUNCTION-001]
+
+  HUB-3V3-POR-DISCHARGE:
+    description: Time the 3.3 V rail takes to fall to the expander's power-on reset floor once its input is gone.
+    requirement_ids: [POWER-CHARGE-003]
+    unit: s
+    limits: {maximum: 2.0}
+    evidence: {class: Datasheet, source: Vault/Scacchiera/Datasheets/TCA9535PWR_C130204.pdf, locator: "Electrical Characteristics VPORF 0.75 V minimum, with section 7.4.1 requiring VCC below VPORF before another power-on reset"}
+    operating_conditions: Hub R36 alone discharging the summed nominal 3V3 capacitance of the hub and matrix schematics plus a 20 uF acceptance allowance for each unbound display module, with no other load and the bleeder at its 1 percent slow end.
+    margin: 1.46 s against 2.0 s. The load and every device leakage only add discharge current, so the resistor by itself is the slowest the rail can be. That figure is also the off-time a power cycle needs before the expander is guaranteed to reset, which is what makes repeated brownout a bounded case rather than an open one.
+    test_ids: [TEST-HUB-3V3-003]
+
+  HUB-3V3-BLEED-FRACTION:
+    description: Standing current the 3.3 V bleeder costs, against the coincident rail load.
+    requirement_ids: [POWER-CHARGE-003]
+    unit: percent
+    limits: {maximum: 0.1}
+    evidence: {class: Derived, source: docs/hardware/criteria.yaml, locator: "HUB-MODULE-LOAD-BUDGET coincident 3.3 V rail load, with hub R36 at its 1 percent fast end"}
+    operating_conditions: 3.3 V across R36 at 9.9 kOhm, compared with the rounded-up 1.34 A coincident rail load. The rail is unpowered when the board is off, so this current never reaches the cell in storage.
+    margin: 333 uA is 0.025 percent of the load, a quarter of the limit. Buying a guaranteed power-on reset costs four times less than the tolerance band on any single load in the budget.
+    test_ids: [TEST-HUB-3V3-003]
+
   HUB-MODULE-LOAD-BUDGET:
     description: Coincident worst-case current the hub draws from its power module.
     requirement_ids: [POWER-CHARGE-003]
     unit: A
-    limits: {maximum: 1.3}
-    evidence: {class: Derived, source: docs/hardware/power-module-interface.md, locator: "Mandatory properties, 5 V output at 1.3 A continuous"}
+    limits: {maximum: 2.0}
+    evidence: {class: Derived, source: docs/hardware/power-module-interface.md, locator: "Mandatory properties, 5 V output at 2.0 A continuous"}
     operating_conditions: Radio transmitting at its data sheet peak, reader driving its field at maximum TVDD, both light bars white, matrix biased, and both displays active, all at once.
-    margin: The 1.3 A the interface obliges was an estimate until this derivation, which lands at 1.14 A and leaves 12 percent. Roughly a fifth of the 3.3 V side rests on an allowance for the display modules, which have no filed data sheet; that allowance is deliberately generous and filing the real one can only reduce the total.
+    margin: The manufacturer display table raises the coincident load to 1.48 A. The 2 A interface obligation leaves 35 percent and the TPS61088 stage is separately swept at the complete 2 A obligation.
     test_ids: [TEST-HUB-LOAD-BUDGET-001]
 
   MATRIX-BIAS-CHOKE-RATING:
@@ -603,6 +893,36 @@ criteria:
     operating_conditions: 4.7 kohm pull-ups to 3.3 V against a bus capacitance bounded at the I2C specification's own 200 pF ceiling.
     margin: 796 ns at that ceiling leaves a fifth of standard mode. It does not leave fast mode, which needs under 300 ns and so under about 70 pF of bus, so the bus is a standard-mode bus and firmware must not raise it.
     test_ids: [TEST-HUB-I2C-001]
+
+  HUB-DISPLAY-SPI-EDGE-TIME:
+    description: Rise or fall time at either SSD1362 display input.
+    requirement_ids: [IF-DISPLAY-001]
+    unit: ns
+    limits: {maximum: 15.0}
+    evidence: {class: Datasheet, source: Vault/Scacchiera/Datasheets/SSD1362_SOLOMON.pdf, locator: "Table 12-4, Serial Interface Timing Characteristics, tR and tF"}
+    operating_conditions: ESP32-C6 driving either display through a hub trace, connector, harness and module input whose complete load is at most 50 pF.
+    margin: The weaker guaranteed MCU drive side produces a 12.96 ns edge at 50 pF, leaving 2.04 ns and placing the absolute derived load ceiling at 57.86 pF.
+    test_ids: [TEST-HUB-DISPLAY-SPI-001]
+
+  HUB-DISPLAY-SPI-WRITE-TIMING:
+    description: Mode-0 SSD1362 clock and write-data timing at either display input.
+    requirement_ids: [IF-DISPLAY-001]
+    unit: ns
+    limits: {period_minimum: 100.0, high_minimum: 20.0, low_minimum: 25.0, data_setup_minimum: 15.0, data_hold_minimum: 30.0}
+    evidence: {class: Datasheet, source: Vault/Scacchiera/Datasheets/SSD1362_SOLOMON.pdf, locator: "Table 12-4, Serial Interface Timing Characteristics"}
+    operating_conditions: Four-wire SPI mode 0 at 4 MHz with the complete clock and data load bounded at 50 pF per display input.
+    margin: A 250 ns period leaves 112.04 ns after the conservative edge allowance in either half-cycle, over three times the largest 30 ns setup or hold obligation.
+    test_ids: [TEST-HUB-DISPLAY-SPI-001]
+
+  HUB-DISPLAY-SPI-CONTROL-TIMING:
+    description: SSD1362 chip-select and command/data framing at either display input.
+    requirement_ids: [IF-DISPLAY-001]
+    unit: ns
+    limits: {cs_setup_minimum: 20.0, cs_hold_minimum: 10.0, dc_setup_minimum: 15.0, dc_hold_minimum: 40.0}
+    evidence: {class: Datasheet, source: Vault/Scacchiera/Datasheets/SSD1362_SOLOMON.pdf, locator: "Table 12-4, Serial Interface Timing Characteristics, tCSS, tCSH, tDCS and tDCH"}
+    operating_conditions: Four-wire SPI mode 0 at 4 MHz with CS# and D/C# framed a full clock period around each burst and the complete load bounded at 50 pF per display input.
+    margin: A full 250 ns period less the 12.96 ns edge leaves 237.04 ns of framing, close to six times the 40 ns D/C# hold that is the largest control obligation in the table.
+    test_ids: [TEST-HUB-DISPLAY-SPI-001]
 
   MATRIX-SERIAL-TRANSITION-RATE:
     description: Edge rate the matrix shift registers see on the hub's serial link.

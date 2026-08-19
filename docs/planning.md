@@ -1,256 +1,648 @@
 # Hardware development plan
 
 The hardware and firmware are being rebuilt from scratch, keeping only the
-[functional specification](functional/overview.md) as fixed ground truth. This file is the
-milestone list that rebuild follows. Claude follows this plan rather than inventing its own
-sequencing; update it as work proceeds so it stays the current source of truth for what is done.
+[functional specification](functional/overview.md) as fixed ground truth. This file records where
+that rebuild stands. Claude follows this plan rather than inventing its own sequencing; update it as
+work proceeds so it stays the current source of truth for what is done.
 
 ## How to read this
 
-- `[ ]` open, `[x]` done.
-- Each milestone has a short description and a Definition of Done (DoD). A milestone is not done
-  until its DoD holds, not when the work "looks finished".
-- Milestone 1 gates everything else: no board's schematic, layout, or simulation starts before the
-  board inventory exists, the same way [functional/overview.md](functional/overview.md) gates the
-  hardware and software design that serves it.
+- `[ ]` open, `[x]` done. A gate is done only when its definition of done in
+  [simulation-workflow.md](simulation-workflow.md) has recorded evidence, not when the work looks
+  finished.
+- **The release gates are V0 through V9.** They decide what may be ordered. V0 through V7 permit a
+  scoped test-article order; V0 through V9 permit a final-board order.
+- **The milestones M1 through M4 describe design-generation progress only.** They authorise nothing.
+  They exist because a schematic, a simulation and a layout have to exist before a gate can judge
+  them.
 - Milestones 2 to 4 repeat once per board. The default order per board is schematic, then SPICE
-  validation, then PCB layout. If a board's SPICE validation needs layout-derived values (real
-  trace or antenna inductance, resistance, coupling, parasitics) rather than an analytical estimate,
-  that board's PCB layout (Milestone 4) comes before its SPICE validation (Milestone 3) instead,
-  because the honest numbers come from the copper geometry, not a formula.
-- Milestones M1 through M4 now describe design-generation progress only. They do not authorize a
-  PCB order. The hard release gates are V0 through V9 in
-  [simulation-workflow.md](simulation-workflow.md), which take precedence over the older completion
-  language below.
+  validation, then PCB layout. A board whose SPICE validation needs layout-derived values (real
+  trace or antenna inductance, resistance, coupling, parasitics) takes its layout first, because the
+  honest numbers come from the copper geometry rather than from a formula.
 
-## Verification release gates
+## Gate status
 
-No gate is complete until its definition of done in
-[simulation-workflow.md](simulation-workflow.md) has recorded evidence. V0 through V7 permit only a
-scoped test-article order. V0 through V9 permit a final-board order.
+| Gate | State | What blocks it |
+| --- | --- | --- |
+| V0 requirement traceability | **passed** | |
+| V1 component and library proof | open | Preliminary display datasheet, module strap state, unbound cell and harnesses, unpurchased tag |
+| V2 connectivity and static checks | **passed** | |
+| V3 power, analog, timing, fault | open | Four vendor-data gaps, all named below |
+| V4 layout-derived electromagnetics | open | RF return model raises by design; resistance and Q unextracted |
+| V5 firmware host verification | open | Rules engine is a stub; sanitizer runtimes absent |
+| V6 firmware in simulation | not started | |
+| V7 fabrication preflight | open | No rendered review package, no recorded DFM pass |
+| V8 test-article measurement | not started | Needs the test article, which needs V0 to V7 |
+| V9 independent review | not started | |
 
-- [x] V0 requirement traceability: 80 atomic requirements in
-  [verification/traceability.yaml](verification/traceability.yaml) map the complete functional
-  specification and fitted-part absolute-maximum audit to stable test IDs. The manifest pins the
-  reviewed functional sources by SHA-256. Forty-two numeric criteria in
-  [hardware/criteria.yaml](hardware/criteria.yaml) record units, evidence, conditions, and margin.
-  `hardware/tests/test_traceability.py` enforces source freshness, schema completeness, unique IDs,
-  and bidirectional requirement/criterion links. The 2026-07-26 revision specifies runtime,
-  5 V/2 A charge-time, fallback, protection, and cell-temperature requirements without requiring
-  USB Power Delivery. Evidence: 5 tests passed on 2026-07-26.
-- [ ] V1 component and library proof: open on three items now. A custom power board was added on
-  2026-07-29, reviving MCP73871, TPS61023, the PH cell connector and an NR6045S 1 uH inductor from
-  the superseded charger design; their audit records need regenerating, and the inductor's order code
-  is unverified because the catalogue reports the neighbouring SWPA family under a part number the
-  manufacturer's own table does not list. It otherwise passes for every board part and is open on the
-  purchased items below.
-  [verification/v1-components.yaml](verification/v1-components.yaml) exactly matches the 44 unique
-  purchased fitted MPN, supplier, order-code, and footprint tuples generated by the three
-  authoritative schematics, and separately audits the off-board NTCLE317E4103SBA cell sensor. The
-  power module's audit was withdrawn on 2026-07-29 when the design stopped binding PiSugar and moved
-  to the contract in [hardware/power-module-interface.md](hardware/power-module-interface.md): V1
-  cannot pass for a part nobody has chosen. Binding one closes this gate and needs its manufacturer
-  documentation filed, its exact product and revision recorded, and every mandatory property in the
-  contract checked. A second item is open for the same reason: the two ER-OLEDM3.12-1W display
-  modules are fixed by the functional specification but have no filed data sheet and no audit record,
-  and roughly a fifth of the 3.3 V load budget currently rests on an allowance for them. Every other
-  record has dated availability,
-  immutable manufacturer sources, wiki ingestion, library or interface proof, ratings, model
-  treatment, and no open conflict. The AP63203WU-7, AP22811AW5-7, TLV7042DGKR and NR6045S4R7MT
-  records include their exact selected limits and footprints. TLV7042DGKR uses the manufacturer's
-  DGK0008A land pattern because the generic KiCad VSSOP footprint does not meet the board's 0.2 mm
-  clearance. The rejected SWPA catalog binding remains as contradiction evidence rather than a
-  waiver. Evidence: 7 component-proof tests and 4 matrix vendor-model tests passed on 2026-07-26.
-- [x] V2 connectivity and static electrical checks: clean generation runs full SKiDL and KiCad ERC,
-  imports reviewed deterministic routing sessions, and runs PCB DRC with schematic parity on all
-  three boards. [verification/v2-static.yaml](verification/v2-static.yaml) records the four
-  reviewed generated-schematic warning classes, every datasheet-traced no-connect, and the zero
-  finding board results. All three boards are 2-layer. The hub is 162 x 46 mm: it briefly went to
-  four copper layers when a 110 mm two-layer route would not converge, and came back to two by
-  buying length instead, which the 310 mm player rail has to spare. Its reviewed route keeps the
-  code-owned USB shield and 0.5 mm VBUS safety distribution; the inner-layer SCLK and comparator
-  branches are gone with the layers that needed them. The back copper under the reader's match and
-  the matrix run is a reserved plane with zero signal segments in it. The Gerber export reads the
-  stack from the board rather than a fixed layer list, so a later layer change cannot ship copper
-  short. Seven focused tests cover both ends of every cable, exact USB-C pins, startup pulls,
-  recovery pads, enable/reset nets, exposed pads, the hardware temperature gate, the on-board
-  battery measurement, and the recorded stackup and envelope.
-- [ ] V3 power, analog, timing, and fault simulation: substantially advanced, not complete. Checked
-  against the six cases the workflow lists, rather than against how much work has been done.
-  - Line, load and tolerance corners: the buck over 72 corners, the light-bar limiter on TI's
-    transient model, the charge gate over 384, the matrix bias against its choke's rating.
-    Capacitor bias derating is bounded rather than sourced, since the part's data sheet prints only
-    example curves. **Temperature corners and capacitor ESR are not swept anywhere.**
-  - Startup and transients: soft-start inrush, dropout and hold-up are derived. **Warm reset,
-    power-off discharge and repeated brownout are not done.** USB insertion, removal and rail
-    handover belong to the power module and are V8 measurements.
-  - Coincident loads: the worst case is derived at 1.14 A against the module's 1.3 A obligation.
-    **Radio and reader current steps as transients are not done**, because the load-transient
-    response needs the buck's compensation, which Diodes does not publish.
-  - Faults: light-bar short circuit on the vendor model, input-switch limit derived, sensor open and
-    short in the charge gate. **Current-limit latch timing, open load, missing battery and stuck
-    control signal are not done.**
-  - Regulator behaviour: ripple, absolute maximums and logic threshold margins are covered.
-    **Stability, overshoot, undershoot, sequencing and junction-temperature estimates are not**, and
-    the first four cannot be, for the same unpublished-compensation reason.
-  - Waveform integrity: I2C, the light-bar data line and the matrix serial link are bounded against
-    their receivers' own specifications. **USB and the display SPI segment are not done.**
-- [ ] V3 addition: the power board has no simulation at all. A charger with a cell on it is exactly
-  the circuit the workflow wants swept and faulted, and none of that exists yet. Panelising its PCB
-  removed the fabrication cost of building rather than buying; it removed none of this.
-- [ ] V4 layout-derived electromagnetic validation: the hub is two layers again, so the RF front end
-  returns through the back copper reserved under it rather than an inner plane. Extraction must use
-  that reserved region and confirm the reserve is wide enough, since it is the whole return path.
-- [ ] V5 firmware host verification
-- [ ] V6 firmware-in-simulation system verification
-- [ ] V7 mechanical and fabrication preflight: no fab quote exists for any board at its final
-  dimensions. The hub is 162 x 46 mm and the matrix 300 x 300 mm, both 2-layer; the matrix is
-  area-dominated and is the likely largest single line in the product.
-- [ ] V8 test-article measurement and model calibration
-- [ ] V9 independent review and final release
+**No fabrication or assembly order is authorised.** The nearest releasable item is the scoped bare
+sensing-plane test article in [hardware/test-article-quad.md](hardware/test-article-quad.md), and it
+waits on the open V3, V4 and V7 items below.
+
+One workflow requirement is not implemented at all: **`make release-check` does not exist.**
+[simulation-workflow.md](simulation-workflow.md) requires a single non-interactive command that
+rebuilds and runs every automated V0 to V7 and V9 check from a clean generated state, and records a
+missing implementation as open work that blocks release. `make check` covers generation, DRC,
+schematic parity, mypy, the Python suite and the firmware host tests, which is most of the content
+but is not the gate command the workflow specifies.
+
+## The gates
+
+### V0: requirement traceability, passed
+
+[verification/traceability.yaml](verification/traceability.yaml) maps 84 atomic requirements, the
+complete functional specification plus the fitted-part absolute-maximum audit, onto stable test IDs.
+The manifest pins each reviewed functional source by SHA-256 over line-ending-normalised text, so an
+edit to `docs/functional/` fails the test until the mapping is reviewed. 93 numeric criteria in
+[hardware/criteria.yaml](hardware/criteria.yaml) record units, evidence class, operating conditions
+and margin. `hardware/tests/test_traceability.py` enforces source freshness, schema completeness,
+unique IDs and bidirectional requirement-to-criterion links.
+
+Evidence: 5 traceability tests passed on 2026-07-29.
+
+### V1: component and library proof, open
+
+**Every fitted board part is bound and sourced.**
+[verification/v1-components.yaml](verification/v1-components.yaml) matches 58 unique purchased MPN,
+supplier, order-code and footprint tuples generated by the four authoritative schematics, and records
+no fitted-part blocker. Two off-board parts are audited separately: the NTCLE317E4103SBA cell sensor
+and the pair of ER-OLEDM3.12-1W display modules. Every record
+carries dated availability, an immutable manufacturer source, wiki ingestion, library or interface
+proof, ratings and model treatment. The 10 W power board binds BQ25895RTWR, TPS61088RHLR,
+TLV809K33DBVR, CSD25404Q3, TLV7021DCKR, CDMC8D28NP-1R2MC and both Micro-Fit headers.
+
+What remains open is not on any board: it is the two displays, the cell, the cables and the tag.
+
+**Displays.** The ER-OLEDM3.12-1W datasheet is revision 1.0 and **preliminary**, dated 2025-08-07,
+which is a release blocker on its own terms. Its 320 mA active figure is settled against the product
+page's contradictory 2 mA: 2 mA at 3.3 V is 6.6 mW and cannot run the controller, its boost and
+16384 lit pixels, the datasheet's own section 4.3 note 5 reads "VDD=3.3V, 100% Display Area Turn on"
+against the 320 mA maximum, and an independently published table for a comparable 3.12 inch 256 by
+64 panel works out to 312 to 331 mA equivalent. The product page publishes the sleep figure as the
+maximum. Pin 1 VCC has a 3.6 V absolute maximum, so the panel's high-voltage rail is generated
+on-module, and the header is a stock 2 x 8 on 2.54 mm pitch. The interconnect contract is
+[hardware/display-interface.md](hardware/display-interface.md).
+
+The interface-select gap is closed from the controller datasheet rather than the module's: SSD1362
+revision 1.0 Table 6-2 gives BS[2:0] = 000 for four-wire SPI against 110 for the 8-bit 8080 parallel
+the module ships in, and the paired 0-ohm jumpers R3/R9, R5/R8 and R10/R11/R12 on the module's back
+are what strap those pins. Table 7-1 confirms the whole strap list independently, including that D2
+must be tied low, which the vendor's own ESP32 example omits.
+
+**What is still open is which strap state a shipped module has**, and it is a purchase condition
+rather than a rework item: *supply configured for four-wire SPI, BS[2:0] = 000*. It cannot be
+corrected after delivery, because module datasheet section 7.3 forbids modifying the printed circuit
+board and 7.7 excludes it from warranty. A module strapped for parallel will not talk to the hub and
+no adapter fixes that.
+
+The ten grounded pins are commoned by a solder bridge on the module's own header rather than by new
+hardware: they cluster into a two-by-three block at columns 6 to 8 plus column 4, so it is one
+bridge across six adjacent pins, one across two, and a link wire. An adapter PCB was designed for
+this and discarded as over-built; it is documented as a fallback only.
+
+**Cell.** A Keeppower wired 1S1P 21700 6000 mAh protected pack is the leading total-cost candidate
+at about EUR 11: 12 A continuous, 5900 mAh minimum, and the four mandatory electrical protections.
+It is not bound, because its exact cell revision, protection thresholds, wire gauge, connector,
+thermistor attachment and shipped construction are undocumented.
+[hardware/cell-assembly.md](hardware/cell-assembly.md) states what any candidate must satisfy,
+derived from criteria already recorded rather than newly chosen:
+
+- over-discharge detection at or below 2.8 V, so the TLV809K33 supervisor governs the discharge
+  instead of an undocumented threshold;
+- overcharge at or above 4.25 V, so a full charge does not nuisance-trip against the BQ25895's
+  4.221 V real top;
+- overcurrent at or above 6.6 A, so the TPS61088's guaranteed 6.502 A limit acts first;
+- 18 AWG leads with insulation inside the terminal's 1.85 mm limit.
+
+No protected pack on the market supplies the thermistor the functional spec requires, so bonding the
+audited NTCLE317E4103SBA and re-terminating to the keyed Molex housing are this project's work
+whichever pack wins. Binding a cell also replaces the borrowed `PISUGAR3_PLUS_safety.md` evidence
+still standing behind the 0 and 40 degree charge window. The Molicel M65A remains a higher-capacity
+feasibility reference but is unavailable and would need a custom protected assembly.
+
+**Harnesses.** The Micro-Fit mating housings and 18 AWG female terminals are exact. The protected
+cell assembly, wire, qualified crimp or pre-crimped leads, colour coding and assembled harness are
+not bound. [hardware/harnesses.md](hardware/harnesses.md) inventories every cable with its worst-case
+per-contact current and lists what each still needs.
+
+It also settles a figure nobody had filed: what a Micro-Fit 3.0 contact is rated for, given the cell
+link is the highest-current path in the product. Molex PS-43045 revision M1 is filed and its table
+stops at 20 AWG at 5 A with no 18 AWG row, while distributors list the fitted 18 AWG 430300038 at
+8.5 A. The design keeps 18 AWG and the 8.5 A figure, recorded as catalog rather than datasheet
+evidence until a current Molex revision can be retrieved; Molex's own servers did not respond to
+repeated attempts, and the filed copy is an Octopart mirror of a 2007 document. This is not a
+blocker because the harness passes under either figure. The governing comparison is RMS rather than
+peak, because a connector rating is a 30 degree temperature-rise limit and contact heating is I
+squared R: the battery path is 4.442 A RMS, 48 percent inside 8.5 A and still 11 percent inside
+5.0 A, while the 5.871 A figure is a 500 kHz inductor peak that sizes the converter limit and the
+inductor, not a contact.
+
+**Tag.** The piece tag has a researched candidate: an Avery Dennison AD Circus SLIX2 inlay
+(3006370 / IL-603074) carrying NXP SL2S2602, ISO/IEC 15693, 21 mm die-cut in the 22 mm recess, 18 mm
+coil, about EUR 0.69 each or EUR 0.34 at 100+. Both datasheets are filed and ingested and the
+protocol choice is settled (see [hardware/matrix.md](hardware/matrix.md)). It stays a candidate
+rather than a binding: nothing is purchased, so there is no dated availability record, no second
+source is identified, and the inlay's coil inductance and the chip's equivalent parallel resistance
+are unpublished, which is why V4's tag resonator is bounded rather than datasheet-sourced.
+
+Selecting the tag exposed a geometry conflict and resolved it in the tag's favour. At conventional
+chess proportions a 35 mm grid gives an approximately 20.5 mm pawn base, smaller than both the 21 mm
+die-cut and the 22 mm recess. Every smaller ISO 15693 part was surveyed and rejected on cost, format
+or coupling (see [hardware/matrix.md](hardware/matrix.md)), so
+[functional/physical.md](functional/physical.md) carries a 24 mm minimum base diameter for every
+piece, pawns included, through PHY-PIECE-004 and PHY-PIECE-BASE-DIAMETER.
+
+**Design work proceeds on eleven registered assumptions.** They are listed with basis, consequence
+and measurement point in [hardware/assumptions.md](hardware/assumptions.md). Three matter: the cell
+protection thresholds (A5), the display interface mode (A2), and the tag resonator (A8 with A9). A
+V8 test article measures every one. Because [simulation-workflow.md](simulation-workflow.md) treats
+an assumed critical value as a V1 failure, these bear on the V8 and V9 order gates and not on
+schematic, layout, simulation or firmware work, all of which continue.
+
+Evidence: `make check` regenerated all five designs at zero DRC violations, unconnected items and
+parity issues, mypy passed on 92 source files, and all 168 tests passed on 2026-08-01.
+
+### V2: connectivity and static electrical checks, passed
+
+Clean generation runs full SKiDL and KiCad ERC, imports reviewed deterministic routing sessions, and
+runs PCB DRC with schematic parity on all **five designs**: the four shipping boards plus the
+retained matrix baseline. [verification/v2-static.yaml](verification/v2-static.yaml) records the four
+reviewed generated-schematic warning classes, every datasheet-traced no-connect, and the zero-finding
+board results.
+
+All five designs are 2-layer. The quad's entry was added on 2026-08-02 with its envelope, 0.6 mm
+thickness, antenna keepout, single-side assembly rule and the four deliberately unused register
+outputs. The hub is 162 x 46 mm: it briefly went to four copper layers when a 110 mm two-layer route
+would not converge, and returned to two by buying length instead, which the 310 mm player rail has to
+spare. Its reviewed route keeps the code-owned USB shield and 0.5 mm VBUS safety distribution. The
+back copper under the reader's match and the matrix run is a reserved plane with zero signal segments
+in it. The Gerber export reads the stack from the board rather than a fixed layer list, so a later
+layer change cannot ship copper short.
+
+Eighteen focused connectivity and Type-C tests cover both ends of every cable, exact USB-C pins and
+current-advertisement thresholds, startup pulls, recovery pads, enable and reset nets, exposed pads,
+the hardware temperature gate, the on-board battery measurement, and the recorded stackup and
+envelope.
+
+### V3: power, analog, timing, and fault simulation, open
+
+Substantially advanced, and judged against the six cases the workflow lists rather than against how
+much work has been done.
+
+**Line, load and tolerance corners.** The buck over 72 corners, the light-bar limiter on TI's
+transient model, the charge gate over 384, the matrix bias against its choke's rating, and the boost
+switching stage over 162. Capacitor bias derating is bounded rather than sourced, since the part's
+datasheet prints only example curves. The power boost includes the output-capacitor X5R temperature
+limit, uses TPS61088 switch-resistance maxima specified across minus 40 to 125 degrees Celsius, and
+sweeps a derived 15 milliohm assembled-bank ESR acceptance limit. Both inductors are cornered from
+the one point their datasheets fix: rated RMS current is defined at a 40 degree rise from 20 degrees,
+and the range to 125 degrees includes that rise, so hub L1 tolerates 108.8 degrees ambient at 2.1 A
+and power L1 tolerates 120.1 at 4.5 A. The hot winding moves the buck's dropout from 3.513 to
+3.520 V, 7 mV of the 487 mV in hand.
+
+> **Open:** Diodes publishes the AP63203's switch resistance as a typical with no limits and no
+> temperature coefficient, so a hot dropout cannot be closed from any filed document. The fitted
+> capacitor bank's ESR needs a V8 measurement.
+
+**Startup and transients.** Soft-start inrush, dropout and hold-up are derived, as are warm reset,
+power-off discharge and repeated brownout. A warm reset reaches no peripheral, and the ten
+TCA9535-driven nets that survive it are enumerated from the schematic as a V6 firmware obligation.
+Hub R36, a 10 k bleeder, was added because nothing else discharged the 3.3 V rail, so the decay was
+leakage rather than a specified number; it reaches the expander's 0.75 V power-on reset floor in
+1.46 s, which is also the off-time that makes repeated brownout bounded, and costs 0.025 percent of
+the rail load. USB insertion, removal and rail handover belong to the power module and are V8
+measurements.
+
+**Coincident loads.** The corrected worst case is 1.48 A against a 5 V, 2 A interface. The fitted
+BQ25895 and TPS61088 path is swept at the full 10 W obligation.
+
+> **Open:** radio and reader current steps as transients. The load-transient response needs the
+> buck's compensation network, which Diodes does not publish.
+
+**Faults.** Light-bar short circuit on the vendor model, input-switch limit derived, sensor open and
+short in the charge gate, averaged power-board missing, depleted and shorted cell cases, a stuck
+charge command, and an ngspice reverse-cell bench for cold and already-powered insertion.
+Current-limit latch timing and open load are done: a cold start into both bars' 202.9 uF spends
+1.66 ms in current limit against the limiter's 5 ms minimum latch deglitch, and the rail could carry
+610 uF before a normal power-on latched it off. A real short is bounded at 10 ms and 36.7 mJ. The
+open-cable sweep found one hub net with no driver and no pull, LED_RETURN, which left the second
+bar's data input floating at 5 V whenever the first bar was unplugged; hub R37 defines it, and the
+check reads that net list from the schematic rather than keeping its own copy.
+
+> **Open:** physical reversed insertion, which stays a V8 measurement.
+
+**Regulator behaviour.** Ripple, absolute maximums and logic threshold margins are covered. The
+TPS61088 loop has a 4,374-corner small-signal sensitivity check from TI's published transfer
+functions; it selects 22 nF compensation with 54.64 degrees minimum phase margin and rejects the
+4.7 nF alternative. Junction temperature is bounded for all five dissipating parts, inverted into the
+highest ambient each tolerates: 145.1 degrees for the light-bar limiter, 103.5 for the charger, 96.5
+for the reverse FET, 81.0 for the buck and 53.0 for the boost, against a 45 degree allowance that is
+the specification's 25 degree room plus a 20 degree enclosure rise. That rise is an acceptance limit,
+and the boost's 8 degrees is thin because the bound charges it the whole stage's efficiency floor, so
+V8 must measure both.
+
+Sequencing is done. Five hub signals cross between rails, read from the schematic rather than listed:
+LED_DATA, LED_EN and LED_FAULT_N land on pins their datasheets rate against ground, so being driven
+before their own rail exists is a non-event, and CHARGE_TEMP_OK shares a supply with its driver.
+
+> **Open, and recorded as a finding rather than a pass:** Diodes gives the AP22811 no absolute
+> maximum for its fault flag at all while rating the enable against VIN, so holding
+> CHARGE_INPUT_FAULT_N at 3.3 V on battery with USB absent is unspecified rather than permitted. R15
+> bounds the exposure at 33 uA, smaller than the leakages the same sheet specifies, but that bounds
+> the condition instead of clearing it. It stays a vendor or V8 question.
+>
+> **Open:** guaranteed stability, overshoot and undershoot. TI specifies the error-amplifier
+> transconductance only typically, so the plus or minus 30 percent sweep is not release evidence.
+
+**Waveform integrity.** I2C, the light-bar data line, the matrix serial link and the filtered Type-C
+CC current advertisement are bounded against their sources. The display SPI segment is bounded too:
+SSD1362 Table 12-4 caps both edges at 15 ns, which the ESP32-C6's guaranteed drive meets only up to
+57.86 pF, so 50 pF is an acceptance limit on the complete clock, data, chip-select and command load
+at each display input. Period, high, low, write setup and hold, and the CS# and D/C# framing all
+clear at 4 MHz. The harness that has to stay inside 50 pF is still unbound, which is a V1 item rather
+than a V3 one.
+
+**Power board specifics.** `hardware/tests/test_sim_power_boost.py` sweeps 162 switching-stage
+corners and passes ripple, feedback and an 80 percent efficiency current bound at the full 10 W
+obligation. `hardware/tests/test_sim_power_path.py` covers eleven averaged NVDC states and faults,
+including adapter priority, supplement, removal, missing and depleted cells, short circuit, and
+external temperature gating against a stuck command. TI's official TPS61088 transient model is filed,
+but its ngspice compatibility copy does not switch. The CSD25404Q3 and TLV7021 reverse stage passes
+cold and already-powered insertion at both polarities. Control-loop closure, startup, protection
+timing, temperature and ESR measurements remain open, and V8 must still inject the physical fault and
+measure pass-FET temperature.
+
+### V4: layout-derived electromagnetic validation, open
+
+**Solver substitution, recorded as the workflow requires.** The solver is FastHenry rather than
+openEMS. At 13.56 MHz the wavelength is 22 m and the board is 162 mm, about 0.007 of a wavelength, so
+nothing on it is electrically large and the question is magnetoquasistatic: what inductance and
+resistance the RF run has over its return, and whether the return is intact. FastHenry solves that
+directly. openEMS is in neither the Fedora repositories nor PyPI, would need a from-source CSXCAD
+build, and would spend hours confirming a quasi-static result. The trade is that this is inductance
+and resistance evidence, not radiated-emission evidence.
+
+FastHenry 3.0.1 is built from the FastFieldSolvers source with `-std=gnu89 -fcommon` for a current
+GCC, installed at `~/.local/bin/fasthenry`, and `hardware/sim/rf_return.py` finds it through the
+`FASTHENRY` environment variable. `hardware/tests/test_rf_return.py` validates it against the Grover
+model already used for the matrix loop before trusting it: 572.6 nH against 584.9 nH and 0.436
+against 0.473 ohm, agreeing to 2 and 8 percent. **That much is good evidence and stands.**
+
+**The sixteen antennas are extracted.** `hardware/sim/antenna_coupling.py` solves all sixteen loops
+together at the carrier and returns the full port-to-port matrix, from the same
+`matrix_geometry.py` constants the footprint generator and the layout use, so it cannot drift from
+the board. `hardware/tests/test_antenna_coupling.py` checks it against
+[hardware/criteria.yaml](hardware/criteria.yaml).
+
+| Quantity | Value | Status |
+| --- | --- | --- |
+| Self inductance | 566.5 nH | converged; 590 nH from Grover in `loop.py`, agreeing to 4 percent |
+| Line-to-line spread | 0.05 percent L, 0.3 percent R | the sixteen lines are interchangeable |
+| Adjacent same-axis coupling | k = 0.1398 | converged; the dominant coupling on the board |
+| Row-to-column coupling | k = 0.0066 to 0.0665 | converged; worst at the four corners |
+| Resistance | at least 563 milliohm | **not converged** |
+| Capacitance, loaded Q | not extracted | needs a different solver |
+
+Two results worth stating plainly. **Rows and columns are decoupled, but not uniformly**: the
+cancellation is weakest where two loops cross near their open ends, so the four board corners couple
+ten times more strongly than the centre. `matrix.md` asserted decoupling without a figure and without
+that spatial variation. And **adjacent parallel lines are the dominant coupling at k = 0.14**,
+falling to 0.017 two lanes away and 0.001 across the board; that is the path by which a tag could
+answer on the wrong line, which is the `RF_CROSSTALK` mechanism the firmware reports.
+
+A mesh study over nhinc 1 to 7 and nwinc 9 to 13 is what makes those numbers evidence rather than a
+first solve, and it found two problems. **Resistance never converged**, climbing 525 to 563 milliohm
+and still rising: 17.8 um of skin depth in a 1 mm wide, 35 um thick conductor needs far more
+filaments than the coupling does, so resistance is a lower bound and loaded Q cannot be stated at
+all. And the first reciprocity check divided by near-zero mutual terms and reported 47 percent error
+that meant nothing; against the self-inductance scale the residual is 0.15 percent and constant
+across meshes, which is the solver's floor.
+
+This is inductive coupling between antennas. It is not tag coupling, which assumptions A8 and A9
+record as unobtainable from any datasheet, and it is not radiated emission. The bare sensing-plane
+test article exists to measure both.
+
+**One numeric conflict is open and only a re-extraction settles it.**
+`MATRIX-ADJACENT-LINE-COUPLING` records the monolith at k = 0.1398 and
+`QUAD-ADJACENT-LINE-COUPLING` records the split at k = 0.1401 while calling the two identical, but
+`test_quad_stack.py::test_adjacent_lines_are_no_worse_than_the_monolith` pins them equal within
+1e-4, which that pair violates. The passing test is what says the copper is unchanged; at least one
+of the two transcribed figures is stale. Re-run both extractions and correct the losing margin text.
+
+**Retracted 2026-08-01: the RF return defect this section previously reported was an artifact of the
+check, not a property of the board.** `rf_segments()` filtered the net to F.Cu and then measured its
+distance to B.Cu tracks, so it was comparing traces on opposite layers. Two traces that cross in plan
+view on different layers read as nearly zero apart, which is normal and harmless; real same-layer
+clearance is enforced by DRC at 0.2 mm and passes. The reported 0.034 mm MOSI intrusion, the
+placement root-cause story built on it, the keepout experiments and the router comparison all
+followed from that number and none of them stand.
+
+A second claim made during that retraction was itself wrong and is also withdrawn: that RF_BUS runs
+on both layers with an 18.35 mm back-layer segment. That was read off a board left on disk by the
+keepout experiments rather than a regenerated one. On the committed route RF_BUS is entirely on F.Cu
+with no vias. The layer filter is still worth removing, because nothing guaranteed that, but the
+46.9 nH figure was not wrong for the reason given. It is unverified rather than refuted: the model
+omits the reserve's real extent and the criterion it fed was meaningless.
+
+**What closing V4 needs.** RF_BUS cannot be modelled as a trace over a plane while part of it runs on
+the plane layer, so `deck()` raises instead of returning a number, and a test pins that. Closing it
+needs the plane slotted where the net crosses into it, both layers and the vias in the model, and a
+criterion derived from what matters on two layers, same-layer parallel coupling length and return
+continuity, rather than a cross-layer distance. Whether the 18.35 mm back-layer run inside the
+reserved region is itself a problem is not established either way and should not be assumed from the
+retracted material above.
+
+The hub is two layers, so the RF front end returns through the back copper reserved under it rather
+than through an inner plane. Extraction must use that reserved region and confirm the reserve is wide
+enough, since it is the whole return path.
+
+### V5: firmware host verification, open
+
+Scoped for hardware validation rather than completeness, per
+[software/architecture.md](software/architecture.md). The hardware-facing layer comes first, because
+it is the part whose failure costs a respin.
+
+**What exists.** The host CMake and CTest gate builds with warnings as errors and gcc's analyzer, and
+runs inside `make check`. `core/` holds square indexing, piece and snapshot types, the fault table,
+the sixteen-line-to-sixty-four-square join, the stability layer that decides when a sweep has become
+a position, and text rendering against a generated glyph table. `port/` holds six drivers, all
+compiling for the C6: the TCA9535 expander, the matrix register chain, the PN5180 down to BUSY and
+sixteen-slot ISO 15693 anticollision, the SSD1362 command path, the light-bar stream and the shared
+SPI bus. The ESP32-C6 target image builds reproducibly against a pinned ESP-IDF v5.5.5 and its
+partition layout, and `port/board_pins.h` is generated from the hub netlist with a test that fails if
+the committed copy drifts.
+
+**What is open.**
+
+- **The rules engine is a stub**, deliberately, because no rule in `functional/gameplay.md` can
+  invalidate a PCB. V5's generated-gameplay-sequence bullet cannot close until it is real.
+- **Sanitizers do not run.** gcc accepts `-fsanitize=address,undefined` whether or not the runtime
+  libraries exist and only fails at link, so the build probes a real link and falls back with a
+  warning. Installing `libasan` and `libubsan` closes it.
+- **The provisioning journey** is absent by design: identity resolution through the registry is
+  implemented and a stable position resolves UID by UID, but nothing yet writes piece records to
+  tags, so an unprovisioned board reads every piece as `TAG_FAULT`. Colliding inventory slots are
+  resolved by the standard's mask recursion; one that survives the mask and round budgets is
+  reported as an under-read line rather than guessed at.
+- Persistence tests do not yet inject reset and write failure at every transaction boundary.
+
+### V6: firmware-in-simulation system verification, not started
+
+Needs the real ESP32-C6 image running in Wokwi against behavioural models for the PN5180, TCA9535,
+displays, LEDs, matrix register chain, button, charger signals and rail faults, with virtual wiring
+generated from the authoritative netlist.
+
+### V7: fabrication preflight, open
+
+**The mechanical half is deliberately out of this gate.** The enclosure and the pieces are 3D
+printed and owned by the builder, where a wrong dimension costs a reprint rather than a respin, so
+iterating in plastic beats modelling in build123d. `hardware/cad/` keeps only the power-rail
+reservation.
+
+That is only safe because the dependency runs one way: **a print adapts to the board, the board
+cannot adapt to a print.** So the mechanical items that survive into this gate are exactly those a
+reprint cannot fix, and they are all PCB-side:
+
+- connector position, edge and orientation on every board, since a connector facing the wrong way is
+  a respin;
+- cable reach and bend space between boards at their real positions in the rail;
+- component height and assembly side on the sensing boards, which must stay flat against the
+  controlled air gap;
+- board outlines against the 310 x 380 mm body, where the 300 mm sensing plane leaves 5 mm of wall
+  each side;
+- the antenna keepout and the conductor clearance behind the sensing plane.
+
+Everything else the workflow lists under mechanical fit, diffuser clearance, fastener access, service
+access and the display cradle's hard stops is a print-iteration matter and is not tracked here.
+
+**Fabrication artifacts generate for all five designs.** Each board emits gerbers, drills, a JLCPCB
+BOM and CPL, a hybrid pair and a hand-assembly BOM. Geometry extracted from the routed boards:
+
+| Board | Outline | Layers | Min copper track | Min drill | Min via pad |
+| --- | --- | --- | --- | --- | --- |
+| lightbar | 120.0 x 8.5 mm | 2 | 0.200 mm | 0.300 mm | 0.600 mm |
+| **quad (sensing)** | 300.0 x 140.0 mm | 2 | 0.200 mm | 0.300 mm | 0.600 mm |
+| hub | 162.0 x 46.0 mm | 2 | 0.200 mm | 0.300 mm | 0.600 mm |
+| power | 90.0 x 32.0 mm | 2 | 0.200 mm | 0.300 mm | 0.600 mm |
+| matrix, superseded baseline | 300.0 x 300.0 mm | 2 | 0.200 mm | 0.200 mm | 0.400 mm |
+
+**Every shipping board is on the same 0.2/0.3/0.6 tier.** The 0.2 mm via drills into 0.4 mm pads that
+were the standing worry here belonged to the matrix, the largest and most expensive board and so the
+worst place to discover a fabricator tier change; retiring it removed the exposure rather than
+resolving it.
+
+**Quote status**, which is cost evidence rather than gate evidence:
+
+| Board | Quoted | Caveat |
+| --- | --- | --- |
+| quad | bare, 2026-08-02, 20.92 EUR for five | Taken at JLCPCB's default 1.6 mm; 0.6 mm priced separately the same day against 0.8 and 1.0 mm at the same outline and quantity, all three identical, so the design thickness is settled and free |
+| hub | complete, 44.88 EUR | Predates the U4, Y1, C31/C32, U6 and C33/C34 changes; re-quote before ordering |
+| power | complete, 29.70 EUR | Current |
+| lightbar | bare, 4.08 EUR for five | Current |
+
+**What V7's definition of done still lacks**, independent of any quote:
+
+- **No rendered review package.** The workflow requires every copper, mask, paste, silkscreen, drill
+  and 3D side rendered for review, and nothing generates one.
+- **No recorded manufacturer DFM pass** on the regenerated gerbers.
+- **Copper weight is not in any board file**, so 1 oz is chosen in the order form rather than read
+  from the upload. That is a pre-upload check rather than a design defect, and
+  [hardware/ordering.md](hardware/ordering.md) carries it.
+- **No STEP fit**, because no enclosure model exists. Out of scope per the paragraph above, except
+  for the PCB-side items listed there.
+- **The panel is not orderable.** `hardware/pcb/generated/panel/` has two independent geometry
+  defects (nested closed Edge_Cuts read as cutouts, and no tab joining the board cluster to the
+  frame) and is outside `make check`. Its constituent boards are ordered individually instead; see
+  [hardware/ordering.md](hardware/ordering.md).
+
+### V8: test-article measurement and model calibration, not started
+
+Blocked on the article itself. The named article for the power path is the selected implementation
+and cell under [hardware/power-module-interface.md](hardware/power-module-interface.md), recorded in
+[hardware/power-subsystem.md](hardware/power-subsystem.md); it must measure charge time, runtime,
+cable handover, thermals, I2C behaviour and NFC performance in a representative ventilated
+enclosure. The hub's independent fail-safe charge interlock remains mandatory regardless.
+
+### V9: independent review and final release, not started
+
+## Scoped test-article release: bare quad boards
+
+Documented in [hardware/test-article-quad.md](hardware/test-article-quad.md) and buildable with
+`make test-article-quad`. Bare copper, unpopulated, which is the "copper antenna sample" the workflow
+prefers over an assembled set, and which carries none of the electrical risk V3 covers or the
+assembly risk V7's BOM and CPL bullets cover.
+
+It exists to make V4 possible: assumptions A8 and A9 record that no published datasheet gives the tag
+coil inductance or the chip's equivalent parallel resistance, so the tag resonator cannot be sourced
+by further simulation and only a measurement settles it. Five boards, 20.92 EUR, which is a complete
+two-plane set plus a spare rather than the retired matrix article's one set and four scrap boards, so
+it can measure the real row-against-column geometry and the butt joint between two boards.
+
+**It is not released.** V0 through V7 must pass first, and V3, V4 and V7 are open above. Copper weight
+must be confirmed at upload; surface finish is settled at OSP and thickness at 0.6 mm.
 
 ## Milestones
 
-### M1: Board inventory
+These record design-generation progress. They authorise nothing; the gates above do that.
 
-Description: decide which physical boards the product needs and what each is responsible for,
-derived from `docs/functional/`, keeping the bill-of-materials cost in mind from the start (fewer
-boards and fewer parts over a more elegant but pricier split).
+### M1: board inventory
 
-DoD: a `docs/hardware/boards.md` doc lists every board, one entry per board, with its
-responsibility, its interfaces to the other boards, and a rough cost target. No schematic exists
-for any board yet.
+Decide which physical boards the product needs and what each is responsible for, derived from
+`docs/functional/`, keeping bill-of-materials cost in mind from the start.
 
-- [x] Board inventory complete: see [hardware/boards.md](hardware/boards.md). Three custom
-  designs, four physical PCBs: light bar (x2), matrix board, hub board. Build order: light bar,
-  then matrix, then hub.
+DoD: [hardware/boards.md](hardware/boards.md) lists every board with its responsibility, its
+interfaces to the other boards, and a rough cost target.
 
-### M2: Schematic (per board)
+- [x] **Board inventory complete.** Four custom designs, five physical PCBs at the time: light bar
+  (x2), matrix, hub and power. The power board is fabricated on the light-bar panel.
+- [x] **Sensing plane settled 2026-08-02: the four-lane [quad board](hardware/quad.md) ships and the
+  matrix board is retired to a recorded baseline.** Four identical 300 x 140 mm boards, four lanes
+  each, carrying the identical sixteen loops and sixteen switch cells, so the inventory is four
+  custom designs in eight physical PCBs. A sixteen-strip layout was designed first and superseded: it
+  needed thirty-six connectors and two spine boards to do the same job, and its code is deleted.
 
-Description: design the board's electrical schematic in SKiDL (`hardware/pcb/`) to meet exactly its
-Milestone 1 responsibility. Keep the bill of materials cheap: prefer fewer parts and simpler
-switching over a more elegant but pricier circuit.
+  The 2026-08-02 JLCPCB quote decided between the survivors: one working sensing plane costs
+  20.92 EUR bare against the matrix board's 58.34, because a 300 by 140 mm outline pays no large-size
+  assembly charge where a 300 by 300 mm one pays 50.47 EUR, and because a five-piece minimum yields a
+  set plus a spare rather than one set and four scrap boards. Figures and caveats in
+  [hardware/jlcpcb-sourcing.md](hardware/jlcpcb-sourcing.md).
 
-DoD: `hardware/pcb/<board>.py` exists and generates a schematic, ERC is clean, a BOM is generated
-with a running per-board cost total, and a `docs/hardware/<board>.md` spec describes the board
-against the functional requirement it serves.
+  What retirement means concretely: `hardware/pcb/matrix.py` and `matrix_layout.py` stay, generate,
+  and stay in `make check`, because the quad instantiates their `matrix_cell` and their loop geometry
+  and because every quad figure is a delta against a matrix figure. What is retired is the outline,
+  the stackup and the order path. No release artifact is taken from the matrix.
 
-- [x] Light bar schematic: `hardware/pcb/lightbar.py`, ERC clean, BOM totals 6.33 EUR in parts,
-  spec in [hardware/lightbar.md](hardware/lightbar.md). Revised 2026-07-25: the pixel is now an
-  Harvatek T37K3RGB-05C000112U1930, because a hand-populated board needs an exact sourced package
-  an iron can reach, and the count dropped 17 to 14 because that package is wider.
-- [x] Matrix board schematic: `hardware/pcb/matrix.py`, ERC clean, BOM 4.80 EUR in parts, spec
-  in [hardware/matrix.md](hardware/matrix.md).
-- [x] Hub board schematic: `hardware/pcb/hub.py` accepts a purchased power module's regulated 5 V
-  against the contract in [hardware/power-module-interface.md](hardware/power-module-interface.md),
-  implements the AP63203 buck and the independent analog cell-temperature cutoff, and distributes
-  protected 5 V to the light bars. It measures cell voltage itself on ADC1_CH4 rather than reading a
-  module register, so no module's telemetry is load-bearing. The power-only USB-C, charge output,
-  module return, thermistor, and UART recovery connectors have focused connectivity tests. The generated
-  BOM and ERC are rechecked as part of the reopened V1 and V2 gates. The subsystem boundary is
-  in [hardware/power-subsystem.md](hardware/power-subsystem.md), and hub rationale is in
-  [hardware/hub.md](hardware/hub.md). Revised 2026-07-25: U4 to ESP32-C6-MINI-1U-N4 with the C6
-  pin map from datasheet Table 3-1 (native USB moves to pins 17/18), Y1 to a stocked 3225
-  27.12 MHz crystal with 15 pF loads, plus local module decoupling and IO9/EN recovery pads.
+### M2: schematic, per board
 
-### M3: SPICE validation (per board)
+Design each board's schematic in SKiDL to meet exactly its Milestone 1 responsibility, preferring
+fewer parts and simpler switching over a more elegant but pricier circuit.
 
-Description: validate the schematic automatically in ngspice (`hardware/sim/`, invoked from the
-test suite) against numeric limits recorded in `docs/hardware/criteria.yaml`.
+DoD: `hardware/pcb/<board>.py` generates a schematic, ERC is clean, a BOM is generated with a running
+per-board cost total, and `docs/hardware/<board>.md` describes the board against the functional
+requirement it serves.
+
+- [x] **Light bar.** `hardware/pcb/lightbar.py`, ERC clean, BOM 6.33 EUR in parts, spec in
+  [hardware/lightbar.md](hardware/lightbar.md). The pixel is a Harvatek
+  T37K3RGB-05C000112U1930, because a hand-populated board needs an exact sourced package an iron can
+  reach; that package is wider, which is why the count is 14 rather than 17.
+- [x] **Matrix board.** `hardware/pcb/matrix.py`, ERC clean, BOM 4.80 EUR, spec in
+  [hardware/matrix.md](hardware/matrix.md). Superseded but retained.
+- [x] **Split sensing plane.** `hardware/pcb/quad.py`, ERC clean, BOM 1.82 EUR per board and 7.28 EUR
+  for the set against the matrix board's 4.80. The increase is eight connectors and four registers,
+  and the split binds no new component type. Spec in [hardware/quad.md](hardware/quad.md).
+- [x] **Hub board.** `hardware/pcb/hub.py` accepts a regulated 5 V input against the contract in
+  [hardware/power-module-interface.md](hardware/power-module-interface.md), implements the AP63203
+  buck and the independent analog cell-temperature cutoff, and distributes protected 5 V to the light
+  bars. It measures cell voltage itself on ADC1_CH4 rather than reading a module register, so no
+  module's telemetry is load-bearing. U4 is an ESP32-C6-MINI-1U-N4 with the C6 pin map from datasheet
+  Table 3-1, and Y1 a stocked 3225 27.12 MHz crystal with 15 pF loads, plus local module decoupling
+  and IO9/EN recovery pads. Rationale in [hardware/hub.md](hardware/hub.md), subsystem boundary in
+  [hardware/power-subsystem.md](hardware/power-subsystem.md).
+- [x] **Power board.** `hardware/pcb/power.py` implements the 5 V at 2 A contract with a BQ25895 NVDC
+  charger, TPS61088 boost stage, TLV809 undervoltage supervisor, Sumida 1.2 uH inductor and Micro-Fit
+  power connectors. The matching housings and 18 AWG terminals are exact; the protected 21700
+  assembly and qualified complete harnesses remain V1 blockers.
+
+### M3: SPICE validation, per board
+
+Validate the schematic automatically in ngspice (`hardware/sim/`, invoked from the test suite)
+against the numeric limits in `docs/hardware/criteria.yaml`.
 
 DoD: an automatic test in `hardware/tests/` builds the board's SPICE deck, runs it, and passes
-against its `criteria.yaml` limits, in the ordinary test suite. A board is not done while its only
-evidence is an analytical formula; it needs a passing simulation.
+against its `criteria.yaml` limits in the ordinary test suite. A board is not done while its only
+evidence is an analytical formula.
 
-- [x] Light bar SPICE validation: `hardware/tests/test_sim_lightbar.py` solves the resistor
-  network extracted from the routed board in ngspice; worst supply-loop droop 12.46 mV against the
-  100 mV limit in [hardware/criteria.yaml](hardware/criteria.yaml). Ran after layout because the
-  copper supplies the resistances. Ground is now a pour rather than routed track, modelled as a
-  ladder between its real stitching-via positions so the plane stays layout-derived.
-- [x] Matrix board SPICE validation: `hardware/tests/test_sim_matrix.py`, antenna inductance and
-  AC resistance derived from the routed loop geometry (`hardware/sim/loop.py`). Selected cell
-  resonates at 13.54 MHz, loaded 16-line bus at 12.93 MHz, off/on suppression 65.6 dB, steering
-  bias 10.326 mA, all inside [hardware/criteria.yaml](hardware/criteria.yaml) with exact Diodes
-  vendor MOSFET models.
-- [ ] Hub board SPICE validation: the existing RF-only bench still drives the 16-cell bus
-  through the PN5180 TX path; the selected loop's field peaks at 13.86 MHz at 60 mA per volt of
-  drive and preserves useful RF evidence. The 68 pF series match value came from this bench.
-  The power module's charge and handover behavior is measured at V8 rather than represented by an
-  invented internal model.
+- [x] **Light bar.** `test_sim_lightbar.py` solves the resistor network extracted from the routed
+  board; worst supply-loop droop 12.46 mV against a 100 mV limit. Ran after layout because the copper
+  supplies the resistances. Ground is a pour rather than routed track, modelled as a ladder between
+  its real stitching-via positions so the plane stays layout-derived.
+- [x] **Matrix board.** `test_sim_matrix.py`, antenna inductance and AC resistance derived from the
+  routed loop geometry. Selected cell resonates at 13.54 MHz, loaded 16-line bus at 12.93 MHz, off/on
+  suppression 65.6 dB, steering bias 10.326 mA, all inside `criteria.yaml` with exact Diodes vendor
+  MOSFET models.
+- [x] **Split sensing plane.** `test_sim_quad.py` runs the same sixteen `matrix_cell` objects through
+  one testbench with and without the harness-and-chain path, so the difference is the interconnect
+  and nothing else. Every line resonates between 12.767 and 12.865 MHz against a 12.895 MHz
+  interconnect-free reference, at most 0.99 percent of tuning, with a 0.77 percent line-to-line
+  spread against a 2 percent limit. Every figure is a bound rather than a nominal, because the
+  on-board bus is autorouted and each line is modelled at the whole net's routed length. Swept over
+  the whole 2 to 8 nH bounding range of assumption A11.
+- [ ] **Hub board.** Validated: the 3.3 V stage over 72 corners (3.59 mV ripple against 50 mV,
+  2.141 A inductor peak against the converter's 2.5 A lowest guaranteed limit, 2.015 A RMS against
+  the inductor's 3.30 A rating); the light-bar rail on TI's TPS2553 transient model (444 mA at
+  4.459 V without tripping, 657 to 670 mA into a short); and the cell-temperature charge gate over
+  384 corners (2.17 to 36.43 degrees permitted, inside the qualified 0 to 40 range, with an open or
+  shorted sensor inhibiting). The RF bench drives the 16-cell bus through the PN5180 TX path and the
+  selected loop's field peaks at 13.86 MHz at 60 mA per volt of drive, which is where the 68 pF
+  series match came from.
 
-  The 3.3 V power stage is validated: `hardware/tests/test_sim_buck.py` sweeps 72 corners of load,
-  input voltage, inductance tolerance and output capacitance. Worst case it produces 3.59 mV of
-  ripple against a 50 mV budget, 2.141 A of inductor peak current against the converter's 2.5 A
-  lowest guaranteed limit, and 2.015 A rms against the inductor's 3.30 A rating. The model is an
-  open-loop datasheet-bounded substitute and makes no claim about the control loop. Evidence: 5 tests
-  passed on 2026-07-29.
+  Still open: the AP22811 current limit, UVLO and fault timing; the startup, brownout and
+  rail-handover transients; and the AP63203 over temperature, which no filed document supports.
+  Neither Diodes part has a distributable vendor model, so each needs a documented datasheet-bounded
+  substitute of the kind `hardware/sim/models/tlv7042.lib` demonstrates. The power module's charge
+  and handover behaviour is measured at V8 rather than represented by an invented internal model.
+- [ ] **Power board.** The boost power stage passes 162 ngspice corners with 138 mV worst ripple after
+  a third 22 uF output capacitor. Its switching stage reaches 5.325 A peak and 3.877 A RMS; the
+  accepted 80 percent efficiency bound raises those to 5.871 A and 4.442 A. Feedback tolerances
+  produce 4.909 to 5.215 V. The averaged BQ25895 handover cases pass, and a separate polarity bench
+  passes correct and reversed insertion with USB absent and already present, a reversed 4.2 V cell
+  producing only minus 5.8 mV at the protected BAT node.
 
-  The light-bar rail is validated: `hardware/tests/test_sim_led_rail.py` drives TI's transient model
-  for the TPS2553 from the rail's own connectivity, over both extremes of the 1% programming resistor
-  and a 4.5 to 5.5 V module output. It carries both bars at full white (444 mA at 4.459 V) without
-  tripping and clamps a short at 657 to 670 mA, inside the 1.0 A its harness contacts are rated for.
-  This replaces a value that had only the data sheet's IOS formula behind it. Evidence: 4 tests
-  passed on 2026-07-29.
+  Still open: the datasheet-bounded stages do not close the TPS61088 control loop. The 4,374-corner
+  sensitivity analysis selects 22 nF and clears TI's phase, gain and crossover guidance, but its
+  amplifier-transconductance band is assumed rather than guaranteed. Measured capacitor-bank ESR, the
+  remaining temperature corners, other protection timing and the V8 physical fault test all remain.
 
-  The cell-temperature charge gate is now validated: `hardware/tests/test_sim_interlock.py` runs
-  384 corners of the gate emitted from the hub's own SKiDL objects, with the filed Vishay R/T curve
-  as the sensor. Worst case the gate permits charging only from 2.17 to 36.43 degrees Celsius,
-  inside the qualified 0 to 40 range, while its tightest corner still covers the functional 20 to
-  25 degree charge band. The enable pin reaches 4.40 V permitting and 6.3 mV inhibiting against the
-  AP22811 thresholds, and an open or shorted sensor inhibits charging. Evidence: 6 interlock tests
-  inside a `make check` of 53 tests, mypy clean, on 2026-07-26.
+### M4: PCB layout as code, per board
 
-  Still open on this board before M3 closes: the AP63203 buck over line, load and temperature
-  corners; the AP22811 current limit, UVLO and fault timing; the TPS2553 LED rail trip against the
-  measured bar load; and the startup, brownout and rail-handover transients. Neither Diodes part
-  has a distributable vendor model, so each needs a documented datasheet-bounded substitute of the
-  kind `hardware/sim/models/tlv7042.lib` now demonstrates.
-
-### M4: PCB layout, as code (per board)
-
-Description: lay out the board from its schematic in code (SKiDL/KiCad-generation, `hardware/pcb/`),
-not by hand in a GUI, so the layout stays reproducible and versioned like the schematic.
+Lay out the board from its schematic in code, not by hand in a GUI, so the layout stays reproducible
+and versioned like the schematic.
 
 DoD: the layout is generated from code, DRC is clean, and it fits the board's envelope in
 [functional/physical.md](functional/physical.md).
 
-- [x] Light bar layout: `hardware/pcb/lightbar_layout.py` generates the routed 120 x 8.5 mm
-  board, DRC clean at 0 violations and 0 unconnected (`make pcb-lightbar-drc`). Rerouted
-  2026-07-25 around the wider LED: back-copper ground pour instead of a routed bus, and the 5 V
-  bus below the connector's mounting pads, the only pad-free full-length band left.
-- [x] Matrix board layout: `hardware/pcb/matrix_layout.py` generates placement, antenna copper,
-  and both-face ground pours. The reviewed route session excludes four deterministic serial nets,
-  and the Q24 rail escape is deterministic as well. `make pcb-matrix-drc` is reproducibly clean:
-  0 violations, 0 unconnected, and 0 schematic parity issues.
-- [x] Hub board layout: `hardware/pcb/hub_layout.py` generates the 2-layer 162 x 46 mm placement,
-  the code-owned USB shield and VBUS safety distribution, both ground pours, the reserved back-copper
-  region under the RF path, and the reviewed route. `make pcb-hub-drc` is reproducibly clean:
-  0 violations, 0 unconnected, and 0 schematic parity issues.
+- [x] **Light bar.** `lightbar_layout.py` generates the routed 120 x 8.5 mm board, DRC clean at 0
+  violations and 0 unconnected. Back-copper ground pour instead of a routed bus, and the 5 V bus below
+  the connector's mounting pads, the only pad-free full-length band available around the wider LED.
+- [x] **Matrix board.** `matrix_layout.py` generates placement, antenna copper and both-face ground
+  pours. The reviewed route session excludes four deterministic serial nets, and the Q24 rail escape
+  is deterministic as well. Reproducibly clean at 0 violations, 0 unconnected, 0 parity issues.
+- [x] **Split sensing plane.** `quad_layout.py` keeps the four loops on front copper with all
+  fifty-two components on the back and a keepout barring track or via over the 276 mm of antenna. It
+  imports a reviewed route and is clean from a wiped tree.
+- [x] **Split sensing plane antenna extraction.** `test_quad_stack.py` re-solves all sixteen loops on
+  the stacked-board stackup through the same FastHenry model as the monolith. Self inductance and
+  adjacent-line coupling match the monolith, and worst row-to-column coupling falls from 0.0664 to
+  0.0652 because the two planes end up 1.035 mm apart against 0.965 mm. The split spends no coupling
+  margin. See the numeric conflict recorded under V4.
+- [x] **Hub board.** `hub_layout.py` generates the 2-layer 162 x 46 mm placement, the code-owned USB
+  shield and VBUS safety distribution, both ground pours, the reserved back-copper region under the
+  RF path, and the reviewed route. Reproducibly clean at 0 violations, 0 unconnected, 0 parity issues.
+- [x] **Power board.** `power_layout.py` generates the routed 90 x 32 mm board, reproducibly clean.
+  The routed board is panelized with both light bars by `make panel`, which is not orderable; see V7.
 
-## Legacy definition of done for design generation
+## Decision log
 
-Every board from Milestone 1 must clear Milestones 2 through 4. These milestones establish that the
-schematic, initial SPICE validation, and PCB layout exist. They are necessary inputs to the current
-verification workflow, not evidence that a board is final or safe to order. Final completion is V9
-in [simulation-workflow.md](simulation-workflow.md).
+Dated entries, newest first. Each records a decision and what it rests on, not a change narrative.
 
-## Status
+**2026-08-02, the sensing plane is settled.** The four-lane quad board ships, the matrix board is a
+retired baseline, and the strip-and-spine layout that preceded both is deleted. The plane costs
+20.92 EUR bare against 58.34, spends no coupling margin (worst row-to-column coupling improves 0.0664
+to 0.0652), and costs at most 0.99 percent of tuning in interconnect. It owes software one thing,
+recorded rather than discovered: the selection chain is four registers deep, so a scan shifts 32 bits
+where the monolith shifted 16. `software/firmware/port/matrix_encoding.h` implements that and
+`test_matrix_encoding.c` pins it.
 
-Revised 2026-07-26. V0 passes with ordinary 5 V/2 A charging and bounded recharge time included.
-The power subsystem is a purchased module bounded by a written interface, with no product bound yet.
-V1 passes for the rebuilt hub, V2 passes for all three boards. The lightbar and matrix retain their
-passing component, static, simulation, and layout evidence. The 10 uH matrix choke's 15 mA rating is
-settled: `hardware/tests/test_sim_matrix_bias.py` sweeps the bias over the rail's regulation band and
-the setting resistor's tolerance and reaches 10.58 mA, leaving 29 percent of the component's maximum
-unused.
+**2026-08-02, 0.6 mm on a 300 mm outline is priced and free.** Quoted against 0.8 and 1.0 mm at the
+same outline and quantity, all three identical. HASL is not offered at 0.6 mm, so the sensing plane
+takes OSP, chosen on RF grounds: ENIG's nickel underplate is roughly forty times copper's resistivity
+and magnetic, and at 13.56 MHz the skin depth in it is comparable to its own thickness.
 
-No board is authorized for a test-article order until V3 through V7 pass. Firmware and the companion
-app have not started, so V5 and V6 remain open.
+**2026-07-29, the power path is custom.** V0 passes with ordinary 5 V/2 A charging and bounded
+recharge time. The custom power board implements the written module interface, and a purchased
+replacement remains an optional substitute rather than a dependency. The 10 W boost power stage has
+bounded V3 evidence; its control loop and charger faults remain open.
 
-The named V8 article is whichever power module and cell are finally bound under
-[hardware/power-module-interface.md](hardware/power-module-interface.md), recorded in
-[hardware/power-subsystem.md](hardware/power-subsystem.md). V8 must measure charge time, runtime,
-cable handover, thermals, I2C behavior, and NFC performance in the representative ventilated
-enclosure. The module does not measure cell temperature, so an independent fail-safe charge
-interlock remains mandatory and open. No purchase or test-article order is authorized until V3
-through V7 pass.
+**2026-07-29, the matrix choke's rating is settled.** `test_sim_matrix_bias.py` sweeps the bias over
+the rail's regulation band and the setting resistor's tolerance and reaches 10.58 mA against the
+component's 15 mA, leaving 29 percent unused.

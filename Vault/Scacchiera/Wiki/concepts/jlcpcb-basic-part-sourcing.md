@@ -65,3 +65,5 @@ the limits and pricing are time-sensitive.
 ## Related
 
 - [[jlcpcb]]
+- [[pcba-cost-structure]], which puts these part-level rules in the context of the per-order fixed
+  costs that outweigh them at one-unit quantity

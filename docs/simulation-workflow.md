@@ -31,7 +31,9 @@ these evidence classes:
 
 - **Datasheet:** a limit or requirement quoted from a filed manufacturer datasheet, with its
   section or table recorded in the component's wiki source summary.
-- **Derived:** a deterministic calculation whose inputs all have Datasheet or Measured evidence.
+- **Standard:** a limit or requirement quoted from a filed normative standard, with its exact
+  section or table recorded in the source summary.
+- **Derived:** a deterministic calculation whose inputs all have Datasheet, Standard, or Measured evidence.
 - **Simulated:** a passing automated test using the production connectivity and a documented model.
 - **Measured:** a repeatable test on a named test article with the instrument, setup, raw result,
   and uncertainty recorded.
@@ -85,7 +87,7 @@ Milestones are sequential gates. A later milestone cannot compensate for an earl
 
 Map every relevant statement in `docs/functional/` and every component absolute maximum to one or
 more tests. Record numeric pass limits in `docs/hardware/criteria.yaml`. Each limit must name its
-Datasheet, Derived, or Measured source and include deliberate margin.
+Datasheet, Standard, Derived, or Measured source and include deliberate margin.
 
 Definition of done:
 
@@ -251,8 +253,11 @@ Definition of done:
 
 - The reviewer signs off component pinouts, footprints, power, reset and programming, RF topology,
   protection, connectors, layout, fabrication outputs, and the remaining risk register.
-- The complete clean-build test command passes, including all three boards, firmware host tests,
-  Wokwi scenarios, ngspice corners, electromagnetic tests, ERC, DRC, and schematic parity.
+- The complete clean-build test command passes, including every board design carried at the time,
+  firmware host tests, Wokwi scenarios, ngspice corners, electromagnetic tests, ERC, DRC, and
+  schematic parity. Where two designs are alternatives rather than both shipping (the monolithic
+  matrix board and the split sensing plane in [hardware/quad.md](hardware/quad.md)), both are
+  held to this gate and the release records which one ships.
 - No critical Assumed evidence, open sourcing conflict, unexplained waiver, or manual-only test
   remains.
 - `docs/planning.md` records the passing evidence, tool versions, test-article identity, release Git

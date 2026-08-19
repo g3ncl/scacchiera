@@ -3,7 +3,7 @@ type: source-summary
 tags:
   - wiki/source
   - wiki/component
-date_updated: 2026-07-26
+date_updated: 2026-07-29
 source_file: "Datasheets/0603WAF1000T5E_C22775.pdf"
 source_title: "0603WAF1000T5E manufacturer datasheet"
 publisher: "UNI-ROYAL"
@@ -12,7 +12,7 @@ publisher: "UNI-ROYAL"
 # 0603WAF1000T5E datasheet
 
 This source binds [0603WAF1000T5E](../entities/0603waf1000t5e.md) to supplier order
-code `C22775`. It is used by hub R27 (100R), hub R28 (100R).
+code `C22775`. It is used by hub R27 (100R), hub R28 (100R), power R12 (100R 1%), power R13 (100R 1%).
 
 [mpn::0603WAF1000T5E] [order_code::C22775]
 [manufacturer::UNI-ROYAL] [footprint::Resistor_SMD:R_0603_1608Metric]

@@ -1,6 +1,6 @@
 ---
 type: overview
-date_updated: 2026-07-29
+date_updated: 2026-08-02
 tags:
   - wiki/overview
 ---
@@ -9,7 +9,7 @@ tags:
 
 High level synthesis of everything the wiki knows. This page is regenerated as
 the big picture changes during ingestion. Start here for the shape of the
-knowledge base, then follow [[wikilinks]] into [[index|the index]] and the
+knowledge base, then follow wikilinks into [[index|the index]] and the
 individual pages.
 
 ## Verification state
@@ -19,36 +19,74 @@ release authority. [[verification-evidence-model]] records the executable V0 str
 functional power specification adds bounded runtime, charge time, source fallback, and battery
 safety requirements after the original 500 mA architecture proved unsuitable.
 
-[[commercial-power-subsystem-selection]] replaced the custom charger and raw-cell plan with a
-purchased subsystem owning the cell, charging, protection and the uninterrupted 5 V path. As of
-2026-07-29 that subsystem is a written contract rather than a product: [[pisugar3-plus]] is 57 mm
-across against the 46 mm a player rail allows, and the board now measures cell voltage itself, so no
-module's telemetry is load-bearing and the module can be swapped. See
-[[battery-format-and-module-alternatives]]. V1 is open again as a result, because an unbound part
-cannot have a passing audit; every board part still passes it.
+The power boundary remains a written contract, but the default implementation is now a custom
+90 x 32 mm board panelized with the light bars. [[bq25895rtwr]] owns charging and power-path
+management, while [[tps61088rhlr]] produces the regulated 5 V return. The hub still measures cell
+voltage and gates charging from its independent temperature window, so the implementation can be
+replaced without moving safety or telemetry across the boundary. See
+[[battery-format-and-module-alternatives]].
 
-[[v2-static-connectivity|V2]] passes on all three boards, and all three are two copper layers. The
+The inlet remains a 5 V-only passive sink. [[usb-type-c-5v-current-advertisement]] adds two filtered
+CC ADC readings, so ordinary Type-C and laptop PD chargers can be distinguished as default, 1.5 A,
+or 3.0 A sources without a PD contract. Invalid or changing readings retain the lower input limit.
+
+[[v1-component-proof|V1]] audits the exact fitted tuples with no fitted-part sourcing blocker. The
+power inductor is now exact [[dfe252012f-1r0m-p2]]. V1 remains open on the
+[[er-oledm3-12-1w]] documentation conflict and its cable definition; a purchased power module is
+only an optional replacement, not a fitted dependency. [[v2-static-connectivity|V2]] passes on all five board designs, and all
+five are two copper layers. The
 hub reached that by growing to 162 x 46 mm rather than by adding layers, since the rail it lives in
 has length to spare and a four-layer panel costs a multiple of a two-layer one.
 
-V3 power and fault simulation is the open gate, with two hub results so far.
+V3 power and fault simulation is the open gate. Three hub results and two power-board benches exist.
 [[v3-charge-interlock]]: the cell-temperature cutoff holds inside the qualified 0 to 40 degree range
 across 384 published tolerance corners and both sensor failure directions.
 [[v3-led-rail-current-limit]]: the light-bar limiter carries both bars at full white and clamps a
 short inside its harness rating, on TI's own transient model, replacing a value that had only a
 formula behind it. [[v3-buck-power-stage]]: the 3.3 V rail's ripple and inductor stress over 72
 corners, from a model that deliberately holds no control behaviour, so regulation and stability stay
-data sheet claims for V8. The AP22811 input switch and every transient case on every board remain
+data sheet claims for V8. The power-board boost has a 162-corner ngspice stage sweep plus a separate
+80 percent efficiency current bound. Its averaged NVDC model covers adapter priority, battery
+supplement, removal, missing and depleted cells, a shorted cell, and a stuck charge command.
+Its [[0402b223k500nt]] compensation capacitor is selected by a 4,374-corner small-signal
+sensitivity analysis, which reaches 54.64 degrees minimum phase margin and rejects the former 4.7
+nF value. TI gives no guaranteed error-amplifier transconductance range, so this narrows the design
+without closing V3 loop evidence.
+[[csd25404q3]] and [[tlv7021dckr]] now isolate a reversed cell before the charger BAT node. The
+ngspice bench covers cold and already-powered insertion at both polarities, while physical fault
+insertion remains mandatory at V8. The AP22811 input switch and many transient cases remain
 unsimulated.
+
+The display evidence raises coincident load from 1.14 A to 1.48 A. The current 2 A interface and
+[[tps61088rhlr]] stage cover the full 10 W stress case. Replacing BQ25619 with [[bq25895rtwr]] raises
+the guaranteed battery path from 5 A to 6 A continuous and 9 A for one second, clearing the
+efficiency-bounded 4.442 A RMS and 5.871 A peak boost currents. Its third 22 uF output capacitor
+keeps ripple to 138 mV after initial tolerance, X5R temperature shift, the 50 percent DC-bias
+sensitivity bound, TI's recommended minus 30 percent inductor corner, and a 15 milliohm
+assembled-bank ESR limit. The fitted bank still needs an ESR measurement.
 
 The earlier [[chessboard-quick-charge-architecture|custom PD architecture]] and
 [[quick-charge-module-evaluation|RBS18634 article]] remain historical evidence rather than active
-designs. The current open risks are enclosure ventilation, choosing a power module that fits the
-rail, measured recharge time, and representative runtime. The selected
+designs. The current open risks are the protected cell assembly, physical reversed-cell response, switching
+loop evidence, enclosure ventilation, measured recharge time, and representative runtime. The selected
 [[fail-safe-cell-temperature-window]] uses a wired thermistor and analog comparators so firmware
 cannot override the qualified charge range. Hub L1 is the fully documented [[nr6045s4r7mt]];
 the earlier [[swpa5045s4r7mt]] catalog binding is rejected because its claimed MPN is absent from
 the manufacturer series table.
+
+The leading total-cost battery candidate is now a wired Keeppower 1S1P 21700 protected pack. Its
+21.6 Wh nominal energy and 12 A continuous rating clear the electrical bounds, and the roughly
+EUR 11 article includes a protection PCB and leads. The [[inr-21700-m65a]] remains the unavailable
+higher-capacity reference. A parametric rail-fit model reserves 80 x 26 x 23 mm around the maximum
+listed Keeppower body beside the 90 x 32 x 10 mm power-board envelope. The allocation fits with
+125 mm of rail length left, but the exact cell revision, protection thresholds, wire, connector,
+thermistor retention, lead bend, and supplier drawing remain open.
+
+The filed [[ssd1362-datasheet]] now supplies the timing the purchased display-module document
+omits. Its 15 ns edge limit produces a 50 pF complete-load acceptance bound for each display SPI
+input. At the fixed 4 MHz bus rate, the derived clock and write windows clear the controller table.
+The exact cable still has to prove that load bound, and the controller document remains advance
+information with timing characterized only at 25 degrees Celsius.
 
 ## NFC Game Board: the reference project
 
@@ -102,6 +140,13 @@ CPL.
 The follow-up [[jlcpcb-matrix-live-stock-2026-07-25|live inventory capture]] confirms that every
 matrix line is available from JLCPCB's public Basic or Extended library above the five-board order
 requirement. Pre-Order and Global Sourcing remain fallback paths, not current requirements.
+
+The sensing plane those figures were bound against is now the four-lane split rather than the
+monolith, decided 2026-08-02 on a quote and written up in [[split-sensing-plane]]. Every part above
+carries over unchanged, which is why the matrix sourcing work was not wasted; what changed is the
+outline. [[pcba-cost-structure]] totals the whole product on top of that and finds the cost model
+is dominated by per-order fixed charges rather than by the bill of materials, and that the largest
+single line item, the two display modules, has no filed price.
 
 [[schemalyzer-jlcpcb-design-rules-2025|Schemalyzer's captured JLCPCB DFM guide]] adds a general
 fabrication and release checklist. It is deliberately treated as secondary guidance: the project

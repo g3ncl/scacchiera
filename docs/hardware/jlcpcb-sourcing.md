@@ -1,35 +1,55 @@
 # JLCPCB assembly sourcing
 
-This register records the project's JLCPCB part selections for the three boards and the parts that
-need a deliberate follow-up. The supporting catalog capture and live-stock evidence live in the
+This register records the project's JLCPCB part selections for every board and the parts that
+need a deliberate follow-up. The sensing plane is the four-lane [quad board](quad.md); the
+[matrix board](matrix.md) section is kept as the superseded baseline it was priced against, not as
+a shipping option. The supporting catalog capture and live-stock evidence live in the
 vault. The complete bound BOM was checked live again on 2026-07-25. Stock and prices remain
 time-sensitive.
 
-The hub selections and quotes in this register describe the last generated MCP73871 design. That
-hub is superseded by the commercial 5 V subsystem boundary in [hub.md](hub.md), so none of its hub
-counts, costs, or order files are current release evidence. Update this register from the
-regenerated simplified hub only after its V1 and V2 gates pass. Lightbar and matrix selections
-remain current.
+**One quote in this file is historical and labelled as such.** The 2026-07-25 hub quote priced a hub
+that carried the charger and both converters on board (MCP73871, TPS63802, TPS61023). Those moved to
+the [power board](power.md), so that quote's part list, feeder count and total are kept as cost
+*structure* and are not current release evidence. Current per-board prices are in
+[cost.md](cost.md).
 
-`make pcb-fab` emits the upload pair `<board>_jlcpcb_bom.csv` and
-`<board>_jlcpcb_cpl.csv`, and rejects the export if their designators differ. The internal costed file is named
-`<board>_engineering_bom.csv`; do not upload it. Blank `LCSC Part #` cells in the upload BOM are
+`make pcb-fab` emits the upload pair `<board>_jlcpcb_upload_bom.csv` and
+`<board>_jlcpcb_upload_cpl.csv`, and rejects the export if their designators differ. The internal costed file is named
+`<board>_bom_all_parts.csv`; do not upload it. Blank `LCSC Part #` cells in the upload BOM are
 intentional unresolved items, not permission to select a substitute during ordering.
 
 The engineering BOM also records `JLC Library`, `Assembly Route`, `Hand Method`, and
-`Assembly Reason`. These columns are planning guidance. They do not silently remove parts from the
-JLCPCB upload. `Hand` identifies a practical candidate to buy elsewhere and omit deliberately when
-reviewing the JLCPCB match; `JLCPCB` means the part is Basic, too small or hidden for reliable iron
-soldering, or too repetitive to place economically by hand.
+`Assembly Reason`. `Hand` identifies a part an iron can reach, bought elsewhere and fitted by the
+builder; `JLCPCB` means the part is Basic, too small or hidden for reliable iron soldering, or too
+repetitive to place economically by hand. **The `Assembly Route` column governs the upload pair**:
+a `Hand` row is absent from it, on every board.
 
-Each fabrication run emits two upload choices. `<board>_jlcpcb_bom.csv` and
-`<board>_jlcpcb_cpl.csv` ask JLCPCB to place every fitted part. The matched
-`<board>_jlcpcb_hybrid_bom.csv` and `<board>_jlcpcb_hybrid_cpl.csv` omit every `Hand` row. Upload
-the hybrid pair together when using manual completion, then purchase exactly the rows in
-`<board>_hand_bom.csv` elsewhere. Never mix the full BOM with the hybrid CPL or the reverse.
-The lightbar is the exception: JLCPCB cannot assemble its 120 by 8.5 mm outline, so both of its
-JLCPCB BOM/CPL pairs are intentionally empty and its hand BOM contains every fitted component.
-Order only its bare PCB Gerbers from JLCPCB.
+That was not always true, and the correction is worth reading before trusting an older quote.
+Until 2026-08-02 the exclusion applied only to boards that were populated by hand *in their
+entirety*, so on the hub and the power board, the two that actually go to assembly, the upload pair
+was identical to the max-assembly pair: nineteen Extended rows offered to the factory where the
+plan intends four. At 2.70 EUR a feeder change that is **67.50 EUR across the two boards** of fees
+the design never meant to pay. The plan existed in this column and in this document, and the
+exported file ignored both.
+
+Each fabrication run emits two upload choices. `<board>_jlcpcb_upload_bom.csv` and
+`<board>_jlcpcb_upload_cpl.csv` are the plan actually chosen for that board, so on a fully
+hand-populated board there is nothing to upload and **the pair is not written at all**. It used to
+be written with a header and no rows, which is a trap: the files are named `upload`, and JLCPCB
+answers a zero-part list with an opaque HTTP 500 rather than a message naming the problem. The
+matched `<board>_jlcpcb_max_assembly_bom.csv` and `<board>_jlcpcb_max_assembly_cpl.csv` ignore the
+plan and list everything JLCPCB could place, which is what makes them a quote instrument for the
+road not taken. Never mix a BOM from one pair with the CPL from the other.
+
+The quad, the matrix and the lightbar have no upload pair, because all three are populated
+entirely by hand; only their max-assembly pairs exist, to price the alternative. The lightbar has a
+second reason: JLCPCB cannot assemble its 120 by 8.5 mm outline at all.
+
+**The panel has a pair of its own**, `panel_jlcpcb_upload_bom.csv` and `panel_jlcpcb_upload_cpl.csv`.
+A CPL is board-relative, so the power board's own pair cannot be uploaded against the panel: every
+placement would sit at the wrong coordinate. The panel pair is the power board's plan translated
+into panel coordinates, under the suffixed references `panel.py` gives each copy, and it is what to
+upload when ordering the panel assembled. See [ordering.md](ordering.md).
 
 The upload BOM uses the selected manufacturer's exact MPN in `Comment`, not the schematic value.
 This makes the MPN agree with `LCSC Part #` and prevents JLCPCB's misleading comment mismatch
@@ -54,35 +74,42 @@ each route, so "hand" here always means a joint an iron tip can reach.
 
 | Board | Prefer JLCPCB | Hand fitted |
 | --- | --- | --- |
-| Lightbar | none, the board is below JLCPCB's supported assembly size | everything; the LED was changed to a legs-outside-body package so an iron reaches all four joints |
-| Matrix | none, see below | all 165 references |
-| Hub, historical MCP73871 design | QFN, SON, SOT563, USB-C, the crystal, and the ESP32 module | JST connectors, switch, SOT-23 devices, inductors, 0402 C0G RF and timing capacitors, and the 0.65 mm TSSOP expander |
+| Lightbar | none, the board is below JLCPCB's supported assembly size | everything; the LED is a legs-outside-body package so an iron reaches all four joints |
+| Quad (sensing) | none by choice, see below | all 176 references across the four boards |
+| Matrix, superseded | none, see below | all 165 references |
+| Hub | J1 (USB-C), U3 (PN5180 QFN-40), U4 (ESP32-C6-MINI-1U) and Y1 (the 3225 crystal) | JST connectors, switch, SOT-23 devices, inductors, 0402 C0G RF and timing capacitors, and the 0.65 mm TSSOP expander |
+| Power | Q1 (CSD25404Q3 DQG), U1 (BQ25895 QFN-24) and U2 (TPS61088 QFN-20) | everything else, 11 references |
 
-Packages classified reflow-only are those with pads under the body or a pitch no tip can reach:
-QFN, SON, SOT563, USB-C, the 3225 crystal, and the ESP32 module. **0402, SOD-523, SOT-23, SOIC and
-0.65 mm TSSOP are deliberately not on that list.** They are tedious but every joint is reachable,
-and the plan hand-fits them, which is what removes their feeder fees.
+Packages classified reflow-only are those with pads under the body or a pitch no tip can reach, and
+the list lives in code as `REFLOW_ONLY_FOOTPRINT_MARKERS` in `hardware/pcb/bom.py`: QFN and DFN, the
+SON and SOT563 variants, USB-C, the 3225 crystal, the ESP32 module and the CSD25404Q3's clip
+package. **0402, SOD-523, SOT-23, SOIC and 0.65 mm TSSOP are deliberately not on that list.** They
+are tedious but every joint is reachable, and the plan hand-fits them, which is what removes their
+feeder fees.
 
-The lightbar and the matrix are now both fully hand populated, so only the hub goes to assembly.
-Order bare Gerbers for the other two. The hub leaves **seven** Extended lines for factory placement,
-all genuinely reflow-only: J1 (USB-C), U1 (MCP73871 QFN-20), U2 (TPS63802 SON-10), U3 (PN5180
-QFN-40), U4 (ESP32-C6-MINI-1U), U5 (TPS61023 SOT563) and Y1 (the 3225 crystal). Everything else
-Extended on the hub is hand fitted from `hub_hand_bom.csv`.
+The lightbar and the sensing plane are fully hand populated, so only the hub and the power board go
+to assembly; order bare Gerbers for the other two. That leaves **four** charged Extended lines on
+the hub and **three** on the power board, 10.80 and 8.10 EUR of feeder changes against the 51.30 and
+35.10 EUR the max-assembly alternative would cost. Everything else Extended is hand fitted from each
+board's `_self_solder_bom.csv`.
 
-Moving the 0402 C0G RF capacitors (C33/C36, C34) and the TSSOP expander (U6) to hand removes three
-feeder changes, about 8.10 EUR. That is offset by U4 and Y1 becoming real charged lines now that
-they are bound to stocked parts, where previously they were shortages the factory simply would not
-place. Net feeder count is about the same, but the board comes back complete instead of missing its
-MCU and its reader clock, which was the point.
+The reduction is already taken rather than available: moving the 0402 C0G RF capacitors (C33/C36,
+C34) and the TSSOP expander (U6) to hand removed three feeder changes on the hub, and
+[cost.md](cost.md) records why the remaining seven cannot follow them. The set an iron cannot reach
+and the set that carries a feeder fee are nearly the same set.
 
-The quote below predates the U4, Y1, C31/C32, U6 and C33/C34 changes, so re-quote before ordering.
-It is kept as the cost structure, not as a current price.
+### The historical hub quote, kept for its structure
 
-The 2026-07-25 hub hybrid quote is the current cost baseline. It reports 31 detected BOM rows, 29
-confirmed rows, and shortages on U4 and Y1. Economic PCBA is 53.13 EUR: 7.19 setup, 1.34 stencil,
-24.28 components, 18.88 Extended-component fees, 0.69 SMT assembly, and 0.75 nitrogen reflow. The
-18.88 EUR is seven nominal 2.70 EUR feeder changes after quote rounding. J1 was detected with zero
-quantity and no component price, so budget another 2.70 EUR if it becomes a charged placement.
+The 2026-07-25 hybrid quote priced the pre-split hub, the one that still carried MCP73871, TPS63802
+and TPS61023. It reports 31 detected BOM rows, 29 confirmed rows, and shortages on U4 and Y1.
+Economic PCBA is 53.13 EUR: 7.19 setup, 1.34 stencil, 24.28 components, 18.88 Extended-component
+fees, 0.69 SMT assembly and 0.75 nitrogen reflow. The 18.88 EUR is seven nominal 2.70 EUR feeder
+changes after quote rounding.
+
+**Do not price the current hub from it.** Its charger and converters are on the power board now and
+its feeder count is nearly double the current four. It is retained because the fixed-cost structure
+(setup, stencil, feeders, nitrogen) is the part that transfers, and that structure is what
+[cost.md](cost.md) uses to rank the panelisation and consolidation levers.
 
 The ESP32-C6-MINI-1U is not an iron-solder part. Its 0.8 mm perimeter pitch is manageable, but the
 ground pad is an array of 1.45 mm pads under the module that no tip and no syringe can reach.
@@ -125,7 +152,7 @@ Every bound code below was checked against live JLCPCB stock above the five-boar
 ### Lightbar
 
 - **Assembly route:** bare PCB fabrication only, populated by hand with an iron. Both JLCPCB BOM
-  and CPL pairs are intentionally empty and `lightbar_hand_bom.csv` holds every fitted part.
+  and CPL pairs are intentionally empty and `lightbar_self_solder_bom.csv` holds every fitted part.
 - **C15:** C49066, Samsung CL32A107MQVNNNE, is the exact 100 uF, 6.3 V, X5R, 1210 requirement.
 - **J1:** C225127, CJT A1257WR-S-4P, preserves the 1.25 mm GH-compatible right-angle interface.
 - **D1-D14, Harvatek T37K3RGB-05C000112U1930:** DigiKey cut-tape order
@@ -134,7 +161,11 @@ Every bound code below was checked against live JLCPCB stock above the five-boar
   channel and an 800 kHz protocol. The observed stock was 53, enough for two bars plus attrition.
   This closes the unresolved C5200774 catalog and pinout conflict without changing the rail budget.
 
-### Matrix
+### Matrix, superseded baseline
+
+**Superseded by the quad board below on the 2026-08-02 quote.** This section stays because every
+part in it is the part the quad uses, the live-stock evidence is the same evidence, and the pricing
+here is what the split is measured against. Do not order from it.
 
 The matrix upload is fully bound. Its 11 BOM rows contain 165 placed references, every row has an
 exact JLC code, and the CPL contains the same 165 references. PCB copper loops L2/L4 through L32,
@@ -174,7 +205,118 @@ the only cost is time, against roughly 82 EUR of PCBA of which 50.47 EUR was pur
 Splitting the matrix into a dumb antenna board plus a small switch daughterboard would also avoid
 the charge, but it puts connector inductance into all 16 resonant tanks, changes the ground return,
 and forces the antenna board through Milestones 1 to 4 again. Hand populating gets the same saving
-with no RF risk, so the split was rejected.
+with no RF risk, so **that** split was rejected.
+
+A different split was not. The objection above is specific to a boundary drawn between a loop and
+its tuning capacitor; the four-lane board in [quad.md](quad.md) keeps the whole tank on the board
+and puts the connector on the far side of the 100 nF DC block, so the harness loads the shared bus
+instead of joining sixteen resonators. `hardware/sim/quad_rf.py` measures that at under 1 percent of
+tuning against the same cells with the interconnect removed. The RF objection does not carry over;
+the area and connector cost below is what does.
+
+### Split sensing plane (the shipping sensing board)
+
+Quoted 2026-08-02. This was the open item that decided between the two sensing architectures, and
+it is now closed in the split's favour. The four-lane board in [quad.md](quad.md) is what ships;
+the matrix section above is retained as the superseded baseline it was measured against.
+
+**The large-size charge is the whole story.** A 300 x 300 mm matrix board pays **50.47 EUR** of
+large-size assembly charge, 61.5 percent of its PCBA. A 300 mm board narrow enough to stay out of
+the band pays **0.00 EUR**. That is the number no catalogue could answer.
+
+What triggers the band is *not* established by the quoted points. Every board quoted here is
+300 mm long, so length alone cannot be it, but width and area are equally consistent with the
+evidence and nothing here separates them. It matters practically: a panel that gangs four 140 mm
+boards is 560 mm of width or 168,000 mm2 of area, either of which could reincur the charge that
+four separate boards avoid. **Quote a panel before assuming panelisation is free.**
+
+Bare PCB, quoted at JLCPCB's default 1.6 mm, 2 layers, green, HASL, 2-day build:
+
+| Board | Outline | Quantity | Price | Per board | Per 1000 mm2 |
+| --- | --- | ---: | ---: | ---: | ---: |
+| **quad** | 300 x 140 mm | 5 | **20.92 EUR** | 4.18 EUR | 0.100 EUR |
+| matrix | 300 x 300 mm | 5 | 58.34 EUR | 11.67 EUR | 0.130 EUR |
+| strip, superseded | 300 x 33 mm | 20 | 19.97 EUR | 1.00 EUR | 0.101 EUR |
+| spine, superseded | design deleted | 5 | 6.95 EUR | 1.39 EUR | 0.171 EUR |
+
+The quad prices at the same EUR per square millimetre as the 33 mm strip, so 140 mm of width is
+still outside whatever the band measures, and the matrix's 0.130 against 0.100 is a **separate**
+area premium in bare fabrication, about 30 percent, on top of the assembly charge. Two distinct
+effects that respond to different changes, and worth not conflating.
+
+**Be precise about what is quoted here.** The quad's 0.00 EUR large-size charge is inferred from
+the 33 mm strip's assembly quote, because the quad itself was quoted bare only. That inference
+carries no weight in the decision: the choice between the two architectures rests on the bare
+prices, 20.92 against 58.34, and both of those are direct quotes.
+
+#### What one working sensing plane costs
+
+A set is four quad boards, or one matrix board. JLCPCB's five-piece minimum is part of the
+comparison rather than an aside: it forces four unusable matrix boards to get one usable plane,
+where five quads is a complete set plus one spare.
+
+| Build | Order | Cost | Hand joints |
+| --- | --- | ---: | ---: |
+| **Quad, bare copper** | 5 boards (one set + spare) | **20.92 EUR** | 176 |
+| Matrix, bare copper | 5 boards (one set, four wasted) | 58.34 EUR | 165 |
+| Matrix, assembled | 5 boards | 141.05 EUR | 0 |
+| Strip + spine, bare, superseded | 20 strips + 5 spines | 26.92 EUR | about 200 |
+
+**The quad is the cheapest route to a working plane, by 37.42 EUR against the monolith**, and it
+buys a spare board where the monolith buys four scrap ones. The area penalty is real and unchanged
+at 1.87 times the substrate; the size charge and the minimum order quantity both outweigh it.
+
+#### Assembly route
+
+The quad stays hand populated in `hardware/pcb/bom.py`. Bare copper at 20.92 EUR the set is the
+cheapest way to a working board, every package on it is iron-reachable (0402, 0603, 0805, SOT-23,
+SOD-523, SOIC-16, one JST), and unlike the matrix this is a preference rather than a forced choice:
+the outline pays no size charge, so factory assembly is available if the labour is worth buying.
+Flipping it is a one-line change to `HAND_POPULATED_BOARDS`.
+
+What buying it back would cost is not quoted for the quad, but the superseded strip quote fixes the
+structure, and the structure is what decides. Strip with assembly, 20 pieces, retained for that
+reason only:
+
+| Line | Cost |
+| --- | ---: |
+| PCB, engineering fee | 3.47 EUR |
+| PCB, board | 35.34 EUR |
+| PCBA, setup | 22.19 EUR |
+| PCBA, stencil | 7.13 EUR |
+| PCBA, panel | 0.00 EUR |
+| **PCBA, large size** | **0.00 EUR** |
+| PCBA, components, 10 items | 11.24 EUR |
+| PCBA, feeder loading | 13.28 EUR |
+| PCBA, SMT assembly | 1.08 EUR |
+| PCBA, packaging | 0.43 EUR |
+| **Total** | **94.17 EUR** |
+
+Two things in that table are worth reading twice, and both carry to the quad. Enabling assembly
+nearly doubled the bare board price, 19.97 to 38.81 EUR, because JLCPCB re-specifies the PCB for
+line handling; that cost is real and it is in no line item named for it. And 42.60 EUR of the
+55.36 EUR PCBA is fixed per order (setup, stencil, feeders), with only 12.75 EUR scaling across the
+twenty boards. **Fixed cost decides the route on a five-piece order far more than unit price does.**
+
+#### Caveats on these figures
+
+- **The bare prices above were quoted at 1.6 mm**, JLCPCB's default, where the quad is designed at
+  0.6 mm and the matrix at 1.0 mm. **0.6 mm has since been priced separately and costs the same as
+  0.8 and 1.0 mm** at this outline and quantity, so the thickness the design wants is free and the
+  ranking holds. That was the last open fabrication risk on the shipping sensing board.
+- The quad was not quoted with assembly. Its route is decided on the fixed-cost structure above
+  rather than on its own quote, which is safe only because the decision is to buy no assembly.
+- The matrix bare figure is a 2026-08-02 re-quote; its 58.34 EUR against the 59.03 EUR recorded on
+  2026-07-25 confirms the earlier quote was five pieces.
+- **No capture of the 2026-08-02 quote is filed in `Vault/Scacchiera/Clippings/jlcpcb/`.** The
+  2026-07-25 stock and parts captures are; this one is not, so these figures rest on the quote as
+  transcribed rather than on an immutable capture. File it before the numbers are used to release
+  an order.
+
+Four JST GH cable assemblies (one per board, equal length by construction) are purchased
+accessories on no board BOM, like the hub's antenna pigtail. An order that forgets them is
+incomplete. The connectors themselves are all SM07B-GHS-TB, C495552, already bound above, so the
+split adds no feeder change.
 
 The stocked JSCJ BAR64-02V replaces the unavailable NXP BAP64-02. Its conservative ngspice model
 uses the JSCJ limits of 2.5 ohm maximum at 10 mA and 0.55 pF maximum at 1 V, 0.35 pF maximum at
@@ -193,18 +335,28 @@ an Extended alternative solely for extra margin would add another unique-compone
 
 ### Hub
 
-The hub necessarily uses Extended ICs. Its safe public-stock substitutions now include the exact
-PN5180 C3E package suffix, verified connector families, RF chokes, protection parts, exact feedback
-values, and passives that meet the original dielectric, voltage, and footprint requirements. The
-24.9 kohm R6 replacement differs by only 0.4%, inside the original 25 kohm 1% tolerance.
+The hub necessarily uses Extended ICs. Its safe public-stock substitutions cover the exact PN5180
+C3E package suffix, verified connector families, RF chokes, protection parts, exact feedback values,
+and passives meeting the specified dielectric, voltage and footprint. The 24.9 kohm R6 replacement
+differs by only 0.4%, inside the original 25 kohm 1% tolerance.
 
-U4, Y1 and L2 are exact and externally available. U4 still needs JLCPCB Global Sourcing or another
+U4, Y1 and L2 are exact and externally available. U4 needs JLCPCB Global Sourcing or another
 controlled placement route because its exposed ground pads make it reflow-only.
 
-- **L2, 74438357010:** DigiKey cut-tape order `732-11197-1-ND`, 16,892 observed in stock. It remains
-  hand fitted and preserves the required 9.6 A saturation current and 13.5 milliohm maximum DCR.
+- **L2, 74438357010:** DigiKey cut-tape order `732-11197-1-ND`, 16,892 observed in stock. Hand
+  fitted, and preserves the required 9.6 A saturation current and 13.5 milliohm maximum DCR.
 
-Resolved:
+Two items need attention at order time, both seen in the 2026-08-02 quote and both recorded in
+[ordering.md](ordering.md):
+
+- **U4 is not stocked at LCSC.** The bound ESP32-C6-MINI-1U-N4 (C7558096) shows a shortfall rather
+  than a dip. Substitute ESP32-C6-MINI-1U-H4, C20627095: the filed Espressif datasheet covers both
+  in Table 1-2 with the same 4 MB Quad SPI flash, body and pinout, and gives the H4 a wider minus 40
+  to 105 C grade.
+- **J1 was rejected by the matcher** and left in Unselected Parts with no reason given. A hub without
+  J1 has no power input, and its pads sit under the body, so no iron fixes it afterwards.
+
+Bound selections:
 
 - **U4, now ESP32-C6-MINI-1U-N4.** The C3-MINI-1U-N4X was two pieces short. The C6 is
   newer silicon (2023 against 2021) with 512 KB SRAM against 400 KB, in the identical 13.2 x 12.5 mm
@@ -223,6 +375,20 @@ Resolved:
   about 10.5 pF against the required 10 pF. The previous 10 pF presented about 8 pF, about 41 ppm of
   pull, spending most of the ± 100 ppm budget on load error before the crystal's own tolerance.
   Basic, so the correction was free.
+
+### Power board
+
+The power board is factory reflowed as part of the light-bar panel. Its reverse-cell stage adds two
+exact Extended parts: CSD25404Q3 is LCSC `C2865523`, and TLV7021DCKR is `C702120`. Both passed the
+dated V1 availability check. Q1 uses TI's DQG land pattern because its continuous source clip does
+not map cleanly to a generic footprint; U4 uses the stock DCK SC70-5 pattern. The Q1-only 0.15 mm
+pad-gap rule matches TI's recommended land geometry without changing the board-wide 0.2 mm rule.
+
+Boost compensation C13 is Fenghua 0402B223K500NT, `C1532`: 22 nF, 50 V, X7R, plus or minus 10
+percent, 0402. JLCPCB listed it as Basic with more than one million assembly units on 2026-07-29.
+The LCSC retail page simultaneously reported no stock, so the JLC assembly inventory is the source
+for this build and the retail result is retained as a catalog-channel contradiction rather than
+silently merged with it.
 
 ## Antenna, a purchased accessory
 
@@ -249,3 +415,63 @@ must state:
 For the NFC reader and ESP32 in particular, a different package, protocol, RF architecture, or
 firmware target is a redesign, not a purchasing substitution. Bring a concrete candidate to this
 register before it is introduced.
+
+### Open candidate: a hand-fittable power-only USB-C for J1
+
+Raised 2026-08-02, **not bound**. J1 is currently USB4105-GF-A, a 16-pin USB 2.0 receptacle at
+0.5 mm pitch, factory-placed and Extended, so it costs one 2.70 EUR feeder change. The hub is a
+power-only sink and six of its sixteen contacts (A6, A7, A8, B6, B7, B8) are already deliberate
+no-connects, so a smaller power-only part would carry every signal the design uses.
+
+**The contact count is six, not four.** VBUS, GND, **CC1 and CC2**, plus the shield. CC1 and CC2
+cannot be merged into one contact, for three independent reasons:
+
+1. Each carries its own mandatory 5.1 kohm Rd to ground. Tying them together puts two 5.1 k in
+   parallel, 2.55 k, outside the sink termination the Type-C specification requires, and a
+   compliant source may refuse to deliver anything or misread the sink as an accessory.
+2. The connector is reversible, so exactly one CC is connected through the cable at a time. The
+   design has to terminate whichever one that is.
+3. Each is separately low-passed through 10 k and 100 nF into its own ESP32 ADC input (pins 12 and
+   13) to read the source's current advertisement. That is the whole basis of the 5 V input current
+   limit, and it needs two independent readings.
+
+**A part with no CC contacts breaks the product completely**, not subtly: with no Rd, a compliant
+source delivers no VBUS at all.
+
+That is the risk, and it is live. Many parts sold as "Type-C 6P" are VBUS and GND only. LCSC
+C7507406 (SHOU HAN TYPE-C 6PIN, 39,550 in stock, about USD 0.05 at 10+) is a plausible candidate,
+and **its catalog page does not publish a pinout**, which is precisely the case
+[the datasheet rule](../../CLAUDE.md) exists for. Fetch and file the datasheet in `Datasheets/`
+before this is bound, and confirm CC1 and CC2 appear as separate contacts.
+
+**What it is worth.** The feeder fee is the small half. The larger argument is repairability: a
+USB-C receptacle is the most mechanically abused part in the product, and the 6-pin power-only
+variants typically carry through-hole shield legs that are mechanically stronger than the current
+top-mount SMD part while being reachable with an iron. That turns a damaged connector into an iron
+job rather than a hot-air job on a populated hub.
+
+**What it costs.** A different footprint means regenerating and rerouting a board that is currently
+DRC-clean, and rerunning the eighteen focused connectivity and Type-C tests, including both CC
+orientations and the advertisement thresholds. **Bundle this with a hub relayout rather than doing
+it on its own**; 2.70 EUR does not justify a reroute by itself.
+
+## Generated order files
+
+`make pcb-fab` writes six files per board. The names say what to do with each, because uploading
+the wrong one is a silent and expensive mistake.
+
+| File | Use |
+| --- | --- |
+| `<board>_bom_all_parts.csv` | Reference. Every part with MPN, supplier, order code, footprint, cost and its assembly classification. The other files are views of this one. |
+| `<board>_jlcpcb_upload_bom.csv` and `_cpl.csv` | **Upload these.** The build plan actually chosen for this board. Absent on a hand-populated board, where the plan is bare Gerbers and there is nothing to place. |
+| `<board>_jlcpcb_max_assembly_bom.csv` and `_cpl.csv` | The alternative: everything JLCPCB could place, excluding only parts with no LCSC code. It ignores the board's chosen assembly route on purpose, because its whole job is to price the road not taken. Kept because the economics that made the other choice can change. |
+| `<board>_self_solder_bom.csv` | What you buy and fit yourself. |
+
+BOM and CPL always come as a pair: the BOM says which part goes on each designator, the CPL says
+where it sits and at what rotation. `validate_assembly_designators` fails the export if the two
+disagree, which is the classic assembly failure.
+
+The two JLCPCB pairs differ only where a board is hand-populated. For the hub and the power board
+they differ only by the Extended low-quantity rows that were planned for hand fitting. For the light bar, which is below JLCPCB's assembly size, and the
+matrix, where the large-size assembly charge exceeded the rest of its PCBA, the upload pair is bare
+copper and the max-assembly pair shows what the alternative would cost.

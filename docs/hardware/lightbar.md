@@ -26,13 +26,13 @@ channel or by adhesive, as LED strips of this shape normally are.
 ### Why this LED, and why 14 of them
 
 JLCPCB cannot assemble a 120 x 8.5 mm outline, so this board is populated by hand with an iron and
-no hot air or stencil. That rules out the WS2812C-2020 the design previously used, whose four pads
-sit underneath its body. The Harvatek part's legs extend outside the body, so every joint is reachable.
+no hot air or stencil. That rules out the WS2812C-2020 class of pixel, whose four pads sit
+underneath its body. The Harvatek part's legs extend outside the body, so every joint is reachable.
 
-The cost is width. Its 3.5 by 2.8 mm body and four external pads need more pitch than the WS2812C-2020's
-2.0 mm body, and the 4-pin JST GH is 9.46 mm wide and 6.40 mm deep, too deep to tuck under the LED
-row in an 8.5 mm tall board. That leaves room for 14 pixels, not 17, which is why
-[functional/interface.md](../functional/interface.md) changed. The selected 5 mA part keeps the
+The cost is width. Its 3.5 by 2.8 mm body and four external pads need more pitch than a 2.0 mm
+WS2812C-2020 body, and the 4-pin JST GH is 9.46 mm wide and 6.40 mm deep, too deep to tuck under the
+LED row in an 8.5 mm tall board. That leaves room for 14 pixels rather than 17, which is the count
+[functional/interface.md](../functional/interface.md) fixes. The selected 5 mA part keeps the
 hub's 5 V rail and TPS2553 limiter inside their existing budget without a firmware brightness cap.
 The exact manufacturer datasheet, pinout, land pattern and DigiKey cut-tape ordering code are filed
 in the V1 component audit, replacing the unresolved SK6805 catalog selection.
@@ -64,6 +64,6 @@ width, one square of copper at a time.
 
 ## Cost
 
-Generated engineering BOM (`hardware/pcb/generated/lightbar/lightbar_engineering_bom.csv`) totals
+Generated engineering BOM (`hardware/pcb/generated/lightbar/lightbar_bom_all_parts.csv`) totals
 6.33 EUR in parts per bar. This exceeds the original 5 EUR target because an exact, stocked,
 hand-solderable LED was chosen instead of retaining an unresolved catalog part.

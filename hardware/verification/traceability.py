@@ -19,7 +19,12 @@ def load_traceability_document() -> dict[str, Any]:
 
 
 def source_digest(relative_path: str) -> str:
-    return hashlib.sha256((ROOT / relative_path).read_bytes()).hexdigest()
+    # Line endings are normalised before hashing so the recorded digest identifies
+    # the reviewed text rather than the checkout that produced it. A Windows
+    # checkout stores CRLF in the working tree and would otherwise fail the
+    # freshness check on files nobody has edited.
+    content = (ROOT / relative_path).read_bytes().replace(b"\r\n", b"\n")
+    return hashlib.sha256(content).hexdigest()
 
 
 def require_mapping(value: Any, context: str) -> dict[str, Any]:

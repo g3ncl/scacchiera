@@ -5,9 +5,9 @@ version: 1
 sources:
   docs/functional/overview.md: 7695e7509df6c79868e2286a0b42da37fd1823937f0b8e139d75ce85523bdb62
   docs/functional/gameplay.md: 461a3ce900ad7e2bfe67bc4f424bfa5b899486ad70e7820304bceae711a65097
-  docs/functional/interface.md: 9d5aa00b924f575a50c5e1f5020e19c7470c0e618da78e05f585d669c9d59b71
-  docs/functional/physical.md: 5f7888874f7e5a848dffe02f8d00c3a26ac5ebeb4aeb0ae89a0bc7ecee5779b3
-  docs/functional/power.md: 8dafdec29c9eeb707c39178b281cbc570d31f18c946cd494df8381e27f20bc74
+  docs/functional/interface.md: 1206b0887b84b042d222ed0969603419770cdbdd1ef3db988126ec16618604ef
+  docs/functional/physical.md: 91acb43af14c6a1dd90bf8fb63b43f36800cea3f17da3dee38259849ab09f4b3
+  docs/functional/power.md: 15a40f177a8d88a1ce695016e9dfad6e1ab36f219f879ed70e1e580129727162
 
 requirements:
   - id: PRINCIPLE-001
@@ -210,8 +210,8 @@ requirements:
   - id: IF-DISPLAY-001
     source: {path: docs/functional/interface.md, locator: Displays}
     statement: Two 100 by 33 mm ER-OLEDM3.12-1W displays fit one per player rail.
-    criterion_ids: [IF-DISPLAY-COUNT, IF-DISPLAY-WIDTH, IF-DISPLAY-HEIGHT]
-    test_ids: [TEST-IF-DISPLAY-001]
+    criterion_ids: [IF-DISPLAY-COUNT, IF-DISPLAY-WIDTH, IF-DISPLAY-HEIGHT, HUB-DISPLAY-SPI-EDGE-TIME, HUB-DISPLAY-SPI-WRITE-TIMING, HUB-DISPLAY-SPI-CONTROL-TIMING]
+    test_ids: [TEST-IF-DISPLAY-001, TEST-HUB-DISPLAY-SPI-001]
   - id: IF-DISPLAY-002
     source: {path: docs/functional/interface.md, locator: Displays}
     statement: Displays show clocks, setup, countdowns, faults, and battery state.
@@ -227,8 +227,8 @@ requirements:
   - id: IF-LIGHTBAR-001
     source: {path: docs/functional/interface.md, locator: Light bars}
     statement: Two 120 by 8.5 mm light-bar PCBs fit one per player rail behind replaceable diffusers.
-    criterion_ids: [IF-LIGHTBAR-ASSEMBLY-COUNT, IF-LIGHTBAR-WIDTH, IF-LIGHTBAR-HEIGHT]
-    test_ids: [TEST-IF-LIGHTBAR-001]
+    criterion_ids: [IF-LIGHTBAR-ASSEMBLY-COUNT, IF-LIGHTBAR-WIDTH, IF-LIGHTBAR-HEIGHT, HUB-LED-RAIL-STARTUP-CURRENT-LIMIT, HUB-LED-RAIL-LATCH-LATENCY]
+    test_ids: [TEST-IF-LIGHTBAR-001, TEST-HUB-LED-RAIL-002, TEST-HUB-OPEN-CABLE-001]
   - id: IF-LIGHTBAR-002
     source: {path: docs/functional/interface.md, locator: Light bars}
     statement: Each light bar has exactly 14 low-current LEDs with every component on the front side.
@@ -266,6 +266,11 @@ requirements:
     source: {path: docs/functional/power.md, locator: Cordless runtime}
     statement: The owner interface reports estimated remaining play time as well as battery level.
     test_ids: [TEST-POWER-RUNTIME-002]
+  - id: POWER-OUTPUT-001
+    source: {path: docs/functional/power.md, locator: Peak output}
+    statement: The battery subsystem supplies a regulated 5 V at 2 A across the qualified cell-voltage range without USB input power.
+    criterion_ids: [POWER-MODULE-OUTPUT-POWER, POWER-BOOST-OUTPUT-VOLTAGE, POWER-BOOST-RIPPLE, POWER-BOOST-OUTPUT-ESR, POWER-BOOST-PHASE-MARGIN, POWER-BOOST-GAIN-MARGIN, POWER-BOOST-INDUCTOR-PEAK, POWER-BOOST-INDUCTOR-RMS, POWER-CELL-PASS-FET-LOSS, THERMAL-JUNCTION-AMBIENT, THERMAL-INDUCTOR-AMBIENT]
+    test_ids: [TEST-POWER-OUTPUT-001, TEST-V8-POWER-OUTPUT-001, TEST-THERMAL-JUNCTION-001, TEST-THERMAL-INDUCTOR-001]
   - id: POWER-CHARGE-001
     source: {path: docs/functional/power.md, locator: USB-C charging}
     statement: A compliant 5 V 2 A USB source charges an idle board from 10 to 80 percent in no more than 240 minutes at 20 to 25 degrees Celsius, without requiring USB Power Delivery.
@@ -279,12 +284,18 @@ requirements:
   - id: POWER-CHARGE-003
     source: {path: docs/functional/power.md, locator: USB-C charging}
     statement: The board remains usable on USB while power-path management prioritizes the system and safely reduces charge current when needed.
-    criterion_ids: [HUB-3V3-RIPPLE, HUB-3V3-INDUCTOR-PEAK, HUB-3V3-INDUCTOR-RMS, HUB-CHARGE-SWITCH-DROP, HUB-CHARGE-SWITCH-LIMIT-FLOOR, HUB-3V3-DROPOUT-INPUT, HUB-3V3-STARTUP-INRUSH, HUB-MODULE-LOAD-BUDGET]
-    test_ids: [TEST-POWER-CHARGE-003, TEST-HUB-3V3-001, TEST-HUB-3V3-002, TEST-HUB-CHARGE-PATH-001, TEST-HUB-LOAD-BUDGET-001, TEST-V8-POWER-PATH-001]
+    criterion_ids: [HUB-3V3-RIPPLE, HUB-3V3-INDUCTOR-PEAK, HUB-3V3-INDUCTOR-RMS, HUB-CHARGE-SWITCH-DROP, HUB-CHARGE-SWITCH-LIMIT-FLOOR, HUB-3V3-DROPOUT-INPUT, HUB-3V3-STARTUP-INRUSH, HUB-MODULE-LOAD-BUDGET, HUB-3V3-POR-DISCHARGE, HUB-3V3-BLEED-FRACTION, THERMAL-JUNCTION-AMBIENT, THERMAL-INDUCTOR-AMBIENT, HUB-SEQUENCING-PIN-INJECTION]
+    test_ids: [TEST-POWER-CHARGE-003, TEST-HUB-3V3-001, TEST-HUB-3V3-002, TEST-HUB-3V3-003, TEST-HUB-WARM-RESET-001, TEST-THERMAL-JUNCTION-001, TEST-THERMAL-INDUCTOR-001, TEST-HUB-SEQUENCING-001, TEST-HUB-CHARGE-PATH-001, TEST-HUB-LOAD-BUDGET-001, TEST-V8-POWER-PATH-001]
   - id: POWER-CHARGE-004
     source: {path: docs/functional/power.md, locator: USB-C charging}
     statement: The board never loads a USB source beyond its advertised capability and safely falls back to slower charging.
+    criterion_ids: [HUB-TYPEC-CURRENT-ADVERTISEMENT]
     test_ids: [TEST-POWER-CHARGE-004, TEST-V8-USB-FALLBACK-001]
+  - id: POWER-CHARGE-005
+    source: {path: docs/functional/power.md, locator: USB-C charging}
+    statement: USB-C Power Delivery chargers operate through their 5 V output without PD negotiation, and the board never requests or accepts a higher PD voltage.
+    criterion_ids: [HUB-TYPEC-CURRENT-ADVERTISEMENT]
+    test_ids: [TEST-HUB-USB-C-SINK-001, TEST-V8-USB-PD-5V-001]
   - id: POWER-SAFETY-001
     source: {path: docs/functional/power.md, locator: Battery safety}
     statement: The battery assembly independently protects against overcharge, over-discharge, overcurrent, and short circuit.
@@ -298,6 +309,11 @@ requirements:
     source: {path: docs/functional/power.md, locator: Battery safety}
     statement: Temperature-limited and source-limited charging are reported to the user.
     test_ids: [TEST-POWER-SAFETY-003]
+  - id: POWER-SAFETY-004
+    source: {path: docs/functional/power.md, locator: Battery safety}
+    statement: The keyed cell input electrically isolates reversed polarity with USB absent or already present.
+    criterion_ids: [POWER-CELL-REVERSE-ISOLATION]
+    test_ids: [TEST-POWER-REVERSE-001, TEST-V8-BATTERY-PROTECTION-001]
 
   - id: PHY-GEO-001
     source: {path: docs/functional/physical.md, locator: Fixed geometry}
@@ -350,8 +366,8 @@ requirements:
   - id: PHY-RF-001
     source: {path: docs/functional/physical.md, locator: Read budget}
     statement: Worst-case distance from a resting piece tag to the sensing plane is no more than 3.0 mm.
-    criterion_ids: [PHY-TAG-DISTANCE, MATRIX-CELL-RESONANCE, MATRIX-BUS-RESONANCE, MATRIX-BIAS-CURRENT, MATRIX-OFF-BIAS-CURRENT, HUB-SYSTEM-RESONANCE, HUB-COIL-CURRENT-PER-VOLT, MATRIX-BIAS-CHOKE-RATING, MATRIX-SERIAL-TRANSITION-RATE]
-    test_ids: [TEST-PHY-RF-001, TEST-V8-RF-001, TEST-MATRIX-RF-001, TEST-MATRIX-RF-002, TEST-MATRIX-BIAS-001, TEST-MATRIX-BIAS-002, TEST-HUB-RF-001, TEST-HUB-RF-002, TEST-MATRIX-BIAS-003, TEST-MATRIX-SERIAL-001]
+    criterion_ids: [PHY-TAG-DISTANCE, MATRIX-CELL-RESONANCE, MATRIX-BUS-RESONANCE, MATRIX-BIAS-CURRENT, MATRIX-OFF-BIAS-CURRENT, HUB-SYSTEM-RESONANCE, HUB-COIL-CURRENT-PER-VOLT, MATRIX-BIAS-CHOKE-RATING, MATRIX-SERIAL-TRANSITION-RATE, MATRIX-ANTENNA-INDUCTANCE, MATRIX-ANTENNA-UNIFORMITY, MATRIX-ROW-COLUMN-COUPLING, MATRIX-ADJACENT-LINE-COUPLING, QUAD-PLANE-SEPARATION, QUAD-ROW-COLUMN-COUPLING, QUAD-ADJACENT-LINE-COUPLING, QUAD-BUS-RESONANCE, QUAD-LINE-RESONANCE-SPREAD, QUAD-PANEL-AREA-RATIO]
+    test_ids: [TEST-PHY-RF-001, TEST-V8-RF-001, TEST-MATRIX-RF-001, TEST-MATRIX-RF-002, TEST-MATRIX-BIAS-001, TEST-MATRIX-BIAS-002, TEST-HUB-RF-001, TEST-HUB-RF-002, TEST-MATRIX-BIAS-003, TEST-MATRIX-SERIAL-001, TEST-MATRIX-RF-004, TEST-MATRIX-RF-005, TEST-MATRIX-RF-006, TEST-MATRIX-RF-007, TEST-QUAD-RF-001, TEST-QUAD-RF-002, TEST-QUAD-RF-003, TEST-QUAD-RF-004, TEST-QUAD-RF-005, TEST-QUAD-COST-001]
   - id: PHY-RF-002
     source: {path: docs/functional/physical.md, locator: Read budget}
     statement: Conductive objects remain at least 10 mm behind the sensing plane until measured RF evidence permits less.
@@ -370,6 +386,11 @@ requirements:
     source: {path: docs/functional/physical.md, locator: Pieces}
     statement: Tag provisioning identifies piece color and type independently of sensing architecture.
     test_ids: [TEST-SENSE-TAG-001, TEST-GAME-PROVISION-002]
+  - id: PHY-PIECE-004
+    source: {path: docs/functional/physical.md, locator: Pieces}
+    statement: Every piece base, pawns included, is at least 24 mm across so the tag recess fits inside it.
+    criterion_ids: [PHY-PIECE-BASE-DIAMETER]
+    test_ids: [TEST-MECH-PIECE-001]
 
 component_absolute_maximums:
   source: Generated fitted BOMs and V1 component evidence records

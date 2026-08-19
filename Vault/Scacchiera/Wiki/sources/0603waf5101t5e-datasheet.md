@@ -3,7 +3,7 @@ type: source-summary
 tags:
   - wiki/source
   - wiki/component
-date_updated: 2026-07-26
+date_updated: 2026-07-29
 source_file: "Datasheets/0603WAF5101T5E_C23186.pdf"
 source_title: "0603WAF5101T5E manufacturer datasheet"
 publisher: "UNI-ROYAL"
@@ -12,7 +12,7 @@ publisher: "UNI-ROYAL"
 # 0603WAF5101T5E datasheet
 
 This source binds [0603WAF5101T5E](../entities/0603waf5101t5e.md) to supplier order
-code `C23186`. It is used by hub R1 (5.1k), hub R2 (5.1k).
+code `C23186`. It is used by hub R1 (5.1k), hub R2 (5.1k), power R7 (51k 1%), power R11 (5.1k 1%).
 
 [mpn::0603WAF5101T5E] [order_code::C23186]
 [manufacturer::UNI-ROYAL] [footprint::Resistor_SMD:R_0603_1608Metric]

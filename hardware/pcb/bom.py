@@ -39,6 +39,7 @@ REFLOW_ONLY_FOOTPRINT_MARKERS = (
     "USB_C_Receptacle",
     "ESP32-C6-MINI-1U",
     "Crystal_SMD_3225",
+    "CSD25404Q3_DQG",
 )
 
 # Boards populated entirely by hand, so JLCPCB fabricates bare copper only.
@@ -47,6 +48,11 @@ REFLOW_ONLY_FOOTPRINT_MARKERS = (
 HAND_POPULATED_BOARDS = {
     "lightbar": "The lightbar is below JLCPCB's supported assembly size",
     "matrix": "Hand populated to avoid JLCPCB's large-size assembly charge",
+    # The quad board's 300 by 140 mm outline pays no size charge at all, so
+    # bare copper at 20.92 EUR the set is the cheapest way to a working board
+    # and every package on it is iron-reachable. Buying the labour back is a
+    # live option rather than a blocked one; see jlcpcb-sourcing.md.
+    "quad": "Hand populated; the outline pays no size charge, so bare copper is cheapest",
 }
 
 

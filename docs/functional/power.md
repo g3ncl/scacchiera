@@ -13,12 +13,21 @@ uses the light bars for normal event feedback rather than continuous decorative 
 Maximum-brightness continuous white lighting is a stress condition, not the representative runtime
 profile. The owner interface reports the estimated remaining play time as well as battery level.
 
+## Peak output
+
+The battery subsystem supplies a regulated 5 V at 2 A. This 10 W rating is a stress capability for
+coincident display, radio, reader, and lighting activity, not the representative runtime profile.
+The output remains within regulation across the qualified cell-voltage range without depending on
+USB input power.
+
 ## USB-C charging
 
 With the board idle and connected through a compliant 5 V, 2 A USB source and cable, charging from
 10 percent to 80 percent takes no more than 240 minutes and charging from 10 percent to the normal
 full-charge termination takes no more than 360 minutes at 20 to 25 degrees Celsius. USB Power
-Delivery is not required.
+Delivery negotiation is not required. USB-C Power Delivery chargers, including laptop chargers,
+are supported through their mandatory 5 V output. The board neither requests nor accepts 9 V,
+12 V, 15 V, 20 V, or PPS output.
 
 Recharging is an overnight or between-sessions activity, not a fast top-up. The product trades
 charge speed for the cost of the power subsystem, so a one-amp charger is sufficient and the
@@ -35,3 +44,12 @@ The fitted battery assembly has independent overcharge, over-discharge, overcurr
 circuit protection. Charging is permitted only while the cell temperature is within the qualified
 charge range measured by a thermistor attached to the cell. The board reports temperature-limited
 or source-limited charging instead of presenting it as a fault-free fast-charge cycle.
+
+The cell connector is keyed, and the power electronics isolate a cell inserted with reversed
+polarity. Reversed insertion remains safe when USB is absent and when USB is already powering the
+charger side of the circuit.
+
+A single cylindrical cell may lie lengthwise along the player rail. Its length consumes rail length;
+its diameter, holder, insulation, and wiring must fit the rail cross-section. The complete protected
+assembly and every series contact are rated for the worst-case current at the minimum permitted cell
+voltage, not merely for the average current at nominal voltage.

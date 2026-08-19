@@ -3,7 +3,7 @@ type: source-summary
 tags:
   - wiki/source
   - wiki/component
-date_updated: 2026-07-26
+date_updated: 2026-07-29
 source_file: "Datasheets/SM07B-GHS-TB-LF-SN_C495552.pdf"
 source_title: "SM07B-GHS-TB(LF)(SN) manufacturer datasheet"
 publisher: "JST"
@@ -12,7 +12,7 @@ publisher: "JST"
 # SM07B-GHS-TB(LF)(SN) datasheet
 
 This source binds [SM07B-GHS-TB(LF)(SN)](../entities/sm07b-ghs-tb-lf-sn.md) to supplier order
-code `C495552`. It is used by matrix J1 (SM07B-GHS-TB), hub J2 (SM07B-GHS-TB(LF)(SN)), hub J3 (SM07B-GHS-TB(LF)(SN)), hub J4 (SM07B-GHS-TB(LF)(SN)), hub J5 (SM07B-GHS-TB(LF)(SN)), hub J6 (SM07B-GHS-TB(LF)(SN)).
+code `C495552`. It is used by matrix J1 (SM07B-GHS-TB), hub J2 (SM07B-GHS-TB(LF)(SN)), hub J4 (SM07B-GHS-TB(LF)(SN)), hub J5 (SM07B-GHS-TB(LF)(SN)), hub J6 (SM07B-GHS-TB(LF)(SN)), power J1 (SM07B-GHS-TB(LF)(SN)).
 
 [mpn::SM07B-GHS-TB(LF)(SN)] [order_code::C495552]
 [manufacturer::JST] [footprint::Connector_JST:JST_GH_SM07B-GHS-TB_1x07-1MP_P1.25mm_Horizontal]

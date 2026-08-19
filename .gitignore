@@ -9,6 +9,10 @@ hardware/pcb/generated/
 hardware/cad/generated/
 hardware/sim/generated/
 hardware/release/
+software/firmware/build/
+software/firmware/target/build/
+software/firmware/target/sdkconfig
+software/firmware/target/sdkconfig.old
 
 *.rpt
 *.erc
