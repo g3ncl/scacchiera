@@ -16,7 +16,7 @@ export PYTHONHASHSEED
 export KICAD9_SYMBOL_DIR
 export KICAD_FOOTPRINT_DIR
 
-.PHONY: check release-check footprints schematic-lightbar schematic-matrix schematic-hub \
+.PHONY: check release-check pcb-quad-review footprints schematic-lightbar schematic-matrix schematic-hub \
 	schematic-quad pcb-quad pcb-quad-reroute pcb-quad-drc pcb-quad-fab \
 	pcb-lightbar pcb-lightbar-drc pcb-lightbar-fab \
 	pcb-matrix pcb-matrix-route pcb-matrix-reroute pcb-matrix-drc pcb-matrix-fab \
@@ -93,6 +93,11 @@ pcb-quad-drc: pcb-quad
 
 pcb-quad-fab: schematic-quad
 	$(PYTHON) -m hardware.pcb.fab quad
+
+# V7's rendered review package: every fabrication layer as its own image plus
+# both 3D sides, generated from the routed board rather than the source.
+pcb-quad-review: pcb-quad
+	KICAD_CLI=$(KICAD_CLI) $(PYTHON) -m hardware.pcb.review quad
 
 footprints:
 	$(PYTHON) -m hardware.pcb.footprints
