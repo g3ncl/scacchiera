@@ -51,7 +51,7 @@ tunable, measurable, second-order effect, rather than a term inside sixteen reso
 | | monolith | split | source |
 | --- | ---: | ---: | --- |
 | Loop self inductance | 566.5 nH | unchanged | `hardware/sim/quad_stack.py`, pinned equal within 0.2 percent |
-| Adjacent-line coupling | 0.1398 | 0.1401 | same, but see the conflict below |
+| Adjacent-line coupling | 0.1401 | 0.1401 | same, re-extracted 2026-08-19, both 0.14007 |
 | Worst row-to-column coupling | 0.0664 | **0.0652** | same |
 | Plane separation | 0.965 mm | 1.035 mm | `hardware/pcb/quad_geometry.py` |
 | Bus resonance, all sixteen lines | 12.895 MHz | 12.767 to 12.865 MHz | `hardware/sim/quad_rf.py` |
@@ -61,13 +61,11 @@ tunable, measurable, second-order effect, rather than a term inside sixteen reso
 | Placed references per set | 165 | 176 | generated BOM |
 | Substrate area | 90,000 mm2 | **168,000 mm2** | `test_quad.py` |
 
-**One figure in that table is in conflict with itself and only a re-extraction settles it.**
-`MATRIX-ADJACENT-LINE-COUPLING` records the monolith at 0.1398 and `QUAD-ADJACENT-LINE-COUPLING`
-records the split at 0.1401 while describing the two as identical, but
-`test_quad_stack.py::test_adjacent_lines_are_no_worse_than_the_monolith` pins them equal within
-1e-4, which that pair violates. The passing test is what establishes that the in-plane geometry is
-untouched; at least one of the two transcribed figures is stale. Re-run both extractions and correct
-the losing margin text in [criteria.yaml](criteria.yaml).
+**The adjacent-coupling conflict is resolved.** Both extractions were re-run on 2026-08-19 and
+both return k = 0.14007: the split's recorded 0.1401 was correct and the monolith's 0.1398 was a
+stale transcription, now corrected in [criteria.yaml](criteria.yaml). The pinning test
+`test_quad_stack.py::test_adjacent_lines_are_no_worse_than_the_monolith` was right all along: the
+in-plane geometry is untouched.
 
 The RF numbers are unchanged or better, and the fabrication cost favours the split. The substrate
 penalty is real and structural: the monolith carries two antenna planes on one substrate's two

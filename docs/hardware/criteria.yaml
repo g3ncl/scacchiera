@@ -341,7 +341,7 @@ criteria:
     limits: {maximum: 0.20}
     evidence: {class: Simulated, source: hardware/sim/antenna_coupling.py, locator: Off-diagonal terms at a lane spacing of one}
     operating_conditions: All sixteen loops solved together at 13.56 MHz, no tag present.
-    margin: The extraction returns 0.1398 at a converged mesh, identical to four figures across the whole mesh study and uniform across every adjacent pair, falling to 0.017 at two lanes and 0.001 across the board. This is the dominant coupling on the board and the path a tag reading on the wrong line would take, so the bound is a recorded ceiling rather than a demonstration of adequacy. V8 must measure it.
+    margin: The extraction returns 0.1401 at a converged mesh (0.14007 on the 2026-08-19 re-extraction, identical to the split plane's, which resolved the earlier 0.1398 transcription), uniform across every adjacent pair and falling to 0.017 at two lanes and 0.001 across the board. This is the dominant coupling on the board and the path a tag reading on the wrong line would take, so the bound is a recorded ceiling rather than a demonstration of adequacy. V8 must measure it.
     test_ids: [TEST-MATRIX-RF-007, TEST-V8-RF-002]
 
   QUAD-PLANE-SEPARATION:

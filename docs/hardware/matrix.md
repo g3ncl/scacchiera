@@ -96,7 +96,7 @@ calibration available for a number no datasheet gives:
 | Lane pitch | 21.3 mm (inferred from 320/15) | 35 mm |
 | Fill, breadth over pitch | 0.70 | **0.89** |
 | Gap between adjacent loops | 6.3 mm | **4.0 mm** |
-| Adjacent-line coupling | 0.0786 | **0.1398** |
+| Adjacent-line coupling | 0.0786 | **0.1401** |
 | Worst row-to-column coupling | 0.0170 | **0.0664** |
 
 **Our lines couple 1.8 times harder than the design that demonstrably works, and our worst
@@ -108,7 +108,7 @@ The lever is `LOOP_INSET`, and it is already against a wall:
 
 | Inset | Breadth | Adjacent coupling | Margin enclosing a worst-case off-centre tag |
 | --- | --- | --- | --- |
-| **2.0 mm, current** | 31.0 mm | 0.1398 | **+1.0 mm** |
+| **2.0 mm, current** | 31.0 mm | 0.1401 | **+1.0 mm** |
 | 3.0 mm | 29.0 mm | 0.1067 | 0.0 mm |
 | 4.0 mm | 27.0 mm | 0.0842 | -1.0 mm |
 | 5.25 mm | 24.5 mm | 0.0640 | -2.2 mm |

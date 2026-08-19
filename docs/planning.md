@@ -296,7 +296,7 @@ the board. `hardware/tests/test_antenna_coupling.py` checks it against
 | --- | --- | --- |
 | Self inductance | 566.5 nH | converged; 590 nH from Grover in `loop.py`, agreeing to 4 percent |
 | Line-to-line spread | 0.05 percent L, 0.3 percent R | the sixteen lines are interchangeable |
-| Adjacent same-axis coupling | k = 0.1398 | converged; the dominant coupling on the board |
+| Adjacent same-axis coupling | k = 0.1401 | converged; the dominant coupling on the board |
 | Row-to-column coupling | k = 0.0066 to 0.0665 | converged; worst at the four corners |
 | Resistance | at least 563 milliohm | **not converged** |
 | Capacitance, loaded Q | not extracted | needs a different solver |
@@ -320,12 +320,22 @@ This is inductive coupling between antennas. It is not tag coupling, which assum
 record as unobtainable from any datasheet, and it is not radiated emission. The bare sensing-plane
 test article exists to measure both.
 
-**One numeric conflict is open and only a re-extraction settles it.**
-`MATRIX-ADJACENT-LINE-COUPLING` records the monolith at k = 0.1398 and
-`QUAD-ADJACENT-LINE-COUPLING` records the split at k = 0.1401 while calling the two identical, but
-`test_quad_stack.py::test_adjacent_lines_are_no_worse_than_the_monolith` pins them equal within
-1e-4, which that pair violates. The passing test is what says the copper is unchanged; at least one
-of the two transcribed figures is stale. Re-run both extractions and correct the losing margin text.
+**The adjacent-coupling conflict is resolved.** Both extractions re-ran on 2026-08-19 against
+FastHenry R3.0.1 and both return k = 0.14007: the split's 0.1401 was correct, the monolith's
+0.1398 was a stale transcription, and criteria.yaml, quad.md and matrix.md now carry the one
+figure. The pinning test was right all along.
+
+**A new finding, from running the gate on a second machine: the KiCad libraries are unpinned.**
+The design binds symbols and footprints by name against whatever library release the machine
+carries, and KiCad 9.0.9's libraries have drifted from the desktop's: the USB-C receptacle's
+shield is pin `SH` in one release and `SHIELD`/`S1` in the other (resolved by alias in hub.py and
+hub_layout.py), the power board's reviewed route now sits 0.004 to 0.19 mm from U4's grown pads
+(7 clearance violations that do not exist on the bound release), and the hub's imported route
+loses the RF_BUS net binding entirely. Everything except those two route replays passes on both
+releases; the quad, lightbar, matrix and hub boards are DRC-clean on both. Until the libraries
+are vendored into the repo or pinned by exact release, fabrication artifacts must be generated on
+the machine carrying the bound library set, and the workflow's single-sources rule should be read
+as extending to libraries.
 
 **Retracted 2026-08-01: the RF return defect this section previously reported was an artifact of the
 check, not a property of the board.** `rf_segments()` filtered the net to F.Cu and then measured its

@@ -4,7 +4,7 @@ version: 1
 
 sources:
   docs/functional/overview.md: 7695e7509df6c79868e2286a0b42da37fd1823937f0b8e139d75ce85523bdb62
-  docs/functional/gameplay.md: 461a3ce900ad7e2bfe67bc4f424bfa5b899486ad70e7820304bceae711a65097
+  docs/functional/gameplay.md: 21fb1812e78b6fa3591ce06eef15f2ce0b34feabd5d42139010c6b80b7fe7c9f
   docs/functional/interface.md: 1206b0887b84b042d222ed0969603419770cdbdd1ef3db988126ec16618604ef
   docs/functional/physical.md: 91acb43af14c6a1dd90bf8fb63b43f36800cea3f17da3dee38259849ab09f4b3
   docs/functional/power.md: 15a40f177a8d88a1ce695016e9dfad6e1ab36f219f879ed70e1e580129727162
