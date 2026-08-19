@@ -15,7 +15,10 @@
  *
  * Datasheet rev 4.3, section 11.4: SPI is fixed at CPOL 0 CPHA 0, 7 Mbit/s
  * maximum, half duplex only, no chaining, and NSS must stay low for a whole
- * instruction. */
+ * instruction.
+ *
+ * Single-task driver: instruction sequencing around BUSY is unguarded beyond
+ * the SPI bus lock, so every call here must come from the application task. */
 
 /* 1-byte direct commands, datasheet Table 5. Only the ones this driver issues
  * are named; the rest are deliberately absent rather than listed unused. */
@@ -87,24 +90,17 @@ esp_err_t pn5180_send_data(const uint8_t *data, uint8_t length, uint8_t valid_bi
 esp_err_t pn5180_read_data(uint8_t *buffer, uint16_t length);
 esp_err_t pn5180_received_byte_count(uint16_t *count);
 
-/* One single-slot ISO 15693 inventory on whichever antenna the matrix has
- * selected. Returns ESP_OK with the UID when exactly one tag answers,
- * ESP_ERR_NOT_FOUND when none does, and ESP_ERR_INVALID_RESPONSE when the
- * answer is malformed, which is what a collision between two tags looks like
- * at one slot.
- *
- * Sixteen-slot anticollision, and the BitwiseID scheme above it, are a later
- * increment. One slot is enough to prove the RF path end to end and is what a
- * first bring-up needs. */
-esp_err_t pn5180_iso15693_inventory(uint64_t *uid);
-
-/* Sixteen-slot ISO 15693 anticollision on the selected antenna. This is the
- * one a real board needs: a line is shared by eight squares, so a starting
- * position puts eight tags on rank 1 and single-slot inventory only collides.
+/* Sixteen-slot ISO 15693 anticollision on the selected antenna, resolving a
+ * collided slot by re-running the round with the mask extended by that slot's
+ * four bits (ISO/IEC 15693-3). The recursion is what makes a fully occupied
+ * line readable at all: eight tags in sixteen slots collide far more often
+ * than not, and the slot a tag picks is UID-derived, so no retry helps.
  *
  * Fills up to capacity UIDs and reports how many answered. Sets incomplete
- * when a slot stayed collided or more tags answered than fit, which means the
- * line is known to be under-reported rather than empty. */
+ * when a collision survived the mask and round budgets or more tags answered
+ * than fit, which means the line is known to be under-reported rather than
+ * empty. BitwiseID, which reads a whole line in one operation instead of slot
+ * by slot, remains the later throughput increment. */
 esp_err_t pn5180_iso15693_inventory_16(uint64_t *uids, uint8_t capacity,
                                        uint8_t *found, bool *incomplete);
 

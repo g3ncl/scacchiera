@@ -17,11 +17,6 @@ void tearDown(void) {}
  * rewritten when the engine is real; until then they stop a caller from
  * quietly treating "not implemented" as "legal". */
 
-static void test_stub_reports_itself_unimplemented(void)
-{
-    TEST_ASSERT_FALSE(engine_is_implemented());
-}
-
 static void test_init_leaves_no_position(void)
 {
     TEST_ASSERT_FALSE(engine.has_position);
@@ -74,7 +69,6 @@ static void test_every_fault_is_refused(void)
 int main(void)
 {
     UNITY_BEGIN();
-    RUN_TEST(test_stub_reports_itself_unimplemented);
     RUN_TEST(test_init_leaves_no_position);
     RUN_TEST(test_clean_snapshot_is_recorded_but_never_accepted);
     RUN_TEST(test_faulted_snapshot_does_not_become_the_position);

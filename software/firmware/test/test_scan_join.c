@@ -67,6 +67,7 @@ static void test_a_tag_on_two_rows_is_crosstalk_and_not_a_piece(void)
     scan_join(rows, columns, &snapshot);
 
     TEST_ASSERT_EQUAL_INT(BOARD_FAULT_RF_CROSSTALK, snapshot.fault.fault);
+    TEST_ASSERT_EQUAL_UINT8(SQUARE_INVALID, snapshot.fault.square);
     TEST_ASSERT_EQUAL_UINT8(0u, board_snapshot_occupied_count(&snapshot));
 }
 
@@ -78,6 +79,7 @@ static void test_a_tag_on_two_columns_is_crosstalk(void)
     scan_join(rows, columns, &snapshot);
 
     TEST_ASSERT_EQUAL_INT(BOARD_FAULT_RF_CROSSTALK, snapshot.fault.fault);
+    TEST_ASSERT_EQUAL_UINT8(SQUARE_INVALID, snapshot.fault.square);
     TEST_ASSERT_EQUAL_UINT8(0u, board_snapshot_occupied_count(&snapshot));
 }
 
@@ -89,6 +91,7 @@ static void test_a_row_only_tag_is_not_placed(void)
     scan_join(rows, columns, &snapshot);
 
     TEST_ASSERT_EQUAL_INT(BOARD_FAULT_SQUARE_UNSTABLE, snapshot.fault.fault);
+    TEST_ASSERT_EQUAL_UINT8(SQUARE_INVALID, snapshot.fault.square);
     TEST_ASSERT_EQUAL_UINT8(0u, board_snapshot_occupied_count(&snapshot));
 }
 
@@ -98,6 +101,7 @@ static void test_a_column_only_tag_is_not_placed(void)
     scan_join(rows, columns, &snapshot);
 
     TEST_ASSERT_EQUAL_INT(BOARD_FAULT_SQUARE_UNSTABLE, snapshot.fault.fault);
+    TEST_ASSERT_EQUAL_UINT8(SQUARE_INVALID, snapshot.fault.square);
     TEST_ASSERT_EQUAL_UINT8(0u, board_snapshot_occupied_count(&snapshot));
 }
 
@@ -118,8 +122,8 @@ static void test_a_fault_does_not_discard_the_valid_tags(void)
 /* Identity is provisioning's job and provisioning does not exist, so a scanned
  * square carries its UID and no piece type. Pinned so nobody later "fixes"
  * this by inventing a default piece. */
-/* The case single-slot inventory could not do: eight pieces on rank 1, which
- * is every real starting position. */
+/* Eight pieces on rank 1, which is every real starting position and the
+ * fullest a line can legitimately be. */
 static void test_a_full_rank_resolves(void)
 {
     for (uint8_t file = 0; file < 8u; file++) {
@@ -167,6 +171,7 @@ static void test_an_incomplete_line_is_reported(void)
     scan_join(rows, columns, &snapshot);
 
     TEST_ASSERT_EQUAL_INT(BOARD_FAULT_SQUARE_UNSTABLE, snapshot.fault.fault);
+    TEST_ASSERT_EQUAL_UINT8(SQUARE_INVALID, snapshot.fault.square);
     /* The resolvable tag is still placed. */
     TEST_ASSERT_EQUAL_UINT8(1u, board_snapshot_occupied_count(&snapshot));
 }
@@ -179,6 +184,53 @@ static void test_identity_is_left_unknown_rather_than_guessed(void)
 
     const square_t a1 = square_from_file_rank('a', 1);
     TEST_ASSERT_EQUAL_INT(PIECE_TYPE_NONE, snapshot.squares[a1].type);
+}
+
+/* GAME-FAULT-003 requires duplicate UIDs and one tag heard in two places to be
+ * distinguished, not merged. Coupling spreads a tag along one axis, because the
+ * antenna it couples to is parallel to its own; two crossings means two
+ * physical tags carrying one UID. */
+static void test_a_tag_on_two_rows_and_two_columns_is_a_duplicate(void)
+{
+    see(rows, 1, 0xC10Eu);
+    see(rows, 5, 0xC10Eu);
+    see(columns, 2, 0xC10Eu);
+    see(columns, 6, 0xC10Eu);
+    scan_join(rows, columns, &snapshot);
+
+    TEST_ASSERT_EQUAL_INT(BOARD_FAULT_UID_DUPLICATE, snapshot.fault.fault);
+    TEST_ASSERT_EQUAL_UINT8(SQUARE_INVALID, snapshot.fault.square);
+    TEST_ASSERT_EQUAL_UINT8(0u, board_snapshot_occupied_count(&snapshot));
+}
+
+/* Two different tags resolving to one crossing is two pieces within one
+ * square's footprint. The first must not be silently overwritten by the
+ * second: that would convert a sensing anomaly into a confidently wrong
+ * position with a piece missing from it. */
+static void test_two_tags_on_one_square_conflict_rather_than_overwrite(void)
+{
+    see(rows, 3, 0xAAu);
+    see(columns, 4, 0xAAu);
+    see(rows, 3, 0xBBu);
+    see(columns, 4, 0xBBu);
+    scan_join(rows, columns, &snapshot);
+
+    TEST_ASSERT_EQUAL_INT(BOARD_FAULT_SQUARE_CONFLICT, snapshot.fault.fault);
+    const square_t e4 = square_from_file_rank('e', 4);
+    TEST_ASSERT_EQUAL_UINT8(e4, snapshot.fault.square);
+    /* The first tag heard keeps the square; nothing is invented over it. */
+    TEST_ASSERT_EQUAL_HEX64(0xAAu, snapshot.squares[e4].uid);
+}
+
+/* Spread along one axis only is still coupling, and must stay crosstalk. */
+static void test_one_axis_of_spread_is_still_crosstalk(void)
+{
+    see(rows, 1, 0xC0FFu);
+    see(rows, 2, 0xC0FFu);
+    see(columns, 4, 0xC0FFu);
+    scan_join(rows, columns, &snapshot);
+
+    TEST_ASSERT_EQUAL_INT(BOARD_FAULT_RF_CROSSTALK, snapshot.fault.fault);
 }
 
 int main(void)
@@ -196,5 +248,8 @@ int main(void)
     RUN_TEST(test_two_full_ranks_resolve);
     RUN_TEST(test_an_incomplete_line_is_reported);
     RUN_TEST(test_identity_is_left_unknown_rather_than_guessed);
+    RUN_TEST(test_a_tag_on_two_rows_and_two_columns_is_a_duplicate);
+    RUN_TEST(test_two_tags_on_one_square_conflict_rather_than_overwrite);
+    RUN_TEST(test_one_axis_of_spread_is_still_crosstalk);
     return UNITY_END();
 }

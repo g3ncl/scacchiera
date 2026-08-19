@@ -22,7 +22,10 @@
  *
  * The panel is 256 by 64 with four bits per pixel, so two pixels share a byte
  * and a column address covers two pixels: 128 columns, 64 rows, 8192 bytes for
- * a full frame. */
+ * a full frame.
+ *
+ * Single-task driver: the shared D/C line sequencing is unguarded, so every
+ * call here must come from the application task. */
 
 #define DISPLAY_COUNT 2
 #define DISPLAY_WIDTH_PIXELS 256

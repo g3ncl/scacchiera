@@ -9,6 +9,7 @@ static const char *const FAULT_NAMES[BOARD_FAULT_COUNT] = {
     [BOARD_FAULT_RF_CROSSTALK] = "RF_CROSSTALK",
     [BOARD_FAULT_SQUARE_UNSTABLE] = "SQUARE_UNSTABLE",
     [BOARD_FAULT_BOARD_MISMATCH] = "BOARD_MISMATCH",
+    [BOARD_FAULT_SQUARE_CONFLICT] = "SQUARE_CONFLICT",
 };
 
 const char *board_fault_name(board_fault_t fault)

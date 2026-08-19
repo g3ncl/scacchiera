@@ -25,6 +25,9 @@
  * spare conductor. So the outputs are live with undefined content from
  * power-up, and shifting a known pattern is matrix_init's job rather than a
  * convenience. See docs/hardware/quad.md.
+ *
+ * Single-task driver: selection changes are unguarded beyond the SPI bus
+ * lock, so every call here must come from the application task.
  */
 
 #define MATRIX_LINE_COUNT 16

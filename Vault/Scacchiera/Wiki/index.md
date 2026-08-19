@@ -166,7 +166,7 @@ One exact source summary per purchased fitted MPN. The structured audit is
 | [[grm1555c1h680ja01d-datasheet]] | Murata | 2026-07-26 |
 | [[lqw2basr47j00l-datasheet]] | Murata | 2026-07-26 |
 | [[nr6045s4r7mt-datasheet]] | Magnetsyc | 2026-08-01 |
-| [[pn5180a0hn-c3e-datasheet]] | NXP Semiconductors | 2026-07-26 |
+| [[pn5180a0hn-c3e-datasheet]] | NXP Semiconductors | 2026-08-18 |
 | [[rs-03k1800ft-datasheet]] | Fenghua Advanced Technology | 2026-07-26 |
 | [[sdfl2012s100ktf-datasheet]] | Sunlord | 2026-07-26 |
 | [[sm02b-ghs-tb-lf-sn-datasheet]] | JST | 2026-07-26 |

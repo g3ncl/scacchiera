@@ -136,14 +136,22 @@ esp_err_t display_clear(uint8_t display)
         display_set_window(display, 0, DISPLAY_COLUMNS - 1u, 0, DISPLAY_ROWS - 1u),
         TAG, "clear window");
 
-    /* One row at a time. A full frame is 8 KB and there is no reason to hold
-     * that as a DMA buffer when the window auto-increments. */
+    /* One row at a time so no 8 KB frame buffer is needed, but one data-mode
+     * switch for the whole panel: the D/C line is an I2C round trip, and
+     * paying it per row would cost 128 of them. Static because the transfer
+     * may run under DMA, and a static array is already zero. */
     static uint8_t blank[DISPLAY_COLUMNS];
-    memset(blank, 0, sizeof(blank));
-    for (uint8_t row = 0; row < DISPLAY_ROWS; row++) {
-        ESP_RETURN_ON_ERROR(display_write(display, blank, sizeof(blank)), TAG, "clear row");
+
+    ESP_RETURN_ON_ERROR(spi_device_acquire_bus(s_device[display], portMAX_DELAY),
+                        TAG, "acquire");
+    esp_err_t err = set_data_mode(true);
+    for (uint8_t row = 0; err == ESP_OK && row < DISPLAY_ROWS; row++) {
+        err = transmit(display, blank, sizeof(blank));
     }
-    return ESP_OK;
+    /* Back to command mode either way; see display_write. */
+    const esp_err_t restore = set_data_mode(false);
+    spi_device_release_bus(s_device[display]);
+    return (err != ESP_OK) ? err : restore;
 }
 
 esp_err_t display_set_on(uint8_t display, bool on)

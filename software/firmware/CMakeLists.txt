@@ -19,10 +19,6 @@ add_compile_options(
 option(FIRMWARE_ANALYZER "Enable gcc static analysis" ON)
 option(FIRMWARE_SANITIZE "Enable address and undefined-behaviour sanitizers" ON)
 
-if(FIRMWARE_ANALYZER AND CMAKE_C_COMPILER_ID STREQUAL "GNU")
-  add_compile_options(-fanalyzer)
-endif()
-
 # V5 asks for "available sanitizers". gcc accepts the flag whether or not the
 # runtime libraries are installed and only fails at link, so this probes a real
 # link rather than trusting the compiler, and reports loudly when it has to
@@ -35,14 +31,29 @@ if(FIRMWARE_SANITIZE)
   unset(CMAKE_REQUIRED_FLAGS)
   unset(CMAKE_REQUIRED_LINK_OPTIONS)
 
-  if(FIRMWARE_SANITIZERS_LINK)
-    add_compile_options(-fsanitize=address,undefined -fno-omit-frame-pointer)
-    add_link_options(-fsanitize=address,undefined)
-  else()
+  if(NOT FIRMWARE_SANITIZERS_LINK)
     message(WARNING
       "Sanitizer runtimes are missing, so the host gate runs without them. "
       "Install libasan and libubsan to close this part of V5.")
   endif()
+endif()
+
+# The analyzer and the sanitizers are both V5 obligations, and they cannot
+# share a build: gcc's analyzer runs on the instrumented code when both are
+# enabled and reports uninitialized values that exist only in the sanitizer's
+# own temporaries, with no source location to inspect. So each gets a clean
+# configuration: sanitizers whenever they link, the analyzer otherwise, and a
+# second configure with -DFIRMWARE_SANITIZE=OFF is the analyzer pass.
+if(FIRMWARE_SANITIZE AND FIRMWARE_SANITIZERS_LINK)
+  add_compile_options(-fsanitize=address,undefined -fno-omit-frame-pointer)
+  add_link_options(-fsanitize=address,undefined)
+  if(FIRMWARE_ANALYZER)
+    message(STATUS
+      "Sanitizers active; the gcc analyzer is skipped in this configuration. "
+      "Configure with -DFIRMWARE_SANITIZE=OFF to run the analyzer pass.")
+  endif()
+elseif(FIRMWARE_ANALYZER AND CMAKE_C_COMPILER_ID STREQUAL "GNU")
+  add_compile_options(-fanalyzer)
 endif()
 
 add_subdirectory(core)

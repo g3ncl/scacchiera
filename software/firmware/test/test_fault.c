@@ -7,11 +7,11 @@
 void setUp(void) {}
 void tearDown(void) {}
 
-/* docs/functional/gameplay.md lists exactly five faults. If a row is added
+/* docs/functional/gameplay.md lists exactly six faults. If a row is added
  * there and not here, this fails rather than letting the table drift. */
 static void test_every_fault_has_a_distinct_name(void)
 {
-    TEST_ASSERT_EQUAL_INT(6, BOARD_FAULT_COUNT);
+    TEST_ASSERT_EQUAL_INT(7, BOARD_FAULT_COUNT);
     for (int a = 0; a < BOARD_FAULT_COUNT; a++) {
         const char *name = board_fault_name((board_fault_t)a);
         TEST_ASSERT_NOT_NULL(name);
@@ -29,6 +29,7 @@ static void test_spec_names_are_exact(void)
     TEST_ASSERT_EQUAL_STRING("RF_CROSSTALK", board_fault_name(BOARD_FAULT_RF_CROSSTALK));
     TEST_ASSERT_EQUAL_STRING("SQUARE_UNSTABLE", board_fault_name(BOARD_FAULT_SQUARE_UNSTABLE));
     TEST_ASSERT_EQUAL_STRING("BOARD_MISMATCH", board_fault_name(BOARD_FAULT_BOARD_MISMATCH));
+    TEST_ASSERT_EQUAL_STRING("SQUARE_CONFLICT", board_fault_name(BOARD_FAULT_SQUARE_CONFLICT));
 }
 
 static void test_unknown_fault_is_named_not_crashed(void)

@@ -62,17 +62,16 @@ void scan_join(const line_reading_t rows[SCAN_ROWS],
 
     /* An unresolved line makes the whole sweep untrustworthy: a piece missing
      * from it is indistinguishable from a piece that is not there. Reported
-     * before anything else so it is not masked by a later fault. */
+     * before anything else so it is not masked by a later fault. A line is
+     * not a square, so no square is named. */
     for (uint8_t row = 0; row < SCAN_ROWS; row++) {
         if (rows[row].incomplete) {
-            set_fault(snapshot, BOARD_FAULT_SQUARE_UNSTABLE,
-                      square_from_file_rank('a', (uint8_t)(row + 1u)));
+            set_fault(snapshot, BOARD_FAULT_SQUARE_UNSTABLE, SQUARE_INVALID);
         }
     }
     for (uint8_t column = 0; column < SCAN_COLUMNS; column++) {
         if (columns[column].incomplete) {
-            set_fault(snapshot, BOARD_FAULT_SQUARE_UNSTABLE,
-                      square_from_file_rank((char)('a' + column), 1));
+            set_fault(snapshot, BOARD_FAULT_SQUARE_UNSTABLE, SQUARE_INVALID);
         }
     }
 
@@ -88,11 +87,25 @@ void scan_join(const line_reading_t rows[SCAN_ROWS],
             uint8_t first_column = 0;
             const uint8_t column_hits = count_lines(columns, SCAN_COLUMNS, uid, &first_column);
 
+            if (row_hits > 1u && column_hits > 1u) {
+                /* Answering on two rows AND two columns is not one tag heard
+                 * twice: coupling spreads a tag along one axis, because the
+                 * neighbouring antenna it couples to is parallel to its own.
+                 * Two crossings means two physical tags carrying one UID,
+                 * which the fault table calls UID_DUPLICATE and which
+                 * GAME-FAULT-003 requires to be distinguished from crosstalk.
+                 *
+                 * This is an inference from the geometry rather than a proof,
+                 * so identity_resolve checks duplicates definitively as well;
+                 * it also names the squares, which the lines alone cannot. */
+                set_fault(snapshot, BOARD_FAULT_UID_DUPLICATE, SQUARE_INVALID);
+                continue;
+            }
             if (row_hits > 1u || column_hits > 1u) {
-                /* One tag answering on two lines is the coupling case the
-                 * fault table calls RF_CROSSTALK. Its square is not knowable. */
-                set_fault(snapshot, BOARD_FAULT_RF_CROSSTALK,
-                          square_from_file_rank('a', (uint8_t)(row + 1u)));
+                /* One tag answering on two lines of a single axis is the
+                 * coupling case the fault table calls RF_CROSSTALK. Its square
+                 * is not knowable. */
+                set_fault(snapshot, BOARD_FAULT_RF_CROSSTALK, SQUARE_INVALID);
                 continue;
             }
             if (column_hits == 0u) {
@@ -103,6 +116,15 @@ void scan_join(const line_reading_t rows[SCAN_ROWS],
             }
 
             const square_t square = (square_t)((row * SCAN_COLUMNS) + first_column);
+            if (snapshot->squares[square].state == SQUARE_STATE_OCCUPIED) {
+                /* A second tag resolving to an occupied square is two pieces
+                 * within one square's footprint. Overwriting would erase the
+                 * first tag with no trace, turning a sensing anomaly into a
+                 * confidently wrong position; the square is knowable here, so
+                 * it is named. */
+                set_fault(snapshot, BOARD_FAULT_SQUARE_CONFLICT, square);
+                continue;
+            }
             /* Colour and type come from the piece record, which provisioning
              * owns and which does not exist yet. PIECE_TYPE_NONE says the
              * identity is unknown rather than inventing a pawn. */

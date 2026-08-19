@@ -22,8 +22,3 @@ engine_result_t engine_apply_snapshot(engine_state_t *state,
     state->has_position = true;
     return ENGINE_RESULT_NOT_IMPLEMENTED;
 }
-
-bool engine_is_implemented(void)
-{
-    return false;
-}

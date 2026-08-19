@@ -2,6 +2,7 @@
 
 #include "esp_check.h"
 #include "esp_log.h"
+#include "freertos/FreeRTOS.h"
 
 #include "port/board_pins.h"
 #include "port/expander.h"

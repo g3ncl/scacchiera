@@ -24,6 +24,14 @@ static const char *TAG = "pn5180";
  * fault or a dead reader into a prompt error instead of a hang. */
 #define BUSY_TIMEOUT_US 100000
 
+/* How long the BUSY rise is watched for after a frame. Datasheet section
+ * 11.4.1: BUSY goes active during frame reception, so it is normally already
+ * high when polling starts; a fast instruction can also complete inside one
+ * poll interval, so a missed rise is tolerated rather than an error. The
+ * window only has to outlast a part that is slow to start. Chosen rather
+ * than sourced: the datasheet gives no rise-latency figure. */
+#define BUSY_RISE_TIMEOUT_US 1000
+
 /* The datasheet describes a LOW on RESET_N as a power-down but gives no
  * minimum pulse width, so this is chosen rather than sourced: long enough that
  * the internal regulators are unambiguously down, short enough to be free at
@@ -35,12 +43,14 @@ static spi_device_handle_t s_device;
 static pn5180_version_t s_product;
 static pn5180_version_t s_firmware;
 
-static esp_err_t wait_busy(bool level)
+static esp_err_t wait_busy_for(bool level, int64_t timeout_us, bool loud)
 {
-    const int64_t deadline = esp_timer_get_time() + BUSY_TIMEOUT_US;
+    const int64_t deadline = esp_timer_get_time() + timeout_us;
     while (gpio_get_level(PIN_NFC_BUSY) != (level ? 1 : 0)) {
         if (esp_timer_get_time() > deadline) {
-            ESP_LOGE(TAG, "BUSY stuck %s", level ? "low" : "high");
+            if (loud) {
+                ESP_LOGE(TAG, "BUSY stuck %s", level ? "low" : "high");
+            }
             return ESP_ERR_TIMEOUT;
         }
         esp_rom_delay_us(5);
@@ -48,13 +58,22 @@ static esp_err_t wait_busy(bool level)
     return ESP_OK;
 }
 
-/* One instruction: NSS low for the whole frame, then BUSY back to idle.
+static esp_err_t wait_busy(bool level)
+{
+    return wait_busy_for(level, BUSY_TIMEOUT_US, true);
+}
+
+/* One instruction: NSS low for the whole frame, then BUSY observed around the
+ * processing.
  *
- * Step 3 of the datasheet's recommended sequence, waiting for BUSY high before
- * deasserting NSS, is optional while the test bus is disabled, and ESP-IDF
- * owns NSS so it cannot be honoured without bit-banging chip select. Waiting
- * for BUSY to fall afterwards is the part that matters, because it is what
- * makes the next instruction safe to start. */
+ * Datasheet section 11.4.1: BUSY goes active during frame reception and
+ * returns to idle when the part can take a new frame or has data ready, and
+ * the recommended sequence is exchange, wait BUSY high (optional in normal
+ * mode), deassert NSS, wait BUSY low. ESP-IDF owns NSS, so the deassert lands
+ * right after the transfer; the rise is then watched briefly before the fall
+ * is waited on, because a fall never preceded by an observed rise cannot
+ * distinguish "finished" from "not started yet". A missed rise means the
+ * instruction already completed, which the tolerated timeout covers. */
 static esp_err_t send_instruction(const uint8_t *frame, size_t length)
 {
     ESP_RETURN_ON_ERROR(wait_busy(false), TAG, "busy before send");
@@ -63,6 +82,7 @@ static esp_err_t send_instruction(const uint8_t *frame, size_t length)
         .tx_buffer = frame,
     };
     ESP_RETURN_ON_ERROR(spi_device_polling_transmit(s_device, &transaction), TAG, "send");
+    (void)wait_busy_for(true, BUSY_RISE_TIMEOUT_US, false);
     return wait_busy(false);
 }
 
@@ -75,6 +95,7 @@ static esp_err_t read_response(uint8_t *buffer, size_t length)
         .rx_buffer = buffer,
     };
     ESP_RETURN_ON_ERROR(spi_device_polling_transmit(s_device, &transaction), TAG, "read");
+    (void)wait_busy_for(true, BUSY_RISE_TIMEOUT_US, false);
     return wait_busy(false);
 }
 
@@ -230,8 +251,10 @@ esp_err_t pn5180_send_data(const uint8_t *data, uint8_t length, uint8_t valid_bi
     if (data == NULL || length == 0u) {
         return ESP_ERR_INVALID_ARG;
     }
-    /* Command, the valid-bit count for the last byte, then the payload. */
-    uint8_t frame[3 + 8];
+    /* Command, the valid-bit count for the last byte, then the payload.
+     * Sized for the largest frame this driver sends: an anticollision
+     * inventory carrying a full 60-bit mask is 11 payload bytes. */
+    uint8_t frame[2 + 16];
     if ((size_t)length + 2u > sizeof(frame)) {
         return ESP_ERR_INVALID_SIZE;
     }
@@ -265,85 +288,45 @@ esp_err_t pn5180_received_byte_count(uint16_t *count)
     return ESP_OK;
 }
 
-/* ISO/IEC 15693 inventory, single slot.
+/* ISO/IEC 15693 inventory framing.
  *
- * Flags 0x26 is inventory (bit 2) plus high data rate (bit 1) plus one slot
- * (bit 5). One slot means every tag in the field answers in the same window,
- * so two tags collide and the response comes back malformed rather than as
- * two UIDs. That is reported as INVALID_RESPONSE and is exactly the
- * RF_CROSSTALK condition the fault table describes. */
-#define ISO15693_FLAGS_INVENTORY_ONE_SLOT 0x26u
+ * Flags 0x06 is inventory (bit 2) plus high data rate (bit 1) with the
+ * one-slot bit clear, so a round runs all sixteen slots. The only well-formed
+ * answer is flags, DSFID and eight UID bytes; anything else in a slot is a
+ * collision or a corrupted frame, and neither may become a piece. */
+#define ISO15693_FLAGS_INVENTORY_16 0x06u
 #define ISO15693_CMD_INVENTORY 0x01u
 #define ISO15693_INVENTORY_RESPONSE_BYTES 10u
 
-/* One slot at 26 kbit/s is well under a millisecond; this is generous. */
-#define SLOT_TIMEOUT_US 20000
+/* A mask can name at most 60 bits of the 64-bit UID (ISO/IEC 15693-3), which
+ * is what bounds the anticollision splitting. */
+#define ISO15693_MASK_BITS_MAX 60u
 
-esp_err_t pn5180_iso15693_inventory(uint64_t *uid)
-{
-    if (uid == NULL) {
-        return ESP_ERR_INVALID_ARG;
-    }
+/* Rounds one full anticollision pass may spend before the line is declared
+ * under-read. Eight tags splitting only at the last mask level need 1 + 15
+ * rounds; a real line resolves in one or two, so the budget is a backstop
+ * against pathological or coupled populations, not a working figure. */
+#define INVENTORY_MAX_ROUNDS 16u
 
-    /* Clearing every IRQ first: a stale RX flag from the previous line would
-     * be read as this line's answer. */
-    ESP_RETURN_ON_ERROR(pn5180_write_register(PN5180_REG_IRQ_CLEAR, 0xFFFFFFFFu),
-                        TAG, "irq clear");
-
-    /* SEND_DATA requires SYSTEM_CONFIG.COMMAND set to TRANSCEIVE beforehand
-     * (datasheet Table 15), left as a read-modify-write so the rest of the
-     * register survives. */
-    uint32_t system_config = 0;
-    ESP_RETURN_ON_ERROR(pn5180_read_register(PN5180_REG_SYSTEM_CONFIG, &system_config),
-                        TAG, "system config");
-    system_config &= ~PN5180_SYSTEM_CONFIG_COMMAND_MASK;
-    system_config |= PN5180_SYSTEM_CONFIG_COMMAND_TRANSCEIVE;
-    ESP_RETURN_ON_ERROR(pn5180_write_register(PN5180_REG_SYSTEM_CONFIG, system_config),
-                        TAG, "transceive");
-
-    const uint8_t inventory[3] = {
-        ISO15693_FLAGS_INVENTORY_ONE_SLOT,
-        ISO15693_CMD_INVENTORY,
-        0x00u, /* mask length zero: no addressing, everyone answers */
-    };
-    ESP_RETURN_ON_ERROR(pn5180_send_data(inventory, sizeof(inventory), 0), TAG, "inventory");
-
-    /* An empty square is the normal case, so a silent field is not an error
-     * path worth logging. The wait covers one slot at 26 kbit/s with margin. */
-    const int64_t deadline = esp_timer_get_time() + 20000;
-    uint32_t irq = 0;
-    do {
-        ESP_RETURN_ON_ERROR(pn5180_read_register(PN5180_REG_IRQ_STATUS, &irq), TAG, "irq");
-        if ((irq & PN5180_IRQ_RX) != 0u) {
-            break;
-        }
-    } while (esp_timer_get_time() < deadline);
-
-    if ((irq & PN5180_IRQ_RX) == 0u) {
-        return ESP_ERR_NOT_FOUND;
-    }
-
-    uint16_t received = 0;
-    ESP_RETURN_ON_ERROR(pn5180_received_byte_count(&received), TAG, "count");
-    if (received != ISO15693_INVENTORY_RESPONSE_BYTES) {
-        /* Flags, DSFID and eight UID bytes is the only well-formed answer.
-         * Anything else is a collision or a corrupted frame, and neither may
-         * become a piece. */
-        return ESP_ERR_INVALID_RESPONSE;
-    }
-
-    uint8_t response[ISO15693_INVENTORY_RESPONSE_BYTES] = {0};
-    ESP_RETURN_ON_ERROR(pn5180_read_data(response, sizeof(response)), TAG, "read data");
-
-    /* response[0] flags, response[1] DSFID, response[2..9] UID least
-     * significant byte first. */
-    uint64_t value = 0;
-    for (int index = 7; index >= 0; index--) {
-        value = (value << 8) | response[2 + index];
-    }
-    *uid = value;
-    return ESP_OK;
-}
+/* How long a slot is given before it counts as empty.
+ *
+ * This is the dominant term in scan time and therefore in scan energy, because
+ * most slots in a real position are empty and each one costs the whole timeout.
+ * A starting position leaves eight of sixteen slots silent on a populated line
+ * and all sixteen on an empty one, so the board pays this timeout far more
+ * often than it pays for an answer.
+ *
+ * The bound is the longest legitimate answer, not a round number. An inventory
+ * response is flags, a 64-bit UID and a CRC, so 88 bits at the 26 kbit/s high
+ * data rate is about 3.4 ms, after a start delay of roughly 0.3 ms. Six
+ * milliseconds covers that with about sixty percent in hand.
+ *
+ * A tighter bound is available and deliberately not taken: the reader can
+ * report that a subcarrier was detected (IRQ_STATUS bit 15, RX_SC_DET), which
+ * decides an empty slot in about a third of a millisecond rather than six.
+ * Wiring that in is a measured-throughput change for the bench, not a guess
+ * to make here. */
+#define SLOT_TIMEOUT_US 6000
 
 static esp_err_t set_transceive(void)
 {
@@ -398,31 +381,43 @@ static esp_err_t next_slot(void)
     return pn5180_send_data(&dummy, 1, 0);
 }
 
-esp_err_t pn5180_iso15693_inventory_16(uint64_t *uids, uint8_t capacity,
-                                       uint8_t *found, bool *incomplete)
+/* One sixteen-slot round with `mask_bits` of `mask` pre-selecting the
+ * responders: only tags whose UID starts with the mask answer, and the slot a
+ * tag picks is its next four UID bits. Collided slots are reported to the
+ * caller, which decides whether to run a deeper round. */
+static esp_err_t inventory_round(uint64_t mask, uint8_t mask_bits, uint64_t *uids,
+                                 uint8_t capacity, uint8_t *found, bool *incomplete,
+                                 uint8_t collided[16], uint8_t *collided_count)
 {
-    if (uids == NULL || found == NULL || incomplete == NULL || capacity == 0u) {
-        return ESP_ERR_INVALID_ARG;
-    }
-    *found = 0;
-    *incomplete = false;
+    *collided_count = 0u;
 
+    /* Clearing every IRQ first: a stale RX flag from the previous line or
+     * round would be read as this round's answer. */
     ESP_RETURN_ON_ERROR(pn5180_write_register(PN5180_REG_IRQ_CLEAR, 0xFFFFFFFFu),
                         TAG, "irq clear");
     ESP_RETURN_ON_ERROR(set_tx_data_enable(true), TAG, "data on");
     ESP_RETURN_ON_ERROR(set_transceive(), TAG, "transceive");
 
-    /* Flags 0x06 is inventory plus high data rate with the one-slot bit clear,
-     * so the round runs all sixteen slots. */
-    const uint8_t inventory[3] = {0x06u, ISO15693_CMD_INVENTORY, 0x00u};
-    ESP_RETURN_ON_ERROR(pn5180_send_data(inventory, sizeof(inventory), 0), TAG, "inventory");
+    /* Flags, command, mask length in bits, then the mask value padded with
+     * zeros to whole bytes (ISO/IEC 15693-3), least significant byte first
+     * like every other 15693 field. */
+    uint8_t frame[3 + 8];
+    frame[0] = ISO15693_FLAGS_INVENTORY_16;
+    frame[1] = ISO15693_CMD_INVENTORY;
+    frame[2] = mask_bits;
+    const uint8_t mask_bytes = (uint8_t)((mask_bits + 7u) / 8u);
+    for (uint8_t index = 0u; index < mask_bytes; index++) {
+        frame[3u + index] = (uint8_t)(mask >> (8u * index));
+    }
+    ESP_RETURN_ON_ERROR(pn5180_send_data(frame, (uint8_t)(3u + mask_bytes), 0),
+                        TAG, "inventory");
 
-    for (uint8_t slot = 0; slot < 16u; slot++) {
+    for (uint8_t slot = 0u; slot < 16u; slot++) {
         if (slot > 0u) {
             ESP_RETURN_ON_ERROR(next_slot(), TAG, "next slot");
         }
 
-        uint16_t received = 0;
+        uint16_t received = 0u;
         const esp_err_t err = await_slot(&received);
         if (err == ESP_ERR_NOT_FOUND) {
             continue; /* empty slot, the common case */
@@ -430,11 +425,10 @@ esp_err_t pn5180_iso15693_inventory_16(uint64_t *uids, uint8_t capacity,
         ESP_RETURN_ON_ERROR(err, TAG, "slot");
 
         if (received != ISO15693_INVENTORY_RESPONSE_BYTES) {
-            /* Two tags picked the same slot. Sixteen slots for at most eight
-             * tags makes this uncommon, and a retry reshuffles nothing because
-             * slot choice is UID-derived, so the line is reported as
-             * under-read rather than silently short. */
-            *incomplete = true;
+            /* Two tags answered in this slot. The caller resolves it with a
+             * longer mask rather than reporting it, because the slot a tag
+             * picks is UID-derived and a plain retry reshuffles nothing. */
+            collided[(*collided_count)++] = slot;
             continue;
         }
 
@@ -447,12 +441,68 @@ esp_err_t pn5180_iso15693_inventory_16(uint64_t *uids, uint8_t capacity,
             *incomplete = true;
             continue;
         }
-        uint64_t value = 0;
+        /* response[0] flags, response[1] DSFID, response[2..9] UID least
+         * significant byte first. */
+        uint64_t uid = 0;
         for (int index = 7; index >= 0; index--) {
-            value = (value << 8) | response[2 + index];
+            uid = (uid << 8) | response[2 + index];
         }
-        uids[*found] = value;
-        (*found)++;
+        uids[(*found)++] = uid;
+    }
+    return ESP_OK;
+}
+
+esp_err_t pn5180_iso15693_inventory_16(uint64_t *uids, uint8_t capacity,
+                                       uint8_t *found, bool *incomplete)
+{
+    if (uids == NULL || found == NULL || incomplete == NULL || capacity == 0u) {
+        return ESP_ERR_INVALID_ARG;
+    }
+    *found = 0;
+    *incomplete = false;
+
+    /* Pending masks form a work list rather than call recursion, so the
+     * deepest pathological split costs table entries instead of task stack.
+     * With eight tags in sixteen slots the first round collides about 88% of
+     * the time on a full line, so this list is the normal path to reading a
+     * starting position, not an edge case. */
+    struct {
+        uint64_t mask;
+        uint8_t bits;
+    } pending[INVENTORY_MAX_ROUNDS];
+    uint8_t pending_count = 1u;
+    pending[0].mask = 0u;
+    pending[0].bits = 0u;
+
+    for (uint8_t round = 0u; round < INVENTORY_MAX_ROUNDS && pending_count > 0u;
+         round++) {
+        pending_count--;
+        const uint64_t mask = pending[pending_count].mask;
+        const uint8_t bits = pending[pending_count].bits;
+
+        uint8_t collided[16];
+        uint8_t collided_count = 0u;
+        ESP_RETURN_ON_ERROR(inventory_round(mask, bits, uids, capacity, found,
+                                            incomplete, collided, &collided_count),
+                            TAG, "round");
+
+        for (uint8_t index = 0u; index < collided_count; index++) {
+            if (bits >= ISO15693_MASK_BITS_MAX ||
+                pending_count >= INVENTORY_MAX_ROUNDS) {
+                /* Mask exhausted (two tags agreeing on 60 UID bits should not
+                 * exist) or more splits than the budget will ever run: the
+                 * line is under-read, not empty. */
+                *incomplete = true;
+                continue;
+            }
+            pending[pending_count].mask = mask | ((uint64_t)collided[index] << bits);
+            pending[pending_count].bits = (uint8_t)(bits + 4u);
+            pending_count++;
+        }
+    }
+    if (pending_count > 0u) {
+        /* The round budget ran out with splits still pending. */
+        *incomplete = true;
     }
 
     /* Leave data transmission enabled, or the next ordinary command would send

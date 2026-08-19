@@ -66,49 +66,94 @@ static void test_output_records_both_sides_separately(void)
     TEST_ASSERT_EQUAL_INT(LIGHT_CUE_ILLEGAL, fake_output_last_cue(PIECE_COLOR_BLACK));
 }
 
+static void a_game_of(game_record_t *record, uint16_t plies)
+{
+    game_record_clear(record);
+    record->ply_count = plies;
+    for (uint16_t index = 0u; index < plies; index++) {
+        record->moves[index] = move_make((square_t)12, (square_t)28, PIECE_TYPE_NONE, 0u);
+    }
+    record->has_time_control = true;
+    record->remaining_ms[0] = 300000u;
+    record->remaining_ms[1] = 297000u;
+    game_record_seal(record);
+}
+
 static void test_storage_round_trip(void)
 {
-    board_snapshot_t saved;
-    board_snapshot_clear(&saved);
-    board_snapshot_place(&saved, 12u, PIECE_COLOR_WHITE, PIECE_TYPE_BISHOP, 3u);
-    TEST_ASSERT_TRUE(hw_storage_save_snapshot(&saved));
+    game_record_t saved;
+    a_game_of(&saved, 3u);
+    TEST_ASSERT_TRUE(hw_storage_save_game(&saved));
 
-    board_snapshot_t loaded;
-    TEST_ASSERT_TRUE(hw_storage_load_snapshot(&loaded));
-    TEST_ASSERT_TRUE(board_snapshot_equal(&loaded, &saved));
+    game_record_t loaded;
+    TEST_ASSERT_TRUE(hw_storage_load_game(&loaded));
+    TEST_ASSERT_EQUAL_UINT16(3u, loaded.ply_count);
+    TEST_ASSERT_EQUAL_UINT32(297000u, loaded.remaining_ms[1]);
 }
 
 static void test_nothing_loads_before_anything_is_saved(void)
 {
-    board_snapshot_t loaded;
-    TEST_ASSERT_FALSE(hw_storage_load_snapshot(&loaded));
+    game_record_t loaded;
+    TEST_ASSERT_FALSE(hw_storage_load_game(&loaded));
 }
 
 /* V5 requires injecting write failure at every transaction boundary. A failed
- * write must not leave a half-written snapshot that later loads as valid. */
+ * write must not leave a half-written game that later loads as valid. */
 static void test_failed_write_leaves_nothing_loadable(void)
 {
-    board_snapshot_t saved;
-    board_snapshot_clear(&saved);
-    board_snapshot_place(&saved, 12u, PIECE_COLOR_WHITE, PIECE_TYPE_BISHOP, 3u);
-    TEST_ASSERT_TRUE(hw_storage_save_snapshot(&saved));
+    game_record_t saved;
+    a_game_of(&saved, 2u);
+    TEST_ASSERT_TRUE(hw_storage_save_game(&saved));
 
     fake_storage_fail_writes(1u);
-    TEST_ASSERT_FALSE(hw_storage_save_snapshot(&saved));
-    TEST_ASSERT_FALSE(fake_storage_has_snapshot());
+    TEST_ASSERT_FALSE(hw_storage_save_game(&saved));
+    TEST_ASSERT_FALSE(fake_storage_has_game());
 
-    board_snapshot_t loaded;
-    TEST_ASSERT_FALSE(hw_storage_load_snapshot(&loaded));
+    game_record_t loaded;
+    TEST_ASSERT_FALSE(hw_storage_load_game(&loaded));
     TEST_ASSERT_EQUAL_UINT(2u, fake_storage_write_count());
 }
 
-static void test_clear_removes_the_snapshot(void)
+/* A record that survived the write but not intact must be refused rather than
+ * half-trusted: a plausible garbage board is worse than no board. */
+static void test_a_corrupt_record_does_not_load(void)
 {
-    board_snapshot_t saved;
-    board_snapshot_clear(&saved);
-    TEST_ASSERT_TRUE(hw_storage_save_snapshot(&saved));
-    TEST_ASSERT_TRUE(hw_storage_clear());
-    TEST_ASSERT_FALSE(fake_storage_has_snapshot());
+    game_record_t saved;
+    a_game_of(&saved, 4u);
+    TEST_ASSERT_TRUE(hw_storage_save_game(&saved));
+
+    fake_storage_corrupt();
+    game_record_t loaded;
+    TEST_ASSERT_FALSE(hw_storage_load_game(&loaded));
+}
+
+static void test_clear_removes_the_game(void)
+{
+    game_record_t saved;
+    a_game_of(&saved, 1u);
+    TEST_ASSERT_TRUE(hw_storage_save_game(&saved));
+    TEST_ASSERT_TRUE(hw_storage_clear_game());
+    TEST_ASSERT_FALSE(fake_storage_has_game());
+}
+
+/* The registry has to outlive a game, or a board forgets what its pieces are
+ * the first time someone starts a new one. */
+static void test_the_registry_survives_the_game_being_cleared(void)
+{
+    piece_registry_t registry;
+    registry_init(&registry);
+    TEST_ASSERT_TRUE(registry_add(&registry, 0x77u, PIECE_COLOR_BLACK, PIECE_TYPE_KING, 0u));
+    registry_seal(&registry);
+    TEST_ASSERT_TRUE(hw_storage_save_registry(&registry));
+
+    game_record_t saved;
+    a_game_of(&saved, 1u);
+    TEST_ASSERT_TRUE(hw_storage_save_game(&saved));
+    TEST_ASSERT_TRUE(hw_storage_clear_game());
+
+    piece_registry_t loaded;
+    TEST_ASSERT_TRUE(hw_storage_load_registry(&loaded));
+    TEST_ASSERT_TRUE(registry_contains(&loaded, 0x77u));
 }
 
 int main(void)
@@ -121,6 +166,8 @@ int main(void)
     RUN_TEST(test_storage_round_trip);
     RUN_TEST(test_nothing_loads_before_anything_is_saved);
     RUN_TEST(test_failed_write_leaves_nothing_loadable);
-    RUN_TEST(test_clear_removes_the_snapshot);
+    RUN_TEST(test_a_corrupt_record_does_not_load);
+    RUN_TEST(test_clear_removes_the_game);
+    RUN_TEST(test_the_registry_survives_the_game_being_cleared);
     return UNITY_END();
 }

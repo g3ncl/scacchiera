@@ -29,6 +29,4 @@ void engine_init(engine_state_t *state);
 engine_result_t engine_apply_snapshot(engine_state_t *state,
                                       const board_snapshot_t *snapshot);
 
-bool engine_is_implemented(void);
-
 #endif

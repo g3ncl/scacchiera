@@ -60,6 +60,17 @@ static void test_port_1_drives_nothing(void)
     TEST_ASSERT_EQUAL_HEX8(0x00u, EXPANDER_OUTPUT_PORT_1_SAFE);
 }
 
+/* HUB-I2C-RISE-TIME measured 796 ns at the specification's 200 pF ceiling,
+ * which fits standard mode and does not fit fast mode. Raising this would need
+ * the bus under about 70 pF, which the cable to the power module does not
+ * leave, so the criterion states that firmware must not raise it. Asserted
+ * here because it is the only place a regression would be caught: the driver
+ * itself needs ESP-IDF and never reaches the host gate. */
+static void test_the_bus_stays_in_standard_mode(void)
+{
+    TEST_ASSERT_LESS_OR_EQUAL_UINT32(100000u, EXPANDER_I2C_SPEED_HZ);
+}
+
 int main(void)
 {
     UNITY_BEGIN();
@@ -69,5 +80,6 @@ int main(void)
     RUN_TEST(test_every_output_starts_low);
     RUN_TEST(test_the_resets_and_the_rail_are_asserted_at_boot);
     RUN_TEST(test_port_1_drives_nothing);
+    RUN_TEST(test_the_bus_stays_in_standard_mode);
     return UNITY_END();
 }

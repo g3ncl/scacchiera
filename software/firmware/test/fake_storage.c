@@ -4,17 +4,19 @@
 
 #include "core/hw/storage.h"
 
-static board_snapshot_t g_stored;
-static bool g_has_snapshot;
-static bool g_corrupt;
+static game_record_t g_game;
+static bool g_has_game;
+static piece_registry_t g_registry;
+static bool g_has_registry;
 static unsigned g_failures_remaining;
 static unsigned g_writes;
 
 void fake_storage_reset(void)
 {
-    board_snapshot_clear(&g_stored);
-    g_has_snapshot = false;
-    g_corrupt = false;
+    memset(&g_game, 0, sizeof(g_game));
+    memset(&g_registry, 0, sizeof(g_registry));
+    g_has_game = false;
+    g_has_registry = false;
     g_failures_remaining = 0u;
     g_writes = 0u;
 }
@@ -26,12 +28,15 @@ void fake_storage_fail_writes(unsigned count)
 
 void fake_storage_corrupt(void)
 {
-    g_corrupt = true;
+    /* Left present but unverifiable, which is what a reset partway through a
+     * write leaves behind. The loader must refuse it rather than trust the
+     * bytes it can see. */
+    g_game.crc32 = ~g_game.crc32;
 }
 
-bool fake_storage_has_snapshot(void)
+bool fake_storage_has_game(void)
 {
-    return g_has_snapshot && !g_corrupt;
+    return g_has_game;
 }
 
 unsigned fake_storage_write_count(void)
@@ -39,34 +44,63 @@ unsigned fake_storage_write_count(void)
     return g_writes;
 }
 
-bool hw_storage_save_snapshot(const board_snapshot_t *snapshot)
+/* One failure budget shared by both stores, because a flash part that cannot
+ * take a write cannot take either kind. */
+static bool write_allowed(void)
 {
     g_writes++;
     if (g_failures_remaining > 0u) {
         g_failures_remaining--;
-        /* A failed write must not leave a half-written snapshot readable. */
-        g_corrupt = true;
         return false;
     }
-    g_stored = *snapshot;
-    g_has_snapshot = true;
-    g_corrupt = false;
     return true;
 }
 
-bool hw_storage_load_snapshot(board_snapshot_t *snapshot)
+bool hw_storage_save_game(const game_record_t *record)
 {
-    if (!g_has_snapshot || g_corrupt) {
+    if (!write_allowed()) {
+        /* A failed write leaves nothing loadable rather than the previous
+         * game, because a half-written record that still verifies is the one
+         * outcome persistence must never produce. */
+        g_has_game = false;
         return false;
     }
-    *snapshot = g_stored;
+    g_game = *record;
+    g_has_game = true;
     return true;
 }
 
-bool hw_storage_clear(void)
+bool hw_storage_load_game(game_record_t *record)
 {
-    board_snapshot_clear(&g_stored);
-    g_has_snapshot = false;
-    g_corrupt = false;
+    if (!g_has_game || !game_record_valid(&g_game)) {
+        return false;
+    }
+    *record = g_game;
+    return true;
+}
+
+bool hw_storage_clear_game(void)
+{
+    g_has_game = false;
+    memset(&g_game, 0, sizeof(g_game));
+    return true;
+}
+
+bool hw_storage_save_registry(const piece_registry_t *registry)
+{
+    if (!write_allowed()) {
+        return false;
+    }
+    g_registry = *registry;
+    g_has_registry = true;
+    return true;
+}
+
+bool hw_storage_load_registry(piece_registry_t *registry)
+{
+    if (!g_has_registry || !registry_valid(&g_registry)) {
+        return false;
+    }
+    *registry = g_registry;
     return true;
 }

@@ -13,7 +13,10 @@
  *
  * expander_init() must run before any peripheral driver that owns a reset
  * line, because until it does the reader and both displays are floating
- * rather than held. */
+ * rather than held.
+ *
+ * Single-task driver: the output shadow is an unguarded read-modify-write, so
+ * every call here must come from the application task. */
 
 esp_err_t expander_init(void);
 

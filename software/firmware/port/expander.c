@@ -3,8 +3,6 @@
 #include "driver/i2c_master.h"
 #include "esp_check.h"
 #include "esp_log.h"
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
 
 #include "port/board_pins.h"
 #include "port/expander_config.h"
@@ -19,7 +17,6 @@ static const char *TAG = "expander";
 #define REG_CONFIG_0 0x06u
 
 #define I2C_TIMEOUT_MS 100
-#define I2C_SPEED_HZ 400000
 
 static i2c_master_bus_handle_t s_bus;
 static i2c_master_dev_handle_t s_device;
@@ -57,7 +54,7 @@ esp_err_t expander_init(void)
     const i2c_device_config_t device_config = {
         .dev_addr_length = I2C_ADDR_BIT_LEN_7,
         .device_address = EXPANDER_I2C_ADDRESS,
-        .scl_speed_hz = I2C_SPEED_HZ,
+        .scl_speed_hz = EXPANDER_I2C_SPEED_HZ,
     };
     ESP_RETURN_ON_ERROR(i2c_master_bus_add_device(s_bus, &device_config, &s_device),
                         TAG, "i2c device");
@@ -121,7 +118,7 @@ esp_err_t expander_get(uint8_t port, uint8_t bit, bool *level)
 
 esp_err_t expander_pulse(uint8_t port, uint8_t bit)
 {
-    /* Two I2C transactions at 400 kHz put roughly 50 us between the edges,
+    /* Two I2C transactions at 100 kHz put roughly 300 us between the edges,
      * far longer than the 74HC595's nanosecond-scale pulse width, so no delay
      * is needed to make the edge legal. */
     ESP_RETURN_ON_ERROR(expander_set(port, bit, false), TAG, "pulse low");

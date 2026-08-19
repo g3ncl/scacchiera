@@ -43,3 +43,13 @@ chessboard_test(test_lightbar_encoding)
 chessboard_test(test_scan_join)
 chessboard_test(test_text)
 chessboard_test(test_stability)
+
+# The chess core.
+chessboard_test(test_move)
+chessboard_test(test_position)
+chessboard_test(test_movegen)
+chessboard_test(test_movederive)
+chessboard_test(test_chessclock)
+chessboard_test(test_result)
+chessboard_test(test_registry)
+chessboard_test(test_identity)

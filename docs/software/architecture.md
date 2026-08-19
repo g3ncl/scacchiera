@@ -90,36 +90,54 @@ that the hardware-facing bullets can close first.
 
 ## Status
 
-**Foundation exists as of 2026-08-01.** `software/firmware/` holds the host build, the boundary
-headers, the core types and the deterministic fakes, and `make firmware-test` is part of
-`make check`.
+`software/firmware/` holds the host build, the boundary headers, the core logic, the six drivers and
+the deterministic fakes. `make firmware-test` is part of `make check`.
 
 What is there:
 
 - CMake and CTest over `core/` plus the fakes, building with `-Werror`, `-Wconversion`,
   `-Wsign-conversion`, `-Wshadow` and the rest, and with gcc's `-fanalyzer` as the static analysis
   step. `clang-tidy` and `cppcheck` are not installed on this machine.
-- `core/`: `square` (zero based, aligned with the sensor array), `piece`, `fault` (the five faults
+- `core/`: `square` (zero based, aligned with the sensor array), `piece`, `fault` (the six faults
   from [functional/gameplay.md](../functional/gameplay.md) with a test that fails if the table
   drifts), `snapshot` (typed 64-square reading with UID, plus equality, occupancy and duplicate-UID
-  detection), and the `engine` stub.
+  detection), `scan_join` (sixteen line reads to sixty-four squares), `stability` (when a sweep has
+  become a position), `text` with its generated glyph table, and the chess core: `move`,
+  `position` (with FEN for perft fixtures), `movegen` (legal generation, verified against
+  published perft counts), `movederive` (which legal move turned a known position into the sensed
+  one), `chessclock`, `repetition`, `result`, `registry` and `identity` (UID to piece through the
+  provisioning table), `game_record` (the sealed, CRC-checked persisted game), and the `engine`
+  stub that will replace piecewise use of those parts with the game state machine.
 - `core/hw/`: `clock`, `scan`, `output`, `storage`, the four headers `port/` and the fakes both
   implement as free functions. No indirection layer, because link-time substitution already does
   the job.
-- `test/`: deterministic fakes for all four, and five test executables covering square indexing,
-  snapshot semantics, the fault table, the stub's contract, and the fakes themselves.
+- `test/`: deterministic fakes for all four boundary headers, and nineteen test executables
+  covering square indexing, snapshot semantics, the fault table, the stub's contract, the fakes
+  themselves, the scan join, the stability layer, text rendering, both the matrix and light-bar
+  encodings, and the chess core: moves, positions, move generation (perft), move derivation, the
+  clock, results, the registry and identity resolution.
+- `main/`: the wiring plus the scan loop, one pass of scan, stability, identity and engine every
+  quarter second, with faults surfacing on both displays. Only the expander aborts the boot on
+  failure; a dead scan path or output surface logs, is announced where possible, and leaves the
+  rest of the board running.
 
 The engine stub is pinned by tests deliberately. It records a clean snapshot, refuses a faulted
 one, and never returns ACCEPTED, so a caller cannot mistake "not implemented" for "legal". Those
 tests are expected to be rewritten when the engine is real.
 
-Two gaps, both recorded rather than assumed away:
+The analyzer and the sanitizers are both V5 obligations, and they do not share a build: gcc's
+analyzer, run over sanitizer-instrumented code, reports uninitialized values that exist only in the
+instrumentation's own temporaries, with no source location to inspect. So the gate runs one per
+configuration. The configure probes a real sanitizer link, because gcc accepts the flag without the
+runtime libraries and only fails at link. With `libasan` and `libubsan` present the tests run under
+ASan and UBSan and the analyzer is skipped with a notice; a second configure with
+`-DFIRMWARE_SANITIZE=OFF` is the analyzer pass. Without the runtimes the analyzer pass is what
+runs, and the gate warns that the sanitizer half is missing.
 
-- **Sanitizers do not run.** gcc accepts `-fsanitize=address,undefined` whether or not the runtime
-  libraries exist and only fails at link, so the build probes a real link and falls back with a
-  warning. Installing `libasan` and `libubsan` closes it.
-**The target image builds**, as of 2026-08-01. `make firmware-target` produces a 119 KB
-`chessboard.bin` for the ESP32-C6, leaving 92 percent of its app partition free.
+### The target image
+
+`make firmware-target` produces a 227 KB `chessboard.bin` for the ESP32-C6, leaving 85 percent of
+its app partition free.
 
 - **Pinned to ESP-IDF v5.5.5**, commit `b774170ff46c393eeb5e495ea37936038d3f4f4f`, with the
   riscv32 toolchain at esp-14.2.0. v5.5 rather than v6.0 because V6 has to run this exact image in
@@ -184,16 +202,24 @@ ten host tests including the nibble order, which mirrors characters in pairs whe
 
 Not real, and deliberately so:
 
-- **The rules engine** is still the stub, per the ordering above.
-- **Piece identity.** The scan resolves a square and a UID; mapping a UID to a colour and type is
-  provisioning's job and provisioning does not exist, so a scanned square carries `PIECE_TYPE_NONE`
-  rather than a guess. A host test pins that, so nobody later "fixes" it by defaulting to a pawn.
-- **The BitwiseID scheme.** Sixteen-slot anticollision now resolves the several tags a line
-  carries, which is what makes a real position readable at all, but it does so one slot at a time.
+- **The rules engine** is still the stub, per the ordering above. The chess core it will drive
+  (movegen, movederive, result, chessclock) exists and is host-tested, but only identity and the
+  stub run in the scan loop; the game state machine that connects them is the engine's job.
+- **The provisioning journey.** Identity resolution through the registry is real: a stable
+  position is resolved UID by UID and an unknown tag is a `TAG_FAULT` at its square. What does not
+  exist is the journey that fills the registry: the button-gated write of piece records to tags
+  and the readback that proves them. Until then every piece on an unprovisioned board reads as
+  `TAG_FAULT`, which is the honest state.
+- **The BitwiseID scheme.** Sixteen-slot anticollision, now with the standard's mask recursion on
+  collided slots, resolves everything a line carries, which is what makes a real position readable
+  at all, but it does so slot by slot.
   [The research](../../Vault/Scacchiera/Wiki/concepts/bitwiseid-method.md) exists because that
   scales badly: the source paper measures an equivalent 8x8 scan at 616 to 745 ms with classic
-  anticollision. Throughput, not correctness, is what BitwiseID buys.
-- **Retry.** A slot where two tags collide is reported as an under-read line rather than retried.
+  anticollision. Throughput, not correctness, is what BitwiseID buys, and it waits on a bench
+  answer to whether the PN5180 exposes collision positions the way the paper's reader does.
+- **Retry.** A collided slot is not retried, it is recursed: the slot a tag picks is UID-derived,
+  so only a longer mask separates the colliders. A collision that survives the mask and round
+  budgets is reported as an under-read line rather than guessed at.
 
 `core/stability.c` is where "stable" is given a meaning, and it keeps two jobs apart that are easy
 to conflate. Agreement emits a position once it has read identically three sweeps running, and only

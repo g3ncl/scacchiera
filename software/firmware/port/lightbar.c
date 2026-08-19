@@ -6,6 +6,7 @@
 #include "driver/rmt_tx.h"
 #include "esp_check.h"
 #include "esp_log.h"
+#include "esp_rom_sys.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
@@ -25,29 +26,22 @@ static const char *TAG = "lightbar";
 #define T0L_TICKS 9  /* 900 ns typical */
 #define T1H_TICKS 9  /* 900 ns typical */
 #define T1L_TICKS 3  /* 300 ns typical */
-#define RESET_TICKS 2500 /* 250 us, above the datasheet's ">200 us" minimum */
+#define RESET_GAP_US 250 /* above the datasheet's ">200 us" latch minimum */
 
 static rmt_channel_handle_t s_channel;
 static rmt_encoder_handle_t s_encoder;
 static uint8_t s_stream[LIGHTBAR_STREAM_BYTES];
 
-void lightbar_set(uint8_t index, uint8_t red, uint8_t green, uint8_t blue)
-{
-    if (index >= LIGHTBAR_PIXEL_COUNT) {
-        return;
-    }
-    lightbar_pack(s_stream, index, red, green, blue);
-}
-
-void lightbar_set_bar(uint8_t bar, uint8_t red, uint8_t green, uint8_t blue)
+esp_err_t lightbar_set_bar(uint8_t bar, uint8_t red, uint8_t green, uint8_t blue)
 {
     if (bar >= LIGHTBAR_BAR_COUNT) {
-        return;
+        return ESP_ERR_INVALID_ARG;
     }
     const uint8_t first = (uint8_t)(bar * LIGHTBAR_PIXELS_PER_BAR);
     for (uint8_t offset = 0; offset < LIGHTBAR_PIXELS_PER_BAR; offset++) {
         lightbar_pack(s_stream, (uint8_t)(first + offset), red, green, blue);
     }
+    return ESP_OK;
 }
 
 void lightbar_clear(void)
@@ -61,7 +55,14 @@ esp_err_t lightbar_show(void)
     ESP_RETURN_ON_ERROR(
         rmt_transmit(s_channel, s_encoder, s_stream, sizeof(s_stream), &config),
         TAG, "transmit");
-    return rmt_tx_wait_all_done(s_channel, portMAX_DELAY);
+    ESP_RETURN_ON_ERROR(rmt_tx_wait_all_done(s_channel, portMAX_DELAY), TAG, "wait");
+    /* The chain latches on >200 us of idle line and nothing else produces
+     * that gap: the encoder describes only bit symbols, so a second frame
+     * started too soon reads as a continuation of the first and is forwarded
+     * off the end of the chain. Holding the line idle here is what turns
+     * "shown" from a hope into a guarantee. */
+    esp_rom_delay_us(RESET_GAP_US);
+    return ESP_OK;
 }
 
 esp_err_t lightbar_set_rail(bool on)

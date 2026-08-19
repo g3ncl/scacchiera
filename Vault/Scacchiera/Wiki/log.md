@@ -1976,3 +1976,17 @@ be fixed after delivery, because module datasheet 7.3 forbids modifying the boar
 it from warranty. So the plan to inspect and re-strap on arrival is withdrawn and replaced by a
 purchase condition: **supply configured for four-wire SPI, BS[2:0] = 000.** A vague technical
 unknown became a precise line on an order.
+
+
+## 2026-08-18 The BUSY contract moved from a code comment into the wiki
+
+Extended [[pn5180a0hn-c3e-datasheet]] with the section 11.4 host-interface facts and the IRQ_STATUS
+bit table. The firmware's PN5180 driver was built on a BUSY sequence cited as "datasheet 11.4" that
+no wiki page had transcribed, so the one contract V6's peripheral model must reproduce was sourced
+from a comment. A quality audit flagged both the missing transcription and the handshake bug it
+hid: the driver waited for BUSY low twice and never observed the rise, so the completion wait could
+not distinguish "finished" from "not started". The driver now watches for the rise with a tolerated
+short window before trusting the fall, and the facts it rests on are filed where a reviewer and the
+V6 model can check them. The IRQ table also records RX_SC_DET (bit 15), the subcarrier-detection
+path that would decide an empty inventory slot in a third of a millisecond instead of six; wiring
+that in stays a bench-measured change, but the register bit is no longer unfiled.

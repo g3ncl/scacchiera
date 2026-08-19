@@ -7,7 +7,13 @@
 
 #include "port/board_pins.h"
 
-#define EXPANDER_BIT(port, bit) ((port) == 0 ? (1u << (bit)) : 0u)
+/* Standard mode, and it is a limit rather than a preference. The bus rises in
+ * 796 ns at the specification's 200 pF ceiling, which fits standard mode with a
+ * fifth to spare and does not fit fast mode at all; reaching 400 kHz would need
+ * the bus under about 70 pF, which the cable to the power module does not
+ * leave. See HUB-I2C-RISE-TIME in docs/hardware/criteria.yaml. Kept here rather
+ * than in expander.c so the host gate can assert it. */
+#define EXPANDER_I2C_SPEED_HZ 100000u
 
 /* 1 is an input, 0 is an output. Port 1 is entirely inputs: only NFC_GPO1 is
  * read, and P1.3's net stops at a pullup, so leaving it an input avoids
