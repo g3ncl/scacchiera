@@ -35,9 +35,32 @@ work proceeds so it stays the current source of truth for what is done.
 | V8 test-article measurement | not started | Needs the test article, which needs V0 to V7 |
 | V9 independent review | not started | |
 
-**No fabrication or assembly order is authorised.** The nearest releasable item is the scoped bare
-sensing-plane test article in [hardware/test-article-quad.md](hardware/test-article-quad.md), and it
-waits on the open V3, V4 and V7 items below.
+**A scoped test-article release of the complete prototype set is authorised: owner decision,
+2026-08-19.** V8's required measurements cannot exist without built boards, so the full set is
+released under the workflow's test-article clause (V0 through V7, applicable milestones): the bare
+quad plane (x5, [hardware/test-article-quad.md](hardware/test-article-quad.md)), the light bars
+(x5, bare), the power board (x5, fabrication plus its upload assembly pair), the hub (x5,
+fabrication plus its upload assembly pair), and the purchased accessories the order files exclude
+([hardware/ordering.md](hardware/ordering.md)). The stated unknowns this release exists to measure
+are V8's list: the four V3 vendor gaps, assumptions A5, A8 and A9, antenna resistance and loaded
+Q, scan timing against the stability window, and the buck load transient. V3's gaps live on the
+hub and power electronics and are this release's measurement targets, not violations of it; the
+bare quad carries no electronics at all. Conditions attached:
+
+- fabrication and assembly artifacts are regenerated on the machine carrying the bound KiCad
+  libraries before upload (the library-pinning finding below);
+- each upload's DFM result is recorded here;
+- the hub order resolves its two known items at order time: U4 substitutes the in-stock
+  ESP32-C6-MINI-1U-H4 (C20627095, same filed datasheet, Table 1-2; the audit record is rebound
+  with the order's dated availability), and J1 is re-quoted as-is, with the power-only candidate
+  in [hardware/jlcpcb-sourcing.md](hardware/jlcpcb-sourcing.md) as the fallback if the matcher
+  rejects it again;
+- the panel and the matrix are not ordered ([hardware/ordering.md](hardware/ordering.md) records
+  why);
+- bring-up is supervised bench work: the cell is handled per
+  [hardware/cell-assembly.md](hardware/cell-assembly.md) and first power-on follows the V8
+  measurement plan;
+- this authorises prototypes for measurement. It is not a final-board release: V8 and V9 stand.
 
 The workflow's gate command exists: **`make release-check`** rebuilds from a clean generated
 state and runs every automated V0 to V7 check plus the fabrication exports and the exact target
@@ -519,8 +542,9 @@ by further simulation and only a measurement settles it. Five boards, 20.92 EUR,
 two-plane set plus a spare rather than the retired matrix article's one set and four scrap boards, so
 it can measure the real row-against-column geometry and the butt joint between two boards.
 
-**It is not released.** V0 through V7 must pass first, and V3, V4 and V7 are open above. Copper weight
-must be confirmed at upload; surface finish is settled at OSP and thickness at 0.6 mm.
+**Released 2026-08-19** as part of the scoped prototype-set release above, under its conditions:
+artifacts regenerated on the bound-library machine, DFM recorded at upload. Copper weight is
+confirmed at upload; surface finish is settled at OSP and thickness at 0.6 mm.
 
 ## Milestones
 

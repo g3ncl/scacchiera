@@ -3,9 +3,10 @@
 What to upload, in what order, with what options, to get a price for one complete board. Generated
 artifacts live under `hardware/pcb/generated/<board>/` and are rebuilt with `make pcb-fab panel-fab`.
 
-**This is a quoting checklist, not a release authorisation.** No board is authorised for
-fabrication until the gates in [../simulation-workflow.md](../simulation-workflow.md) pass; see
-[planning.md](../planning.md). Getting a price is not ordering.
+**This is the upload checklist; the release authorisation lives in
+[planning.md](../planning.md).** The scoped prototype-set release of 2026-08-19 authorises the
+quad, light bars, power board and hub under its recorded conditions; the panel and the matrix stay
+unorderable. Getting a price is not ordering.
 
 ## Read this first: which file to upload
 
