@@ -221,7 +221,13 @@ BQ25895 and TPS61088 path is swept at the full 10 W obligation.
 > 0.84 V/T, current-sense ratio 0.2 V/A, block diagram of Rev. 3-2), so a nominal transient model
 > is constructible and is now open work rather than impossible; what stays missing is any
 > tolerance or corner for those internals, so the result will be nominal evidence, not
-> worst-case.
+> worst-case. The remedy is pre-validated should V8's load-step measurement show droop: the rail
+> fits two 22 uF output capacitors and the datasheet's output-capacitor section calls 22 to 68 uF
+> sufficient with larger-and-low-ESR explicitly preferred, so a third identical capacitor (same
+> bound MPN, 66 uF nominal) stays inside the vendor's documented range. It is deliberately not
+> fitted now: adding a footprint invalidates the hub's reviewed route and the V4 work on it, which
+> is the wrong trade against a nuisance-reset risk a bench can measure and a piggyback capacitor
+> can trial without a respin.
 
 **Faults.** Light-bar short circuit on the vendor model, input-switch limit derived, sensor open and
 short in the charge gate, averaged power-board missing, depleted and shorted cell cases, a stuck
