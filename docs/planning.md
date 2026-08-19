@@ -29,7 +29,7 @@ work proceeds so it stays the current source of truth for what is done.
 | V2 connectivity and static checks | **passed** | |
 | V3 power, analog, timing, fault | open | Four vendor-data gaps, all named below |
 | V4 layout-derived electromagnetics | open | RF return model raises by design; resistance and Q unextracted |
-| V5 firmware host verification | open | Rules engine is a stub; sanitizer runtimes absent |
+| V5 firmware host verification | open | Sleep and low battery need the battery ADC path; the button's provisioning hold has no consumer |
 | V6 firmware in simulation | not started | |
 | V7 fabrication preflight | open | No rendered review package, no recorded DFM pass |
 | V8 test-article measurement | not started | Needs the test article, which needs V0 to V7 |
@@ -39,12 +39,10 @@ work proceeds so it stays the current source of truth for what is done.
 sensing-plane test article in [hardware/test-article-quad.md](hardware/test-article-quad.md), and it
 waits on the open V3, V4 and V7 items below.
 
-One workflow requirement is not implemented at all: **`make release-check` does not exist.**
-[simulation-workflow.md](simulation-workflow.md) requires a single non-interactive command that
-rebuilds and runs every automated V0 to V7 and V9 check from a clean generated state, and records a
-missing implementation as open work that blocks release. `make check` covers generation, DRC,
-schematic parity, mypy, the Python suite and the firmware host tests, which is most of the content
-but is not the gate command the workflow specifies.
+The workflow's gate command exists: **`make release-check`** rebuilds from a clean generated
+state and runs every automated V0 to V7 check plus the fabrication exports and the exact target
+image. V8 needs hardware and V9 needs a human; everything a machine can check is in the one
+command.
 
 ## The gates
 
@@ -372,19 +370,27 @@ SPI bus. The ESP32-C6 target image builds reproducibly against a pinned ESP-IDF 
 partition layout, and `port/board_pins.h` is generated from the hub netlist with a test that fails if
 the committed copy drifts.
 
+**The rules engine is real.** `core/game.c` implements the gameplay state machine (start check,
+time selection, provisional commit and cancel, promotion, gestures, flag fall, automatic endings,
+resume after restart), and V5's generated-sequence bullet has evidence: scripted games cover
+checkmate, castling, en passant and promotion end to end, and deterministic random games are
+cross-checked ply by ply against an independent repetition ledger and result evaluation
+(`test_game_sequences.c`). Persistence failure is injected at the boundaries the firmware has: a
+failed commit save continues play and the next commit repersists, a corrupt or truncated record
+refuses to load, and resume is verified against replay both at match and mismatch. Sanitizers run
+with their runtimes installed: 21 of 21 suites pass under ASan and UBSan (2026-08-19).
+
 **What is open.**
 
-- **The rules engine is a stub**, deliberately, because no rule in `functional/gameplay.md` can
-  invalidate a PCB. V5's generated-gameplay-sequence bullet cannot close until it is real.
-- **Sanitizers do not run.** gcc accepts `-fsanitize=address,undefined` whether or not the runtime
-  libraries exist and only fails at link, so the build probes a real link and falls back with a
-  warning. Installing `libasan` and `libubsan` closes it.
+- **Sleep and low battery.** Both need the battery ADC path and a power-state driver that do not
+  exist; the twenty-minute sleep and the five-minute low-battery shutdown are the remaining
+  gameplay behaviours without tests.
 - **The provisioning journey** is absent by design: identity resolution through the registry is
   implemented and a stable position resolves UID by UID, but nothing yet writes piece records to
-  tags, so an unprovisioned board reads every piece as `TAG_FAULT`. Colliding inventory slots are
+  tags, so an unprovisioned board reads every piece as `TAG_FAULT`. The button's long-hold gesture
+  is classified and tested but has no consumer until this exists. Colliding inventory slots are
   resolved by the standard's mask recursion; one that survives the mask and round budgets is
   reported as an under-read line rather than guessed at.
-- Persistence tests do not yet inject reset and write failure at every transaction boundary.
 
 ### V6: firmware-in-simulation system verification, not started
 

@@ -1,4 +1,4 @@
-/* Application wiring and the scan loop. The only place that knows both core/
+/* Application wiring and the main loop. The only place that knows both core/
  * and port/ exist; see docs/software/architecture.md. */
 
 #include <stdio.h>
@@ -8,8 +8,10 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
-#include "core/engine.h"
+#include "core/button.h"
 #include "core/fault.h"
+#include "core/game.h"
+#include "core/hw/button.h"
 #include "core/hw/clock.h"
 #include "core/hw/output.h"
 #include "core/hw/scan.h"
@@ -35,18 +37,21 @@ static const char *TAG = "chessboard";
  * longer here buys energy, not correctness. */
 #define SCAN_PERIOD_MS 250u
 
-/* Owned at file scope rather than on the stack: a stability_t alone carries
- * two board snapshots, about 3 KB against the main task's default 3.5 KB. */
+/* Owned at file scope rather than on the stack: the game alone carries a
+ * position, a record and a derivation context, about 9 KB against the main
+ * task's default 3.5 KB. */
+static game_t s_game;
+static button_t s_button;
 static stability_t s_stability;
 static piece_registry_t s_registry;
-static engine_state_t s_engine;
 static board_snapshot_t s_raw;
 static board_snapshot_t s_stable;
 
-/* What the displays currently say, so a persisting fault is written once
- * rather than on every sweep. A fault found in a raw sweep clears as soon as
- * sweeps run clean again; a fault found in a stable position stays until a
- * stable position resolves cleanly. */
+/* What the displays currently say about sensing, so a persisting fault is
+ * written once rather than on every sweep. A fault found in a raw sweep
+ * clears as soon as sweeps run clean again; a fault found in a stable
+ * position stays until a stable position resolves cleanly. The game paints
+ * nothing while a fault is up. */
 static board_fault_report_t s_shown_fault;
 static bool s_shown_from_sweep;
 
@@ -78,6 +83,15 @@ static void display_fault(const board_fault_report_t *fault)
 static void show_fault(const board_fault_report_t *fault, bool from_sweep)
 {
     if (s_shown_fault.fault != fault->fault || s_shown_fault.square != fault->square) {
+        /* Logged as well as displayed: the serial log is the record a
+         * session leaves behind. */
+        if (square_is_valid(fault->square)) {
+            ESP_LOGW(TAG, "fault %s at %c%u", board_fault_name(fault->fault),
+                     square_file_letter(fault->square),
+                     (unsigned)square_rank(fault->square));
+        } else {
+            ESP_LOGW(TAG, "fault %s board-wide", board_fault_name(fault->fault));
+        }
         display_fault(fault);
         s_shown_fault = *fault;
     }
@@ -95,10 +109,14 @@ static void clear_fault_display(void)
     s_shown_fault.square = SQUARE_INVALID;
 }
 
-/* One pass of the pipeline the architecture names: scan, stability, identity,
- * engine. Faults surface on the displays instead of becoming positions. */
-static void sweep_once(void)
+/* One pass of the sensing pipeline: scan, stability, identity. Faults surface
+ * on the displays; what comes back is what the game may consume this step. */
+static void sweep_once(const board_snapshot_t **raw_clean,
+                       const board_snapshot_t **stable)
 {
+    *raw_clean = NULL;
+    *stable = NULL;
+
     if (!hw_scan_board(&s_raw)) {
         /* board_hw already logged the reason; the next sweep retries. */
         return;
@@ -117,6 +135,7 @@ static void sweep_once(void)
         /* The condition the displays reported is gone. */
         clear_fault_display();
     }
+    *raw_clean = &s_raw;
 
     const bool emitted =
         stability_update(&s_stability, &s_raw, hw_clock_now_ms(), &s_stable);
@@ -142,9 +161,7 @@ static void sweep_once(void)
     }
 
     clear_fault_display();
-    /* The engine is a stub: it records the position and refuses to judge it,
-     * so nothing downstream can mistake "not implemented" for "legal". */
-    (void)engine_apply_snapshot(&s_engine, &s_stable);
+    *stable = &s_stable;
     ESP_LOGI(TAG, "stable position, %u squares occupied",
              (unsigned)board_snapshot_occupied_count(&s_stable));
 }
@@ -181,8 +198,12 @@ void app_main(void)
     }
 
     stability_init(&s_stability);
-    engine_init(&s_engine);
-    ESP_LOGW(TAG, "rules engine is a stub: not implemented");
+    button_init(&s_button);
+    game_init(&s_game);
+    if (s_game.state == GAME_STATE_PLAYING) {
+        ESP_LOGI(TAG, "stored game loaded, %u plies, awaiting a matching board",
+                 (unsigned)s_game.record.ply_count);
+    }
 
     if (!scan_ok) {
         hw_output_display_text(PIECE_COLOR_WHITE, "SCAN FAULT");
@@ -190,9 +211,19 @@ void app_main(void)
     }
 
     while (true) {
+        const uint32_t now_ms = hw_clock_now_ms();
+        const button_event_t button =
+            button_update(&s_button, hw_button_pressed(), now_ms);
+
+        const board_snapshot_t *raw_clean = NULL;
+        const board_snapshot_t *stable = NULL;
         if (scan_ok) {
-            sweep_once();
+            sweep_once(&raw_clean, &stable);
         }
+
+        game_step(&s_game, raw_clean, stable, button,
+                  s_shown_fault.fault != BOARD_FAULT_NONE, now_ms);
+
         vTaskDelay(pdMS_TO_TICKS(SCAN_PERIOD_MS));
     }
 }

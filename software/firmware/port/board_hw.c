@@ -13,13 +13,16 @@
 #include "nvs.h"
 #include "nvs_flash.h"
 
+#include "core/hw/button.h"
 #include "core/hw/clock.h"
 #include "core/hw/scan.h"
 #include "core/scan_join.h"
 #include "core/text.h"
 #include "core/hw/output.h"
 #include "core/hw/storage.h"
+#include "port/board_pins.h"
 #include "port/display.h"
+#include "port/expander.h"
 #include "port/matrix.h"
 #include "port/pn5180.h"
 #include "port/lightbar.h"
@@ -33,6 +36,18 @@ static const char *TAG = "board_hw";
 uint32_t hw_clock_now_ms(void)
 {
     return (uint32_t)(esp_timer_get_time() / 1000);
+}
+
+bool hw_button_pressed(void)
+{
+    /* Active low behind the expander. A read failure counts as not pressed:
+     * a phantom press could start or pause a game, a missed one costs a
+     * retry at the next sweep. */
+    bool level = true;
+    if (expander_get(EXP_BUTTON_N_PORT, EXP_BUTTON_N_BIT, &level) != ESP_OK) {
+        return false;
+    }
+    return !level;
 }
 
 /* Cue colours. Red for the illegal-position flash is the one that matters:

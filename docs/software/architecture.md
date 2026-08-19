@@ -77,16 +77,16 @@ the button; the charger and rail signals; power-up, warm reset and the recovery 
 parts whose failure means a board respin, so they are the parts V6 has to run in simulation against
 behavioural peripheral models.
 
-**Stubbed as TBD**: the chess rules engine. `core/` gets the position type, the typed-snapshot
-interface and a stub that accepts a snapshot and returns "not implemented", enough for the layers
-above and below it to be exercised and for V6 scenarios to drive real scans through real drivers. No
-rule in [functional/gameplay.md](../functional/gameplay.md) can invalidate a PCB, so implementing
-castling before the reader driver works would be effort spent in the wrong order.
-
-The stub is a stub, not a shortcut: V5's definition of done in
-[simulation-workflow.md](../simulation-workflow.md) still requires generated sequences over every
-gameplay behaviour, and that bullet stays open until the engine is real. What this ordering buys is
-that the hardware-facing bullets can close first.
+**The rules engine is real**: `core/game.c` is the game state machine from
+[functional/gameplay.md](../functional/gameplay.md), driven by identity-resolved stable positions,
+clean raw sweeps for the second-scale gestures, the button, and a clock that arrives as a parameter.
+It covers the start check against the standard position, the ten-second time-control window, the
+provisional-move contract (commit on the opponent's first lift, cancel by returning, replace by a
+different legal move), promotion by replacement tag, the resign and draw king-absence countdowns,
+pause and resume, flag fall with the insufficient-material exception, the automatic endings with the
+claimable hints, a sealed persisted record after every commit, and resume-after-restart against a
+matching physical board. Gestures advance only on clean sweeps: no evidence, no countdown, so an
+unreadable board can never resign a game nobody touched.
 
 ## Status
 
@@ -111,7 +111,7 @@ What is there:
 - `core/hw/`: `clock`, `scan`, `output`, `storage`, the four headers `port/` and the fakes both
   implement as free functions. No indirection layer, because link-time substitution already does
   the job.
-- `test/`: deterministic fakes for all four boundary headers, and nineteen test executables
+- `test/`: deterministic fakes for all four boundary headers, and twenty-one test executables
   covering square indexing, snapshot semantics, the fault table, the stub's contract, the fakes
   themselves, the scan join, the stability layer, text rendering, both the matrix and light-bar
   encodings, and the chess core: moves, positions, move generation (perft), move derivation, the
@@ -121,9 +121,11 @@ What is there:
   failure; a dead scan path or output surface logs, is announced where possible, and leaves the
   rest of the board running.
 
-The engine stub is pinned by tests deliberately. It records a clean snapshot, refuses a faulted
-one, and never returns ACCEPTED, so a caller cannot mistake "not implemented" for "legal". Those
-tests are expected to be rewritten when the engine is real.
+The game machine is pinned two ways: unit tests for every spec behaviour (commit, cancel,
+replace, time selection, flag fall, gestures, resume, persistence failure), and generated
+sequences in `test_game_sequences.c`, where scripted games cover checkmate, castling, en passant
+and promotion end to end, and deterministic random games are cross-checked ply by ply against an
+independent repetition ledger and result evaluation, ending with a resume round trip.
 
 The analyzer and the sanitizers are both V5 obligations, and they do not share a build: gcc's
 analyzer, run over sanitizer-instrumented code, reports uninitialized values that exist only in the
@@ -202,9 +204,11 @@ ten host tests including the nibble order, which mirrors characters in pairs whe
 
 Not real, and deliberately so:
 
-- **The rules engine** is still the stub, per the ordering above. The chess core it will drive
-  (movegen, movederive, result, chessclock) exists and is host-tested, but only identity and the
-  stub run in the scan loop; the game state machine that connects them is the engine's job.
+- **PGN export.** The record persists moves and the clock; rendering completed games as PGN with
+  SAN belongs to the browser-client increment, which also owns the explicit undo.
+- **Sleep and low battery.** Both need the battery ADC path and a power-state driver that do not
+  exist yet; the gameplay spec's twenty-minute sleep and five-minute low-battery shutdown stay
+  open until they do.
 - **The provisioning journey.** Identity resolution through the registry is real: a stable
   position is resolved UID by UID and an unknown tag is a `TAG_FAULT` at its square. What does not
   exist is the journey that fills the registry: the button-gated write of piece records to tags
