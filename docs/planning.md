@@ -408,6 +408,13 @@ Needs the real ESP32-C6 image running in Wokwi against behavioural models for th
 displays, LEDs, matrix register chain, button, charger signals and rail faults, with virtual wiring
 generated from the authoritative netlist.
 
+One finding from a since-removed simulation harness is worth keeping: with the 6 ms empty-slot
+timeout, a full sixteen-line sweep takes over 1.5 seconds, so no square can change four times
+inside stability's 2-second window and `SQUARE_UNSTABLE` is unreachable at the current scan
+cadence. The thresholds in core/stability.h and the sweep time need to be reconciled, either by
+the subcarrier-detection fast path the PN5180 offers (IRQ_STATUS bit 15, filed in the vault) or by
+widening the window; V8's measured scan timing decides which.
+
 ### V7: fabrication preflight, open
 
 **The mechanical half is deliberately out of this gate.** The enclosure and the pieces are 3D
