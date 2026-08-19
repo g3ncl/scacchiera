@@ -16,7 +16,7 @@ export PYTHONHASHSEED
 export KICAD9_SYMBOL_DIR
 export KICAD_FOOTPRINT_DIR
 
-.PHONY: check footprints schematic-lightbar schematic-matrix schematic-hub \
+.PHONY: check release-check footprints schematic-lightbar schematic-matrix schematic-hub \
 	schematic-quad pcb-quad pcb-quad-reroute pcb-quad-drc pcb-quad-fab \
 	pcb-lightbar pcb-lightbar-drc pcb-lightbar-fab \
 	pcb-matrix pcb-matrix-route pcb-matrix-reroute pcb-matrix-drc pcb-matrix-fab \
@@ -29,6 +29,13 @@ check: pcb-lightbar-drc pcb-matrix-drc pcb-hub-drc pcb-power-drc \
 	pcb-quad-drc firmware-test
 	$(PYTHON) -m mypy hardware
 	$(PYTHON) -m pytest
+
+# The workflow release gate command (docs/simulation-workflow.md): every
+# automated V0 to V7 check, rebuilt from a clean generated state, plus the
+# fabrication exports and the exact target image. V8 needs hardware and V9
+# needs a human; everything a machine can check is here.
+release-check: clean check pcb-fab firmware-target
+	@echo "release-check: every automated gate passed from a clean state"
 
 # Host firmware gate for V5. Warnings are errors, gcc's analyzer runs, and
 # the sanitizers are enabled when their runtimes are installed.
