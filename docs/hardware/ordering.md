@@ -33,10 +33,11 @@ export if the two ever disagree, but it cannot stop you pairing them wrongly at 
 | Dimensions | 300 x 140 mm, 2 layers |
 | Thickness | **0.6 mm** |
 | Assembly | **none** |
-| Surface finish | HASL, unless you want ENIG |
+| Surface finish | **OSP**, not HASL and not ENIG. See [Surface finish](#surface-finish-which-is-not-the-same-on-every-board) below |
 
 0.6 mm is settled: priced 2026-08-02 against 0.8 and 1.0 mm at this outline and quantity and all
-three cost the same, so take the thickness the design wants.
+three cost the same, so take the thickness the design wants. HASL is not offered at 0.6 mm at all,
+and ENIG's nickel underplate costs antenna Q, which is the quantity this board exists to measure.
 
 ### 2. Light bars and power board, ordered separately
 
@@ -52,11 +53,17 @@ two constituent boards as separate fabrication items:
 | Quantity | 5 (you need 2) | 5 |
 
 Both are DRC-clean and both are in `make check`, unlike the panel. The power pair is 18 rows and 41
-placements, 3 Extended. Expect an X-ray inspection line on the power order, as the hub quote
-charged 2.85 EUR for it and the power board carries two QFNs.
+placements, 3 Extended.
 
-This costs one extra engineering fee, about 3.47 EUR by the hub quote, which is what panelising was
-saving. That is the right trade against shipping a panel nobody has verified.
+Do not budget an X-ray line for the power board. This checklist previously predicted one because the
+board carries two QFNs and the hub was charged 2.85 EUR for it; the power quote came back with no
+X-ray line at all. Treat X-ray as a hub-class charge tied to pin count or hidden pad arrays, and as
+something to quote rather than to model ([cost.md](cost.md)).
+
+Ordering the two boards separately costs one extra fabrication order rather than the engineering fee
+this checklist once assumed: both small boards came back on promotional pricing with no engineering
+fee. What panelising genuinely saves is on the assembly side, about 8.40 EUR of duplicated setup and
+stencil, and it needs a panel that works.
 
 #### The panel defect
 

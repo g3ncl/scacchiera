@@ -7,11 +7,11 @@ a shipping option. The supporting catalog capture and live-stock evidence live i
 vault. The complete bound BOM was checked live again on 2026-07-25. Stock and prices remain
 time-sensitive.
 
-The hub selections and quotes in this register describe the last generated MCP73871 design. That
-hub is superseded by the commercial 5 V subsystem boundary in [hub.md](hub.md), so none of its hub
-counts, costs, or order files are current release evidence. Update this register from the
-regenerated simplified hub only after its V1 and V2 gates pass. Lightbar and matrix selections
-remain current.
+**One quote in this file is historical and labelled as such.** The 2026-07-25 hub quote priced a hub
+that carried the charger and both converters on board (MCP73871, TPS63802, TPS61023). Those moved to
+the [power board](power.md), so that quote's part list, feeder count and total are kept as cost
+*structure* and are not current release evidence. Current per-board prices are in
+[cost.md](cost.md).
 
 `make pcb-fab` emits the upload pair `<board>_jlcpcb_upload_bom.csv` and
 `<board>_jlcpcb_upload_cpl.csv`, and rejects the export if their designators differ. The internal costed file is named
@@ -74,36 +74,42 @@ each route, so "hand" here always means a joint an iron tip can reach.
 
 | Board | Prefer JLCPCB | Hand fitted |
 | --- | --- | --- |
-| Lightbar | none, the board is below JLCPCB's supported assembly size | everything; the LED was changed to a legs-outside-body package so an iron reaches all four joints |
+| Lightbar | none, the board is below JLCPCB's supported assembly size | everything; the LED is a legs-outside-body package so an iron reaches all four joints |
 | Quad (sensing) | none by choice, see below | all 176 references across the four boards |
 | Matrix, superseded | none, see below | all 165 references |
-| Hub, historical MCP73871 design | QFN, SON, SOT563, USB-C, the crystal, and the ESP32 module | JST connectors, switch, SOT-23 devices, inductors, 0402 C0G RF and timing capacitors, and the 0.65 mm TSSOP expander |
+| Hub | J1 (USB-C), U3 (PN5180 QFN-40), U4 (ESP32-C6-MINI-1U) and Y1 (the 3225 crystal) | JST connectors, switch, SOT-23 devices, inductors, 0402 C0G RF and timing capacitors, and the 0.65 mm TSSOP expander |
+| Power | Q1 (CSD25404Q3 DQG), U1 (BQ25895 QFN-24) and U2 (TPS61088 QFN-20) | everything else, 11 references |
 
-Packages classified reflow-only are those with pads under the body or a pitch no tip can reach:
-QFN, SON, SOT563, USB-C, the 3225 crystal, and the ESP32 module. **0402, SOD-523, SOT-23, SOIC and
-0.65 mm TSSOP are deliberately not on that list.** They are tedious but every joint is reachable,
-and the plan hand-fits them, which is what removes their feeder fees.
+Packages classified reflow-only are those with pads under the body or a pitch no tip can reach, and
+the list lives in code as `REFLOW_ONLY_FOOTPRINT_MARKERS` in `hardware/pcb/bom.py`: QFN and DFN, the
+SON and SOT563 variants, USB-C, the 3225 crystal, the ESP32 module and the CSD25404Q3's clip
+package. **0402, SOD-523, SOT-23, SOIC and 0.65 mm TSSOP are deliberately not on that list.** They
+are tedious but every joint is reachable, and the plan hand-fits them, which is what removes their
+feeder fees.
 
-The lightbar and the sensing plane are both fully hand populated, so only the hub and the power
-board go to assembly. Order bare Gerbers for the other two. The hub leaves **seven** Extended lines for factory placement,
-all genuinely reflow-only: J1 (USB-C), U1 (MCP73871 QFN-20), U2 (TPS63802 SON-10), U3 (PN5180
-QFN-40), U4 (ESP32-C6-MINI-1U), U5 (TPS61023 SOT563) and Y1 (the 3225 crystal). Everything else
-Extended on the hub is hand fitted from `hub_self_solder_bom.csv`.
+The lightbar and the sensing plane are fully hand populated, so only the hub and the power board go
+to assembly; order bare Gerbers for the other two. That leaves **four** charged Extended lines on
+the hub and **three** on the power board, 10.80 and 8.10 EUR of feeder changes against the 51.30 and
+35.10 EUR the max-assembly alternative would cost. Everything else Extended is hand fitted from each
+board's `_self_solder_bom.csv`.
 
-Moving the 0402 C0G RF capacitors (C33/C36, C34) and the TSSOP expander (U6) to hand removes three
-feeder changes, about 8.10 EUR. That is offset by U4 and Y1 becoming real charged lines now that
-they are bound to stocked parts, where previously they were shortages the factory simply would not
-place. Net feeder count is about the same, but the board comes back complete instead of missing its
-MCU and its reader clock, which was the point.
+The reduction is already taken rather than available: moving the 0402 C0G RF capacitors (C33/C36,
+C34) and the TSSOP expander (U6) to hand removed three feeder changes on the hub, and
+[cost.md](cost.md) records why the remaining seven cannot follow them. The set an iron cannot reach
+and the set that carries a feeder fee are nearly the same set.
 
-The quote below predates the U4, Y1, C31/C32, U6 and C33/C34 changes, so re-quote before ordering.
-It is kept as the cost structure, not as a current price.
+### The historical hub quote, kept for its structure
 
-The 2026-07-25 hub hybrid quote is the current cost baseline. It reports 31 detected BOM rows, 29
-confirmed rows, and shortages on U4 and Y1. Economic PCBA is 53.13 EUR: 7.19 setup, 1.34 stencil,
-24.28 components, 18.88 Extended-component fees, 0.69 SMT assembly, and 0.75 nitrogen reflow. The
-18.88 EUR is seven nominal 2.70 EUR feeder changes after quote rounding. J1 was detected with zero
-quantity and no component price, so budget another 2.70 EUR if it becomes a charged placement.
+The 2026-07-25 hybrid quote priced the pre-split hub, the one that still carried MCP73871, TPS63802
+and TPS61023. It reports 31 detected BOM rows, 29 confirmed rows, and shortages on U4 and Y1.
+Economic PCBA is 53.13 EUR: 7.19 setup, 1.34 stencil, 24.28 components, 18.88 Extended-component
+fees, 0.69 SMT assembly and 0.75 nitrogen reflow. The 18.88 EUR is seven nominal 2.70 EUR feeder
+changes after quote rounding.
+
+**Do not price the current hub from it.** Its charger and converters are on the power board now and
+its feeder count is nearly double the current four. It is retained because the fixed-cost structure
+(setup, stencil, feeders, nitrogen) is the part that transfers, and that structure is what
+[cost.md](cost.md) uses to rank the panelisation and consolidation levers.
 
 The ESP32-C6-MINI-1U is not an iron-solder part. Its 0.8 mm perimeter pitch is manageable, but the
 ground pad is an array of 1.45 mm pads under the module that no tip and no syringe can reach.
@@ -329,18 +335,28 @@ an Extended alternative solely for extra margin would add another unique-compone
 
 ### Hub
 
-The hub necessarily uses Extended ICs. Its safe public-stock substitutions now include the exact
-PN5180 C3E package suffix, verified connector families, RF chokes, protection parts, exact feedback
-values, and passives that meet the original dielectric, voltage, and footprint requirements. The
-24.9 kohm R6 replacement differs by only 0.4%, inside the original 25 kohm 1% tolerance.
+The hub necessarily uses Extended ICs. Its safe public-stock substitutions cover the exact PN5180
+C3E package suffix, verified connector families, RF chokes, protection parts, exact feedback values,
+and passives meeting the specified dielectric, voltage and footprint. The 24.9 kohm R6 replacement
+differs by only 0.4%, inside the original 25 kohm 1% tolerance.
 
-U4, Y1 and L2 are exact and externally available. U4 still needs JLCPCB Global Sourcing or another
+U4, Y1 and L2 are exact and externally available. U4 needs JLCPCB Global Sourcing or another
 controlled placement route because its exposed ground pads make it reflow-only.
 
-- **L2, 74438357010:** DigiKey cut-tape order `732-11197-1-ND`, 16,892 observed in stock. It remains
-  hand fitted and preserves the required 9.6 A saturation current and 13.5 milliohm maximum DCR.
+- **L2, 74438357010:** DigiKey cut-tape order `732-11197-1-ND`, 16,892 observed in stock. Hand
+  fitted, and preserves the required 9.6 A saturation current and 13.5 milliohm maximum DCR.
 
-Resolved:
+Two items need attention at order time, both seen in the 2026-08-02 quote and both recorded in
+[ordering.md](ordering.md):
+
+- **U4 is not stocked at LCSC.** The bound ESP32-C6-MINI-1U-N4 (C7558096) shows a shortfall rather
+  than a dip. Substitute ESP32-C6-MINI-1U-H4, C20627095: the filed Espressif datasheet covers both
+  in Table 1-2 with the same 4 MB Quad SPI flash, body and pinout, and gives the H4 a wider minus 40
+  to 105 C grade.
+- **J1 was rejected by the matcher** and left in Unselected Parts with no reason given. A hub without
+  J1 has no power input, and its pads sit under the body, so no iron fixes it afterwards.
+
+Bound selections:
 
 - **U4, now ESP32-C6-MINI-1U-N4.** The C3-MINI-1U-N4X was two pieces short. The C6 is
   newer silicon (2023 against 2021) with 512 KB SRAM against 400 KB, in the identical 13.2 x 12.5 mm

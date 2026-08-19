@@ -113,8 +113,9 @@ for the same reason the display modules are: an order that forgets them is incom
   a euro.
 - **One protected 1S cell assembly** for the custom [power board](power.md), against the acceptance
   specification in [cell-assembly.md](cell-assembly.md). A cylindrical cell may lie lengthwise in
-  the player rail. The filed 21.7 x 71.0 mm Molicel 21700 candidate demonstrates that the geometry
-  and discharge current are feasible, but the protected assembly is not bound.
+  the player rail. The leading candidate is a Keeppower wired 1S1P 21700 6000 mAh protected pack at
+  about EUR 11; the bare Molicel M65A remains a higher-capacity feasibility reference. Neither is
+  bound, because no candidate publishes its protection thresholds.
 - **Micro-Fit mating hardware:** two Molex 430250800 eight-circuit receptacle housings for the
   hub-to-power harness, one 430250200 two-circuit housing for the battery, and 430300038 female
   terminals for 18 AWG wire (see [harnesses.md](harnesses.md)). Exact wire, pre-crimped leads or qualified crimp process, color coding,
@@ -136,9 +137,10 @@ for the same reason the display modules are: an order that forgets them is incom
 - The light bars are separate because they live in a different mechanical position (behind the
   rail diffusers) and are trivially small; folding them into the hub would tie the hub's outline
   to the diffuser geometry.
-- Total per unit in custom parts, fab and assembly is in [cost.md](cost.md): roughly 155 to 165 EUR
-  plus shipping and tax, plus the two display modules, which have no filed price and are probably
-  the largest single line item in the product.
+- Total per unit is in [cost.md](cost.md): 205.77 EUR at listed prices, of which 99.58 is quoted,
+  and a realistic 270 to 300 EUR delivered once shipping and Italian IVA are added. No single
+  component dominates that total. What dominates is per-order fixed cost, which is why the cost
+  levers are mostly about consolidating orders rather than choosing cheaper parts.
 
 ## Build order
 

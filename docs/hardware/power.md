@@ -54,7 +54,7 @@ boost enable as the system rail falls through its 2.87 to 2.99 V threshold, with
 bypass. This prevents ordinary operation from following the cell down to its absolute discharge
 cutoff.
 
-R11 and C13 form the series compensation branch. C13 is now the exact 22 nF, 50 V, X7R
+R11 and C13 form the series compensation branch. C13 is the exact 22 nF, 50 V, X7R
 [Fenghua 0402B223K500NT](../../Vault/Scacchiera/Wiki/entities/0402b223k500nt.md), JLCPCB Basic
 `C1532`. A 4,374-corner small-signal sensitivity analysis implements TPS61088 data-sheet equations
 13 through 17. It combines line, load, inductor, output-capacitance, ESR, R11, and C13 corners with
@@ -70,7 +70,9 @@ bounds, with assembled-bank ESR from ideal to 15 milliohm. The third 22 uF outpu
 the minimum effective bank at 22.8 uF. The switching model reaches 138 mV peak-to-peak ripple,
 5.325 A peak, and 3.877 A RMS. A separate 80
 percent efficiency floor raises the accepted stress bound to 5.871 A peak and 4.442 A RMS, still
-below the TPS61088 limit, the inductor ratings, and the BQ25895 battery path.
+below the TPS61088 limit, the inductor ratings, and the BQ25895 battery path. The 4.442 A RMS figure
+is the one a connector rating is compared against, since contact heating is I squared R; the peak
+sizes the converter limit and the inductor. See [harnesses.md](harnesses.md).
 
 TI's official TPS61088 transient model is preserved unchanged in
 `hardware/sim/models/vendor/TPS61088_TRANS.LIB`. A two-expression compatibility copy parses and
@@ -92,8 +94,8 @@ at 2.87 V. A reversed 4.2 V cell leaves `BAT_RAW` at minus 5.8 mV with USB absen
 4.2 V with USB already present, inside the BQ25895 minus 0.3 V absolute limit. The 4.442 A RMS hot
 pass-FET loss bound is 0.334 W and remains a V8 temperature and voltage-drop measurement.
 
-`hardware/tests/test_junction_temperature.py` now puts a bound on that temperature rather than
-leaving it entirely to V8. Stated as the ambient each part tolerates before its junction reaches the
+`hardware/tests/test_junction_temperature.py` bounds that temperature rather than leaving it
+entirely to V8. Stated as the ambient each part tolerates before its junction reaches the
 data sheet limit, the reverse FET reaches its at 96.5 degrees on the 160 degrees per watt the data
 sheet gives for minimum pad copper, and the charger reaches its at 103.5 degrees on the 85 percent
 efficiency floor at the qualified 1.95 A input. The boost is the tightest of the whole product at

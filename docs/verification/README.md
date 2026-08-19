@@ -10,6 +10,10 @@ make edits to `docs/functional/` fail the verification test until the mapping is
 name the checks that later V-gates must implement. A mapped ID is not evidence that its test already
 exists or passes.
 
+Hashes are taken over line-ending-normalised text, so a digest identifies the reviewed wording
+rather than the checkout that produced it. After an approved change to a functional source, update
+its digest in the same commit as the requirement review.
+
 V0 maps every fitted component's applicable absolute maximum through
 `TEST-V1-ABSOLUTE-MAXIMUM-COVERAGE`. V1 materializes that rule as one evidence record per fitted
 part and fails if a BOM item or applicable limit is absent. This keeps V0 responsible for complete

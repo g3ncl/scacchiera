@@ -117,11 +117,15 @@ failure and every waiver here is deliberate.
 | V1 | closed on the assumptions in [assumptions.md](assumptions.md) |
 | V2 | passed: zero DRC, unconnected and parity findings on this board |
 | V3 | not applicable to bare copper, and incomplete generally |
-| V4 | **not started**, and this article exists to make it possible |
+| V4 | **partly extracted**, and this article exists to finish it |
 | V5 | firmware not required to fabricate bare copper |
 | V6 | not required for this article |
-| V7 | artifacts generated, geometry checked, and 0.6 mm priced and available; no enclosure fit because no enclosure model exists |
+| V7 | **open**: artifacts generated, geometry checked, thickness and finish settled, but no rendered review package and no recorded manufacturer DFM pass |
 
 A bare unpopulated board carries none of the electrical risk V3 covers and none of the assembly
-risk V7's BOM and CPL bullets cover, which is why a scoped article is releasable here while a
-populated one is not.
+risk V7's BOM and CPL bullets cover, which is why a scoped article is the right shape of release
+here while a populated one is not.
+
+**This article is not released.** [planning.md](../planning.md) carries the open V3, V4 and V7
+items, and the workflow requires V0 through V7 before any test-article order. What this file
+authorises is the *content* of that order once the gate passes, not the order itself.

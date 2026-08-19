@@ -89,10 +89,10 @@ trades field strength the 3 mm read budget does not need for one less rail).
 Y1 is a TXC 7M27100009, 27.12 MHz in a 3225 package. 27.12 divided by two is the 13.56 MHz carrier,
 so the value is fixed by the protocol, and the ESP32 module's own 40 MHz crystal cannot serve it.
 Every value clears the reader's Table 142: 10 pF load against 10 pF typ, 60 ohm ESR against 100 ohm
-max, +/-10 ppm and +/-15 ppm over temperature against +/-100 ppm. C31 and C32 are 15 pF, not the
-10 pF used before: two equal caps present C/2 plus stray, so 15 pF lands near the required 10 pF
-while 10 pF presented only 8 pF and spent about 41 ppm of the budget on load error alone. The 3225
-package replaced a 2016 part JLCPCB could not stock, and its larger pads are also reworkable.
+max, +/-10 ppm and +/-15 ppm over temperature against +/-100 ppm. C31 and C32 are 15 pF: two equal caps present C/2
+plus stray, so 15 pF lands near the required 10 pF, where 10 pF would present only 8 pF and spend
+about 41 ppm of the budget on load error alone. The 3225 package is stocked where the 2016
+equivalent is not, and its larger pads are reworkable.
 
 TX1 drives the single-ended matrix bus through a 470 nH / 220 pF EMC low-pass and a 68 pF series
 match with a DNP trim; TX2 carries the mirrored EMC filter into ground so the push-pull driver
@@ -109,8 +109,8 @@ UART service connector, and the 2-pin button. The cell itself never lands on thi
 
 ## Board
 
-The board is 162 x 46 mm, 1.0 mm thick, two copper layers. Every board in the product is now two
-layers. The length buys the layer count: the service volume is a 310 mm player rail with only the
+The board is 162 x 46 mm, 1.0 mm thick, two copper layers, as is every board in the product. The
+length buys the layer count: the service volume is a 310 mm player rail with only the
 hub in it, so 162 mm costs nothing mechanically, while a four-layer panel costs a multiple of a
 two-layer one at every fab. Width stays at 46 mm because that is what fits under a 50 mm rail.
 
@@ -309,13 +309,11 @@ them. Both are recorded as such rather than left looking unfinished.
 
 ## Cost
 
-The engineering BOM is 14.090 EUR in estimated custom-board parts across 40 fitted lines, up
-0.688 EUR from the four-layer revision: J2 became seven-way and J3 later became eight-way Micro-Fit
-to spread their supply across
-1.0 A contacts, and the cell divider added three passives with values already in the BOM. R36 and
-R37, the 3V3 bleeder and the light-bar data pulldown, add 0.004 EUR between them and no line, since
-both values were already fitted. No new part type entered the design, so the four fee-bearing
-Extended lines and their 10.80 EUR of feeder charges are unchanged.
+The engineering BOM is 14.090 EUR in estimated custom-board parts across 40 fitted lines. J2 is
+seven-way and J3 eight-way Micro-Fit so that each spreads its supply across 1.0 A contacts, and the
+cell divider costs three passives whose values were already in the BOM, as do R36 and R37, the 3V3
+bleeder and the light-bar data pulldown. Four Extended lines are factory-placed and carry 10.80 EUR
+of feeder charges: J1, U3, U4 and Y1.
 
 This is not a factory quote and excludes assembly fees, the power module, its cell, sensor and cable
 assemblies. The purchased subsystem belongs in complete-product cost, not the JLCPCB BOM. Two copper

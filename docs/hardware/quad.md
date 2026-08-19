@@ -50,8 +50,8 @@ tunable, measurable, second-order effect, rather than a term inside sixteen reso
 
 | | monolith | split | source |
 | --- | ---: | ---: | --- |
-| Loop self inductance | 566.6 nH | 566.6 nH | `hardware/sim/quad_stack.py` |
-| Adjacent-line coupling | 0.1401 | 0.1401 | same |
+| Loop self inductance | 566.5 nH | unchanged | `hardware/sim/quad_stack.py`, pinned equal within 0.2 percent |
+| Adjacent-line coupling | 0.1398 | 0.1401 | same, but see the conflict below |
 | Worst row-to-column coupling | 0.0664 | **0.0652** | same |
 | Plane separation | 0.965 mm | 1.035 mm | `hardware/pcb/quad_geometry.py` |
 | Bus resonance, all sixteen lines | 12.895 MHz | 12.767 to 12.865 MHz | `hardware/sim/quad_rf.py` |
@@ -60,6 +60,14 @@ tunable, measurable, second-order effect, rather than a term inside sixteen reso
 | Large-size assembly charge | 50.47 EUR | **0.00 EUR** | quoted for the monolith, inferred for the split |
 | Placed references per set | 165 | 176 | generated BOM |
 | Substrate area | 90,000 mm2 | **168,000 mm2** | `test_quad.py` |
+
+**One figure in that table is in conflict with itself and only a re-extraction settles it.**
+`MATRIX-ADJACENT-LINE-COUPLING` records the monolith at 0.1398 and `QUAD-ADJACENT-LINE-COUPLING`
+records the split at 0.1401 while describing the two as identical, but
+`test_quad_stack.py::test_adjacent_lines_are_no_worse_than_the_monolith` pins them equal within
+1e-4, which that pair violates. The passing test is what establishes that the in-plane geometry is
+untouched; at least one of the two transcribed figures is stale. Re-run both extractions and correct
+the losing margin text in [criteria.yaml](criteria.yaml).
 
 The RF numbers are unchanged or better, and the fabrication cost favours the split. The substrate
 penalty is real and structural: the monolith carries two antenna planes on one substrate's two
@@ -129,14 +137,13 @@ rather than cost. ENIG's nickel underplate is roughly forty times copper's resis
 and at 13.56 MHz the skin depth in it is comparable to its own thickness, so antenna current would
 partly run in the lossy layer and spend loop Q. See [ordering.md](ordering.md).
 
-Worth recording how it stood before, because the sequence matters. An earlier revision asserted
-"quoted and accepted" when the quote had been taken at JLCPCB's default 1.6 mm; that claim was
-withdrawn as unverified, and the thickness was then actually priced. The conclusion is the same as
-the premature claim, and it is now evidence rather than assumption.
+Worth knowing that an earlier revision claimed this thickness was "quoted and accepted" on the
+strength of a quote taken at JLCPCB's default 1.6 mm. That claim was withdrawn as unverified before
+the thickness was actually priced, so the conclusion is the same but the evidence behind it is not.
 
-The escape route this made unnecessary is still worth keeping in mind, because it is the freedom
-the split bought: row-to-column separation is `QUAD_THICKNESS + INTERPLANE_GAP`, so if thin stock
-had priced badly, 0.8 mm board with a 0.2 mm rib would have given the identical 1.0 mm separation.
+The escape route this made unnecessary is worth keeping in mind, because it is the freedom the split
+bought: row-to-column separation is `QUAD_THICKNESS + INTERPLANE_GAP`, so if thin stock had priced
+badly, 0.8 mm board with a 0.2 mm rib would give the identical 1.0 mm separation.
 
 ## The board
 

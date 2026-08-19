@@ -23,7 +23,7 @@ Read the class before the number.
 
 ### Custom PCBs
 
-All four boards are now quoted. Fabrication quantity 5, assembly quantity 2.
+All four boards are quoted. Fabrication quantity 5, assembly quantity 2.
 
 | Item | Cost | Class |
 | --- | ---: | --- |
@@ -170,7 +170,7 @@ about consolidating orders rather than about choosing cheaper parts.
 
 ## Levers, most valuable first
 
-### 1. Consolidate shipments, which is now the biggest lever in the product
+### 1. Consolidate shipments, the biggest lever in the product
 
 **Estimated saving: 30 to 60 EUR.** With no dominant component, the largest controllable cost is
 the number of parcels. A naive build orders sensing boards, the assembled panel, hand-fit parts,
@@ -245,7 +245,26 @@ quote predates the design.
 
 The same recount applies to the power board, which has three: Q1, U1 and U2.
 
-### 2b. Sensing-plane thickness, closed at no cost
+### 4. Buy 50 tags rather than 32, which is not a saving and is worth doing anyway
+
+**Costs 2.42 EUR, buys 18 spares.** 32 tags in ones is 22.08 EUR at 0.69 each. Fifty crosses into
+the 0.49 tier at 24.50 total, so the absolute spend goes *up*, not down; the 100+ tier at 0.34
+would be 34 EUR for a hundred. Listed here because the tier structure invites a saving that is not
+there, and because the spares matter: a tag is glued into a printed piece and a bad bond is not
+recoverable.
+
+### 5. Consolidate every board into one order
+
+**Estimated saving: 15 to 25 EUR per shipment avoided.** The sensing plane is bare copper, the
+panel is assembled, and they are different fabrication specifications (0.6 mm against 1.0 mm), so
+they cannot share a panel. They can still share an order and a shipment. With lever 2 applied the
+whole product is two fabrication items in one order.
+
+## Closed and rejected
+
+Recorded so they stop being re-proposed.
+
+### Sensing-plane thickness, closed at no cost
 
 **Resolved 2026-08-02, saving nothing because nothing was being lost.** 0.6 mm on a 300 mm outline
 was the last open fabrication risk on the shipping board, and thin stock on a long outline is
@@ -265,7 +284,7 @@ criteria currently passing at 0.99 percent of a 2 percent limit.
 That optionality is a dividend of the partition nobody designed for: the monolith's plane
 separation *was* its board thickness, so it had no such escape.
 
-### 3b. Swapping the fee-carrying parts for fee-free ones, which cannot be done
+### Swapping the fee-carrying parts for fee-free ones, which cannot be done
 
 **Available: 0.00 EUR of 18.90.** Settled 2026-08-02 against the catalog rather than argued, and
 recorded here so it stops being re-proposed.
@@ -325,22 +344,7 @@ including the trap that sinks it if taken carelessly: **the part needs six conta
 because CC1 and CC2 must stay separate, and many parts sold as "Type-C 6P" have no CC contacts at
 all. The saving is still 2.70 EUR and the real argument is repairability rather than cost.
 
-### 4. Buy 50 tags rather than 32, which is not a saving and is worth doing anyway
-
-**Costs 2.42 EUR, buys 18 spares.** 32 tags in ones is 22.08 EUR at 0.69 each. Fifty crosses into
-the 0.49 tier at 24.50 total, so the absolute spend goes *up*, not down; the 100+ tier at 0.34
-would be 34 EUR for a hundred. Listed here because the tier structure invites a saving that is not
-there, and because the spares matter: a tag is glued into a printed piece and a bad bond is not
-recoverable.
-
-### 5. Consolidate every board into one order
-
-**Estimated saving: 15 to 25 EUR per shipment avoided.** The sensing plane is bare copper, the
-panel is assembled, and they are different fabrication specifications (0.6 mm against 1.0 mm), so
-they cannot share a panel. They can still share an order and a shipment. With lever 2 applied the
-whole product is two fabrication items in one order.
-
-### 6. Reconsider the purchased power module, with the assembly numbers in hand
+### The purchased power module
 
 **Not recommended, recorded because it will be asked.** [power-subsystem.md](power-subsystem.md)
 treats a purchased 5 V module as the superseded option. The custom power board costs 7.65 EUR of
@@ -354,9 +358,7 @@ and V3 evidence has since been built against the BQ25895 and TPS61088 specifical
 now would discard simulation work worth more than the 5 EUR it saves. **Revisit only if the module
 survey turns up a compliant part**, not for the price.
 
-### 7. Things deliberately not worth cutting
-
-Recorded so they stop being re-proposed.
+### Individual line items
 
 - **The four 74HC595 registers**, half of whose outputs are unused. The waste is 0.40 EUR. Using
   eight lanes per board to halve the register count means a 280 mm outline, back inside the
@@ -380,7 +382,7 @@ still comes from a filed datasheet, per `CLAUDE.md`.
 | Source | Use it for |
 | --- | --- |
 | [jlcpcb.com/parts](https://jlcpcb.com/parts) | The official library, 700k+ in-stock parts, with a "Basic & Promotional Extended Parts" filter. **Authoritative for library class**, which is the thing that decides the 2.70 EUR feeder fee. |
-| [yaqwsx.github.io/jlcparts](https://yaqwsx.github.io/jlcparts/) | **The one to actually use for substitution hunting.** Third-party parametric search over the same catalog: full text, category browse, sort by any attribute, sort by price at a given quantity, direct datasheet and LCSC links. It is the right tool for the Basic-equivalent question in lever 3b. |
+| [yaqwsx.github.io/jlcparts](https://yaqwsx.github.io/jlcparts/) | **The one to actually use for substitution hunting.** Third-party parametric search over the same catalog: full text, category browse, sort by any attribute, sort by price at a given quantity, direct datasheet and LCSC links. It is the right tool for the Basic-equivalent question under Closed and rejected. |
 | [lcsc.com](https://www.lcsc.com) | Retail arm, same inventory pool. The JLC assembly library is a subset of LCSC stock, so an LCSC page confirms a part exists but **not** that JLC will place it. |
 
 **The fee-free catalog is mirrored in the vault**, at
@@ -439,11 +441,12 @@ the interface option, capture the page, and file it before the blocker is closed
 
 ## What would change these numbers
 
-- **A 0.6 mm quote for the quad board.** Every sensing-plane figure here is quoted at 1.6 mm. This
-  is the one open fabrication risk on the shipping design and it could move the 20.92 EUR in either
-  direction.
 - **A confirmed display price**, from EastRising rather than a marketplace listing, and for the
-  module rather than the bare panel.
+  module rather than the bare panel. This is the largest unconfirmed line in the total.
+- **A resolved J1.** The hub's USB-C receptacle was rejected by the matcher, so whatever replaces it
+  adds a part and possibly a feeder change.
+- **A re-quoted hub.** The 44.88 EUR figure carries an Extended count the design has already
+  reduced; see lever 3.
 - **Any move to more than one unit.** Everything in this file is priced at the five-piece minimum,
   which is one product. The fixed costs (setup, stencil, feeders, engineering fee, shipping) are
   charged once, so a second unit is far cheaper than the first, and a cost model built from this

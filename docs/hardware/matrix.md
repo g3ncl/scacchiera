@@ -71,7 +71,7 @@ Every ISO 15693 tag small enough for a 20.5 mm pawn base was surveyed and reject
 
 Nothing small is comparably priced, and everything small couples worse, because coupling scales
 with coil area and this design is already weakly coupled by construction. So the piece geometry
-moves instead of the tag: `docs/functional/physical.md` now sets a 24 mm minimum base diameter for
+moves instead of the tag: `docs/functional/physical.md` sets a 24 mm minimum base diameter for
 every piece, pawns included, which holds the 22 mm recess with 1 mm of wall per side and the bound
 tag with 1.5 mm. A 35 mm square is already well under FIDE's 50 mm minimum, so the set is
 non-standard regardless; the visible cost is that pawn bases end up close to the king's.

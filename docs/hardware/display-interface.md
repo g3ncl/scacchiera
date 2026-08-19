@@ -201,14 +201,17 @@ had to buy length to converge.
 
 ## Carried as assumptions, not blockers
 
-Three things the datasheet does not settle. All three are registered in
+Three things the module datasheet does not settle. All three are registered in
 [assumptions.md](assumptions.md) and carried rather than chased, so that display work proceeds.
 
-- **Interface selection is documented nowhere.** Section 4.1 describes what each pin does "when
-  serial interface mode is selected" and never says how to select it; the back view shows paired
-  0-ohm jumpers R3/R9, R5/R8 and R10/R11/R12. Assumption A2 takes the modules as shipping strapped
-  for four-wire SPI, which is how BuyDisplay sells and documents them. If wrong, the display is
-  silent at bring-up and the jumpers are reworked. No board change either way.
+- **Which strap state a shipped module has.** The mechanism itself is documented, just not in the
+  module's own datasheet: SSD1362 Table 6-2 fixes BS[2:0] = 000 for four-wire SPI, and the paired
+  0-ohm jumpers R3/R9, R5/R8 and R10/R11/R12 on the module's back are what set those pins.
+  Assumption A2 takes the modules as shipping strapped for four-wire SPI, which is how BuyDisplay
+  sells and documents them, while the product listing says the default is 8080 parallel. If it is
+  wrong the display is silent at bring-up, and the remedy is a replacement module rather than
+  rework, because section 7.3 forbids modifying the board and 7.7 excludes it from warranty. Hence
+  the order-time condition above. No board change either way.
 - **The datasheet is revision 1.0, preliminary**, dated 2025-08-07. Assumption A4 takes its numbers
   as holding, which its independently corroborated 320 mA supports.
 - **The 2 x 8 socket is unbound.** This only matters for the fallback adapter, which is not being
