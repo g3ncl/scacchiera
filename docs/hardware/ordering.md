@@ -2,6 +2,8 @@
 
 What to upload, in what order, with what options, to get a price for one complete board. Generated
 artifacts live under `hardware/pcb/generated/<board>/` and are rebuilt with `make pcb-fab panel-fab`.
+The step-by-step purchasing session across every shop is [order-runbook.md](order-runbook.md); this
+file carries the rationale and the per-board detail.
 
 **This is the upload checklist; the release authorisation lives in
 [planning.md](../planning.md).** The scoped prototype-set release of 2026-08-19 authorises the
