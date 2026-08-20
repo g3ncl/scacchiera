@@ -609,9 +609,41 @@ def _finalize_ground(board_path: Path) -> None:
         raise OSError(f"could not save {board_path}")
 
 
+# The unrouted export is an external placement and routing job (Quilter), and
+# a placer starts from intent, not from a finished floor plan: whatever the
+# enclosure or the 13.56 MHz physics pins down stays fixed, everything else is
+# parked below the outline for the placer to position. Fixed by name are the
+# connectors, the mounting holes, and the parts the code-laid pre-routes in
+# generate_board are drawn to; fixed by position is the reader region, from
+# the reader supply row rightward.
+PREROUTE_FIXED = frozenset({"U1", "U2", "R3", "R4", "R5", "R12", "C12", "C13", "C16"})
+RF_FIXED_LEFT = 100.0
+
+
+def _park_free_components(board_path: Path) -> None:
+    board = pcbnew.LoadBoard(str(board_path))
+    x, y = 4.0, BOARD_HEIGHT + 8.0
+    for footprint in sorted(board.GetFootprints(), key=lambda f: f.GetReference()):
+        reference = footprint.GetReference()
+        if (
+            reference[0] in "JH"
+            or reference in PREROUTE_FIXED
+            or pcbnew.ToMM(footprint.GetPosition().x) >= RF_FIXED_LEFT
+        ):
+            continue
+        footprint.SetPosition(pcbnew.VECTOR2I_MM(x, y))
+        x += 8.0
+        if x > BOARD_WIDTH:
+            x, y = 4.0, y + 10.0
+    if not pcbnew.SaveBoard(str(board_path), board):
+        raise OSError(f"could not save {board_path}")
+
+
 if __name__ == "__main__":
     if "--unrouted" in sys.argv:
-        generate_board(OUTPUT / "hub-unrouted.kicad_pcb")
+        unrouted = OUTPUT / "hub-unrouted.kicad_pcb"
+        generate_board(unrouted)
+        _park_free_components(unrouted)
     else:
         generate_board()
         if "--route" in sys.argv or "--reroute" in sys.argv:
