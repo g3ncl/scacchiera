@@ -212,5 +212,8 @@ def route_board(
 
 
 if __name__ == "__main__":
-    generate_board()
-    route_board(reroute="--reroute" in sys.argv)
+    if "--unrouted" in sys.argv:
+        generate_board(OUTPUT / "quad-unrouted.kicad_pcb")
+    else:
+        generate_board()
+        route_board(reroute="--reroute" in sys.argv)

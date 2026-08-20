@@ -30,6 +30,7 @@ export KICAD_FOOTPRINT_DIR
 	pcb-matrix pcb-matrix-route pcb-matrix-reroute pcb-matrix-drc pcb-matrix-fab \
 	pcb-hub pcb-hub-route pcb-hub-reroute pcb-hub-drc pcb-hub-fab \
 	pcb-power pcb-power-reroute pcb-power-drc pcb-power-fab power-rail-fit panel panel-fab pcb-fab \
+	pcb-unrouted \
 	firmware firmware-test firmware-pins firmware-font firmware-target \
 	test-article-quad clean
 
@@ -190,6 +191,18 @@ pcb-lightbar-fab: schematic-lightbar
 # still exported because it remains the recorded baseline the quad is measured
 # against, and an unexported baseline rots.
 pcb-fab: pcb-lightbar-fab pcb-matrix-fab pcb-hub-fab pcb-power-fab pcb-quad-fab
+
+# Placed but unrouted boards, written beside the routed ones as
+# <board>-unrouted.kicad_pcb, for trying an external router (Quilter and the
+# like). The code-laid critical tracks (USB shield, VBUS escapes) stay in as
+# pre-routes. Nothing downstream reads these files; an external route enters
+# the flow only by passing the same DRC and review gate as a Freerouting run.
+# The lightbar has no unrouted form (all its copper is code-laid) and the
+# matrix is superseded.
+pcb-unrouted: schematic-hub schematic-power schematic-quad
+	/usr/bin/python3 -m hardware.pcb.hub_layout --unrouted
+	/usr/bin/python3 -m hardware.pcb.power_layout --unrouted
+	/usr/bin/python3 -m hardware.pcb.quad_layout --unrouted
 
 # The bare sensing-plane test article. Regenerates only what the release in
 # docs/hardware/test-article-quad.md needs, so the upload is one file.

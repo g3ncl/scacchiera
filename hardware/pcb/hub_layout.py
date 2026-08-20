@@ -610,6 +610,9 @@ def _finalize_ground(board_path: Path) -> None:
 
 
 if __name__ == "__main__":
-    generate_board()
-    if "--route" in sys.argv or "--reroute" in sys.argv:
-        route_board(reroute="--reroute" in sys.argv)
+    if "--unrouted" in sys.argv:
+        generate_board(OUTPUT / "hub-unrouted.kicad_pcb")
+    else:
+        generate_board()
+        if "--route" in sys.argv or "--reroute" in sys.argv:
+            route_board(reroute="--reroute" in sys.argv)
