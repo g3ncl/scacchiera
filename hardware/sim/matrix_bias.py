@@ -20,9 +20,11 @@ from hardware.sim.spice import emit_subckt
 
 GENERATED_DIR = Path(__file__).parent / "generated" / "matrix" / "bias"
 
-# SDFL2012S100KTF data sheet, selection table: the 10 uH part's maximum rated
-# current. This is a component absolute maximum, not a design preference.
-CHOKE_RATED_A = 0.015
+# LQM21DH100M70L data sheet, specifications table: the saturation-type rated
+# current, by inductance change (the temperature-rise rating is higher, 300 mA
+# at 125 C ambient). This is a component absolute maximum, not a design
+# preference.
+CHOKE_RATED_A = 0.250
 
 # The 3.3 V rail's own regulation band, from the AP63203WU-7 data sheet's CCM
 # feedback voltage of 3.27 to 3.33 V. The matrix is fed from that rail.

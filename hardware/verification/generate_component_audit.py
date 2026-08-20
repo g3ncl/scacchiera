@@ -21,10 +21,16 @@ AUDIT_PATH = ROOT / "docs" / "verification" / "v1-components.yaml"
 REVIEW_DATE = "2026-07-26"
 WIKI_UPDATE_DATE = "2026-07-29"
 AUDIT_UPDATE_DATE = "2026-07-29"
-PART_REVIEW_DATES = {"0402B223K500NT": "2026-07-29"}
+PART_REVIEW_DATES = {"0402B223K500NT": "2026-07-29", "LQM21DH100M70L": "2026-08-20"}
 MODULE_NAME = "hardware.verification.generate_component_audit"
 
 DESIGN_FACTS = {
+    "LQM21DH100M70L": (
+        "10 uH plus or minus 20 percent at 1 MHz, 250 mA saturation-type rated current by "
+        "inductance change, 300 mA temperature-rise rated current at 125 degrees Celsius ambient, "
+        "0.845 ohm maximum DC resistance, 27 MHz minimum self-resonance, ferrite shielded, "
+        "0805 package"
+    ),
     "0402B223K500NT": (
         "22 nF plus or minus 10 percent, 50 V, X7R with plus or minus 15 percent "
         "temperature change from minus 55 to 125 degrees Celsius, 0402 package and nickel-barrier "
@@ -282,6 +288,7 @@ MANUFACTURERS = {
     "ESP32": "Espressif Systems",
     "GRM": "Murata",
     "JS102011SAQN": "C&K",
+    "LQM": "Murata",
     "LQW": "Murata",
     "MCP73871": "Microchip Technology",
     "MF-MSMF050-2": "Bourns",

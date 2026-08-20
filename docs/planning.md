@@ -703,6 +703,15 @@ DoD: the layout is generated from code, DRC is clean, and it fits the board's en
 
 Dated entries, newest first. Each records a decision and what it rests on, not a change narrative.
 
+**2026-08-20, the sensing choke is rebound to LQM21DH100M70L (C882484).** LCSC delisted C1046, the
+Sunlord SDFL2012S100KTF, discovered at cart time. The replacement is a Murata 0805 10 uH on the
+same footprint (no copper change, staged gerbers stay valid) whose datasheet publishes both rating
+types the Sunlord sheet left ambiguous: 250 mA saturation-type by inductance change and 300 mA by
+temperature rise, against the simulated 10.29 mA bias. That closes the recorded thin-margin
+question (69 percent of a 15 mA rating of unknown type) with a 24x margin on a stated saturation
+limit. Tolerance widens from 10 to 20 percent, which the bias corners absorb; the datasheet is
+filed and the V1 audit regenerated.
+
 **2026-08-02, the sensing plane is settled.** The four-lane quad board ships, the matrix board is a
 retired baseline, and the strip-and-spine layout that preceded both is deleted. The plane costs
 20.92 EUR bare against 58.34, spends no coupling margin (worst row-to-column coupling improves 0.0664

@@ -163,8 +163,8 @@ def matrix_cell(
         f"L{index * 2 + 1}",
         "10uH",
         "Inductor_SMD:L_0805_2012Metric",
-        mpn="SDFL2012S100KTF",
-        unit_cost_eur=0.056,
+        mpn="LQM21DH100M70L",
+        unit_cost_eur=0.15,
     )
     _connect(inject, l_choke, "1")
     _connect(bus, l_choke, "2")
