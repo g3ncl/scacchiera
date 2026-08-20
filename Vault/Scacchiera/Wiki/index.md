@@ -164,6 +164,7 @@ One exact source summary per purchased fitted MPN. The structured audit is
 | [[esp32-c6-mini-1u-n4-datasheet]] | Espressif Systems | 2026-07-26 |
 | [[grm1555c1h221ja01d-datasheet]] | Murata | 2026-07-26 |
 | [[grm1555c1h680ja01d-datasheet]] | Murata | 2026-07-26 |
+| [[lqm21dh100m70l-datasheet]] | Murata | 2026-08-20 |
 | [[lqw2basr47j00l-datasheet]] | Murata | 2026-07-26 |
 | [[nr6045s4r7mt-datasheet]] | Magnetsyc | 2026-08-01 |
 | [[pn5180a0hn-c3e-datasheet]] | NXP Semiconductors | 2026-08-18 |
@@ -227,6 +228,7 @@ One exact source summary per purchased fitted MPN. The structured audit is
 | [[esp32-c6-mini-1u-n4]] | 1 | 2026-07-26 |
 | [[grm1555c1h221ja01d]] | 1 | 2026-07-26 |
 | [[grm1555c1h680ja01d]] | 1 | 2026-07-26 |
+| [[lqm21dh100m70l]] | 1 | 2026-08-20 |
 | [[lqw2basr47j00l]] | 1 | 2026-07-26 |
 | [[nr6045s4r7mt]] | 1 | 2026-07-29 |
 | [[pn5180a0hn-c3e]] | 1 | 2026-07-26 |

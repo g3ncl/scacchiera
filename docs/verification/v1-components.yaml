@@ -254,6 +254,9 @@ components:
     reference: R4
     value: 10k
   - board: hub
+    reference: R36
+    value: 10k
+  - board: hub
     reference: R20
     value: 10k
   - board: hub
@@ -390,6 +393,9 @@ components:
     value: 100k
   - board: hub
     reference: R19
+    value: 100k
+  - board: hub
+    reference: R37
     value: 100k
   - board: hub
     reference: R24
@@ -2478,6 +2484,93 @@ components:
     valid_region: lumped model with datasheet tolerance, bias, ESR, DCR and temperature
       corners
   conflicts: []
+- mpn: LQM21DH100M70L
+  manufacturer: Murata
+  supplier: JLCPCB
+  order_code: C882484
+  availability:
+    status: available
+    checked: '2026-08-20'
+    source: https://jlcpcb.com/partdetail?part=C882484
+  datasheet: Vault/Scacchiera/Datasheets/LQM21DH100M70L_C882484.pdf
+  wiki_source: Vault/Scacchiera/Wiki/sources/lqm21dh100m70l-datasheet.md
+  wiki_entity: Vault/Scacchiera/Wiki/entities/lqm21dh100m70l.md
+  category: inductor
+  footprint: Inductor_SMD:L_0805_2012Metric
+  uses:
+  - board: matrix
+    reference: L1
+    value: 10uH
+  - board: matrix
+    reference: L3
+    value: 10uH
+  - board: matrix
+    reference: L5
+    value: 10uH
+  - board: matrix
+    reference: L7
+    value: 10uH
+  - board: matrix
+    reference: L9
+    value: 10uH
+  - board: matrix
+    reference: L11
+    value: 10uH
+  - board: matrix
+    reference: L13
+    value: 10uH
+  - board: matrix
+    reference: L15
+    value: 10uH
+  - board: matrix
+    reference: L17
+    value: 10uH
+  - board: matrix
+    reference: L19
+    value: 10uH
+  - board: matrix
+    reference: L21
+    value: 10uH
+  - board: matrix
+    reference: L23
+    value: 10uH
+  - board: matrix
+    reference: L25
+    value: 10uH
+  - board: matrix
+    reference: L27
+    value: 10uH
+  - board: matrix
+    reference: L29
+    value: 10uH
+  - board: matrix
+    reference: L31
+    value: 10uH
+  library_audit:
+    status: passed
+    checked: '2026-08-20'
+    evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
+      KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
+    checks:
+    - symbol_pin_numbers_and_names
+    - symbol_electrical_types
+    - exposed_and_no_connect_pins
+    - footprint_pad_numbers
+    - package_dimensions
+    - polarity_and_pin_one
+    - assembly_side
+    - cpl_zero_rotation
+  ratings_audit:
+    status: passed
+    fields: inductance, tolerance, rated or saturation current, DC resistance, self-resonance,
+      temperature range and package dimensions
+    datasheet_locator: electrical characteristics, ratings and dimensions tables
+  simulation_model:
+    kind: analytical
+    path: hardware/sim
+    valid_region: lumped model with datasheet tolerance, bias, ESR, DCR and temperature
+      corners
+  conflicts: []
 - mpn: LQW2BASR47J00L
   manufacturer: Murata
   supplier: JLCPCB
@@ -2691,93 +2784,6 @@ components:
     fields: value, tolerance, rated power, maximum working voltage, temperature coefficient,
       operating temperature and package dimensions
     datasheet_locator: ratings, dimensions and part-number tables
-  simulation_model:
-    kind: analytical
-    path: hardware/sim
-    valid_region: lumped model with datasheet tolerance, bias, ESR, DCR and temperature
-      corners
-  conflicts: []
-- mpn: SDFL2012S100KTF
-  manufacturer: Sunlord
-  supplier: JLCPCB
-  order_code: C1046
-  availability:
-    status: available
-    checked: '2026-07-26'
-    source: https://jlcpcb.com/partdetail?part=C1046
-  datasheet: Vault/Scacchiera/Datasheets/SDFL2012S100KTF_C1046.pdf
-  wiki_source: Vault/Scacchiera/Wiki/sources/sdfl2012s100ktf-datasheet.md
-  wiki_entity: Vault/Scacchiera/Wiki/entities/sdfl2012s100ktf.md
-  category: inductor
-  footprint: Inductor_SMD:L_0805_2012Metric
-  uses:
-  - board: matrix
-    reference: L1
-    value: 10uH
-  - board: matrix
-    reference: L3
-    value: 10uH
-  - board: matrix
-    reference: L5
-    value: 10uH
-  - board: matrix
-    reference: L7
-    value: 10uH
-  - board: matrix
-    reference: L9
-    value: 10uH
-  - board: matrix
-    reference: L11
-    value: 10uH
-  - board: matrix
-    reference: L13
-    value: 10uH
-  - board: matrix
-    reference: L15
-    value: 10uH
-  - board: matrix
-    reference: L17
-    value: 10uH
-  - board: matrix
-    reference: L19
-    value: 10uH
-  - board: matrix
-    reference: L21
-    value: 10uH
-  - board: matrix
-    reference: L23
-    value: 10uH
-  - board: matrix
-    reference: L25
-    value: 10uH
-  - board: matrix
-    reference: L27
-    value: 10uH
-  - board: matrix
-    reference: L29
-    value: 10uH
-  - board: matrix
-    reference: L31
-    value: 10uH
-  library_audit:
-    status: passed
-    checked: '2026-07-26'
-    evidence: manufacturer pin and package drawing checked against the SKiDL pin numbers,
-      KiCad pad numbers, polarity, top assembly side and KiCad zero-degree orientation
-    checks:
-    - symbol_pin_numbers_and_names
-    - symbol_electrical_types
-    - exposed_and_no_connect_pins
-    - footprint_pad_numbers
-    - package_dimensions
-    - polarity_and_pin_one
-    - assembly_side
-    - cpl_zero_rotation
-  ratings_audit:
-    status: passed
-    fields: inductance, tolerance, rated or saturation current, DC resistance, self-resonance,
-      temperature range and package dimensions
-    datasheet_locator: electrical characteristics, ratings and dimensions tables
   simulation_model:
     kind: analytical
     path: hardware/sim

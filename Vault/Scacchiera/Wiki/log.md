@@ -2017,3 +2017,14 @@ grown SOT-353 pads. TI's drawing 4214834/G recommends 0.95 x 0.4 mm pads on a 2.
 the manufacturer-consistent pattern and the reviewed board is correct; the drifted library is
 merely different, and hardware/pcb/vendor_libraries.py now exists so the bound set travels with
 the repo instead of living on one machine.
+
+## 2026-08-20 The sensing choke rebinds to a Murata part with a published Isat
+
+LCSC delisted C1046 (Sunlord SDFL2012S100KTF), found while filling the hand-fit cart; DigiKey has
+no stock either. Filed [[lqm21dh100m70l-datasheet]] (Murata LQM21DH100M70L, C882484): same 10 uH
+0805 footprint, so the staged gerbers stand. Its datasheet publishes both rating types, 250 mA
+saturation-type by inductance change and 300 mA by temperature rise, against the simulated
+10.29 mA bias. That closes the open margin question recorded in [[matrix-discrete-datasheets]]
+(69 percent of a 15 mA rating of unknown type) with the stated-limit margin the note asked for.
+Entity [[lqm21dh100m70l]] created, [[sdfl2012s100ktf]] marked superseded, the V1 audit
+regenerated, and CHOKE_RATED_A updated in the bias sweep.
