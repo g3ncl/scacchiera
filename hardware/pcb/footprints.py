@@ -258,10 +258,15 @@ def sot563_drl_footprint() -> str:
 def csd25404q3_footprint() -> str:
     """TI DQG land pattern from the CSD25404Q3 data sheet page 9."""
     drain_and_gate_pads = []
+    # The 0.65 mm pitch leaves 0.15 mm between lands, which is the
+    # manufacturer's geometry, not a routing choice. The local clearance stops
+    # a DRC engine from applying the 0.2 mm netclass rule inside the land
+    # pattern itself; against anything external the larger constraint still
+    # governs, so the copper and its protection are unchanged.
     for number, x in ((1, -0.975), (2, -0.325), (3, 0.325), (4, 0.975)):
         drain_and_gate_pads.append(
             f'  (pad "{number}" smd roundrect (at {x} 1.435) (size 0.5 0.63) '
-            '(layers "F.Cu" "F.Mask") (roundrect_rratio 0.1))'
+            '(layers "F.Cu" "F.Mask") (roundrect_rratio 0.1) (clearance 0.07))'
         )
     # Pins 5 to 8 are one source clip. Pad 5 carries the exact continuous land;
     # the three tiny coincident pads preserve the physical pin map in KiCad.

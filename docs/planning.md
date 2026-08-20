@@ -47,11 +47,15 @@ Q, scan timing against the stability window, and the buck load transient. V3's g
 hub and power electronics and are this release's measurement targets, not violations of it; the
 bare quad carries no electronics at all. Conditions attached:
 
-- fabrication and assembly artifacts come from a library set on which that board's DRC and
-  schematic parity pass. Recorded 2026-08-20: quad, light bar and hub are clean on both library
-  generations and their upload artifacts are generated (KiCad 9.0.9 set); the power board passes
-  only on the bound set, so its artifacts come from the bound-library machine and its
-  9.0.9-generated files are deliberately not staged (the library-pinning finding below);
+- fabrication and assembly artifacts come from the vendored library set in
+  hardware/pcb/vendored/, which reproduces the reviewed boards on any machine. Recorded
+  2026-08-20: the bound release was identified as kicad-libraries 9.0.6 by fingerprint (the
+  SOT-353 pads grew in 9.0.7, the USB-C shield pin renamed later), vendored from that tag, and
+  all four ordered boards regenerate DRC-clean and parity-clean from it; every upload artifact is
+  staged from that set. This resolves the library-pinning finding: the one residual engine
+  difference (kicad-cli 9.0.9 applying netclass clearance inside a land pattern) is answered in
+  the footprint itself, with a local pad clearance on the CSD25404Q3 fine-pitch lands that leaves
+  the copper untouched;
 - each upload's DFM result is recorded here;
 - the hub order resolves its two known items at order time: U4 substitutes the in-stock
   ESP32-C6-MINI-1U-H4 (C20627095, same filed datasheet, Table 1-2; the audit record is rebound

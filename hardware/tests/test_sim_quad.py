@@ -178,11 +178,22 @@ def test_the_bus_bound_still_bounds_the_routed_copper() -> None:
     board = (
         Path(__file__).parent.parent / "pcb" / "generated" / "quad" / "quad.kicad_pcb"
     ).read_text(encoding="utf-8")
-    segments = re.findall(
-        r"\(segment\s*\(start ([\d.-]+) ([\d.-]+)\)\s*\(end ([\d.-]+) ([\d.-]+)\)"
-        r"\s*\(width ([\d.]+)\)\s*\(layer \"[^\"]+\"\)\s*\(net \"RF_BUS\"\)",
-        board,
-    )
+    # Serializers differ across pcbnew releases: net references in segments
+    # are written as the name in some and as the numeric net id in others, and
+    # field order inside the block is not stable. Resolve the id first, then
+    # accept either spelling anywhere in the segment block.
+    net_id_match = re.search(r"\(net (\d+) \"RF_BUS\"\)", board)
+    assert net_id_match, "RF_BUS net is not declared on the board"
+    net_ref = rf"\(net (?:{net_id_match.group(1)}|\"RF_BUS\")\)"
+    segments = [
+        (m.group(1), m.group(2), m.group(3), m.group(4), m.group(5))
+        for m in re.finditer(
+            r"\(segment\s*\(start ([\d.-]+) ([\d.-]+)\)\s*\(end ([\d.-]+) ([\d.-]+)\)"
+            r"\s*\(width ([\d.]+)\)(?:(?!\(segment).)*?" + net_ref,
+            board,
+            re.S,
+        )
+    ]
     assert segments, "no routed RF_BUS copper found"
     routed = sum(
         math.dist((float(x1), float(y1)), (float(x2), float(y2)))
