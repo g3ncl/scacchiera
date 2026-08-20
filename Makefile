@@ -24,7 +24,7 @@ export PYTHONHASHSEED
 export KICAD9_SYMBOL_DIR
 export KICAD_FOOTPRINT_DIR
 
-.PHONY: check release-check pcb-quad-review vendor-libraries footprints schematic-lightbar schematic-matrix schematic-hub \
+.PHONY: check release-check pcb-quad-review vendor-libraries pcb-dfm footprints schematic-lightbar schematic-matrix schematic-hub \
 	schematic-quad pcb-quad pcb-quad-reroute pcb-quad-drc pcb-quad-fab \
 	pcb-lightbar pcb-lightbar-drc pcb-lightbar-fab \
 	pcb-matrix pcb-matrix-route pcb-matrix-reroute pcb-matrix-drc pcb-matrix-fab \
@@ -54,6 +54,11 @@ FIRMWARE_BUILD := $(FIRMWARE_DIR)/build
 # schematic change; test_firmware_pins.py fails if the committed copy drifts.
 vendor-libraries:
 	$(PYTHON) -m hardware.pcb.vendor_libraries
+
+# The fabricator's published limits as an automated check (hardware/pcb/
+# jlcpcb.kicad_dru); silkscreen findings are advisories the fab clips.
+pcb-dfm:
+	$(PYTHON) -m hardware.pcb.dfm
 
 firmware-pins:
 	$(PYTHON) -m hardware.pcb.firmware_pins

@@ -1,0 +1,46 @@
+(version 1)
+
+# JLCPCB 2-layer, 1 oz manufacturing limits, read from
+# jlcpcb.com/capabilities/pcb-capabilities on 2026-08-20. These are the
+# fabricator's floors, looser than the design rules the boards route against;
+# running them is the manufacturer's DFM as an automated check rather than an
+# upload-time surprise. Drill minimum is the standard order tier (0.30 mm),
+# not the 0.15 mm capability floor, because that is the tier being ordered.
+
+(rule "JLC track width"
+  (constraint track_width (min 0.10mm))
+  (condition "A.Type == 'Track'"))
+
+(rule "JLC copper clearance"
+  (constraint clearance (min 0.10mm)))
+
+(rule "JLC smd pad to pad"
+  (constraint clearance (min 0.15mm))
+  (condition "A.Type == 'Pad' && B.Type == 'Pad' && A.Pad_Type == 'SMD' && B.Pad_Type == 'SMD'"))
+
+(rule "JLC drill size, standard tier"
+  (constraint hole_size (min 0.30mm) (max 6.3mm)))
+
+# 0.18 mm is the component-PTH pad figure; vias carry their own capability
+# (0.25 mm diameter over a 0.15 mm hole), so the via floor is 0.05 mm.
+(rule "JLC PTH annular ring"
+  (constraint annular_width (min 0.18mm))
+  (condition "A.Type == 'Pad'"))
+
+(rule "JLC via annular ring"
+  (constraint annular_width (min 0.05mm))
+  (condition "A.Type == 'Via'"))
+
+(rule "JLC via to via"
+  (constraint hole_to_hole (min 0.20mm))
+  (condition "A.Type == 'Via' && B.Type == 'Via'"))
+
+(rule "JLC pad hole to hole"
+  (constraint hole_to_hole (min 0.45mm))
+  (condition "A.Type == 'Pad' && B.Type == 'Pad'"))
+
+(rule "JLC copper to routed edge"
+  (constraint edge_clearance (min 0.20mm)))
+
+(rule "JLC silk to pad"
+  (constraint silk_clearance (min 0.15mm)))
