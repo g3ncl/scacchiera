@@ -121,6 +121,29 @@ Two of those need attention at order time, and both were seen in the 2026-08-02 
   [jlcpcb-sourcing.md](jlcpcb-sourcing.md), which becomes attractive precisely when J1 has to change
   anyway.
 
+**Check the assembly placement preview part by part before paying**, with particular attention to
+J1, U3 and U4. JLCPCB's desktop DFM tool overlays its own lead models per the CPL and flagged
+pin-to-pad misalignment concentrated on those three; that is the tool's part origin and rotation
+conventions disagreeing with the KiCad footprints, not a pad error, but the same disagreement is
+exactly what puts a part down rotated at assembly. The order preview renders their model on these
+pads; rotate or nudge any body that sits wrong there.
+
+#### The desktop DFM report on the hub, reconciled
+
+JLCPCB's desktop DFM tool (run 2026-08-20 on `hub_gerbers.zip`) raises dangers that `make pcb-dfm`
+does not. Each was checked against the published capabilities and the gerbers themselves; none
+needs a board change:
+
+| Report says | What it is | Verdict |
+| --- | --- | --- |
+| Slot width 0.6 mm, danger x4 | The USB-C shield slots of the GCT USB4105 land pattern | Within capability: JLCPCB's published floor for plated slots on 2 layers is 0.5 mm |
+| Mask opening exposing trace, danger x2 at 0.03 mm | Same-net copper passing the shield slot openings | The tool reads gerbers without nets. The mask is exported 1:1 and the copper DRC passes, so foreign-net copper cannot sit closer than the copper clearance |
+| THT to SMD 0.85 mm, danger x4 | The USB-C's shield slots against its own pins | Fixed by the connector's package drawing; JLCPCB assembles C3020560 from its own library |
+| Annular ring 0.15 mm, warning x100 | Every via, 0.3 mm drill in 0.6 mm pad | The standard-tier via the order form selects; 0.15 mm is the published absolute minimum |
+| Silkscreen dangers, 0.12 mm line width | Refdes text near pads and openings | Silk over openings is clipped by the fab as a matter of course; lines under 0.15 mm print thin |
+| SMT pin and lead dangers, about 150 | Tool lead models against the footprints of J1, U3, U4 | Origin and rotation conventions, not pad geometry; caught at the placement preview above |
+| PCB size 18.2 x 4.6 cm | The tool adds its own margin | Edge_Cuts measures exactly 162 x 46 mm and no layer content extends past the outline |
+
 ## What the upload pairs deliberately exclude
 
 **The upload pair is the plan, not the inventory.** Anything an iron can reach is hand-fitted and

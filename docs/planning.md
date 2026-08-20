@@ -59,7 +59,10 @@ bare quad carries no electronics at all. Conditions attached:
 - each upload's DFM result is recorded here. The manufacturer's limits also run as an automated
   check (`make pcb-dfm`, rules read from JLCPCB's published capabilities on 2026-08-20): all four
   ordered boards pass with zero fabrication errors; the 103 findings are silkscreen-near-pad
-  advisories the fab clips as a matter of course;
+  advisories the fab clips as a matter of course. JLCPCB's desktop DFM tool was additionally run
+  on the hub gerbers (2026-08-20) and every danger it raised is reconciled finding by finding
+  against the published capabilities in [hardware/ordering.md](hardware/ordering.md), with no
+  board change needed; what it does add is the placement-preview check recorded there;
 - the hub order resolves its two known items at order time: U4 substitutes the in-stock
   ESP32-C6-MINI-1U-H4 (C20627095, same filed datasheet, Table 1-2; the audit record is rebound
   with the order's dated availability), and J1 is re-quoted as-is, with the power-only candidate
