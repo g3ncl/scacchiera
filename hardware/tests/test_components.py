@@ -103,7 +103,7 @@ def test_availability_and_simulation_treatment_are_recorded() -> None:
         mpn = str(record["mpn"])
         availability = require_mapping(record.get("availability"), f"{mpn} availability")
         assert availability.get("status") == "available"
-        assert availability.get("checked") in {"2026-07-26", "2026-07-29"}
+        assert availability.get("checked") in {"2026-07-26", "2026-07-29", "2026-08-20"}
         source = require_nonempty_string(availability.get("source"), f"{mpn} availability source")
         assert source.startswith("https://")
         model = require_mapping(record.get("simulation_model"), f"{mpn} model")
@@ -154,7 +154,7 @@ def test_external_power_components_are_exact_sourced_and_modelled() -> None:
         require_nonempty_string(record.get("order_code"), f"{mpn} order code")
         availability = require_mapping(record.get("availability"), f"{mpn} availability")
         assert availability.get("status") == "available"
-        assert availability.get("checked") in {"2026-07-26", "2026-07-29"}
+        assert availability.get("checked") in {"2026-07-26", "2026-07-29", "2026-08-20"}
         for relative in require_list(record.get("datasheets"), f"{mpn} datasheets"):
             source = ROOT / require_nonempty_string(relative, f"{mpn} datasheet")
             assert source.is_file()
