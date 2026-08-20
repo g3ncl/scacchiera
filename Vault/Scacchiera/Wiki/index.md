@@ -174,7 +174,7 @@ One exact source summary per purchased fitted MPN. The structured audit is
 | [[sn74ahct1g125dbvr-datasheet]] | Texas Instruments | 2026-08-01 |
 | [[t37k3rgb-05c000112u1930-datasheet]] | Harvatek | 2026-07-26 |
 | [[tca9535pwr-datasheet]] | Texas Instruments | 2026-07-31 |
-| [[tlv7021dckr-datasheet]] | Texas Instruments | 2026-07-29 |
+| [[tlv7021dckr-datasheet]] | Texas Instruments | 2026-08-20 |
 | [[tlv7042dgkr-datasheet]] | Texas Instruments | 2026-07-26 |
 | [[tlv809k33dbvr-datasheet]] | Texas Instruments | 2026-07-29 |
 | [[tps2553dbvr-1-datasheet]] | Texas Instruments | 2026-08-01 |

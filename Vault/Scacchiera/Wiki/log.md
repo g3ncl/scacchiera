@@ -2006,3 +2006,14 @@ its own application equations from the specification. So the gaps stand for wors
 evidence, but a nominal AP63203 transient model moved from impossible to open work, and every gap
 now states precisely which number is missing, which is what a vendor query or a V8 measurement
 plan needs.
+
+
+## 2026-08-20 Which pads are correct: the datasheet answers
+
+Appended the DCK land pattern to [[tlv7021dckr-datasheet]]. The question came from the power
+board's seven DRC violations on KiCad 9.0.9: replaying the reviewed route against that release's
+grown SOT-353 pads. TI's drawing 4214834/G recommends 0.95 x 0.4 mm pads on a 2.2 mm span; the
+9.0.9 generic is 1.325 x 0.4 on 3.1 mm, oversized by 0.45 mm per side. So the bound footprint is
+the manufacturer-consistent pattern and the reviewed board is correct; the drifted library is
+merely different, and hardware/pcb/vendor_libraries.py now exists so the bound set travels with
+the repo instead of living on one machine.

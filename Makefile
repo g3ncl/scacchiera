@@ -8,6 +8,14 @@ KICAD9_SYMBOL_DIR := $(HOME)/.local/share/flatpak/runtime/org.kicad.KiCad.Librar
 KICAD_FOOTPRINT_DIR := $(HOME)/.local/share/flatpak/runtime/org.kicad.KiCad.Library.Footprints/x86_64/stable/active/files/footprints
 KICAD_CLI := /usr/bin/kicad-cli
 
+# Once the bound libraries are vendored into the repo (make vendor-libraries,
+# run on the machine the routes were reviewed against), every machine
+# regenerates the reviewed boards. Until then the flatpak defaults above hold.
+ifneq ($(wildcard hardware/pcb/vendored/footprints),)
+KICAD9_SYMBOL_DIR := $(CURDIR)/hardware/pcb/vendored/symbols
+KICAD_FOOTPRINT_DIR := $(CURDIR)/hardware/pcb/vendored/footprints
+endif
+
 export XDG_DATA_HOME
 export XDG_CACHE_HOME
 export XDG_CONFIG_HOME
@@ -16,7 +24,7 @@ export PYTHONHASHSEED
 export KICAD9_SYMBOL_DIR
 export KICAD_FOOTPRINT_DIR
 
-.PHONY: check release-check pcb-quad-review footprints schematic-lightbar schematic-matrix schematic-hub \
+.PHONY: check release-check pcb-quad-review vendor-libraries footprints schematic-lightbar schematic-matrix schematic-hub \
 	schematic-quad pcb-quad pcb-quad-reroute pcb-quad-drc pcb-quad-fab \
 	pcb-lightbar pcb-lightbar-drc pcb-lightbar-fab \
 	pcb-matrix pcb-matrix-route pcb-matrix-reroute pcb-matrix-drc pcb-matrix-fab \
@@ -44,6 +52,9 @@ FIRMWARE_BUILD := $(FIRMWARE_DIR)/build
 
 # Regenerate the firmware pin map from the hub netlist. Run after any hub
 # schematic change; test_firmware_pins.py fails if the committed copy drifts.
+vendor-libraries:
+	$(PYTHON) -m hardware.pcb.vendor_libraries
+
 firmware-pins:
 	$(PYTHON) -m hardware.pcb.firmware_pins
 
