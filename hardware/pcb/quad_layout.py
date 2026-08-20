@@ -213,7 +213,9 @@ def route_board(
 
 if __name__ == "__main__":
     if "--unrouted" in sys.argv:
-        generate_board(OUTPUT / "quad-unrouted.kicad_pcb")
+        unrouted = OUTPUT.parent / "unrouted" / "quad-unrouted.kicad_pcb"
+        unrouted.parent.mkdir(parents=True, exist_ok=True)
+        generate_board(unrouted)
     else:
         generate_board()
         route_board(reroute="--reroute" in sys.argv)

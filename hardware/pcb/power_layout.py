@@ -213,7 +213,9 @@ def _finalize_ground(board_path: Path) -> None:
 
 def main() -> None:
     if "--unrouted" in sys.argv:
-        generate_board(OUTPUT / "power-unrouted.kicad_pcb")
+        unrouted = OUTPUT.parent / "unrouted" / "power-unrouted.kicad_pcb"
+        unrouted.parent.mkdir(parents=True, exist_ok=True)
+        generate_board(unrouted)
         return
     generate_board()
     if "--route" in sys.argv or "--reroute" in sys.argv:

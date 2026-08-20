@@ -641,7 +641,8 @@ def _park_free_components(board_path: Path) -> None:
 
 if __name__ == "__main__":
     if "--unrouted" in sys.argv:
-        unrouted = OUTPUT / "hub-unrouted.kicad_pcb"
+        unrouted = OUTPUT.parent / "unrouted" / "hub-unrouted.kicad_pcb"
+        unrouted.parent.mkdir(parents=True, exist_ok=True)
         generate_board(unrouted)
         _park_free_components(unrouted)
     else:

@@ -192,10 +192,9 @@ pcb-lightbar-fab: schematic-lightbar
 # against, and an unexported baseline rots.
 pcb-fab: pcb-lightbar-fab pcb-matrix-fab pcb-hub-fab pcb-power-fab pcb-quad-fab
 
-# Placed but unrouted boards, written beside the routed ones as
-# <board>-unrouted.kicad_pcb, for an external placer and router (Quilter and
-# the like). The code-laid critical tracks (USB shield, VBUS escapes) stay in
-# as pre-routes. On the hub the fixed parts keep their position and the rest
+# Placed but unrouted boards, collected in hardware/pcb/generated/unrouted/
+# for an external placer and router (Quilter and the like). The code-laid
+# critical tracks (USB shield, VBUS escapes) stay in as pre-routes. On the hub the fixed parts keep their position and the rest
 # park below the outline for the placer; power and quad stay fully preplaced,
 # one being switching loops and connectors, the other antenna geometry.
 # Nothing downstream reads these files; an external route enters the flow
