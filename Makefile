@@ -30,7 +30,7 @@ export KICAD_FOOTPRINT_DIR
 	pcb-matrix pcb-matrix-route pcb-matrix-reroute pcb-matrix-drc pcb-matrix-fab \
 	pcb-hub pcb-hub-route pcb-hub-reroute pcb-hub-drc pcb-hub-fab \
 	pcb-power pcb-power-reroute pcb-power-drc pcb-power-fab power-rail-fit panel panel-fab pcb-fab \
-	pcb-unrouted \
+	pcb-unrouted pcb-self-solder-order \
 	firmware firmware-test firmware-pins firmware-font firmware-target \
 	test-article-quad clean
 
@@ -201,6 +201,12 @@ pcb-fab: pcb-lightbar-fab pcb-matrix-fab pcb-hub-fab pcb-power-fab pcb-quad-fab
 # only by passing the same DRC and review gate as a Freerouting run. The
 # lightbar has no unrouted form (all its copper is code-laid) and the matrix
 # is superseded.
+# One purchase list for everything hand-fitted, merged across the whole
+# build from the four per-board self-solder BOMs. LCSC lines combine with
+# the JLCPCB order into one shipment; the light-bar LED is a DigiKey line.
+pcb-self-solder-order:
+	$(PYTHON) -m hardware.pcb.self_solder_order
+
 pcb-unrouted: schematic-hub schematic-power schematic-quad
 	/usr/bin/python3 -m hardware.pcb.hub_layout --unrouted
 	/usr/bin/python3 -m hardware.pcb.power_layout --unrouted
