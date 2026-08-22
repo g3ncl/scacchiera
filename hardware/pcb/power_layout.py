@@ -121,6 +121,8 @@ def generate_board(output: Path = OUTPUT / "power.kicad_pcb") -> None:
         if placement is None:
             raise ValueError(f"no placement for {component.reference}")
         builder.add_component(component, placement)
+    # The top-right quarter carries no parts, only the corner mounting hole.
+    builder.add_title("power board rev 1.0\nClaudio Genovese", Position(70.0, 7.0), height=1.2)
     builder.save(output)
     output.with_suffix(".kicad_dru").write_text(POWER_DRC_RULES, encoding="utf-8")
 

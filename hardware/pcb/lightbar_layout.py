@@ -146,6 +146,11 @@ def generate_board(output: Path = OUTPUT / "lightbar.kicad_pcb") -> None:
     _route_power(builder)
     _route_ground(builder)
     _route_external_data(builder)
+    # The back face is one trace and the vias; the front has no room between
+    # the pixels. Mirrored so it reads from the back.
+    builder.add_title(
+        "lightbar rev 1.0 - Claudio Genovese", Position(60.0, 6.6), height=1.0, back=True
+    )
     builder.save(output)
     _finalize_ground(output)
 

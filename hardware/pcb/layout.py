@@ -72,7 +72,13 @@ class BoardBuilder:
         footprint.SetPath(schematic_path)
         footprint.SetSheetname("/")
         footprint.SetPosition(_vector(placement.position))
-        footprint.Reference().SetVisible(False)
+        # The reference is the hand-assembly legend; JLCPCB's printable floor
+        # is 1 mm text with 0.15 mm strokes. Values stay off the silk: at this
+        # density they would be clipped into noise.
+        reference = footprint.Reference()
+        reference.SetVisible(True)
+        reference.SetTextSize(pcbnew.VECTOR2I_MM(1.0, 1.0))
+        reference.SetTextThickness(pcbnew.FromMM(0.15))
         footprint.Value().SetVisible(False)
         pad_nets = self.netlist.pad_nets()
         for pad in footprint.Pads():
@@ -189,6 +195,25 @@ class BoardBuilder:
             point = _vector(corner)
             outline.Append(point.x, point.y)
         self.board.Add(zone)
+
+    def add_title(
+        self,
+        text: str,
+        position: Position,
+        height: float = 1.3,
+        back: bool = False,
+    ) -> None:
+        """Board identification on the silkscreen, mirrored when it sits on
+        the back face so it reads correctly from that side."""
+        title = pcbnew.PCB_TEXT(self.board)
+        title.SetText(text)
+        title.SetLayer(pcbnew.B_SilkS if back else pcbnew.F_SilkS)
+        title.SetPosition(_vector(position))
+        title.SetTextSize(pcbnew.VECTOR2I_MM(height, height))
+        title.SetTextThickness(pcbnew.FromMM(max(0.15, round(height * 0.15, 2))))
+        if back:
+            title.SetMirrored(True)
+        self.board.Add(title)
 
     def add_keepout(self, layer: int, corners: Iterable[Position]) -> None:
         """Forbid tracks and vias in a region, leaving the pour there intact.
