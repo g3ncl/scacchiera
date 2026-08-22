@@ -23,6 +23,9 @@ from hardware.pcb.ses_import import apply_session
 OUTPUT = Path(__file__).parent / "generated" / "hub"
 REVIEWED_SESSION = Path(__file__).parent / "routes" / "hub.ses"
 FREEROUTING_JAR = os.environ.get("FREEROUTING_JAR", "/tmp/freerouting-2.2.4.jar")
+# The classic 1.9 jar completes this board where 2.2.4 stalls, and it needs a
+# JVM with AWT (no headless flag); point this at that JVM when using it.
+FREEROUTING_JAVA = os.environ.get("FREEROUTING_JAVA", "java")
 FREEROUTING_PASSES = int(os.environ.get("FREEROUTING_PASSES", "40"))
 # Longest straight bridge the post-route closer may lay. See _close_pad.
 MAX_BRIDGE_MM = 2.5
@@ -346,6 +349,11 @@ def generate_board(output: Path = OUTPUT / "hub.kicad_pcb") -> None:
     )
     builder.add_via("USB_VBUS", vbus_window_via, diameter=0.8, drill=0.4)
     builder.add_track("USB_VBUS", (vbus_window_via, vbus_pullup), 0.5)
+    # The receptacle's inner ground pad is walled in between the pad row and
+    # the VBUS escape, so its front-face pour island is removed and the pad
+    # would float. A stitching via at its edge bonds it to the back pour.
+    ground_pad = builder.pad_position("J1", "A12")
+    builder.add_via("GND", Position(ground_pad.x + 0.3, ground_pad.y))
     comparator_supply = builder.pad_position("U2", "8")
     comparator_supply_via = Position(comparator_supply.x + 1.0, comparator_supply.y)
     builder.add_track("USB_VBUS", (comparator_supply, comparator_supply_via), 0.25)
@@ -444,7 +452,7 @@ def route_board(
             )
         subprocess.run(
             (
-                "java", "-Djava.awt.headless=true", "-jar", FREEROUTING_JAR,
+                FREEROUTING_JAVA, "-jar", FREEROUTING_JAR,
                 "-de", str(dsn), "-do", str(session_path), "-mp", str(FREEROUTING_PASSES),
             ),
             check=True,
