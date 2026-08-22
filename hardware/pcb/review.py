@@ -24,6 +24,9 @@ LAYERS = (
     "F.Mask", "B.Mask",
     "F.Paste", "B.Paste",
     "F.Silkscreen", "B.Silkscreen",
+    # Fab drawings carry each body's outline and pin-1 mark: the orientation
+    # reference for the assembler's placement preview.
+    "F.Fab", "B.Fab",
     "Edge.Cuts",
 )
 
