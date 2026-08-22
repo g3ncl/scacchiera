@@ -211,6 +211,7 @@ class BoardBuilder:
         title.SetPosition(_vector(position))
         title.SetTextSize(pcbnew.VECTOR2I_MM(height, height))
         title.SetTextThickness(pcbnew.FromMM(max(0.15, round(height * 0.15, 2))))
+        title.SetHorizJustify(pcbnew.GR_TEXT_H_ALIGN_CENTER)
         if back:
             title.SetMirrored(True)
         self.board.Add(title)

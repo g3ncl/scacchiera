@@ -167,9 +167,14 @@ def generate_board(output: Path = OUTPUT / "quad.kicad_pcb") -> None:
             builder.add_component(component, placement)
     _check_loop_terminals(builder)
     _add_antenna_keepout(builder)
-    # In the gap between the second and third antenna lanes; the front face
-    # carries only the loops.
-    builder.add_title("quad board rev 1.0 - Claudio Genovese", Position(150.0, 70.0), height=1.5)
+    # Every board carries the same block in the same place: back silk, top
+    # right corner, mirrored so it reads from the back.
+    builder.add_title(
+        "SCACCHIERA · QUAD\nrev 1.0 · 2026\nClaudio Genovese",
+        Position(270.0, 12.0),
+        height=1.5,
+        back=True,
+    )
     builder.save(output)
 
 

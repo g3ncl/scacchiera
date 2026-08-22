@@ -121,8 +121,14 @@ def generate_board(output: Path = OUTPUT / "power.kicad_pcb") -> None:
         if placement is None:
             raise ValueError(f"no placement for {component.reference}")
         builder.add_component(component, placement)
-    # Below the corner mounting hole, the one clear patch of front silk.
-    builder.add_title("power board rev 1.0\nClaudio Genovese", Position(79.0, 11.0), height=1.2)
+    # Every board carries the same block in the same place: back silk, top
+    # right corner, mirrored so it reads from the back.
+    builder.add_title(
+        "SCACCHIERA · POWER\nrev 1.0 · 2026\nClaudio Genovese",
+        Position(73.0, 8.0),
+        height=1.2,
+        back=True,
+    )
     builder.save(output)
     output.with_suffix(".kicad_dru").write_text(POWER_DRC_RULES, encoding="utf-8")
 

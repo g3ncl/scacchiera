@@ -415,9 +415,14 @@ def generate_board(output: Path = OUTPUT / "hub.kicad_pcb") -> None:
     # it carries, so a via in the wrong place connects on one layer only. The two
     # pours tie together through the ground pads of the parts themselves, which
     # are spread across the whole board.
-    # Below the module, above the bottom-edge connector pads: the one strip
-    # of front silk this board leaves empty.
-    builder.add_title("hub board rev 1.0 - Claudio Genovese", Position(68.0, 37.5))
+    # Every board carries the same block in the same place: back silk, top
+    # right corner, mirrored so it reads from the back.
+    builder.add_title(
+        "SCACCHIERA · HUB\nrev 1.0 · 2026\nClaudio Genovese",
+        Position(140.0, 8.0),
+        height=1.2,
+        back=True,
+    )
     builder.save(output)
 
 
