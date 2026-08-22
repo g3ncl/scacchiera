@@ -67,6 +67,21 @@ def review(name: str) -> Path:
             "--quality", "high",
             "--width", "1600", "--height", "900",
         ])
+
+    # The hand-assembly drawings: fab outlines carrying every reference,
+    # printed on paper instead of crowding the silk. The bottom sheet is
+    # mirrored so it reads while looking at that face.
+    for name, layer, mirror in (
+        ("assembly_top", "F.Fab", False),
+        ("assembly_bottom", "B.Fab", True),
+    ):
+        run([
+            KICAD_CLI, "pcb", "export", "pdf", str(board),
+            "--output", str(out / f"{name}.pdf"),
+            "--layers", f"{layer},Edge.Cuts",
+            "--black-and-white",
+            *(["--mirror"] if mirror else []),
+        ])
     return out
 
 

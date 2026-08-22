@@ -72,13 +72,11 @@ class BoardBuilder:
         footprint.SetPath(schematic_path)
         footprint.SetSheetname("/")
         footprint.SetPosition(_vector(placement.position))
-        # The reference is the hand-assembly legend; JLCPCB's printable floor
-        # is 1 mm text with 0.15 mm strokes. Values stay off the silk: at this
-        # density they would be clipped into noise.
-        reference = footprint.Reference()
-        reference.SetVisible(True)
-        reference.SetTextSize(pcbnew.VECTOR2I_MM(1.0, 1.0))
-        reference.SetTextThickness(pcbnew.FromMM(0.15))
+        # References stay off the silk: at this density the labels overlap
+        # each other and the parts they name. The hand-assembly legend is the
+        # fab-layer drawing instead, printed from the review package, where
+        # every footprint carries its reference legibly.
+        footprint.Reference().SetVisible(False)
         footprint.Value().SetVisible(False)
         pad_nets = self.netlist.pad_nets()
         for pad in footprint.Pads():
