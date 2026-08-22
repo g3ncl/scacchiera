@@ -101,8 +101,11 @@ def _grid(
 def _placements() -> dict[str, Placement]:
     placements: dict[str, Placement] = {
         # External power enters here. The safety gate remains physically ahead
-        # of every connector and converter it controls.
-        "J1": Placement(Position(6.0, 23.0), rotation=90.0),
+        # of every connector and converter it controls. Rotation 270 points the
+        # receptacle opening off the left board edge, and x sits the footprint's
+        # "PCB Edge" reference line (local y +3.675) exactly on that edge, so
+        # the shell overhangs the way the GCT drawing mounts it.
+        "J1": Placement(Position(3.675, 23.0), rotation=270.0),
         "R3": Placement(Position(12.0, 17.5)),
         "C12": Placement(Position(12.65, 20.0)),
         "R34": Placement(Position(10.0, 6.5), rotation=90.0),
