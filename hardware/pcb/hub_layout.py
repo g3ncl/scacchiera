@@ -300,21 +300,35 @@ def generate_board(output: Path = OUTPUT / "hub.kicad_pcb") -> None:
         (shield_resistor, shield_via, shield_capacitor),
         0.4,
     )
-    # The receptacle's VBUS pads face the board edge and cannot escape around
-    # its signal row on the front face. Take the qualified input under the
-    # connector, then return beside the temperature-window pull-up.
+    # The receptacle's VBUS pads cannot escape toward the board edge: the two
+    # NPTH locating pegs sit in that path, and both VBUS pads fall inside the
+    # pegs' hole-clearance band. Escape inboard instead, drop below the shield
+    # slot row, and run to the edge from there.
     vbus_pad = builder.pad_position("J1", "A9")
     vbus_second_pad = builder.pad_position("J1", "A4")
     vbus_pullup = builder.pad_position("R12", "1")
-    vbus_entry_via = Position(0.8, vbus_pad.y)
+    # Past the pad row's copper plus clearance.
+    vbus_exit_x = vbus_pad.x + 1.05
+    # Below the shield slot pads, clear of their copper.
+    vbus_lane_y = 28.6
+    vbus_entry_via = Position(0.8, vbus_lane_y)
     vbus_window_via = Position(vbus_pullup.x - 1.5, vbus_pullup.y)
-    builder.add_track("USB_VBUS", (vbus_pad, vbus_entry_via), 0.5)
+    builder.add_track(
+        "USB_VBUS",
+        (
+            vbus_pad,
+            Position(vbus_exit_x, vbus_pad.y),
+            Position(vbus_exit_x, vbus_lane_y),
+            vbus_entry_via,
+        ),
+        0.5,
+    )
     builder.add_track(
         "USB_VBUS",
         (
             vbus_second_pad,
-            Position(vbus_entry_via.x, vbus_second_pad.y),
-            vbus_entry_via,
+            Position(vbus_exit_x, vbus_second_pad.y),
+            Position(vbus_exit_x, vbus_pad.y),
         ),
         0.5,
     )
